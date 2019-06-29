@@ -80,7 +80,7 @@ public:
 	virtual		void				OnPlayerKillPlayer		(game_PlayerState* ps_killer, game_PlayerState* ps_killed, KILL_TYPE KillType, SPECIAL_KILL_TYPE SpecialKillType, CSE_Abstract* pWeaponA);
 	virtual		void				OnPlayerFire			(ClientID id_who, NET_Packet &P) {};
 	virtual		void				Victim_Exp				(game_PlayerState* pVictim) {};
-	virtual		void				UpdateTeamScore			(game_PlayerState* ps_killer) {};
+	virtual		void				UpdateTeamScore			(game_PlayerState* ps_killer, s16 OldKills) {};
 	virtual		void				OnPlayerReady			(ClientID id_who);
 	virtual		void				OnPlayerBuySpawn		(ClientID sender);
 

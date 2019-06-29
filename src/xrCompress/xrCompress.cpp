@@ -10,9 +10,20 @@
 #include <direct.h>
 #include <fcntl.h>
 #include <sys\stat.h>
+#include <malloc.h>
 #pragma warning(default:4995)
 
-#pragma comment			(lib,"x:\\xrCore.lib")
+#pragma comment			(lib,"xrCore.lib")
+
+#define PROTECTED_BUILD
+
+#ifdef PROTECTED_BUILD
+#	define TRIVIAL_ENCRYPTOR_ENCODER
+//#	define TRIVIAL_ENCRYPTOR_DECODER
+#	include "../xr_3da/trivial_encryptor.h"
+#	undef TRIVIAL_ENCRYPTOR_ENCODER
+//#	undef TRIVIAL_ENCRYPTOR_DECODER
+#endif // PROTECTED_BUILD
 
 extern int				ProcessDifference();
 
@@ -79,19 +90,32 @@ BOOL	testSKIP		(LPCSTR path)
 
 BOOL	testVFS			(LPCSTR path)
 {
-	if(bStoreFiles)		return TRUE;
+	if (bStoreFiles)
+		return			(TRUE);
 
-	string256			p_name;
 	string256			p_ext;
-	_splitpath			(path, 0, 0, p_name, p_ext );
+	_splitpath			(path,0,0,0,p_ext);
 
+	if (!stricmp(p_ext,".xml"))
+		return			(FALSE);
+
+	if (!stricmp(p_ext,".ltx"))
+		return			(FALSE);
+
+	if (!stricmp(p_ext,".script"))
+		return			(FALSE);
+
+	return				(TRUE);
+	/**
 	// if (0==stricmp(p_name,"level") && (0==stricmp(p_ext,".") || 0==p_ext[0]) )	return TRUE;	// level.
 	if (0==stricmp(p_name,"level") && 0==stricmp(p_ext,".ai"))					return TRUE;
 	if (0==stricmp(p_name,"level") && 0==stricmp(p_ext,".gct"))					return TRUE;
 	if (0==stricmp(p_name,"level") && 0==stricmp(p_ext,".details"))				return TRUE;
 	if (0==stricmp(p_ext,".ogg"))												return TRUE;
 	if (0==stricmp(p_name,"game") && 0==stricmp(p_ext,".graph"))				return TRUE;
-	return FALSE;
+	if (0==stricmp(p_name,"game") && 0==stricmp(p_ext,".graph"))				return TRUE;
+	return				(FALSE);
+	/**/
 }
 
 BOOL	testEqual		(LPCSTR path, IReader* base)
@@ -121,6 +145,44 @@ ALIAS*	testALIAS		(IReader* base, u32 crc, u32& a_tests)
 		I++;
 	}
 	return 0;
+}
+
+IC	void write_file_header	(LPCSTR file_name, const u32 &crc, const u32 &ptr, const u32 &size_real, const u32 &size_compressed)
+{
+#ifndef PROTECTED_BUILD
+	fs_desc.w_stringZ	(file_name);
+	fs_desc.w_u32		(crc);	// crc
+	fs_desc.w_u32		(ptr);
+	fs_desc.w_u32		(size_real);
+	fs_desc.w_u32		(size_compressed);
+#else // PROTECTED_BUILD
+	u32					file_name_size = (xr_strlen(file_name) + 0)*sizeof(char);
+	u32					buffer_size = file_name_size + 4*sizeof(u32);
+	VERIFY				(buffer_size <= 65535);
+	u32					full_buffer_size = buffer_size + sizeof(u16);
+	u8					*buffer = (u8*)_alloca(full_buffer_size);
+	u8					*buffer_start = buffer;
+	*(u16*)buffer		= (u16)buffer_size;
+	buffer				+= sizeof(u16);
+
+	*(u32*)buffer		= size_real;
+	buffer				+= sizeof(u32);
+
+	*(u32*)buffer		= size_compressed;
+	buffer				+= sizeof(u32);
+
+	*(u32*)buffer		= crc;
+	buffer				+= sizeof(u32);
+
+	Memory.mem_copy		(buffer,file_name,file_name_size);
+	buffer				+= file_name_size;
+
+	*(u32*)buffer		= ptr;
+
+//	trivial_encryptor::encode	(buffer_start,full_buffer_size,buffer_start);
+
+	fs_desc.w			(buffer_start,full_buffer_size);
+#endif // PROTECTED_BUILD
 }
 
 void	Compress			(LPCSTR path, LPCSTR base, BOOL bFast)
@@ -243,11 +305,7 @@ void	Compress			(LPCSTR path, LPCSTR base, BOOL bFast)
 	}
 
 	// Write description
-	fs_desc.w_stringZ	(path				);
-	fs_desc.w_u32		(c_crc32			);
-	fs_desc.w_u32		(c_ptr				);
-	fs_desc.w_u32		(c_size_real		);
-	fs_desc.w_u32		(c_size_compressed	);
+	write_file_header		(path,c_crc32,c_ptr,c_size_real,c_size_compressed);
 
 	if (0==A)	
 	{
@@ -329,13 +387,8 @@ void CompressList(LPCSTR in_name, xr_vector<char*>* list, xr_vector<char*>* fl_l
 		if (make_pack)
 			OpenPack	(tgt_folder,pack_num++);
 
-		for (u32 it=0; it<fl_list->size(); it++){
-			fs_desc.w_stringZ	((*fl_list)[it]);
-			fs_desc.w_u32		(0		);	// crc
-			fs_desc.w_u32		(0		);
-			fs_desc.w_u32		(0		);
-			fs_desc.w_u32		(0		);
-		}
+		for (u32 it=0; it<fl_list->size(); it++)
+			write_file_header	((*fl_list)[it],0,0,0,0);
 
 		c_heap			= xr_alloc<u8> (LZO1X_999_MEM_COMPRESS);
 		//***main process***: BEGIN
@@ -520,8 +573,15 @@ void ProcessLTX(LPCSTR tgt_name, LPCSTR params, BOOL bFast)
 	exclude_exts.clear_and_free();
 }
 
+typedef void DUMMY_STUFF (const void*,const u32&,void*);
+XRCORE_API DUMMY_STUFF	*g_temporary_stuff;
+XRCORE_API DUMMY_STUFF	*g_dummy_stuff;
+
 int __cdecl main	(int argc, char* argv[])
 {
+//	g_temporary_stuff	= &trivial_encryptor::decode;
+	g_dummy_stuff		= &trivial_encryptor::encode;
+
 	Core._initialize("xrCompress",0,FALSE);
 	printf			("\n\n");
 

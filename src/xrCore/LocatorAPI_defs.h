@@ -31,6 +31,7 @@ public:
 	LPCSTR		_update		(LPSTR dest, LPCSTR src) const;
 	void		_update		(xr_string& dest, LPCSTR src) const;
 	void		_set		(LPSTR add);
+	void		_set_root	(LPSTR root);
 
     void __stdcall rescan_path_cb	();
 };

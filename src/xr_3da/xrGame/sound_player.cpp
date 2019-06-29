@@ -96,7 +96,7 @@ bool CSoundPlayer::check_sound_legacy(u32 internal_type) const
 	SOUND_COLLECTIONS::const_iterator	J = m_sounds.find(internal_type);
 	if (m_sounds.end() == J) {
 #ifdef DEBUG
-		ai().script_engine().script_log(eLuaMessageTypeError,"Can't find sound with internal type %d (sound_script = %d)",internal_type,StalkerSpace::eStalkerSoundScript);
+		ai().script_engine().script_log(eLuaMessageTypeMessage,"Can't find sound with internal type %d (sound_script = %d)",internal_type,StalkerSpace::eStalkerSoundScript);
 #endif
 		return						(false);
 	}

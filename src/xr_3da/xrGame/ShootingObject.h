@@ -51,13 +51,16 @@ protected:
 	virtual void			FireEnd				();
 public:
 	IC BOOL					IsWorking			()	const	{return bWorking;}
+	virtual BOOL			ParentMayHaveAimBullet()		{return FALSE;}
+	virtual BOOL			ParentIsActor()					{return FALSE;}
 
 protected:
 	// Weapon fires now
 	bool					bWorking;
 
 	float					fTimeToFire;
-	float					fHitPower;
+	Fvector4				fvHitPower;
+	//float					fHitPower;
 	float					fHitImpulse;
 
 	//скорость вылета пули из ствола
@@ -93,7 +96,7 @@ protected:
 	u32						light_frame;
 	float					light_time;
 	//включение подсветки во время выстрела
-	bool					m_bShotLight;
+	bool					m_bLightShotEnabled;
 protected:
 	void					Light_Create		();
 	void					Light_Destroy		();
@@ -146,7 +149,9 @@ protected:
 	shared_str				m_sShellParticles;
 public:
 	Fvector					vLoadedShellPoint;
-
+	float					m_fPredBulletTime;
+	float					m_fTimeToAim;
+	BOOL					m_bUseAimBullet;
 protected:
 	//имя пратиклов для огня
 	shared_str				m_sFlameParticlesCurrent;

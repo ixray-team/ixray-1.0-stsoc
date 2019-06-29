@@ -110,6 +110,9 @@ public:
 	//для наследования CParticlesPlayer
 	virtual void			UpdateCL			();
 			void			correct_spawn_pos	();
+
+public:
+	virtual bool			register_schedule	() const;
 };
 
 #endif

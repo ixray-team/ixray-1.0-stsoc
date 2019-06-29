@@ -102,23 +102,25 @@ STRING_VALUE CStringTable::ParseLine(LPCSTR str, LPCSTR skey, bool bFirst)
 	bool	b_hit = false;
 	while( (b = strstr( str+k,ACTION_STR)) !=0 )
 	{
-		buff[0]			= 0;
-		srcbuff[0]		= 0;
-		res.append		(str+k, b-str-k);
-		const char* e	= strstr( b+LEN,"$$" );
+		buff[0]				= 0;
+		srcbuff[0]			= 0;
+		res.append			(str+k, b-str-k);
+		const char* e		= strstr( b+LEN,"$$" );
 
-		int len			= (int)(e-b-LEN);
+		int len				= (int)(e-b-LEN);
 
-		strncpy			(srcbuff,b+LEN, len);
-		srcbuff[len]	= 0;
-		GetActionBinding(srcbuff,buff);
-		res.append		(buff, xr_strlen(buff) );
-		k				= (int)(b-str);
-		k				+= len;
-		k				+= LEN;
-		k				+= 2;
-		b_hit			= true;
+		strncpy				(srcbuff,b+LEN, len);
+		srcbuff[len]		= 0;
+		GetActionAllBinding	(srcbuff, buff);
+		res.append			(buff, xr_strlen(buff) );
+
+		k					= (int)(b-str);
+		k					+= len;
+		k					+= LEN;
+		k					+= 2;
+		b_hit				= true;
 	};
+
 	if(k<(int)xr_strlen(str)){
 		res.append(str+k);
 	}
@@ -142,27 +144,3 @@ STRING_VALUE CStringTable::translate (const STRING_ID& str_id) const
 	}
 	return					pData->m_StringTable[str_id];
 }
-
-/*
-STRING_VALUE CStringTable::translate(const STRING_INDEX str_index) const
-{
-	VERIFY					(pData);
-	if(NO_STRING == str_index)
-		return		NULL;
-	else
-		return		pData->m_Strings[str_index];
-
-}
-
-
-STRING_INDEX CStringTable::IndexById	(const STRING_ID& str_id)		const
-{
-	VERIFY					(pData);
-	STRING_TABLE_MAP_IT it	=  pData->m_StringTable.find(str_id);
-
-	if(pData->m_StringTable.end() == it) 
-		return		NO_STRING;
-
-	return			(*it).second;
-}
-*/

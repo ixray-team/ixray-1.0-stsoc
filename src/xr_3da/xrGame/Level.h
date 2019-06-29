@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../igame_level.h"
-#include "net_client.h"
+#include "../../xrNetServer/net_client.h"
 #include "script_export_space.h"
 #include "../StatGraph.h"
 #include "xrMessages.h"
@@ -37,7 +37,6 @@ class	CLevelSoundManager;
 
 const int maxRP					= 64;
 const int maxTeams				= 32;
-const int NET_ObjectsPerPacket	= NET_PacketSizeLimit/280;
 
 //class CFogOfWar;
 class CFogOfWarMngr;
@@ -127,6 +126,8 @@ public:
 	void						AddObject_To_Objects4CrPr	(CGameObject* pObj);
 	void						AddActor_To_Actors4CrPr		(CGameObject* pActor);
 
+	void						RemoveObject_From_4CrPr		(CGameObject* pObj);	
+
 	CObject*					CurrentControlEntity	( void ) const		{ return pCurrentControlEntity; }
 	void						SetControlEntity		( CObject* O  )		{ pCurrentControlEntity=O; }
 private:
@@ -154,6 +155,7 @@ public:
 	POVec						m_StaticParticles;
 
 	game_cl_GameState			*game;
+	BOOL						m_bGameConfigStarted;
 	BOOL						game_configured;
 	NET_Queue_Event				*game_events;
 	xr_deque<CSE_Abstract*>		game_spawn_queue;

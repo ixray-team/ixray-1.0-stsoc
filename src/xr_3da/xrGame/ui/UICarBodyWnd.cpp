@@ -18,7 +18,7 @@
 #include "../Actor.h"
 #include "../eatable_item.h"
 #include "../alife_registry_wrappers.h"
-#include "UIButton.h"
+#include "UI3tButton.h"
 #include "UIListBoxItem.h"
 #include "../InventoryBox.h"
 #include "../game_object_space.h"
@@ -123,9 +123,9 @@ void CUICarBodyWnd::Init()
 	SetCurrentItem					(NULL);
 	m_pUIStaticDesc->SetText		(NULL);
 
-	m_pUITakeAll					= xr_new<CUIButton>(); m_pUITakeAll->SetAutoDelete(true);
+	m_pUITakeAll					= xr_new<CUI3tButton>(); m_pUITakeAll->SetAutoDelete(true);
 	AttachChild						(m_pUITakeAll);
-	xml_init.InitButton				(uiXml, "take_all_btn", 0, m_pUITakeAll);
+	xml_init.Init3tButton				(uiXml, "take_all_btn", 0, m_pUITakeAll);
 
 	BindDragDropListEnents			(m_pUIOurBagList);
 	BindDragDropListEnents			(m_pUIOthersBagList);
@@ -169,6 +169,12 @@ void CUICarBodyWnd::InitCarBody(CInventoryOwner* pOur, CInventoryOwner* pOthers)
 		if (monster || m_pOthersObject->use_simplified_visual() ) 
 		{
 			m_pUICharacterInfoRight->ClearInfo		();
+			if(monster)
+			{
+				shared_str monster_tex_name = pSettings->r_string(monster->cNameSect(),"icon");
+				m_pUICharacterInfoRight->UIIcon().InitTexture(monster_tex_name.c_str());
+				m_pUICharacterInfoRight->UIIcon().SetStretchTexture(true);
+			}
 		}else 
 		{
 			m_pUICharacterInfoRight->InitCharacter	(other_id);
@@ -204,8 +210,11 @@ void CUICarBodyWnd::UpdateLists_delayed()
 		m_b_need_update = true;
 }
 
+#include "UIInventoryUtilities.h"
+
 void CUICarBodyWnd::Hide()
 {
+	InventoryUtilities::SendInfoToActor			("ui_car_body_hide");
 	m_pUIOurBagList->ClearAll					(true);
 	m_pUIOthersBagList->ClearAll				(true);
 	inherited::Hide								();
@@ -305,8 +314,10 @@ void CUICarBodyWnd::Update()
 	inherited::Update();
 }
 
+
 void CUICarBodyWnd::Show() 
 { 
+	InventoryUtilities::SendInfoToActor		("ui_car_body");
 	inherited::Show							();
 	SetCurrentItem							(NULL);
 	InventoryUtilities::UpdateWeight		(*m_pUIOurBagWnd);
@@ -381,7 +392,8 @@ bool CUICarBodyWnd::OnKeyboard(int dik, EUIMessages keyboard_action)
 {
 	if( inherited::OnKeyboard(dik,keyboard_action) )return true;
 
-	if(keyboard_action==WINDOW_KEY_PRESSED&&key_binding[dik]==kUSE) {
+	if(keyboard_action==WINDOW_KEY_PRESSED && is_binded(kUSE, dik)) 
+	{
 			GetHolder()->StartStopMenu(this,true);
 			return true;
 	}
@@ -403,46 +415,12 @@ void CUICarBodyWnd::ActivatePropertiesBox()
 	CAntirad*				pAntirad		= smart_cast<CAntirad*>			(CurrentIItem());
 	CBottleItem*			pBottleItem		= smart_cast<CBottleItem*>		(CurrentIItem());
     bool					b_show			= false;
-/*
-	if(pWeapon)
-	{
-		bool b = 0!=pWeapon->GetAmmoElapsed();
-		if(!b)
-		{
-			CUICellItem * itm = CurrentItem();
-			for(u32 i=0; i<itm->ChildsCount(); ++i)
-			{
-				pWeapon		= smart_cast<CWeaponMagazined*>( (CWeapon*)itm->Child(i)->m_pData );
-				if(pWeapon->GetAmmoElapsed())
-				{
-					b = true;
-					break;
-				}
-			}
-		}
-
-		if(b)
-		{		
-			m_pUIPropertiesBox->AddItem("st_unload_magazine",  NULL, INVENTORY_UNLOAD_MAGAZINE);
-			b_show			= true;
-		}
-	}
-*/	
-	if(pMedkit || pAntirad)
-	{
-		m_pUIPropertiesBox->AddItem("st_use",  NULL, INVENTORY_EAT_ACTION);
-		b_show			= true;
-	}
-	else if(pEatableItem)
-	{
-		m_pUIPropertiesBox->AddItem("st_eat",  NULL, INVENTORY_EAT_ACTION);
-		b_show			= true;
-	}
 	
 	LPCSTR _action				= NULL;
 	if(pMedkit || pAntirad)
 	{
 		_action						= "st_use";
+		b_show						= true;
 	}
 	else if(pEatableItem)
 	{
@@ -450,6 +428,7 @@ void CUICarBodyWnd::ActivatePropertiesBox()
 			_action					= "st_drink";
 		else
 			_action					= "st_eat";
+		b_show						= true;
 	}
 	if(_action)
 		m_pUIPropertiesBox->AddItem(_action,  NULL, INVENTORY_EAT_ACTION);
@@ -572,6 +551,7 @@ bool CUICarBodyWnd::OnItemSelected(CUICellItem* itm)
 
 bool CUICarBodyWnd::OnItemRButtonClick(CUICellItem* itm)
 {
+	SetCurrentItem				(itm);
 	ActivatePropertiesBox		();
 	return						false;
 }

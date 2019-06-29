@@ -6,36 +6,37 @@
 
 CGameSpy_QR2::CGameSpy_QR2()
 {
-	m_SecretKey[0] = 't';
-	m_SecretKey[1] = '9';
-	m_SecretKey[2] = 'F';
-	m_SecretKey[3] = 'j';
-	m_SecretKey[4] = '3';
-	m_SecretKey[5] = 'M';
-	m_SecretKey[6] = 'x';
-	m_SecretKey[7] = '\0';
 	//-------------------------------
-	hGameSpyDLL = NULL;
+	m_hGameSpyDLL = NULL;
 
-	LoadGameSpy();
+	LPCSTR			g_name	= "xrGameSpy.dll";
+	Log				("Loading DLL:",g_name);
+	m_hGameSpyDLL			= LoadLibrary	(g_name);
+	if (0==m_hGameSpyDLL)	R_CHK			(GetLastError());
+	R_ASSERT2		(m_hGameSpyDLL,"GameSpy DLL raised exception during loading or there is no game DLL at all");
+
+	LoadGameSpy(m_hGameSpyDLL);
+};
+
+CGameSpy_QR2::CGameSpy_QR2(HMODULE hGameSpyDLL)
+{
+	//-------------------------------
+	m_hGameSpyDLL = NULL;
+
+	LoadGameSpy(hGameSpyDLL);
 };
 
 CGameSpy_QR2::~CGameSpy_QR2()
 {
-	if (hGameSpyDLL)
+	if (m_hGameSpyDLL)
 	{
-		FreeLibrary(hGameSpyDLL);
-		hGameSpyDLL = NULL;
+		FreeLibrary(m_hGameSpyDLL);
+		m_hGameSpyDLL = NULL;
 	}
 };
 
-void	CGameSpy_QR2::LoadGameSpy()
+void	CGameSpy_QR2::LoadGameSpy(HMODULE hGameSpyDLL)
 {
-	LPCSTR			g_name	= "xrGameSpy.dll";
-	Log				("Loading DLL:",g_name);
-	hGameSpyDLL			= LoadLibrary	(g_name);
-	if (0==hGameSpyDLL)	R_CHK			(GetLastError());
-	R_ASSERT2		(hGameSpyDLL,"GameSpy DLL raised exception during loading or there is no game DLL at all");
 
 	GAMESPY_LOAD_FN(xrGS_RegisteredKey);
 	GAMESPY_LOAD_FN(xrGS_qr2_register_key);
@@ -50,6 +51,8 @@ void	CGameSpy_QR2::LoadGameSpy()
 	GAMESPY_LOAD_FN(xrGS_qr2_register_publicaddress_callback);
 
 	GAMESPY_LOAD_FN(xrGS_qr2_init);
+
+	GAMESPY_LOAD_FN(xrGS_GetGameVersion);
 }
 
 void	CGameSpy_QR2::Think	(void* qrec)
@@ -96,11 +99,11 @@ void	CGameSpy_QR2::RegisterAdditionalKeys	()
 	xrGS_qr2_register_key(G_BEARER_CANT_SPRINT_KEY,		("bearercant_sprint"));
 
 	//---- Player keys	
-	xrGS_qr2_register_key(P_NAME__KEY,					("name_"));
-	xrGS_qr2_register_key(P_FRAGS__KEY,					("frags_"));
-	xrGS_qr2_register_key(P_DEATH__KEY,					("death_"));
-	xrGS_qr2_register_key(P_RANK__KEY,					("rank_"));
-	xrGS_qr2_register_key(P_TEAM__KEY,					("p_team_"));
+//	xrGS_qr2_register_key(P_NAME__KEY,					("name_"));
+//	xrGS_qr2_register_key(P_FRAGS__KEY,					("frags_"));
+//	xrGS_qr2_register_key(P_DEATH__KEY,					("death_"));
+//	xrGS_qr2_register_key(P_RANK__KEY,					("rank_"));
+//	xrGS_qr2_register_key(P_TEAM__KEY,					("p_team_"));
 	xrGS_qr2_register_key(P_SPECTATOR__KEY,				("spectator_"));
 	xrGS_qr2_register_key(P_ARTEFACTS__KEY,				("artefacts_"));
 
@@ -109,18 +112,22 @@ void	CGameSpy_QR2::RegisterAdditionalKeys	()
 	xrGS_qr2_register_key(T_SCORE_T_KEY,					("t_score_t"));
 };
 
-bool	CGameSpy_QR2::Init		(int Public, void* instance)
+//bool	CGameSpy_QR2::Init		(u32 PortID, int Public, void* instance)
+bool	CGameSpy_QR2::Init		(int PortID, int Public, void* instance)
 {	
 	//--------- QR2 Init -------------------------/
 	//call qr_init with the query port number and gamename, default IP address, and no user data
-	if (xrGS_qr2_init(NULL,NULL,GAMESPY_BASEPORT, GAMESPY_GAMENAME, m_SecretKey, Public, 1,
+	
+//	if (xrGS_qr2_init(NULL,NULL,PortID, GAMESPY_GAMENAME, m_SecretKey, Public, 0,
+	if (xrGS_qr2_init(NULL,NULL,PortID, Public, 0,
 		callback_serverkey, callback_playerkey, callback_teamkey,
 		callback_keylist, callback_count, callback_adderror, instance) != e_qrnoerror)
 	{
 		//		_tprintf(_T("Error starting query sockets\n"));
-		Msg("GameSpy::QR2 : Failes to Initialize!");
+		Msg("xrGS::QR2 : Failes to Initialize!");
 		return false;
 	}
+	
 	RegisterAdditionalKeys();
 
 	// Set a function to be called when we receive a game specific message
@@ -129,7 +136,7 @@ bool	CGameSpy_QR2::Init		(int Public, void* instance)
 	// Set a function to be called when we receive a nat negotiation request
 	xrGS_qr2_register_natneg_callback(NULL, callback_nn);
 
-	Msg("GameSpy::QR2 : Initialized");
+	Msg("xrGS::QR2 : Initialized");
 	return true;
 };
 
@@ -147,3 +154,8 @@ void	CGameSpy_QR2::KeyBufferAdd	(void* keybuffer, int keyid)
 {
 	xrGS_qr2_keybuffer_add(keybuffer, keyid);
 }
+
+const	char*	CGameSpy_QR2::GetGameVersion	(const	char*result)
+{
+	return xrGS_GetGameVersion(result);
+};

@@ -63,7 +63,7 @@ CEnvironment::CEnvironment	()
 	// perlin noise
 	PerlinNoise1D			= xr_new<CPerlinNoise1D>(Random.randI(0,0xFFFF));
 	PerlinNoise1D->SetOctaves(2);
-	PerlinNoise1D->SetAmplitude(2.5f);
+	PerlinNoise1D->SetAmplitude(0.66666f);
 
 	tsky0					= Device.Resources->_CreateTexture("$user$sky0");
 	tsky1					= Device.Resources->_CreateTexture("$user$sky1");
@@ -120,7 +120,10 @@ float CEnvironment::NormalizeTime(float tm)
 
 void CEnvironment::SetWeather(shared_str name, bool forced)
 {
+//.	static BOOL bAlready = FALSE;
+//.	if(bAlready)	return;
 	if (name.size())	{
+//.		bAlready = TRUE;
         EnvsMapIt it		= WeatherCycles.find(name);
         R_ASSERT3			(it!=WeatherCycles.end(),"Invalid weather name.",*name);
 		CurrentCycleName	= it->first;
@@ -260,6 +263,15 @@ void CEnvironment::SelectEnvs(float gt)
     }
 }
 
+int get_ref_count(IUnknown* ii)
+{
+	if(ii){
+		ii->AddRef();
+		return ii->Release();
+	}else
+	return 0;
+}
+
 void CEnvironment::OnFrame()
 {
 #ifdef _EDITOR
@@ -319,7 +331,7 @@ void CEnvironment::OnFrame()
 
 	if (::Render->get_generation()==IRender_interface::GENERATION_R2){
 		//. very very ugly hack
-		if (HW.Caps.raster_major >= 3){
+		if (HW.Caps.raster_major >= 3 && HW.Caps.geometry.bVTF){
 			// tonemapping in VS
 			CurrentEnv.sky_r_textures.push_back		(mk_pair(u32(D3DVERTEXTEXTURESAMPLER0),tonemap));	//. hack
 			CurrentEnv.sky_r_textures_env.push_back	(mk_pair(u32(D3DVERTEXTEXTURESAMPLER0),tonemap));	//. hack
@@ -336,15 +348,12 @@ void CEnvironment::OnFrame()
 	//. Setup skybox textures, somewhat ugly
 	IDirect3DBaseTexture9*	e0	= CurrentEnv.sky_r_textures[0].second->surface_get();
 	IDirect3DBaseTexture9*	e1	= CurrentEnv.sky_r_textures[1].second->surface_get();
+	
 	tsky0->surface_set		(e0);	_RELEASE(e0);
 	tsky1->surface_set		(e1);	_RELEASE(e1);
 
-	//
-	wind_strength_factor				= 0.f;
-	if (!fis_zero(wind_gust_factor,EPS_L)){
-		PerlinNoise1D->SetFrequency		(wind_gust_factor*MAX_NOISE_FREQ);
-		wind_strength_factor			= clampr(PerlinNoise1D->Get(Device.fTimeGlobal)+0.5f,0.f,1.f); 
-	}
+	PerlinNoise1D->SetFrequency		(wind_gust_factor*MAX_NOISE_FREQ);
+	wind_strength_factor			= clampr(PerlinNoise1D->GetContinious(Device.fTimeGlobal)+0.5f,0.f,1.f); 
 
     int l_id							=	(current_weight<0.5f)?Current[0]->lens_flare_id:Current[1]->lens_flare_id;
 	eff_LensFlare->OnFrame				(l_id);

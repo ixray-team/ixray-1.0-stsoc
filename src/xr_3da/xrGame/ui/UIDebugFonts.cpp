@@ -54,9 +54,10 @@ void CUIDebugFonts::FillUpList(){
 		CUIStatic* pItem		= xr_new<CUIStatic>();
 		pItem->SetWndPos		(pos);
 		pItem->SetWndSize		(sz);
-		sprintf					(str, "%s:%s", *F->m_font_name, *CStringTable().translate("Test_Font_StrIing"));
+		sprintf					(str, "%s:%s", *F->m_font_name, *CStringTable().translate("Test_Font_String"));
 		pItem->SetFont			(F);
 		pItem->SetText			(str);
+		pItem->SetTextComplexMode(false);
 		pItem->SetVTextAlignment(valCenter);
 		pItem->SetTextAlignment	(CGameFont::alCenter);
 		pItem->AdjustHeightToText();

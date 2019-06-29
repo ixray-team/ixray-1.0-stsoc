@@ -18,6 +18,7 @@ class CUIStatic;
 class CUIStatix;
 class CUI3tButton;
 class CUIAnimatedStatic;
+class CExtraContentFilter;
 
 typedef enum{
 	SKIN_MENU_BACK = 0,
@@ -28,6 +29,8 @@ typedef enum{
 class CUISkinSelectorWnd: public CUIDialogWnd
 {
 	typedef CUIDialogWnd inherited;
+
+	CExtraContentFilter*	m_pExtraContentFilter;
 public:	
 	CUISkinSelectorWnd(const char* strSectionName, s16 team);
 	~CUISkinSelectorWnd();
@@ -41,6 +44,7 @@ public:
 
 	int				GetActiveIndex();
 	s16				GetTeam()				{return m_team;};
+	virtual void	Update			();
 protected:
 			void	OnBtnOK();
 			void	OnBtnCancel();
@@ -63,6 +67,7 @@ protected:
 	shared_str		m_shader;
 	int				m_iActiveIndex; 
 	xr_vector<xr_string> m_skins;
+	xr_vector<int>	m_skinsEnabled;
 	int				m_firstSkin;
 	s16				m_team;
 };

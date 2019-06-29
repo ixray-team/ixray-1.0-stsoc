@@ -39,10 +39,7 @@ public:
 			void			AddCharAtCursor								(const char ch);
 			void			DelChar										();
 			void			DelLeftChar									();
-			float			GetDrawCursorPos							();
 			void			MoveCursorToEnd								();
-			bool			MoveCursorUp								();
-			bool			MoveCursorDown								();
 
 			void			SetTextComplexMode							(bool mode = true);
 			bool			GetTextComplexMode							() const;
@@ -54,7 +51,6 @@ public:
     // IUISimpleWindow methods
 	virtual void			Init										(float x, float y, float width, float height);
 	virtual void			Draw										();
-			void			DrawCursor									(float x, float y);
 	virtual void			Draw										(float x, float y);
 	virtual void			Update										();
 IC			void			SetWndSize_inline							(const Fvector2& wnd_size);
@@ -67,7 +63,6 @@ IC			void			SetWndSize_inline							(const Fvector2& wnd_size);
 			void			Reset										();
 			void			ParseText									();
 			float			GetVisibleHeight							();
-			float			GetTextLength								();
 
 	// cursor control
 			int				m_iCursorPos;
@@ -78,7 +73,7 @@ protected:
 			void			UpdateCursor								();
 				// %c[255,255,255,255]
 		u32					GetColorFromText							(const xr_string& str)							const;
-		float				GetIndentByAlign							(float length)									const;
+		float				GetIndentByAlign							()												const;
 		float				GetVIndentByAlign							();
 		void				CutFirstColoredTextEntry					(xr_string& entry, u32& color,xr_string& text)	const;
 	CUILine*				ParseTextToColoredLine						(const xr_string& str);
@@ -86,11 +81,11 @@ protected:
 	// IUITextControl data
 	typedef xr_string						Text;
 	typedef xr_vector<CUILine>				LinesVector;
-	typedef xr_vector<CUILine>::iterator	LinesVector_it;
+	typedef LinesVector::iterator			LinesVector_it;
 	LinesVector				m_lines;	// parsed text
 	float					m_interval; // interval
 
-	xr_string				m_text;
+	Text					m_text;
 
 	ETextAlignment			m_eTextAlign;
 	EVTextAlignment			m_eVTextAlign;

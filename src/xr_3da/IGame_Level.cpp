@@ -23,10 +23,13 @@ IGame_Level::IGame_Level	()
 	pHUD						= NULL;
 }
 
+#include "resourcemanager.h"
+
 IGame_Level::~IGame_Level	()
 {
-	// 
-	DEL_INSTANCE				( pHUD			);
+	if(strstr(Core.Params,"-nes_texture_storing") )
+		Device.Resources->StoreNecessaryTextures();
+//.	DEL_INSTANCE				( pHUD			);
 	xr_delete					( pLevel		);
 
 	// Render-level unload
@@ -35,15 +38,18 @@ IGame_Level::~IGame_Level	()
 	// Unregister
 	Device.seqRender.Remove		(this);
 	Device.seqFrame.Remove		(this);
+	CCameraManager::ResetPP		();
 }
 
 void IGame_Level::net_Stop			()
 {
+	for (int i=0; i<6; i++)
+		Objects.Update(true);
 	// Destroy all objects
 	Objects.Unload				( );
 	IR_Release					( );
 
-	bReady						= false;
+	bReady						= false;	
 }
 
 //-------------------------------------------------------------------------------------------
@@ -59,7 +65,7 @@ BOOL IGame_Level::Load			(u32 dwNum)
 	pLevel						= xr_new<CInifile>	( temp );
 	
 	// Open
-	pApp->LoadTitle				("Opening stream...");
+	g_pGamePersistent->LoadTitle	("st_opening_stream");
 	IReader* LL_Stream			= FS.r_open	("$level$","level");
 	IReader	&fs					= *LL_Stream;
 
@@ -69,13 +75,17 @@ BOOL IGame_Level::Load			(u32 dwNum)
 	R_ASSERT2					(XRCL_PRODUCTION_VERSION==H.XRLC_version,"Incompatible level version.");
 
 	// CForms
-	pApp->LoadTitle				("Loading CFORM...");
+	g_pGamePersistent->LoadTitle	("st_loading_cform");
 	ObjectSpace.Load			();
 	pApp->LoadSwitch			();
 
 
 	// HUD + Environment
-	pHUD						= (CCustomHUD*)NEW_INSTANCE	(CLSID_HUDMANAGER);
+//.	pHUD						= (CCustomHUD*)NEW_INSTANCE	(CLSID_HUDMANAGER);
+	if(g_hud)
+		pHUD					= g_hud;
+	else
+		pHUD					= (CCustomHUD*)NEW_INSTANCE	(CLSID_HUDMANAGER);
 
 	// Render-level Load
 	Render->level_Load			(LL_Stream);
@@ -83,14 +93,12 @@ BOOL IGame_Level::Load			(u32 dwNum)
 	// Msg						("* S-CREATE: %f ms, %d times",tscreate.result,tscreate.count);
 
 	// Objects
-	// pApp->LoadTitle			("Loading game...");
-	g_pGamePersistent->Environment.mods_load	();
+	g_pGamePersistent->Environment().mods_load	();
 	R_ASSERT					(Load_GameSpecific_Before());
 	Objects.Load				();
 	R_ASSERT					(Load_GameSpecific_After ());
 
 	// Done
-	// pApp->LoadTitle				("Syncronizing...");
 	FS.r_close					( LL_Stream );
 	bReady						= true;
 	if (!g_pGamePersistent->bDedicatedServer)	IR_Capture();

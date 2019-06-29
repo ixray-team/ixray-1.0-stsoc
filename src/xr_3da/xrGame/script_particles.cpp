@@ -10,14 +10,27 @@
 #include "script_particles.h"
 #include "../objectanimator.h"
 
-CScriptParticlesCustom::CScriptParticlesCustom(LPCSTR caParticlesName):CParticlesObject(caParticlesName,FALSE)
+CScriptParticlesCustom::CScriptParticlesCustom(CScriptParticles* owner, LPCSTR caParticlesName):CParticlesObject(caParticlesName,FALSE)
 {
+	m_owner						= owner;
 	m_animator					= 0;
 }
 CScriptParticlesCustom::~CScriptParticlesCustom()
 {
 	xr_delete					(m_animator);
 }
+void CScriptParticlesCustom::PSI_internal_delete()
+{
+	m_owner->m_particles					= NULL;
+	CParticlesObject::PSI_internal_delete	();
+}
+
+void CScriptParticlesCustom::PSI_destroy()
+{
+	m_owner->m_particles			= NULL;
+	CParticlesObject::PSI_destroy	();
+}
+
 void CScriptParticlesCustom::shedule_Update(u32 _dt)
 {
 	CParticlesObject::shedule_Update(_dt);
@@ -56,15 +69,17 @@ void CScriptParticlesCustom::StopPath()
 
 CScriptParticles::CScriptParticles(LPCSTR caParticlesName)
 {
-	m_particles					= xr_new<CScriptParticlesCustom>(caParticlesName);
+	m_particles					= xr_new<CScriptParticlesCustom>(this, caParticlesName);
 }
 
 CScriptParticles::~CScriptParticles()
 {
-	VERIFY						(m_particles);
-	// destroy particles
-	m_particles->PSI_destroy	();
-	m_particles					= 0;
+	if(m_particles)
+	{
+		// destroy particles
+		m_particles->PSI_destroy	();
+		m_particles					= 0;
+	}
 }
 
 void CScriptParticles::Play()

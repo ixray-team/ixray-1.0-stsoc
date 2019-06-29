@@ -1,9 +1,11 @@
 #ifndef _INCDEF_NETUTILS_H_
 #define _INCDEF_NETUTILS_H_
 #pragma once
-#pragma pack(push,1)
 
 #include "client_id.h"
+
+#pragma pack(push,1)
+
 //for presentation
 const	u32			NET_PacketSizeLimit	= 8192; //16384;//8192;
 // const	u32			NET_PacketSizeLimit	= 16384; 

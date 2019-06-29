@@ -149,6 +149,11 @@ void CUIDragDropListEx::OnItemDrop(CUIWindow* w, void* pData)
 	if(old_owner&&new_owner && !b)
 	{
 		CUICellItem* i					= old_owner->RemoveItem(itm, (old_owner==new_owner) );
+		while(i->ChildsCount())
+		{
+			CUICellItem* _chld				= i->PopChild();
+			new_owner->SetItem				(_chld, old_owner->GetDragItemPosition());
+		}
 		new_owner->SetItem				(i,old_owner->GetDragItemPosition());
 	}
 	DestroyDragItem						();
@@ -232,7 +237,7 @@ void CUIDragDropListEx::Draw()
 	if(0 && bDebug){
 		CGameFont* F		= UI()->Font()->pFontDI;
 		F->SetAligment		(CGameFont::alCenter);
-		F->SetSizeI			(0.02f);
+		F->SetHeightI		(0.02f);
 		F->OutSetI			(0.f,-0.5f);
 		F->SetColor			(0xffffffff);
 		Ivector2			pt = m_container->PickCell(GetUICursor()->GetPos());
@@ -271,17 +276,11 @@ void CUIDragDropListEx::ReinitScroll()
 		m_vScrollBar->SetScrollPos	(0);
 		m_vScrollBar->SetStepSize	(CellSize().y/3);
 		m_vScrollBar->SetPageSize	(iFloor(GetWndSize().y/float(CellSize().y)));
+		m_container->SetWndPos		(0,0);
 }
 
 bool CUIDragDropListEx::OnMouse(float x, float y, EUIMessages mouse_action)
 {
-	if(m_drag_item){
-		if(NULL==m_drag_item->ParentItem()->GetMessageTarget())
-		{
-			Msg("%x",m_drag_item->ParentItem());
-			VERIFY(0);
-		}
-	}
 	bool b = inherited::OnMouse		(x,y,mouse_action);
 
 	if(m_vScrollBar->IsShown())
@@ -352,7 +351,7 @@ void CUIDragDropListEx::SetItem(CUICellItem* itm, Fvector2 abs_pos) // start at 
 void CUIDragDropListEx::SetItem(CUICellItem* itm, Ivector2 cell_pos) // start at cell
 {
 	if(m_container->AddSimilar(itm))	return;
-	VERIFY						(m_container->IsRoomFree(cell_pos, itm->GetGridSize()));
+	R_ASSERT						(m_container->IsRoomFree(cell_pos, itm->GetGridSize()));
 
 	m_container->PlaceItemAtPos	(itm, cell_pos);
 
@@ -387,7 +386,7 @@ bool CUIDragDropListEx::IsOwner(CUICellItem* itm){
 
 CUICellItem* CUIDragDropListEx::GetItemIdx(u32 idx)
 {
-	VERIFY(idx<ItemsCount());
+	R_ASSERT(idx<ItemsCount());
 	WINDOW_LIST_it it = m_container->GetChildWndList().begin();
 	std::advance	(it, idx);
 	return smart_cast<CUICellItem*>(*it);
@@ -408,8 +407,9 @@ bool CUICellContainer::AddSimilar(CUICellItem* itm)
 {
 	if(!m_pParentDragDropList->IsGrouping())	return false;
 
-	CUICellItem* i	= FindSimilar(itm);
-	VERIFY			(i!=itm);
+	CUICellItem* i		= FindSimilar(itm);
+	R_ASSERT			(i!=itm);
+	R_ASSERT			(0==itm->ChildsCount());
 	if(i){	
 		i->PushChild			(itm);
 		itm->SetOwnerList		(m_pParentDragDropList);
@@ -427,7 +427,7 @@ CUICellItem* CUICellContainer::FindSimilar(CUICellItem* itm)
 #else
 		CUICellItem* i = (CUICellItem*)(*it);
 #endif
-		VERIFY			(i!=itm);
+		R_ASSERT		(i!=itm);
 		if(i->EqualTo(itm))
 			return i;
 	}
@@ -459,7 +459,7 @@ CUICellItem* CUICellContainer::RemoveItem(CUICellItem* itm, bool force_root)
 		if(i->HasChild(itm))
 		{
 			CUICellItem* iii	= i->PopChild();
-			iii->SetOwnerList	(NULL);
+			R_ASSERT			(0==iii->ChildsCount());
 			return				iii;
 		}
 	}
@@ -467,7 +467,7 @@ CUICellItem* CUICellContainer::RemoveItem(CUICellItem* itm, bool force_root)
 	if(!force_root && itm->ChildsCount())
 	{
 		CUICellItem* iii	=	itm->PopChild();
-		iii->SetOwnerList	(NULL);
+		R_ASSERT			(0==iii->ChildsCount());
 		return				iii;
 	}
 
@@ -565,7 +565,7 @@ Ivector2 CUICellContainer::TopVisibleCell()
 
 CUICell& CUICellContainer::GetCellAt(const Ivector2& pos)
 {
-	VERIFY				(ValidCell(pos));
+	R_ASSERT			(ValidCell(pos));
 	CUICell&	c		= m_cells[m_cellsCapacity.x*pos.y+pos.x];
 	return				c;
 }
@@ -619,22 +619,33 @@ bool CUICellContainer::ValidCell(const Ivector2& pos) const
 
 void CUICellContainer::ClearAll(bool bDestroy)
 {
-	while( !m_ChildWndList.empty() )
-	{
-		CUIWindow* w			= m_ChildWndList.back();
-		VERIFY					(!w->IsAutoDelete());
-		DetachChild				(w);	
-		
-		if(bDestroy)
-			delete_data			(w);
-	}
-
 	{
 		UI_CELLS_VEC_IT it		= m_cells.begin();
 		UI_CELLS_VEC_IT it_e	= m_cells.end();
 		for(;it!=it_e;++it)
 			(*it).Clear();
 	}
+	while( !m_ChildWndList.empty() )
+	{
+		CUIWindow* w			= m_ChildWndList.back();
+		CUICellItem* wc			= smart_cast<CUICellItem*>(w);
+		VERIFY					(!wc->IsAutoDelete());
+		DetachChild				(wc);	
+		
+		while( wc->ChildsCount() )
+		{
+			CUICellItem* ci		= wc->PopChild();
+			R_ASSERT			(ci->ChildsCount()==0);
+
+			if(bDestroy)
+				delete_data		(ci);
+		}
+		
+		if(bDestroy){
+			delete_data			(wc);
+		}
+	}
+
 }
 
 Ivector2 CUICellContainer::PickCell(const Fvector2& abs_pos)

@@ -27,7 +27,7 @@
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 
-#include "xrCDB.h"
+#include "../xrCDB/xrCDB.h"
 #include "sound.h"
 
 #define ENGINE_API

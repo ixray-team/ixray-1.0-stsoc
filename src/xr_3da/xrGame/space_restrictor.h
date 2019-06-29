@@ -10,7 +10,7 @@
 
 #include "gameobject.h"
 #include "restriction_space.h"
-
+#include "script_export_space.h"
 
 class CSpaceRestrictor : public CGameObject {
 private:
@@ -58,7 +58,7 @@ public:
 	virtual void				spatial_move		();
 	IC		bool				actual				() const;
 	virtual	CSpaceRestrictor	*cast_restrictor	() {return this;}
-	virtual	bool				need_update			() {return false;};
+	virtual	bool				register_schedule	() const {return false;}
 
 	IC RestrictionSpace::ERestrictorTypes restrictor_type() const; 
 
@@ -66,6 +66,10 @@ public:
 #ifdef DEBUG
 	virtual void				OnRender			();
 #endif
+	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
+add_to_type_list(CSpaceRestrictor)
+#undef script_type_list
+#define script_type_list save_type_list(CSpaceRestrictor)
 
 #include "space_restrictor_inline.h"

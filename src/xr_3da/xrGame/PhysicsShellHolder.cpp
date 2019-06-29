@@ -42,8 +42,8 @@ BOOL CPhysicsShellHolder::net_Spawn				(CSE_Abstract*	DC)
 {
 	CParticlesPlayer::net_SpawnParticles		();
 	st_enable_state=(u8)stNotDefitnite;
-	BOOL ret=inherited::net_Spawn				(DC);//load
 	b_sheduled									=	true;
+	BOOL ret=inherited::net_Spawn				(DC);//load
 		//create_physic_shell			();
 	if(PPhysicsShell()&&PPhysicsShell()->isFullActive())
 	{
@@ -364,3 +364,9 @@ CPhysicsShellHolder::PHLoadState(IReader &P)
 		PHGetSyncItem(i)->set_State(state);
 	}
 }
+
+bool CPhysicsShellHolder::register_schedule	() const
+{
+	return					(b_sheduled);
+}
+

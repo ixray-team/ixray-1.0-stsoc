@@ -18,7 +18,7 @@ CFontManager& mngr(){
 
 // hud font
 CGameFont* GetFontSmall()
-{return mngr().pFontSmall;}
+{return mngr().pFontStat;}
 
 CGameFont* GetFontMedium()
 {return mngr().pFontMedium;}
@@ -207,6 +207,8 @@ void CUIWindow::script_register(lua_State *L)
 				
 	// CUITabControl
 				value("TAB_CHANGED",					int(TAB_CHANGED)),
+				value("EDIT_TEXT_COMMIT",				int(EDIT_TEXT_COMMIT)),
+				
 
 	// CUICheckButton
 				value("CHECK_BUTTON_SET",				int(CHECK_BUTTON_SET)),
@@ -223,7 +225,6 @@ void CUIWindow::script_register(lua_State *L)
 
 	// CUIScrollBox
 				value("SCROLLBOX_MOVE",					int(SCROLLBOX_MOVE)),
-				value("SCROLLBOX_STOP",					int(SCROLLBOX_STOP)),
 				
 	// CUIScrollBar
 				value("SCROLLBAR_VSCROLL",				int(SCROLLBAR_VSCROLL)),
@@ -247,6 +248,8 @@ void CUIWindow::script_register(lua_State *L)
 				value("MESSAGE_BOX_QUIT_GAME_CLICKED",	int(MESSAGE_BOX_QUIT_GAME_CLICKED)),
 				value("MESSAGE_BOX_QUIT_WIN_CLICKED",	int(MESSAGE_BOX_QUIT_WIN_CLICKED)),
 
+				value("EDIT_TEXT_CHANGED",				int(EDIT_TEXT_CHANGED)),
+				value("EDIT_TEXT_COMMIT",				int(EDIT_TEXT_COMMIT)),
 	// CUITalkDialogWnd
 				value("TALK_DIALOG_TRADE_BUTTON_CLICKED",	int(TALK_DIALOG_TRADE_BUTTON_CLICKED)),
 				value("TALK_DIALOG_QUESTION_CLICKED",		int(TALK_DIALOG_QUESTION_CLICKED)),

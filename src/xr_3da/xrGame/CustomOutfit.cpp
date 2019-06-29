@@ -56,6 +56,13 @@ void CCustomOutfit::Load(LPCSTR section)
 
 	m_additional_weight				= pSettings->r_float(section,"additional_inventory_weight");
 	m_additional_weight2			= pSettings->r_float(section,"additional_inventory_weight2");
+
+	if (pSettings->line_exist(section, "nightvision_sect"))
+		m_NightVisionSect = pSettings->r_string(section, "nightvision_sect");
+	else
+		m_NightVisionSect = NULL;
+
+	m_full_icon_name								= pSettings->r_string(section,"full_icon_name");
 }
 
 void CCustomOutfit::Hit(float hit_power, ALife::EHitType hit_type)
@@ -89,6 +96,7 @@ BOOL	CCustomOutfit::BonePassBullet					(int boneID)
 	return m_boneProtection->getBonePassBullet(s16(boneID));
 };
 
+#include "torch.h"
 void	CCustomOutfit::OnMoveToSlot		()
 {
 	if (m_pInventory)
@@ -133,6 +141,11 @@ void	CCustomOutfit::OnMoveToRuck		()
 		CActor* pActor = smart_cast<CActor*> (m_pInventory->GetOwner());
 		if (pActor)
 		{
+			CTorch* pTorch = smart_cast<CTorch*>(pActor->inventory().ItemFromSlot(TORCH_SLOT));
+			if(pTorch)
+			{
+				pTorch->SwitchNightVision(false);
+			}
 			if (m_ActorVisual.size())
 			{
 				shared_str DefVisual = pActor->GetDefaultVisualOutfit();
@@ -158,8 +171,3 @@ float CCustomOutfit::GetPowerLoss()
 	};
 	return m_fPowerLoss;
 };
-
-Fvector2 CCustomOutfit::GetIconPos()
-{
-	return pSettings->r_fvector2(cNameSect(),"full_scale_icon");
-}

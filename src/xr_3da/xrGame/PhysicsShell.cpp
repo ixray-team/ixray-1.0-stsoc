@@ -174,6 +174,10 @@ void ApplySpawnIniToPhysicShell(CInifile* ini,CPhysicsShell* physics_shell,bool 
 			{
 				physics_shell->SetIgnoreSmall();
 			}
+			if(ini->line_exist("collide","ignore_ragdoll"))
+			{
+				physics_shell->SetIgnoreRagDoll();
+			}
 		}
 	}
 }

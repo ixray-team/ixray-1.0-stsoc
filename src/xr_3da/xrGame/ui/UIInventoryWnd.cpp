@@ -49,7 +49,6 @@ CUIInventoryWnd::CUIInventoryWnd()
 	Init								();
 	SetCurrentItem						(NULL);
 
-	SetFont								(HUD().Font().pFontMedium);
 	g_pInvWnd							= this;	
 	m_b_need_reinit						= false;
 	Hide								();	
@@ -198,7 +197,9 @@ EListType CUIInventoryWnd::GetType(CUIDragDropListEx* l)
 	if(l==m_pUIOutfitList)		return iwSlot;
 
 	NODEFAULT;
+#ifdef DEBUG
 	return iwSlot;
+#endif // DEBUG
 }
 
 void CUIInventoryWnd::PlaySnd(eInventorySndAction a)
@@ -319,7 +320,6 @@ void CUIInventoryWnd::Hide()
 	inherited::Hide						();
 
 	SendInfoToActor						("ui_inventory_hide");
-
 	ClearAllLists						();
 
 	//достать вещь в активный слот
@@ -362,7 +362,6 @@ void CUIInventoryWnd::AttachAddon(PIItem item_to_upgrade)
 			m_iCurrentActiveSlot				= pActor->inventory().GetActiveSlot();
 			pActor->inventory().Activate		(NO_ACTIVE_SLOT);
 	}
-
 	SetCurrentItem								(NULL);
 }
 
@@ -480,26 +479,23 @@ bool CUIInventoryWnd::OnKeyboard(int dik, EUIMessages keyboard_action)
 		UIPropertiesBox.OnKeyboard(dik, keyboard_action);
 	if (WINDOW_KEY_PRESSED == keyboard_action)
 	{
-		int cmd = key_binding[dik];
-		if (kDROP == cmd)
+		if ( is_binded(kDROP, dik) )
 			DropCurrentItem(false);
 #ifdef DEBUG
-		else if(DIK_NUMPAD7 == dik && CurrentIItem()){
+		else if(DIK_NUMPAD7 == dik && CurrentIItem())
+		{
 			CurrentIItem()->ChangeCondition(-0.05f);
 			UIItemInfo.InitItem(CurrentIItem());
 		}
-		else if(DIK_NUMPAD8 == dik && CurrentIItem()){
+		else if(DIK_NUMPAD8 == dik && CurrentIItem())
+		{
 			CurrentIItem()->ChangeCondition(0.05f);
 			UIItemInfo.InitItem(CurrentIItem());
 
 		}
 #endif
 	}
-
-
 	if( inherited::OnKeyboard(dik,keyboard_action) )return true;
-
-
 
 	return false;
 }

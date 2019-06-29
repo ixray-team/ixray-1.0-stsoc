@@ -8,6 +8,8 @@ class CUIXml;
 #include "../script_export_space.h"
 #include "../script_space.h"
 
+struct SLuaWpnParams;
+
 class CUIWpnParams : public CUIWindow 
 {
 public:
@@ -28,10 +30,4 @@ protected:
 	CUIStatic					m_textHandling;
 	CUIStatic					m_textDamage;
 	CUIStatic					m_textRPM;
-
-	luabind::functor<float>		m_functorRPM;
-	luabind::functor<float>		m_functorAccuracy;
-	luabind::functor<float>		m_functorDamage;
-	luabind::functor<float>		m_functorDamageMP;
-	luabind::functor<float>		m_functorHandling;
 };

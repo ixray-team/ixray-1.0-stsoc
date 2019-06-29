@@ -73,9 +73,10 @@ void CActor::AddEncyclopediaArticle	 (const CInfoPortion* info_portion) const
 
 		article_vector.push_back(ARTICLE_DATA(*it, Level().GetGameTime(), article.data()->articleType));
 		LPCSTR g,n;
+		int _atype = article.data()->articleType;
 		g = *(article.data()->group);
 		n = *(article.data()->name);
-		callback(GameObject::eArticleInfo)(lua_game_object(), g, n);
+		callback(GameObject::eArticleInfo)(lua_game_object(), g, n, _atype);
 
 		if( HUD().GetUI() ){
 			CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(HUD().GetUI()->UIGame());
@@ -124,7 +125,7 @@ void  CActor::AddGameNews			 (GAME_NEWS_DATA& news_data)
 }
 
 
-bool CActor::OnReceiveInfo(INFO_ID info_id) const
+bool CActor::OnReceiveInfo(shared_str info_id) const
 {
 	if(!CInventoryOwner::OnReceiveInfo(info_id))
 		return false;
@@ -153,7 +154,7 @@ bool CActor::OnReceiveInfo(INFO_ID info_id) const
 }
 
 
-void CActor::OnDisableInfo(INFO_ID info_id) const
+void CActor::OnDisableInfo(shared_str info_id) const
 {
 	CInventoryOwner::OnDisableInfo(info_id);
 

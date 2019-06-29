@@ -131,6 +131,7 @@ public:
 
 	virtual bool			IsHidden			()	const		{	return GetState() == eHidden;}						// Does weapon is in hidden state
 	virtual bool			IsHiding			()	const		{	return GetState() == eHiding;}
+	virtual bool			IsShowing			()	const		{	return GetState() == eShowing;}
 
 	IC BOOL					IsValid				()	const		{	return iAmmoElapsed;						}
 	// Does weapon need's update?
@@ -369,6 +370,7 @@ protected:
 	float					fireDispersionConditionFactor;
 	//вероятность осечки при максимальной изношености
 	float					misfireProbability;
+	float					misfireConditionK;
 	//увеличение изношености при выстреле
 	float					conditionDecreasePerShot;
 
@@ -476,4 +478,6 @@ public:
 	virtual bool			use_crosshair				()	const {return true;}
 			bool			show_crosshair				();
 			bool			show_indicators				();
+	virtual BOOL			ParentMayHaveAimBullet		();
+	virtual BOOL			ParentIsActor				();
 };

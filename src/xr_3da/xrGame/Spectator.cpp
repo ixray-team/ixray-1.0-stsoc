@@ -23,6 +23,7 @@
 #include "clsid_game.h"
 #include "game_cl_mp.h"
 #include "string_table.h"
+#include "map_manager.h"
 
 //--------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////
@@ -318,18 +319,12 @@ void CSpectator::cam_Set	(EActorCameras style)
 
 void CSpectator::cam_Update	(CActor* A)
 {
-	HUD().Font().pFontDI->SetColor			(0xF0808080);
-	HUD().Font().pFontDI->SetSizeI			(0.03f);
-	HUD().Font().pFontDI->SetAligment		(CGameFont::alCenter);
 	if (A){
 		const Fmatrix& M			= A->XFORM();
 		CCameraBase* pACam			= A->cam_Active();
 		CCameraBase* cam			= cameras[cam_active];
 		switch(cam_active) {
 		case eacFirstEye:{
-//			Fvector P;
-//			P.add					(M.c,1.6f);
-//			cam->Set				(P,M.k,M.j);
 			Fvector P, D, N;
 			pACam->Get				(P, D, N);
 			cam->Set				(P, D, N);
@@ -350,7 +345,6 @@ void CSpectator::cam_Update	(CActor* A)
 			tmp.translate_over(point);
 			tmp.transform_tiny		(point1);
 			if (!A->g_Alive()) point.set(point1);
-//			if(!A->g_Alive()) point.set	(A->Position());
 			cam->Update				(point,dangle);
 			}break;
 		}
@@ -399,6 +393,12 @@ BOOL			CSpectator::net_Spawn				( CSE_Abstract*	DC )
 	};
 	return TRUE;
 };
+
+void			CSpectator::net_Destroy	()
+{
+	inherited::net_Destroy	();
+	Level().MapManager		().RemoveMapLocationByObjectID(ID());
+}
 
 bool			CSpectator::SelectNextPlayerToLook	()
 {

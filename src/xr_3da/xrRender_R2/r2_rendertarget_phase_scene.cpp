@@ -28,12 +28,17 @@ void	CRenderTarget::phase_scene_begin	()
 	RCache.set_ColorWriteEnable			( );
 }
 
-// end
-void	CRenderTarget::phase_scene_end		()
+void	CRenderTarget::disable_aniso		()
 {
 	// Disable ANISO
 	for (u32 i=0; i<HW.Caps.raster.dwStages; i++)
 		CHK_DX(HW.pDevice->SetSamplerState( i, D3DSAMP_MAXANISOTROPY, 1	));
+}
+
+// end
+void	CRenderTarget::phase_scene_end		()
+{
+	disable_aniso	();
 
 	if (!RImplementation.o.albedo_wo)		return;
 

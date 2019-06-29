@@ -5,11 +5,6 @@
 #include "../script_export_space.h"
 
 struct SCallbackInfo;
-/*
-namespace boost {
-	template<typename Signature, typename Allocator>
-	class function;
-};*/
 
 class CUIDialogWndEx :public CUIDialogWnd, public DLL_Pure
 {
@@ -33,6 +28,7 @@ public:
 			void				AddCallback			(LPCSTR control_id, s16 event, const luabind::functor<void> &functor, const luabind::object &object);
 	virtual void				Update				();
 	virtual bool				OnKeyboard			(int dik, EUIMessages keyboard_action);
+	virtual bool				Dispatch			(int cmd, int param)				{return true;}
 
 template<typename T>
 IC	T*	GetControl(LPCSTR name);

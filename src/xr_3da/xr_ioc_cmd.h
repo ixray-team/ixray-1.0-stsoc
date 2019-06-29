@@ -35,8 +35,8 @@ public		:
 	LPCSTR			Name()			{ return cName;	}
 	void			InvalidSyntax() {
 		TInfo I; Info(I);
-		Msg("! Invalid syntax in call to '%s'",cName);
-		Msg("! Valid arguments: %s", I);
+		Msg("~ Invalid syntax in call to '%s'",cName);
+		Msg("~ Valid arguments: %s", I);
 	}
 	virtual void	Execute	(LPCSTR args)	= 0;
 	virtual void	Status	(TStatus& S)	{ S[0]=0; }
@@ -275,37 +275,7 @@ public:
 		sprintf(I,"string with up to %d characters",size);
 	}
 };
-/*
-class CCC_Pause : public IConsole_Command
-{
-public:
 
-	CCC_Pause(LPCSTR N) :
-		IConsole_Command(N)
-		{bEmptyArgsHandled=TRUE;};
-
-	virtual void	Execute	(LPCSTR args)
-	{
-		BOOL bWhatToDo = TRUE;
-		if( 0==xr_strlen(args) ){
-			bWhatToDo = !Device.Pause();
-		};
-
-		if( EQ(args,"on")||EQ(args,"1") )
-			bWhatToDo = TRUE;
-
-		if( EQ(args,"off")||EQ(args,"0") )
-			bWhatToDo = FALSE;
-
-		Device.Pause	(bWhatToDo);
-		TStatus S;
-		strconcat(S,cName," is ", Device.Pause()?"on":"off");
-		Log(S);
-	}
-	virtual void	Save	(IWriter *F)	{}
-
-};
-*/
 class ENGINE_API CCC_LoadCFG : public IConsole_Command
 {
 public:

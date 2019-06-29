@@ -20,7 +20,7 @@
 #include "InfoPortion.h"
 #include "memory_manager.h"
 #include "ai_phrasedialogmanager.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include "xrMessages.h"
 #include "custommonster.h"
 #include "memory_manager.h"
@@ -171,49 +171,6 @@ CScriptGameObject::operator CObject*()
 {
 	return			(&object());
 }
-/*
-void		CScriptGameObject::set_character_pda_info	(LPCSTR info_id)
-{
-	CInventoryOwner	 *pInventoryOwner = smart_cast<CInventoryOwner*>(&object()); VERIFY(pInventoryOwner);
-	CPda* pda = pInventoryOwner->GetPDA(); VERIFY(pda);
-	pda->SetInfoPortion(info_id);
-}
-
-LPCSTR		CScriptGameObject::get_character_pda_info	()
-{
-	CInventoryOwner	 *pInventoryOwner = smart_cast<CInventoryOwner*>(&object()); VERIFY(pInventoryOwner);
-	CPda* pda = pInventoryOwner->GetPDA(); VERIFY(pda);
-	return *(pda->GetInfoPortion());
-}
-
-void		CScriptGameObject::set_pda_info				(LPCSTR info_id)
-{
-	CPda* pda = smart_cast<CPda*>(&object()); VERIFY(pda);
-	pda->SetInfoPortion(info_id);
-}
-
-LPCSTR		CScriptGameObject::get_pda_info				()
-{
-	CPda* pda = smart_cast<CPda*>(&object()); VERIFY(pda);
-	return *(pda->GetInfoPortion());
-}
-
-const MemorySpace::CHitObject *CScriptGameObject::GetBestHit	() const
-{
-	const CCustomMonster	*monster = smart_cast<const CCustomMonster*>(&object());
-	if (!monster)
-		return				(0);
-	return					(monster->memory().hit().hit());
-}
-
-const MemorySpace::CSoundObject *CScriptGameObject::GetBestSound	() const
-{
-	const CCustomMonster	*monster = smart_cast<const CCustomMonster*>(&object());
-	if (!monster)
-		return				(0);
-	return					(monster->memory().sound().sound());
-}
-*/
 
 CScriptGameObject *CScriptGameObject::GetBestEnemy()
 {

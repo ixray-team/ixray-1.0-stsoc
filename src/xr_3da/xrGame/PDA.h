@@ -50,7 +50,6 @@ public:
 			bool 							IsOff					() {return m_bTurnedOff;}
 
 
-//.			xr_vector<CObject*>&			ActiveContacts			();
 			void							ActivePDAContacts		(xr_vector<CPda*>& res);
 			CPda*							GetPdaFromOwner			(CObject* owner);
 			u32								ActiveContactsNum		()							{return m_active_contacts.size();}
@@ -60,19 +59,16 @@ public:
 	virtual void							load					(IReader &input_packet);
 
 	virtual LPCSTR							Name					();
-	virtual LPCSTR							NameComplex				();
 
 protected:
 	void									UpdateActiveContacts	();
-//.	void									PdaEventSend			(u32 pda_ID, EPdaMsg msg, INFO_ID info_id);
-//.	void									AddMessageToLog			(u32 pda_ID, EPdaMsg msg, INFO_ID info_id, bool receive);
 
 
 	xr_vector<CObject*>						m_active_contacts;
 	float									m_fRadius;
 
 	u16										m_idOriginalOwner;
-	SPECIFIC_CHARACTER_ID					m_SpecificChracterOwner;
+	shared_str					m_SpecificChracterOwner;
 	xr_string								m_sFullName;
 
 	bool									m_bTurnedOff;

@@ -57,7 +57,7 @@ void CActorMemory::eye_pp_s01				()
 	Fmatrix									mProject,mFull,mView;
 	mView.build_camera_dir					(c,k,j);
 	m_position								= c;
-	mProject.build_projection				(deg2rad(m_actor->cam_Active()->f_fov),m_actor->cam_Active()->f_aspect,0.1f,g_pGamePersistent->Environment.CurrentEnv.far_plane);
+	mProject.build_projection				(deg2rad(m_actor->cam_Active()->f_fov),m_actor->cam_Active()->f_aspect,0.1f,g_pGamePersistent->Environment().CurrentEnv.far_plane);
 	mFull.mul								(mProject,mView);
 	feel_vision_query						(mFull,c);
 	Device.Statistic->AI_Vis_Query.End		();

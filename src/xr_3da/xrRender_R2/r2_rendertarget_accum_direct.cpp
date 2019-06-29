@@ -67,9 +67,9 @@ void CRenderTarget::accum_direct		(u32 sub_phase)
 
 	// Perform lighting
 	{
-		phase_accumulator					();
-		RCache.set_CullMode					(CULL_NONE	);
-		RCache.set_ColorWriteEnable			();
+		phase_accumulator					()	;
+		RCache.set_CullMode					(CULL_NONE);
+		RCache.set_ColorWriteEnable			()	;
 
 		// texture adjustment matrix
 		float			fTexelOffs			= (.5f / float(RImplementation.o.smapsize));
@@ -109,8 +109,8 @@ void CRenderTarget::accum_direct		(u32 sub_phase)
 			static	float	w_shift		= 0;
 			Fmatrix			m_xform;
 			Fvector			direction	= fuckingsun->direction	;
-			float	w_dir				= g_pGamePersistent->Environment.CurrentEnv.wind_direction	;
-			//float	w_speed				= g_pGamePersistent->Environment.CurrentEnv.wind_velocity	;
+			float	w_dir				= g_pGamePersistent->Environment().CurrentEnv.wind_direction	;
+			//float	w_speed				= g_pGamePersistent->Environment().CurrentEnv.wind_velocity	;
 			Fvector			normal	;	normal.setHP(w_dir,0);
 							w_shift		+=	0.003f*Device.fTimeDelta;
 			Fvector			position;	position.set(0,0,0);
@@ -147,9 +147,54 @@ void CRenderTarget::accum_direct		(u32 sub_phase)
 		RCache.set_c				("m_shadow",			m_shadow						);
 		RCache.set_c				("m_sunmask",			m_clouds_shadow					);
 		
+		// nv-DBT
+		if (RImplementation.o.nvdbt && ps_r2_ls_flags.test(R2FLAG_USE_NVDBT))	{
+			float zMin,zMax;
+			if (SE_SUN_NEAR==sub_phase)	{
+				zMin = 0;
+				zMax = ps_r2_sun_near;
+			} else {
+				extern float	OLES_SUN_LIMIT_27_01_07;
+				zMin = ps_r2_sun_near;
+				zMax = OLES_SUN_LIMIT_27_01_07;
+			}
+
+			center_pt.mad(Device.vCameraPosition,Device.vCameraDirection,zMin);	Device.mFullTransform.transform	(center_pt);
+			zMin = center_pt.z	;
+
+			center_pt.mad(Device.vCameraPosition,Device.vCameraDirection,zMax);	Device.mFullTransform.transform	(center_pt);
+			zMax = center_pt.z	;
+
+			// enable cheat
+			HW.pDevice->SetRenderState(D3DRS_ADAPTIVETESS_X,MAKEFOURCC('N','V','D','B'));
+			HW.pDevice->SetRenderState(D3DRS_ADAPTIVETESS_Z,*(DWORD*)&zMin);
+			HW.pDevice->SetRenderState(D3DRS_ADAPTIVETESS_W,*(DWORD*)&zMax); 
+
+			// z-test always
+			HW.pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+			HW.pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+		}
+
+		// Fetch4 : enable
+		if (RImplementation.o.HW_smap_FETCH4)	{
+			//. we hacked the shader to force smap on S0
+#			define FOURCC_GET4  MAKEFOURCC('G','E','T','4') 
+			HW.pDevice->SetSamplerState	( 0, D3DSAMP_MIPMAPLODBIAS, FOURCC_GET4 );
+		}
+
 		// setup stencil
 		RCache.set_Stencil			(TRUE,D3DCMP_LESSEQUAL,dwLightMarkerID,0xff,0x00);
 		RCache.Render				(D3DPT_TRIANGLELIST,Offset,0,4,0,2);
+
+		// Fetch4 : disable
+		if (RImplementation.o.HW_smap_FETCH4)	{
+			//. we hacked the shader to force smap on S0
+#			define FOURCC_GET1  MAKEFOURCC('G','E','T','1') 
+			HW.pDevice->SetSamplerState	( 0, D3DSAMP_MIPMAPLODBIAS, FOURCC_GET1 );
+		}
+
+		// disable depth bounds
+		if (RImplementation.o.nvdbt && ps_r2_ls_flags.test(R2FLAG_USE_NVDBT))	HW.pDevice->SetRenderState(D3DRS_ADAPTIVETESS_X,0);
 	}
 }
 

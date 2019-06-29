@@ -79,11 +79,11 @@ public:
 	shared_str													c_ldynamic_props		;
 private:
 	// Loading / Unloading
-	void								LoadBuffers				(IReader	*fs);
-	void								LoadVisuals				(IReader	*fs);
-	void								LoadLights				(IReader	*fs);
-	void								LoadSectors				(IReader	*fs);
-	void								LoadSWIs				(IReader	*fs);
+	void								LoadBuffers				(CStreamReader	*fs);
+	void								LoadVisuals				(IReader *fs);
+	void								LoadLights				(IReader *fs);
+	void								LoadSectors				(IReader *fs);
+	void								LoadSWIs				(CStreamReader	*fs);
 
 	BOOL								add_Dynamic				(IRender_Visual	*pVisual, u32 planes);		// normal processing
 	void								add_Static				(IRender_Visual	*pVisual, u32 planes);
@@ -148,6 +148,7 @@ public:
 
 	// wallmarks
 	virtual void					add_StaticWallmark		(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V);
+	virtual void					clear_static_wallmarks	();
 	virtual void					add_SkeletonWallmark	(intrusive_ptr<CSkeletonWallmark> wm);
 	virtual void					add_SkeletonWallmark	(const Fmatrix* xf, CKinematics* obj, ref_shader& sh, const Fvector& start, const Fvector& dir, float size);
 	
@@ -168,9 +169,9 @@ public:
 	
 	// Models
 	virtual IRender_Visual*			model_CreateParticles	(LPCSTR name);
-	virtual IRender_DetailModel*	model_CreateDM			(IReader*	F);
-	virtual IRender_Visual*			model_Create			(LPCSTR name, IReader* data=0);
-	virtual IRender_Visual*			model_CreateChild		(LPCSTR name, IReader* data);
+	virtual IRender_DetailModel*	model_CreateDM			(IReader*F);
+	virtual IRender_Visual*			model_Create			(LPCSTR name, IReader*data=0);
+	virtual IRender_Visual*			model_CreateChild		(LPCSTR name, IReader*data);
 	virtual IRender_Visual*			model_Duplicate			(IRender_Visual*	V);
 	virtual void					model_Delete			(IRender_Visual* &	V, BOOL bDiscard);
 	virtual void 					model_Delete			(IRender_DetailModel* & F);

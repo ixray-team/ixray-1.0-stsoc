@@ -105,7 +105,9 @@ void CScriptEngine::setup_callbacks		()
 #if !XRAY_EXCEPTIONS
 		luabind::set_error_callback		(CScriptEngine::lua_error);
 #endif
+#ifndef MASTER_GOLD
 		luabind::set_pcall_callback		(CScriptEngine::lua_pcall_failed);
+#endif // MASTER_GOLD
 	}
 
 #if !XRAY_EXCEPTIONS
@@ -153,6 +155,8 @@ void CScriptEngine::setup_auto_load		()
 
 void CScriptEngine::init				()
 {
+	CScriptStorage::reinit				();
+
 	luabind::open						(lua());
 	setup_callbacks						();
 	export_classes						(lua());
@@ -247,7 +251,9 @@ void CScriptEngine::process_file_if_exists	(LPCSTR file_name, bool warn_if_not_e
 			add_no_file		(file_name,string_length);
 			return;
 		}
+#ifndef MASTER_GOLD
 		Msg					("* loading script %s",S1);
+#endif // MASTER_GOLD
 		m_reload_modules	= false;
 		load_file_into_namespace(S,*file_name ? file_name : "_G");
 	}

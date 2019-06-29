@@ -15,8 +15,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -43,9 +43,9 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Debug/XR_3DA.pch"
-				AssemblerListingLocation="Debug\"
-				ObjectFile="Debug\"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -61,15 +61,15 @@
 				AdditionalOptions="/MACHINE:I386 "
 				AdditionalDependencies="msacm32.lib vfw32.lib ogg_static_d.lib theora_static_d.lib"
 				ShowProgress="0"
-				OutputFile="x:\XR_3DA.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
+				IgnoreDefaultLibraryNames="libcmtd libcd"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
-				GenerateMapFile="TRUE"
-				MapFileName="x:\XR_3DA.map"
+				GenerateMapFile="FALSE"
+				MapFileName=""
 				MapExports="FALSE"
-				SubSystem="2"/>
+				SubSystem="2"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
@@ -100,8 +100,8 @@
 		</Configuration>
 		<Configuration
 			Name="Mixed|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Mixed"
+			OutputDirectory="x:\binaries\"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -116,7 +116,7 @@
 				OmitFramePointers="FALSE"
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="3"
-				AdditionalIncludeDirectories="scripting\,.."
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG,MIXED,WIN32,NDEBUG,_WINDOWS,ENGINE_BUILD"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -125,10 +125,10 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerOutput="0"
-				AssemblerListingLocation="Mixed\"
-				ObjectFile="Mixed\"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -141,15 +141,14 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 "
 				AdditionalDependencies="msacm32.lib vfw32.lib ogg_static.lib theora_static.lib"
-				OutputFile="x:\XR_3DA.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcmt.lib"
+				IgnoreDefaultLibraryNames="libcmt"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
 				GenerateMapFile="FALSE"
-				MapFileName=""
+				MapFileName="$(OutDir)/$(ProjectName).map"
 				SubSystem="2"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
 				TargetMachine="0"
 				FixedBaseAddress="1"/>
 			<Tool
@@ -182,8 +181,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -199,7 +198,7 @@
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="3"
-				AdditionalIncludeDirectories="scripting\,.."
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENGINE_BUILD"
 				StringPooling="TRUE"
 				ExceptionHandling="FALSE"
@@ -209,10 +208,10 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Release/XR_3DA.pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerOutput="4"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -226,16 +225,17 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 "
 				AdditionalDependencies="msacm32.lib vfw32.lib ogg_static.lib theora_static.lib"
-				OutputFile="x:\XR_3DA.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
+				IgnoreDefaultLibraryNames="libcmt"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
 				GenerateMapFile="FALSE"
-				MapFileName="x:\XR_3DA.map"
+				MapFileName=""
 				SubSystem="0"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
 				FixedBaseAddress="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -266,94 +266,9 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="DebugNoExceptions|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm200 "
-				Optimization="0"
-				EnableIntrinsicFunctions="FALSE"
-				FavorSizeOrSpeed="0"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="_DEBUG,DEBUG,WIN32,_WINDOWS,ENGINE_BUILD,SECURE_GAMEDATA;FORCE_NO_EXCEPTIONS"
-				StringPooling="FALSE"
-				MinimalRebuild="TRUE"
-				ExceptionHandling="FALSE"
-				BasicRuntimeChecks="3"
-				SmallerTypeCheck="TRUE"
-				RuntimeLibrary="3"
-				BufferSecurityCheck="TRUE"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
-				AssemblerListingLocation="DebugNoExceptions\"
-				ObjectFile="DebugNoExceptions\"
-				ProgramDataBaseFileName="$(IntDir)/"
-				BrowseInformation="0"
-				WarningLevel="4"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				CallingConvention="2"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				IgnoreImportLibrary="TRUE"
-				AdditionalOptions="/MACHINE:I386 "
-				AdditionalDependencies="msacm32.lib vfw32.lib"
-				ShowProgress="0"
-				OutputFile="x:\XR_3DA.exe"
-				LinkIncremental="2"
-				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
-				GenerateMapFile="TRUE"
-				MapFileName="x:\XR_3DA.map"
-				MapExports="FALSE"
-				SubSystem="2"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName="x:\XR_3DA.tlb"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1058"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
 			Name="Debug_Dedicated|Win32"
-			OutputDirectory="x:\dedicated\"
-			IntermediateDirectory=".\Debug_dedicated"
+			OutputDirectory="x:\binaries\dedicated"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -380,9 +295,8 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Debug/XR_3DA.pch"
-				AssemblerListingLocation="Debug\"
-				ObjectFile="Debug\"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -398,15 +312,14 @@
 				AdditionalOptions="/MACHINE:I386 "
 				AdditionalDependencies="msacm32.lib vfw32.lib ogg_static_d.lib theora_static_d.lib"
 				ShowProgress="0"
-				OutputFile="x:\dedicated\XR_3DA.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
+				IgnoreDefaultLibraryNames="libcmtd libcd"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
-				GenerateMapFile="TRUE"
-				MapFileName="x:\XR_3DA.map"
+				MapFileName=""
 				MapExports="FALSE"
-				SubSystem="2"/>
+				SubSystem="2"
+				FixedBaseAddress="1"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
@@ -437,8 +350,8 @@
 		</Configuration>
 		<Configuration
 			Name="Mixed_Dedicated|Win32"
-			OutputDirectory="x:\dedicated\"
-			IntermediateDirectory=".\Mixed_dedicated"
+			OutputDirectory="x:\binaries\dedicated"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -454,7 +367,7 @@
 				OmitFramePointers="FALSE"
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="3"
-				AdditionalIncludeDirectories="scripting\,.."
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEDICATED_SERVER,DEBUG,MIXED,WIN32,NDEBUG,_WINDOWS,ENGINE_BUILD"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -463,10 +376,9 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
 				AssemblerOutput="0"
-				AssemblerListingLocation="Mixed_dedicated\"
-				ObjectFile="Mixed_dedicated\"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -479,12 +391,10 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 "
 				AdditionalDependencies="msacm32.lib vfw32.lib ogg_static.lib theora_static.lib"
-				OutputFile="x:\dedicated\XR_3DA.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcmt.lib"
+				IgnoreDefaultLibraryNames="libcmt"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
 				GenerateMapFile="FALSE"
 				MapFileName=""
 				SubSystem="2"
@@ -520,8 +430,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Dedicated|Win32"
-			OutputDirectory="x:\dedicated\"
-			IntermediateDirectory=".\Release_dedicated"
+			OutputDirectory="x:\binaries\dedicated"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -537,7 +447,7 @@
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="3"
-				AdditionalIncludeDirectories="scripting\,.."
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEDICATED_SERVER,NDEBUG,WIN32,_WINDOWS,ENGINE_BUILD"
 				StringPooling="TRUE"
 				ExceptionHandling="FALSE"
@@ -546,10 +456,9 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Release_dedicated/XR_3DA.pch"
 				AssemblerOutput="4"
-				AssemblerListingLocation=".\Release_dedicated/"
-				ObjectFile=".\Release_dedicated/"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -563,13 +472,12 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 "
 				AdditionalDependencies="msacm32.lib vfw32.lib ogg_static.lib theora_static.lib"
-				OutputFile="x:\dedicated\XR_3DA.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
+				IgnoreDefaultLibraryNames="libcmt"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
 				GenerateMapFile="FALSE"
-				MapFileName="x:\dedicated\XR_3DA.map"
+				MapFileName=""
 				SubSystem="0"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -642,12 +550,6 @@
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="DebugNoExceptions|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Dedicated|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -670,6 +572,9 @@
 				RelativePath=".\stdafx.h">
 			</File>
 			<File
+				RelativePath=".\trivial_encryptor.h">
+			</File>
+			<File
 				RelativePath=".\x_ray.cpp">
 			</File>
 			<File
@@ -679,7 +584,7 @@
 				Name="Resources"
 				Filter="">
 				<File
-					RelativePath=".\icon1.ico">
+					RelativePath=".\OutOfVirtError.RES">
 				</File>
 				<File
 					RelativePath=".\resource.h">
@@ -688,7 +593,14 @@
 					RelativePath=".\resource.rc">
 				</File>
 				<File
+					RelativePath=".\stalker.ico"
+					DeploymentContent="TRUE">
+				</File>
+				<File
 					RelativePath=".\StartUp_Logo.bmp">
+				</File>
+				<File
+					RelativePath=".\ui_splash3.bmp">
 				</File>
 			</Filter>
 		</Filter>
@@ -701,9 +613,6 @@
 			<Filter
 				Name="Sound"
 				Filter="">
-				<File
-					RelativePath="Sound.h">
-				</File>
 			</Filter>
 			<Filter
 				Name="Input"
@@ -1350,6 +1259,58 @@
 						<File
 							RelativePath=".\ResourceManager_Scripting.cpp">
 						</File>
+						<Filter
+							Name="doug_lea_memory_allocator"
+							Filter="">
+							<File
+								RelativePath=".\doug_lea_memory_allocator.c">
+								<FileConfiguration
+									Name="Debug|Win32">
+									<Tool
+										Name="VCCLCompilerTool"
+										UsePrecompiledHeader="0"
+										WarningLevel="2"/>
+								</FileConfiguration>
+								<FileConfiguration
+									Name="Mixed|Win32">
+									<Tool
+										Name="VCCLCompilerTool"
+										UsePrecompiledHeader="0"
+										WarningLevel="2"/>
+								</FileConfiguration>
+								<FileConfiguration
+									Name="Release|Win32">
+									<Tool
+										Name="VCCLCompilerTool"
+										UsePrecompiledHeader="0"
+										WarningLevel="2"/>
+								</FileConfiguration>
+								<FileConfiguration
+									Name="Debug_Dedicated|Win32">
+									<Tool
+										Name="VCCLCompilerTool"
+										UsePrecompiledHeader="0"
+										WarningLevel="2"/>
+								</FileConfiguration>
+								<FileConfiguration
+									Name="Mixed_Dedicated|Win32">
+									<Tool
+										Name="VCCLCompilerTool"
+										UsePrecompiledHeader="0"
+										WarningLevel="2"/>
+								</FileConfiguration>
+								<FileConfiguration
+									Name="Release_Dedicated|Win32">
+									<Tool
+										Name="VCCLCompilerTool"
+										UsePrecompiledHeader="0"
+										WarningLevel="2"/>
+								</FileConfiguration>
+							</File>
+							<File
+								RelativePath=".\doug_lea_memory_allocator.h">
+							</File>
+						</Filter>
 					</Filter>
 					<Filter
 						Name="Resources"
@@ -1376,12 +1337,6 @@
 							</FileConfiguration>
 							<FileConfiguration
 								Name="Mixed|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									AssemblerOutput="4"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="DebugNoExceptions|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									AssemblerOutput="4"/>
@@ -1531,12 +1486,6 @@
 							AssemblerOutput="4"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							AssemblerOutput="4"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="Debug_Dedicated|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1580,9 +1529,6 @@
 				Filter="">
 				<File
 					RelativePath=".\cl_intersect.h">
-				</File>
-				<File
-					RelativePath=".\xrCDB.h">
 				</File>
 				<File
 					RelativePath=".\xrXRC.cpp">
@@ -1665,19 +1611,6 @@
 				</File>
 				<File
 					RelativePath=".\tga.h">
-				</File>
-			</Filter>
-			<Filter
-				Name="Net"
-				Filter="">
-				<File
-					RelativePath=".\client_id.h">
-				</File>
-				<File
-					RelativePath=".\NET_Compressor.h">
-				</File>
-				<File
-					RelativePath=".\NET_utils.h">
 				</File>
 			</Filter>
 			<Filter

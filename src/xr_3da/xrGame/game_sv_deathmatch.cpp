@@ -114,11 +114,12 @@ void	game_sv_Deathmatch::Create					(shared_str& options)
 	m_AnomalySetsList.clear();
 	m_AnomalySetID.clear();	
 	/////////////////////////////////////////////////////////////////////////
+	LoadAnomalySets();
 	
 }
 
 void	game_sv_Deathmatch::OnRoundStart			()
-{
+{	
 	LoadAnomalySets();
 	/////////////////////////////
 	m_delayedRoundEnd = false;
@@ -144,7 +145,7 @@ void	game_sv_Deathmatch::OnRoundStart			()
 	}
 	//////////////////////////////////////////
 	inherited::OnRoundStart	();
-
+	if (IsAnomaliesEnabled()) StartAnomalies();
 	//-------------------------------------
 	m_vFreeRPoints.clear();
 	m_dwLastRPoint = u32(-1);
@@ -154,7 +155,6 @@ void	game_sv_Deathmatch::OnRoundStart			()
 	u32		cnt = get_players_count();
 	for		(u32 it=0; it<cnt; ++it)	
 	{
-		SpawnPlayer(get_it_2_id(it), "spectator");
 		// init
 		xrClientData *l_pC = (xrClientData*)	m_server->client_Get	(it);
 		if (!l_pC || !l_pC->net_Ready || !l_pC->ps) continue;
@@ -167,6 +167,7 @@ void	game_sv_Deathmatch::OnRoundStart			()
 		//---------------------------------------
 		Money_SetStart			(get_it_2_id(it));
 		//---------------------------------------
+		SpawnPlayer(get_it_2_id(it), "spectator");
 
 		if (ps->Skip) continue;
 	}
@@ -692,7 +693,6 @@ void	game_sv_Deathmatch::assign_RP				(CSE_Abstract* E, game_PlayerState* ps_who
 	};
 	//-------------------------------------------------------------------------------
 	xr_vector<RPoint>&	rp	= rpoints[Team];
-//	float MinTeamPRointDist = rpoints_MinDist[Team];
 	//create Enemies list
 	xr_vector <u32>					pEnemies;
 	xr_vector <u32>					pFriends;
@@ -742,145 +742,26 @@ void	game_sv_Deathmatch::assign_RP				(CSE_Abstract* E, game_PlayerState* ps_who
 	m_vFreeRPoints.erase(m_vFreeRPoints.begin() + tmpPoints[NewPointID].PointID);
 
 	RPoint&	r	= rp[m_dwLastRPoint];
-//	Msg("-------------- used %d", m_dwLastRPoint);
-	//-------------------------------------------------------------------------------
-	/*
-	u8 OldTeam = pA->s_team;
-	pA->s_team = u8(Team);
-	
-	bool SpawnPointFound = false;
-	int Pass = 0;
-	int PointID = 0;
-	while (!SpawnPointFound)
-	{
-		bool UseFreezedPoints = false;
-		u16 NumRP = u16(rp.size());
-		while(ps_who->pSpawnPointsList.empty())
-		{
-			for (u16 it=0; it < NumRP; it++)
-			{
-				RPoint&				r	= rp[it];
-				if (it != ps_who->m_s16LastSRoint && (!IsPointFreezed(&r) || UseFreezedPoints))
-					ps_who->pSpawnPointsList.push_back(it);
-			}
-			if (ps_who->pSpawnPointsList.empty()) UseFreezedPoints = true;
-		};
-		R_ASSERT(!ps_who->pSpawnPointsList.empty());
-		
-		if (!pEnemies.empty())
-		{
-			xr_deque<RPointData>			pRPDist;
-			pRPDist.clear();
-
-			u32 NumRP = ps_who->pSpawnPointsList.size();
-			for (it=0; it < NumRP; it++)
-			{
-				u16 PointID = ps_who->pSpawnPointsList[it];
-				RPoint&				r	= rp[PointID];
-
-				float MinEnemyDist = 1000000.0f;
-				for (u32 p=0; p<pEnemies.size(); p++)
-				{
-					xrClientData* xrCData	=	m_server->ID_to_client(get_it_2_id(pEnemies[p]));
-					if (!xrCData || !xrCData->owner) continue;
-
-					CSE_Abstract* pOwner = xrCData->owner;
-					float Dist = r.P.distance_to_xz_sqr(pOwner->o_Position);
-
-					if (MinEnemyDist > Dist) MinEnemyDist = Dist;
-				};
-				if (MinEnemyDist>MinTeamPRointDist || Pass == 1)
-				{
-					pRPDist.push_back(RPointData(it, MinEnemyDist, IsPointFreezed(&r)));
-				}
-			};
-			if (!pRPDist.empty())
-			{
-				std::sort(pRPDist.begin(), pRPDist.end());
-				PointID = (pRPDist.back()).PointID;
-				SpawnPointFound = true;
-			}
-			else
-			{
-				R_ASSERT2(Pass==0, "Can't Find Spawn Point");
-				ps_who->pSpawnPointsList.clear();
-				Pass = 1;
-			}
-		}
-		else
-		{
-			PointID = ::Random.randI((int)ps_who->pSpawnPointsList.size());
-			SpawnPointFound = true;
-		};
-	};
-	ps_who->m_s16LastSRoint = ps_who->pSpawnPointsList[PointID];
-	
-	ps_who->pSpawnPointsList.erase(ps_who->pSpawnPointsList.begin()+PointID);
-
-	RPoint&				r	= rp[ps_who->m_s16LastSRoint];
-	SetPointFreezed(&r);
-*/
 	E->o_Position.set	(r.P);
-	E->o_Angle.set		(r.A);
-
-//	pA->s_team = OldTeam;		
-	
+	E->o_Angle.set		(r.A);	
 };
 
 bool	game_sv_Deathmatch::IsBuyableItem			(LPCSTR	ItemName)
 {
-	/*
-	for (u8 i=0; i<TeamList.size(); i++)
-	{
-		TEAM_WPN_LIST	WpnList = TeamList[i].aWeapons;
-		WeaponDataStruct* pWpnS = NULL;
-		if (GetTeamItem_ByName(&pWpnS, &WpnList, ItemName)) return true;
-	};
-	*/
 	if (m_strWeaponsData->GetItemIdx(ItemName) == u32(-1)) return false;
-	return false;
+	return true;
 };
-/*
-bool	game_sv_Deathmatch::GetBuyableItemCost		(LPCSTR	ItemName, u16* pCost)
-{
-	*pCost = 0;
-//	WeaponDataStruct* tmpWDS = NULL;
-	for (u8 i=0; i<TeamList.size(); i++)
-	{
-		TEAM_WPN_LIST	WpnList = TeamList[i].aWeapons;
-		
-		TEAM_WPN_LIST_it pWpnI	= std::find(WpnList.begin(), WpnList.end(), ItemName);
-		if (pWpnI == WpnList.end() || !((*pWpnI) == ItemName)) continue;
 
-		*pCost = (*pWpnI).Cost;
-		return true;
-	};
-	return false;
-};
-*/
 void	game_sv_Deathmatch::CheckItem		(game_PlayerState*	ps, PIItem pItem, xr_vector<s16> *pItemsDesired, xr_vector<u16> *pItemsToDelete)
 {
 	if (!pItem || !pItemsDesired || !pItemsToDelete) return;
-/*
-	WeaponDataStruct* pWpnS = NULL;
-	TEAM_WPN_LIST	WpnList = TeamList[ps->team].aWeapons;
-	if (!GetTeamItem_ByName(&pWpnS, &WpnList, *(pItem->object().cNameSect())))
-	{
-		for (u8 i=0; i<TeamList.size(); i++)
-		{
-			WpnList = TeamList[i].aWeapons;
-			if (GetTeamItem_ByName(&pWpnS, &WpnList, *(pItem->object().cNameSect()))) break;
-		};
-	};
-	if (!pWpnS) return;
-*/	
+
 	if (m_strWeaponsData->GetItemIdx(pItem->object().cNameSect()) == u32(-1)) return;
 	//-------------------------------------------
 	bool	found = false;
 	for (u32 it = 0; it < pItemsDesired->size(); it++)
 	{
 		s16 ItemID = (*pItemsDesired)[it];
-//		if ((ItemID & 0xff1f) != pWpnS->SlotItem_ID) continue;
 		if ((ItemID & 0x00ff) != u16(m_strWeaponsData->GetItemIdx(pItem->object().cNameSect()))) continue;
 
 		found = true;
@@ -935,6 +816,7 @@ void	game_sv_Deathmatch::OnPlayerBuyFinished		(ClientID id_who, NET_Packet& P)
 	{
 		s16	ItemID;
 		P.r_s16(ItemID);
+//		Msg("------------- Player wants %d", ItemID);
 		ItemsDesired.push_back(ItemID);
 	};
 
@@ -963,18 +845,6 @@ void	game_sv_Deathmatch::OnPlayerBuyFinished		(ClientID id_who, NET_Packet& P)
 		{
 			pItem = (*IRuck);			
 			if (!pItem) continue;
-			/*
-			CWeaponAmmo* pAmmo = smart_cast<CWeaponAmmo*> (pItem);
-			if (!pAmmo) 
-			{
-				CMissile* pMissile = smart_cast<CMissile*> (pItem);
-				if (!pMissile) 
-				{				
-					CEatableItemObject* pEatableItem  = smart_cast<CEatableItemObject*> (pItem);
-					if (!pEatableItem) continue;
-				}
-			}
-			*/
 			CheckItem(ps, pItem, &ItemsDesired, &ItemsToDelete);
 		};
 
@@ -1010,29 +880,6 @@ void	game_sv_Deathmatch::OnPlayerBuyFinished		(ClientID id_who, NET_Packet& P)
  	SpawnWeaponsForActor(e_Actor, ps);
 };
 
-//void	game_sv_Deathmatch::SpawnWeapon4Actor		(u32 actorId,  LPCSTR N, u8 Addons)
-//{
-//	if (!N) return;
-//	
-//	CSE_Abstract			*E	=	spawn_begin	(N);
-//	E->ID_Parent = u16(actorId);
-//
-//	E->s_flags.assign		(M_SPAWN_OBJECT_LOCAL);	// flags
-//
-//	/////////////////////////////////////////////////////////////////////////////////
-//	//если это оружие - спавним его с полным магазином
-//	CSE_ALifeItemWeapon		*pWeapon	=	smart_cast<CSE_ALifeItemWeapon*>(E);
-//	if (pWeapon)
-//	{
-//		pWeapon->a_elapsed = pWeapon->get_ammo_magsize();
-//
-//		pWeapon->m_addon_flags.assign(Addons);
-//	};
-//	/////////////////////////////////////////////////////////////////////////////////
-//
-//	spawn_end				(E,m_server->GetServer_client()->ID);
-//};
-
 void	game_sv_Deathmatch::SpawnWeaponsForActor(CSE_Abstract* pE, game_PlayerState*	ps)
 {
 	CSE_ALifeCreatureActor* pA	=	smart_cast<CSE_ALifeCreatureActor*>(pE);
@@ -1041,121 +888,20 @@ void	game_sv_Deathmatch::SpawnWeaponsForActor(CSE_Abstract* pE, game_PlayerState
 
 	if (!(ps->team < s16(TeamList.size()))) return;
 
-//	TEAM_WPN_LIST	WpnList = TeamList[ps->team].aWeapons;
-	
 	for (u32 i = 0; i<ps->pItemList.size(); i++)
 	{
 		u16 ItemID = ps->pItemList[i];
-//		WeaponDataStruct* pWpnS = NULL;
-//		if (!GetTeamItem_ByID(&pWpnS, &WpnList, ItemID)) continue;
-//		SpawnWeapon4Actor(pA->ID, pWpnS->WeaponName.c_str(), u8(ItemID & 0x00FF)>>0x05);
-		//-------------------------------------------------------------------------------
-//		Game().m_WeaponUsageStatistic->OnWeaponBought(ps, pWpnS->WeaponName.c_str());
+//		Msg("SpawnWeapon4Actor %s %d", *m_strWeaponsData->GetItemName(ItemID& 0x00FF), ItemID);
 		SpawnWeapon4Actor(pA->ID, *m_strWeaponsData->GetItemName(ItemID& 0x00FF), u8((ItemID & 0xFF00)>>0x08)/*u8(ItemID & 0x00FF)>>0x05*/);
 		//-------------------------------------------------------------------------------
 		Game().m_WeaponUsageStatistic->OnWeaponBought(ps, *m_strWeaponsData->GetItemName(ItemID& 0x00FF));
 	};
-
+#ifndef	NDEBUG
 	if (!g_sv_dm_bDMIgnore_Money_OnBuy)
+#endif
 		Player_AddMoney(ps, ps->LastBuyAcount);
 };
-/*
-void	game_sv_Deathmatch::FillWeaponData(WeaponDataStruct* NewWpnData, const shared_str& wpnSingleName, const shared_str& caSection)
-{
-	NewWpnData->WeaponName = wpnSingleName;
-	NewWpnData->Cost = pSettings->r_s16(m_sBaseWeaponCostSection, wpnSingleName.c_str());
-	if (pSettings->line_exist(wpnSingleName, "ammo_class"))
-	{
-		string1024 wpnAmmos, BaseAmmoName;
-		std::strcpy(wpnAmmos, pSettings->r_string(wpnSingleName, "ammo_class"));
-		_GetItem(wpnAmmos, 0, BaseAmmoName);
-		NewWpnData->WeaponBaseAmmo = BaseAmmoName;
-	};
 
-	string1024		tmpName;
-	strcpy			(tmpName, wpnSingleName.c_str() );
-	strcat			(tmpName, "_cost");
-
-	if (pSettings->line_exist(caSection, tmpName))
-		NewWpnData->Cost = pSettings->r_s16(caSection, tmpName);
-};
-*/
-/*
-#ifdef _new_buy_wnd
-#include "ui\UIMpTradeWnd.h"
-#endif
-void	game_sv_Deathmatch::LoadWeaponsForTeam		(const shared_str& caSection, TEAM_WPN_LIST *pTeamWpnList)
-{
-	
-	R_ASSERT(xr_strcmp(caSection,""));
-
-	pTeamWpnList->clear();
-#ifndef _new_buy_wnd
-	for (int i = 1; i < UNBUYABLESLOT; ++i)
-	{
-		// »м€ пол€
-		string16			wpnSection;	
-		sprintf(wpnSection, "slot%i", i);
-		if (!pSettings->line_exist(caSection, wpnSection)) 
-		{
-//			pTeamWpnList->push_back(wpnOneType);
-			continue;
-		}
-
-		string1024			wpnNames, wpnSingleName;
-		// „итаем данные этого пол€
-		std::strcpy(wpnNames, pSettings->r_string(caSection, wpnSection));
-		u32 count	= _GetItemCount(wpnNames);
-		// теперь каждое им€ оружи€, разделенные зап€тыми, заносим в массив
-		for (u32 j = 0; j < count; ++j)
-		{
-			_GetItem(wpnNames, j, wpnSingleName);
-			R_ASSERT3(pSettings->line_exist(m_sBaseWeaponCostSection, wpnSingleName), "No base item cost!", wpnSingleName);
-
-			WeaponDataStruct	NewWpnData;
-
-			NewWpnData.SlotItem_ID = (s16(i-1) << 8) | s16(j);
-			FillWeaponData(&NewWpnData, wpnSingleName, caSection);
-			
-			
-			pTeamWpnList->push_back(NewWpnData);
-		}
-	}
-#endif
-	//-----------------------------------------------------------
-	u32 TotalItemsCount = pSettings->line_count(m_sBaseWeaponCostSection);
-	int CountAdded = 0;
-	for (u32 l=0; l<TotalItemsCount; l++)
-	{
-		LPCSTR					N,V;
-		pSettings->r_line(m_sBaseWeaponCostSection, l, &N, &V);
-		WeaponDataStruct* pWpnS = NULL;
-		if (GetTeamItem_ByName(&pWpnS, pTeamWpnList, N)) continue;
-
-		WeaponDataStruct	NewWpnData;
-		NewWpnData.SlotItem_ID = (s16(0) << 8) | s16(CountAdded++);
-		FillWeaponData(&NewWpnData, N, caSection);	
-		pTeamWpnList->push_back(NewWpnData);
-	}
-	//-----------------------------------------------------------
-	u32 j=0;
-	CInifile::Sect &sect = pSettings->r_section(m_sBaseWeaponCostSection);
-	for (CInifile::SectIt it = sect.begin(); it != sect.end(); it++)
-	{
-		string1024	wpnSingleName;
-		std::strcpy(wpnSingleName, (*it).first.c_str());
-		WeaponDataStruct* pWpnS = NULL;
-		if (GetTeamItem_ByName(&pWpnS, pTeamWpnList, wpnSingleName)) continue;
-				
-		WeaponDataStruct	NewWpnData;
-		NewWpnData.SlotItem_ID = ((s16(UNBUYABLESLOT-1)) << 0x08) | s16(j++);
-		NewWpnData.WeaponName = wpnSingleName;
-		NewWpnData.Cost = pSettings->r_s16(m_sBaseWeaponCostSection, wpnSingleName);
-
-		pTeamWpnList->push_back(NewWpnData);
-	};
-};
-*/
 void	game_sv_Deathmatch::LoadSkinsForTeam		(const shared_str& caSection, TEAM_SKINS_NAMES* pTeamSkins)
 {
 	string256			SkinSingleName;
@@ -1179,37 +925,6 @@ void	game_sv_Deathmatch::LoadSkinsForTeam		(const shared_str& caSection, TEAM_SK
 		pTeamSkins->push_back(SkinSingleName);
 	};
 };
-
-/*
-void	game_sv_Deathmatch::LoadDefItemsForTeam	(const shared_str& caSection, TEAM_WPN_LIST *pWpnList, DEF_ITEMS_LIST* pDefItems)
-{
-	string256			ItemName;
-	string4096			DefItems;
-
-	// ѕоле strSectionName должно содержать им€ секции
-	R_ASSERT(xr_strcmp(caSection,""));
-
-	pDefItems->clear();
-
-	// »м€ пол€
-	if (!pSettings->line_exist(caSection, "default_items")) return;
-
-	// „итаем данные этого пол€
-	std::strcpy(DefItems, pSettings->r_string(caSection, "default_items"));
-	u32 count	= _GetItemCount(DefItems);
-	// теперь дл€ каждое им€ оружи€, разделенные зап€тыми, заносим в массив
-	for (u32 i = 0; i < count; ++i)
-	{
-		_GetItem(DefItems, i, ItemName);
-//		TEAM_WPN_LIST_it pWpnI	= std::find(pWpnList->begin(), pWpnList->end(), ItemName);
-//		if (pWpnI == pWpnList->end() || !((*pWpnI) == ItemName)) continue;
-		WeaponDataStruct* pWpnS = NULL;
-		if (!GetTeamItem_ByName(&pWpnS, pWpnList, ItemName)) continue;
-		
-		pDefItems->push_back(pWpnS->SlotItem_ID);
-	};
-};
-*/
 
 void	game_sv_Deathmatch::LoadDefItemsForTeam	(const shared_str& caSection, DEF_ITEMS_LIST* pDefItems)
 {
@@ -1334,7 +1049,9 @@ void	game_sv_Deathmatch::LoadTeams			()
 		R_ASSERT2(0, "No section for base weapon cost for this type of the Game!");
 		return;
 	};
+	
 	m_strWeaponsData->Load(m_sBaseWeaponCostSection);
+	
 
 	LoadTeamData("deathmatch_team0");
 };
@@ -1651,17 +1368,6 @@ void	game_sv_Deathmatch::StartAnomalies			(int AnomalySet)
 	if (m_dwLastAnomalySetID < m_AnomalySetsList.size())
 	{
 		Send_EventPack_for_AnomalySet(m_dwLastAnomalySetID, CCustomZone::eZoneStateDisabled); //Disable
-		/*
-		ANOMALIES* OldAnomalies = &(m_AnomalySetsList[m_dwLastAnomalySetID]);
-		for (u32 i=0; i<OldAnomalies->size(); i++)
-		{
-			const char *pName = ((*OldAnomalies)[i]).c_str();
-			CCustomZone* pZone = smart_cast<CCustomZone*> (Level().Objects.FindObjectByName(pName));
-			if (!pZone) continue;
-//			if (pZone->IsEnabled())
-				pZone->ZoneDisable();
-		};
-		*/
 	};
 	///////////////////////////////////////////////////
 	if (AnomalySet != -1 && AnomalySet < (int)m_AnomalySetsList.size())
@@ -1672,19 +1378,8 @@ void	game_sv_Deathmatch::StartAnomalies			(int AnomalySet)
 	else
 		m_dwLastAnomalySetID = NewAnomalySetID;
 
-	if (g_sv_dm_bAnomaliesEnabled)
+	if (IsAnomaliesEnabled())
 		Send_EventPack_for_AnomalySet(m_dwLastAnomalySetID, CCustomZone::eZoneStateIdle); //Idle
-	/*
-	ANOMALIES* NewAnomalies = &(m_AnomalySetsList[m_dwLastAnomalySetID]);
-	for (u32 i=0; i<NewAnomalies->size(); i++)
-	{
-		const char *pName = ((*NewAnomalies)[i]).c_str();
-		CCustomZone* pZone = smart_cast<CCustomZone*> (Level().Objects.FindObjectByName(pName));
-		if (!pZone) continue;
-//		if (!pZone->IsEnabled())
-			pZone->ZoneEnable();
-	};
-	*/
 	m_dwLastAnomalyStartTime = Level().timeServer();
 #ifdef DEBUG
 	Msg("Anomaly Set %d Activated", m_dwLastAnomalySetID);
@@ -1888,39 +1583,6 @@ BOOL	game_sv_Deathmatch::OnDetach		(u16 eid_who, u16 eid_what)
 			EventPack.w(&PacketReject.B.data, PacketReject.B.count);
 			EventPack.w_u8(u8(PacketTake.B.count));
 			EventPack.w(&PacketTake.B.data, PacketTake.B.count);
-
-			/*
-			NET_Packet	P;
-			u32			time		= Device.dwTimeGlobal;
-			//remove item from actor
-			xr_vector<u16>& C	= e_parent->children;
-			xr_vector<u16>::iterator c	= std::find	(C.begin(),C.end(),ItemID);
-			VERIFY3				(C.end()!=c,e_entity->name_replace(),e_parent->name_replace());
-			C.erase				(c);
-			//---------------------------------------------
-			P.w_begin				(M_EVENT);
-			P.w_u32					(time);
-			P.w_u16					(GE_OWNERSHIP_REJECT);
-			P.w_u16					(e_parent->ID);
-			P.w_u16					(ItemID);
-			//---------------------------------------------
-			EventPack.w_u8(u8(P.B.count));
-			EventPack.w(&P.B.data, P.B.count);
-			//---------------------------------------------
-			//move item to rukzak
-			e_item->ID_Parent = e_entity->ID;
-			e_entity->children.push_back(ItemID);
-			//---------------------------------------------
-			P.w_begin				(M_EVENT);
-			P.w_u32					(time);
-			P.w_u16					(GE_OWNERSHIP_TAKE);
-			P.w_u16					(e_entity->ID);
-			P.w_u16					(ItemID);
-			//---------------------------------------------
-			EventPack.w_u8(u8(P.B.count));
-			EventPack.w(&P.B.data, P.B.count);
-			//---------------------------------------------
-			*/			
 		}
 		if (EventPack.B.count > 2)	u_EventSend(EventPack);
 	};
@@ -1943,7 +1605,7 @@ void game_sv_Deathmatch::OnPlayerConnect	(ClientID id_who)
 	ps_who->setFlag(GAME_PLAYER_FLAG_SPECTATOR);
 	
 	ps_who->Skip = false;
-	SpawnPlayer(id_who, "spectator");
+	
 
 	if (g_pGamePersistent->bDedicatedServer && (xrCData == m_server->GetServerClient()) )
 	{
@@ -1958,6 +1620,7 @@ void game_sv_Deathmatch::OnPlayerConnect	(ClientID id_who)
 void	game_sv_Deathmatch::OnPlayerConnectFinished	(ClientID id_who)
 {
 	xrClientData* xrCData	=	m_server->ID_to_client(id_who);
+	SpawnPlayer(id_who, "spectator");
 	// Send Message About Client Connected
 	if (xrCData)
 	{
@@ -2081,7 +1744,7 @@ bool	game_sv_Deathmatch::HasChampion()
 
 bool	game_sv_Deathmatch::check_for_Anomalies()
 {
-	if (!g_sv_dm_bAnomaliesEnabled) return false;
+	if (!IsAnomaliesEnabled()) return false;
 
 	if (m_dwLastAnomalySetID < 1000)
 	{
@@ -2217,6 +1880,7 @@ void	game_sv_Deathmatch::Send_Anomaly_States		(ClientID id_who)
 void	game_sv_Deathmatch::Check_ForClearRun		(game_PlayerState* ps)
 {
 	if (!ps) return;
+	if (m_bInWarmUp) return;
 	if (ps->LastBuyAcount != 0) return;
 	TeamStruct* pTeam		= GetTeamData(u8(ps->team));
 	if (!pTeam) return;	
@@ -2236,7 +1900,7 @@ void	game_sv_Deathmatch::ReadOptions				(shared_str &options)
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	g_sv_dm_bDamageBlockIndicators = (get_option_i(*options,"dmbi",(g_sv_dm_bDamageBlockIndicators ? 1 : 0)) != 0);
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	g_sv_dm_bAnomaliesEnabled = (get_option_i(*options,"ans",(g_sv_dm_bAnomaliesEnabled ? 1 : 0)) != 0);
+	g_sv_dm_bAnomaliesEnabled = (get_option_i(*options,"ans",(IsAnomaliesEnabled() ? 1 : 0)) != 0);
 	g_sv_dm_dwAnomalySetLengthTime = get_option_i(*options, "anslen", g_sv_dm_dwAnomalySetLengthTime); //in (min)
 	//-----------------------------------------------------------------------
 	m_bSpectatorMode = false;

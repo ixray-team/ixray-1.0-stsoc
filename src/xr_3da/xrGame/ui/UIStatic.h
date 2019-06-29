@@ -44,7 +44,6 @@ public:
 	// IUISingleTextureOwner--------------------------------------------------------------------------------
 	virtual void		CreateShader				(const char* tex, const char* sh = "hud\\default");
 	virtual ref_shader& GetShader					();
-			ref_geom	GetGeom						();
 	virtual void		SetTextureColor				(u32 color);
 	virtual u32			GetTextureColor				() const;
 	virtual void		SetOriginalRect				(const Frect& r)			{m_UIStaticItem.SetOriginalRect(r);}

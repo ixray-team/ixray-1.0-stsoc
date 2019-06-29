@@ -4,15 +4,37 @@
 
 #include "xrGameSpy_ServerBrowser.h"
 
+#include "gamespy/qr2/qr2regkeys.h"
+
+#define GAMETYPE_NAME_KEY						100
+#define	DEDICATED_KEY							101
+
+static unsigned char Fields_Of_Interest[] = 
+{ 
+		HOSTNAME_KEY, 
+		HOSTPORT_KEY,
+		NUMPLAYERS_KEY, 
+		MAXPLAYERS_KEY, 
+		MAPNAME_KEY, 
+		GAMETYPE_KEY, 
+		GAMEVER_KEY,
+		PASSWORD_KEY,
+		DEDICATED_KEY,
+		GAMETYPE_NAME_KEY
+};
 
 XRGAMESPY_API int xrGS_GetQueryVersion ()
 {
 	return QVERSION_QR2;
 }
 
-XRGAMESPY_API ServerBrowser xrGS_ServerBrowserNew(const gsi_char *queryForGamename, const gsi_char *queryFromGamename, const gsi_char *queryFromKey, int queryFromVersion, int maxConcUpdates, int queryVersion, SBBool bLAN_Only, ServerBrowserCallback callback, void *instance)
+//XRGAMESPY_API ServerBrowser xrGS_ServerBrowserNew(const gsi_char *queryForGamename, const gsi_char *queryFromGamename, const gsi_char *queryFromKey, int queryFromVersion, int maxConcUpdates, int queryVersion, SBBool bLAN_Only, ServerBrowserCallback callback, void *instance)
+XRGAMESPY_API ServerBrowser xrGS_ServerBrowserNew(SBBool bLAN_Only, ServerBrowserCallback callback, void *instance)
 {
-	return ServerBrowserNew(queryForGamename, queryFromGamename, queryFromKey, queryFromVersion, maxConcUpdates, queryVersion, bLAN_Only, callback, instance);
+//	return ServerBrowserNew(queryForGamename, queryFromGamename, queryFromKey, queryFromVersion, maxConcUpdates, queryVersion, bLAN_Only, callback, instance);
+	char SecretKey[16];
+	FillSecretKey(SecretKey);
+	return ServerBrowserNew(GAMESPY_GAMENAME, GAMESPY_GAMENAME, SecretKey, 0, GAMESPY_BROWSER_MAX_UPDATES, xrGS_GetQueryVersion(), bLAN_Only, callback, instance);
 }
 
 XRGAMESPY_API void xrGS_ServerBrowserFree (ServerBrowser sb)
@@ -40,14 +62,23 @@ XRGAMESPY_API void xrGS_ServerBrowserHalt(ServerBrowser sb)
 	ServerBrowserHalt(sb);
 };
 
-XRGAMESPY_API SBError xrGS_ServerBrowserUpdate (ServerBrowser sb, SBBool async, SBBool disconnectOnComplete, const unsigned char *basicFields, int numBasicFields, const gsi_char *serverFilter)
+//XRGAMESPY_API SBError xrGS_ServerBrowserUpdate (ServerBrowser sb, SBBool async, SBBool disconnectOnComplete, const unsigned char *basicFields, int numBasicFields, const gsi_char *serverFilter)
+XRGAMESPY_API SBError xrGS_ServerBrowserUpdate (ServerBrowser sb, SBBool async, SBBool disconnectOnComplete, const gsi_char *serverFilter)
 {
-	return ServerBrowserUpdate(sb, async, disconnectOnComplete, basicFields, numBasicFields, serverFilter);
+	
+	int numBasicFields = sizeof(Fields_Of_Interest)/sizeof(Fields_Of_Interest[0]);
+	return ServerBrowserUpdate(sb, async, disconnectOnComplete, Fields_Of_Interest, numBasicFields, serverFilter);
 };
 
-XRGAMESPY_API SBError xrGS_ServerBrowserLANUpdate(ServerBrowser sb, SBBool async, unsigned short startSearchPort, unsigned short endSearchPort)
+XRGAMESPY_API void xrGS_ServerBrowserSort(ServerBrowser sb, SBBool ascending, const char *sortkey, SBCompareMode comparemode)
 {
-	return ServerBrowserLANUpdate(sb, async,  startSearchPort,  endSearchPort);
+	ServerBrowserSort(sb, ascending, sortkey, comparemode);
+};
+
+//XRGAMESPY_API SBError xrGS_ServerBrowserLANUpdate(ServerBrowser sb, SBBool async, unsigned short startSearchPort, unsigned short endSearchPort)
+XRGAMESPY_API SBError xrGS_ServerBrowserLANUpdate(ServerBrowser sb, SBBool async)
+{
+	return ServerBrowserLANUpdate(sb, async,  START_PORT_LAN,  END_PORT_LAN);
 }
 
 XRGAMESPY_API int xrGS_ServerBrowserCount (ServerBrowser sb)
@@ -136,4 +167,24 @@ XRGAMESPY_API void xrGS_ServerBrowserRemoveIP(ServerBrowser sb, const gsi_char *
 XRGAMESPY_API void xrGS_ServerBrowserRemoveServer(ServerBrowser sb, SBServer server)
 {
 	ServerBrowserRemoveServer(sb, server);
+}
+
+XRGAMESPY_API SBBool  xrGS_SBServerGetConnectionInfo(ServerBrowser sb, SBServer server, gsi_u16 PortToConnectTo, char *ipstring)
+{
+	return SBServerGetConnectionInfo( sb, server, PortToConnectTo, ipstring);
+};
+
+XRGAMESPY_API SBBool xrGS_SBServerDirectConnect (SBServer server)
+{
+	return SBServerDirectConnect (server);
+};
+
+XRGAMESPY_API SBBool xrGS_SBServerHasFullKeys (SBServer server)
+{
+	return SBServerHasFullKeys(server);
+}
+
+XRGAMESPY_API const gsi_char* xrGS_ServerBrowserErrorDesc(ServerBrowser sb, SBError error)
+{
+	return ServerBrowserErrorDesc(sb, error);
 }

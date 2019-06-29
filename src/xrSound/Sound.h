@@ -289,7 +289,7 @@ public:
 	virtual void					clone					( ref_sound& S, const ref_sound& from,		esound_type sound_type, int		game_type)	= 0;
 	virtual void					destroy					( ref_sound& S)																			= 0;
 	virtual void					stop_emitters			( )																						= 0;	
-	virtual void					pause_emitters			( bool val )																			= 0;
+	virtual int						pause_emitters			( bool val )																			= 0;
 
 	virtual void					play					( ref_sound& S, CObject* O,						u32 flags=0, float delay=0.f)			= 0;
 	virtual void					play_at_pos				( ref_sound& S, CObject* O,	const Fvector &pos,	u32 flags=0, float delay=0.f)			= 0;

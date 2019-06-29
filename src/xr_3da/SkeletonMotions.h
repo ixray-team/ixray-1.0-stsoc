@@ -155,6 +155,7 @@ class ENGINE_API		motions_container
 public:
 						motions_container	();
 						~motions_container	();
+	bool				has					(shared_str key);
 	motions_value*		dock				(shared_str key, IReader *data, vecBones* bones);
 	void				dump				();
 	void				clean				(bool force_destroy);

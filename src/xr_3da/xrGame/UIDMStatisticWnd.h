@@ -10,10 +10,8 @@ class CUIDMStatisticWnd:public CUIStatsWnd
 	typedef CUIStatsWnd inherited;
 
 protected:
-//	DEFINE_VECTOR	(LPVOID,ItemVec,ItemIt);
-//	ItemVec			items;
 	bool					SetItemData		(Weapon_Statistic* pWS, CUIStatsListItem *pItem);
-	virtual u32				GetItemCount	()	{return UIStatsList.GetSize();};
+	virtual u32				GetItemCount	()	{return UIStatsList.GetItemsCount();};
 	virtual	CUIStatsListItem*		GetItem			(int index)
 	{
 		return (smart_cast<CUIStatsListItem*> (UIStatsList.GetItem(index)));

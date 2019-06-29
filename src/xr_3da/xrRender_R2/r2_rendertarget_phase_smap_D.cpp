@@ -30,6 +30,7 @@ void	CRenderTarget::phase_smap_direct		(light* L, u32 sub_phase)
 		else							RCache.set_CullMode			( CULL_CCW	);	// far, front-faces
 	}
 	if (RImplementation.o.HW_smap)		RCache.set_ColorWriteEnable	( FALSE		);
+	else								RCache.set_ColorWriteEnable	( );
 }
 
 void	CRenderTarget::phase_smap_direct_tsh	(light* L, u32 sub_phase)

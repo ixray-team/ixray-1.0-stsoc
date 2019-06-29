@@ -18,7 +18,9 @@ class CPHCollideValidator
 		cbNCClassCharacter	=	1<<5,
 		cbClassSmall		=	1<<6,
 		cbNCClassSmall		=	1<<7,
-		cbNone				=	1<<8
+		cbClassRagDoll		=	1<<8,
+		cbNCClassRagDoll	=	1<<9,
+		cbNone				=	1<<10
 	};
 public:
 static		CGID			RegisterGroup				()														;
@@ -35,6 +37,8 @@ static		void			SetNonDynamicObject			(CPHObject& obj)										;
 static		void			SetDynamicNotCollide		(CPHObject& obj)										;
 static		void			SetCharacterClass			(CPHObject& obj)										;
 static		void			SetCharacterClassNotCollide	(CPHObject& obj)										;
+static		void			SetRagDollClass				(CPHObject& obj)										;
+static		void			SetRagDollClassNotCollide	(CPHObject& obj)										;
 static		void			SetClassSmall				(CPHObject& obj)										;
 static		void			SetClassSmallNotCollide		(CPHObject& obj)										;
 static		void			Init						()														;
@@ -46,7 +50,9 @@ static	IC	bool			DoCollide					(const CPHObject& obj1,const CPHObject& obj2)
 		case 0:					return DoCollideNonMatched	(obj1,obj2)			;break;
 		default: NODEFAULT;
 	}
+#ifdef DEBUG
 	return false;
+#endif // DEBUG
 }
 
 static	IC bool				DoCollideStatic				(const CPHObject& obj)

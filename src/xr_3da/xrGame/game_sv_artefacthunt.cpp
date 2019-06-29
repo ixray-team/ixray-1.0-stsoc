@@ -21,12 +21,18 @@ extern	BOOL	g_sv_dm_bAnomaliesEnabled		;
 u32		g_sv_ah_dwArtefactRespawnDelta	= 30;
 int		g_sv_ah_dwArtefactsNum			= 10;
 u32		g_sv_ah_dwArtefactStayTime		= 3;
-int		g_sv_ah_iReinforcementTime		= 0;		//0 - Immediate, -1 - after artefact spawn , other - reinforcement
+int		g_sv_ah_iReinforcementTime		= 20;		//0 - Immediate, -1 - after artefact spawn , other - reinforcement
+BOOL	g_sv_ah_bBearerCantSprint		= TRUE;
+BOOL	g_sv_ah_bShildedBases			= TRUE;
+BOOL	g_sv_ah_bAfReturnPlayersToBases = TRUE;
 //-------------------------------------------------------
 int		game_sv_ArtefactHunt::Get_ArtefactsCount		() {return g_sv_ah_dwArtefactsNum; };
 u32		game_sv_ArtefactHunt::Get_ArtefactsRespawnDelta	() {return g_sv_ah_dwArtefactRespawnDelta; };
 u32		game_sv_ArtefactHunt::Get_ArtefactsStayTime		() {return g_sv_ah_dwArtefactStayTime; };
 int		game_sv_ArtefactHunt::Get_ReinforcementTime		() {return g_sv_ah_iReinforcementTime; };
+BOOL	game_sv_ArtefactHunt::Get_BearerCantSprint		() { return g_sv_ah_bBearerCantSprint; }
+BOOL	game_sv_ArtefactHunt::Get_ShieldedBases			() { return g_sv_ah_bShildedBases; };
+BOOL	game_sv_ArtefactHunt::Get_ReturnPlayers			() {return g_sv_ah_bAfReturnPlayersToBases; };
 //-------------------------------------------------------
 void	game_sv_ArtefactHunt::Create					(shared_str& options)
 {
@@ -654,11 +660,9 @@ void		game_sv_ArtefactHunt::OnObjectLeaveTeamBase	(u16 id, u16 zone_team)
 	};
 };
 
-BOOL	g_bAfReturnPlayersToBases = FALSE;
-BOOL	game_sv_ArtefactHunt::Get_ReturnPlayers() {return g_bAfReturnPlayersToBases; };
 void		game_sv_ArtefactHunt::OnArtefactOnBase		(ClientID id_who)
 {
-	if (Get_ReinforcementTime() == -1 || g_bAfReturnPlayersToBases) 
+	if (Get_ReinforcementTime() == -1 || Get_ReturnPlayers()) 
 	{
 		MoveAllAlivePlayers();
 	};
@@ -891,6 +895,7 @@ void	game_sv_ArtefactHunt::OnCreate				(u16 id_who)
 
 void	game_sv_ArtefactHunt::Assign_Artefact_RPoint	(CSE_Abstract* E)
 {
+	R_ASSERT(E);
 	xr_vector<RPoint>&	rp	= Artefact_rpoints;
 	xr_vector<u8>&	rpID	= ArtefactsRPoints_ID;
 	xr_deque<RPointData>	pRPDist;
@@ -924,19 +929,14 @@ void				game_sv_ArtefactHunt::OnTimelimitExceed		()
 	OnDelayedRoundEnd("Team Final Score");
 };
 
-BOOL	g_bBearerCantSprint = TRUE;
-BOOL	game_sv_ArtefactHunt::Get_BearerCantSprint		()
-{
-	return g_bBearerCantSprint;
-}
 void				game_sv_ArtefactHunt::net_Export_State		(NET_Packet& P, ClientID id_to)
 {
 	inherited::net_Export_State(P, id_to);
-	P.w_u8			(u8(g_sv_ah_dwArtefactsNum));
+	P.w_u8			(u8(Get_ArtefactsCount()));
 	P.w_u16			(artefactBearerID);
 	P.w_u8			(teamInPossession);
 	P.w_u16			(m_dwArtefactID);
-	P.w_u8			((u8)g_bBearerCantSprint);
+	P.w_u8			((u8)Get_BearerCantSprint());
 
 	if ( Get_ReinforcementTime() > 0)
 	{
@@ -1207,8 +1207,8 @@ extern INT g_sv_Skip_Winner_Waiting;
 void	game_sv_ArtefactHunt::CheckForTeamWin()
 {
 	u8 WinTeam = 0;
-	if (GetTeamScore(0) >= g_sv_ah_dwArtefactsNum) WinTeam = 1;
-	else if (GetTeamScore(1) >= g_sv_ah_dwArtefactsNum) WinTeam = 2;
+	if (GetTeamScore(0) >= Get_ArtefactsCount()) WinTeam = 1;
+	else if (GetTeamScore(1) >= Get_ArtefactsCount()) WinTeam = 2;
 	if (!WinTeam) 
 	{
 		if (!GetTimeLimit()) return;
@@ -1241,12 +1241,10 @@ void	game_sv_ArtefactHunt::CheckForTeamWin()
 	OnDelayedRoundEnd("Team Final Score");
 }
 
-BOOL	g_bShildedBases = TRUE;
-BOOL	game_sv_ArtefactHunt::Get_ShieldedBases()	{ return g_bShildedBases; };
 void	game_sv_ArtefactHunt::check_Player_for_Invincibility	(game_PlayerState* ps)
 {
 	if (!ps) return;
-	if (g_bShildedBases && ps->testFlag(GAME_PLAYER_FLAG_ONBASE))
+	if (Get_ShieldedBases() && ps->testFlag(GAME_PLAYER_FLAG_ONBASE))
 		ps->setFlag(GAME_PLAYER_FLAG_INVINCIBLE);
 	else
 		inherited::check_Player_for_Invincibility(ps);
@@ -1349,7 +1347,7 @@ bool	game_sv_ArtefactHunt::Player_Check_Rank		(game_PlayerState* ps)
 
 void	game_sv_ArtefactHunt::OnPlayerHitPlayer_Case	(game_PlayerState* ps_hitter, game_PlayerState* ps_hitted, SHit* pHitS)
 {
-	if (ps_hitted->testFlag(GAME_PLAYER_FLAG_ONBASE) && g_bShildedBases)
+	if (ps_hitted->testFlag(GAME_PLAYER_FLAG_ONBASE) && Get_ShieldedBases())
 	{
 		pHitS->power = 0;
 		pHitS->impulse = 0;

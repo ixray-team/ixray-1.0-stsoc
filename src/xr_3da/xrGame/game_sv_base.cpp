@@ -382,6 +382,18 @@ void game_sv_GameState::Create					(shared_str &options)
 //	pTmp->Execute				(Console->ConfigFile);
 //	xr_delete					(pTmp);
 	//---------------------------------------------------------------------
+	LPCSTR		svcfg_ltx_name = "-svcfg ";
+	if (strstr(Core.Params, svcfg_ltx_name))
+	{
+		string_path svcfg_name = "";
+		int		sz = xr_strlen(svcfg_ltx_name);
+		sscanf		(strstr(Core.Params,svcfg_ltx_name)+sz,"%[^ ] ",svcfg_name);
+		if (FS.exist(svcfg_name))
+		{
+			Console->ExecuteScript(svcfg_name);
+		}
+	};
+	//---------------------------------------------------------------------
 	ReadOptions(options);	
 }
 
@@ -535,8 +547,8 @@ void game_sv_GameState::Update		()
 
 game_sv_GameState::game_sv_GameState()
 {
+	VERIFY(g_pGameLevel);
 	m_server					= Level().Server;
-
 	m_event_queue = xr_new<GameEventQueue>();
 
 	m_bMapRotation = false;
@@ -613,7 +625,7 @@ void game_sv_GameState::OnEvent (NET_Packet &tNetPacket, u16 type, u32 time, Cli
 		{
 			ClientID ID;
 			tNetPacket.r_clientID(ID);
-			string64 PlayerName;
+			string1024 PlayerName;
 			tNetPacket.r_stringZ(PlayerName);
 			u16		GameID = tNetPacket.r_u16();
 			OnPlayerDisconnect(ID, get_option_s(PlayerName,"name",PlayerName), GameID);

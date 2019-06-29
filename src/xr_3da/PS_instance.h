@@ -18,11 +18,11 @@ protected:
 protected:
 	virtual					~CPS_Instance		();
 
-	void					PSI_internal_delete	();
+	virtual void			PSI_internal_delete	();
 public:
 							CPS_Instance		();
 
-	void					PSI_destroy			();
+	virtual void			PSI_destroy			();
 	IC BOOL					PSI_alive			()						{	return m_iLifeTime>0;				}
 	IC BOOL					PSI_IsAutomatic		()						{	return m_bAutoRemove;				}
 	IC void					PSI_SetLifeTime		(float life_time)		{	m_iLifeTime=iFloor(life_time*1000);	}

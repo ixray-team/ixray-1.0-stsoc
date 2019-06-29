@@ -22,6 +22,7 @@
 #define IDD_PSWDLG                      158
 #define IDD_WEATHEROPTIONS              159
 #define IDD_SPECTATOROPTS               160
+#define IDD_PORTSDLG                    161
 #define IDC_TAB1                        1000
 #define IDC_CATCHINPUT                  1001
 #define IDC_CATCHINPUT2                 1002
@@ -89,6 +90,9 @@
 #define IDC_LAN                         1048
 #define IDC_FRIENDLYINDICATORS2         1048
 #define IDC_FRIENDLYNAMES               1048
+#define IDC_SERVERPORT                  1049
+#define IDC_GAMESPYPORT                 1050
+#define IDC_CLIENTPORT                  1051
 #define IDC_FEMPTY                      1061
 #define IDC_FFULL                       1062
 #define IDC_CDK1                        1062
@@ -96,6 +100,7 @@
 #define IDC_CDKEYBTN                    1063
 #define IDC_FNOPASSWORD                 1064
 #define IDC_EDIT1                       1064
+#define IDC_LOGSPATH                    1064
 #define IDC_FLISTEN                     1065
 #define IDC_FNOPUNKBUSTER               1066
 #define IDC_CDK2                        1066
@@ -111,14 +116,19 @@
 #define IDC_STARTWEATHER                1075
 #define IDC_WEATHERSPEED                1076
 #define IDC_SP_FFM                      1077
+#define IDC_PORTS                       1079
+#define IDC_SV_PORTBUTTON               1080
+#define IDC_CLPORTBUTTON                1081
+#define IDC_CL_PORTBUTTON               1081
+#define IDC_GS_PORTBUTTON               1082
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        161
+#define _APS_NEXT_RESOURCE_VALUE        162
 #define _APS_NEXT_COMMAND_VALUE         32774
-#define _APS_NEXT_CONTROL_VALUE         1078
+#define _APS_NEXT_CONTROL_VALUE         1081
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

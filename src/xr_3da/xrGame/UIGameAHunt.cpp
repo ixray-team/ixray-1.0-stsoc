@@ -12,6 +12,9 @@
 #include "ui/UIFrags2.h"
 #include "ui/UIProgressShape.h"
 #include "ui/UIXmlInit.h"
+#include "ui/UIMessageBoxEx.h"
+
+#include "object_broker.h"
 
 #define MSGS_OFFS 510
 
@@ -37,7 +40,8 @@ CUIGameAHunt::CUIGameAHunt()
     m_pReinforcementInidcator = xr_new<CUIProgressShape>();
 
 	CUIXmlInit::InitProgressShape	(uiXml, "reinforcement", 0, m_pReinforcementInidcator);			
-
+	//-------------------------------------------------------------
+	m_pBuySpawnMsgBox	= NULL;
 }
 //--------------------------------------------------------------------
 void CUIGameAHunt::SetClGame (game_cl_GameState* g)
@@ -45,6 +49,14 @@ void CUIGameAHunt::SetClGame (game_cl_GameState* g)
 	inherited::SetClGame(g);
 	m_game = smart_cast<game_cl_ArtefactHunt*>(g);
 	R_ASSERT(m_game);
+	//-----------------------------------------------------------------------
+	delete_data(m_pBuySpawnMsgBox);
+	m_pBuySpawnMsgBox	= xr_new<CUIMessageBoxEx>();	
+	m_pBuySpawnMsgBox->Init("message_box_buy_spawn");
+	m_pBuySpawnMsgBox->SetText("");
+
+	game_cl_mp* clmp_game = smart_cast<game_cl_mp*>(g);
+	m_pBuySpawnMsgBox->AddCallback("msg_box", MESSAGE_BOX_YES_CLICKED, CUIWndCallback::void_function(clmp_game, &game_cl_mp::OnBuySpawn));
 }
 
 void CUIGameAHunt::Init	()
@@ -105,6 +117,7 @@ void CUIGameAHunt::Init	()
 CUIGameAHunt::~CUIGameAHunt()
 {
 	xr_delete(m_pReinforcementInidcator);
+	delete_data(m_pBuySpawnMsgBox);
 }
 
 
@@ -128,4 +141,10 @@ void CUIGameAHunt::OnFrame()
 {
 	inherited::OnFrame();
 	m_pReinforcementInidcator->Update();
+}
+
+void CUIGameAHunt::reset_ui()
+{
+	inherited::reset_ui();
+	m_pBuySpawnMsgBox->Reset();
 }

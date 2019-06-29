@@ -19,7 +19,7 @@ public:
 
 void	CResourceManager::OnDeviceDestroy(BOOL )
 {
-	if (Device.bReady)	return;
+	if (Device.b_is_Ready)	return;
 	xr_delete			(m_description);
 
 	// Matrices
@@ -62,7 +62,7 @@ void	CResourceManager::OnDeviceDestroy(BOOL )
 
 void	CResourceManager::OnDeviceCreate	(IReader* F)
 {
-	if (!Device.bReady) return;
+	if (!Device.b_is_Ready) return;
 
 	string256	name;
 
@@ -165,6 +165,7 @@ void	CResourceManager::OnDeviceCreate	(LPCSTR shName)
 	string32	ID			= "shENGINE";
 	string32	id;
 	IReader*	F			= FS.r_open(shName);
+	R_ASSERT2	(F,shName);
 	F->r		(&id,8);
 	if (0==strncmp(id,ID,8))
 	{
@@ -172,4 +173,30 @@ void	CResourceManager::OnDeviceCreate	(LPCSTR shName)
 	}
 	OnDeviceCreate			(F);
 	FS.r_close				(F);
+}
+
+void CResourceManager::StoreNecessaryTextures()
+{
+	if (!m_necessary.empty())
+		return;
+	
+	map_TextureIt it			= m_textures.begin();
+	map_TextureIt it_e			= m_textures.end();
+
+	for (;it!=it_e;++it)
+	{
+		LPCSTR texture_name		= it->first;
+		if(strstr(texture_name,"\\levels\\"))	continue;
+		if(!strchr(texture_name,'\\'))			continue;
+
+		ref_texture				T;
+		T.create				(texture_name);
+		m_necessary.push_back	(T);
+		
+	}
+}
+
+void CResourceManager::DestroyNecessaryTextures()
+{
+	m_necessary.clear			();
 }

@@ -36,9 +36,13 @@ extern void dump_list_wnd							();
 extern void dump_list_lines							();
 extern void dump_list_sublines						();
 extern void clean_wnd_rects							();
+extern void dump_list_xmls							();
+extern void CreateUIGeom							();
+extern void DestroyUIGeom							();
 
 void init_game_globals()
 {
+	CreateUIGeom									();
 	CInfoPortion::InitInternal						();
 	CEncyclopediaArticle::InitInternal				();
 	CPhraseDialog::InitInternal						();
@@ -48,13 +52,17 @@ void init_game_globals()
 	CHARACTER_RANK::InitInternal					();
 	CHARACTER_REPUTATION::InitInternal				();
 	MONSTER_COMMUNITY::InitInternal					();
+	InventoryUtilities::CreateShaders				();
 }
+
+extern CUIXml*	g_gameTaskXml;
+extern CUIXml*	g_uiSpotXml;
+
+extern void destroy_lua_wpn_params	();
 
 void clean_game_globals()
 {
-	// xml parser options
-	XML_CleanUpMemory								();
-	
+	destroy_lua_wpn_params							();
 	// destroy ai space
 	xr_delete										(g_ai_space);
 	// destroy object factory
@@ -66,7 +74,6 @@ void clean_game_globals()
 	spawn_story_ids.clear							();
 
 	InventoryUtilities::DestroyShaders				();
-
 	//XML indexes
 	CInfoPortion::DeleteSharedData					();
 	CInfoPortion::DeleteIdToIndexData				();
@@ -83,6 +90,7 @@ void clean_game_globals()
 	CSpecificCharacter::DeleteSharedData			();
 	CSpecificCharacter::DeleteIdToIndexData			();
 	
+
 	CHARACTER_COMMUNITY::DeleteIdToIndexData		();
 	CHARACTER_RANK::DeleteIdToIndexData				();
 	CHARACTER_REPUTATION::DeleteIdToIndexData		();
@@ -111,4 +119,8 @@ void clean_game_globals()
 	dump_list_lines									();
 	dump_list_sublines								();
 	clean_wnd_rects									();
+	xr_delete										(g_gameTaskXml);
+	xr_delete										(g_uiSpotXml);
+	dump_list_xmls									();
+	DestroyUIGeom									();
 }

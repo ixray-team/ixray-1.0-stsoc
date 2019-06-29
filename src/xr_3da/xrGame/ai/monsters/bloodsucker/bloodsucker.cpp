@@ -159,6 +159,8 @@ void CAI_Bloodsucker::reinit()
 	inherited::reinit			();
 	CControlledActor::reinit	();
 
+	if(CCustomMonster::use_simplified_visual())	return;
+
 	Bones.Reset					();
 
 	com_man().ta_fill_data(anim_triple_vampire, "vampire_0", "vampire_1", "vampire_2", TA_EXECUTE_LOOPED, TA_DONT_SKIP_PREPARE, ControlCom::eCapturePath | ControlCom::eCaptureMovement);

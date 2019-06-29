@@ -88,39 +88,42 @@ void CUIEncyclopediaWnd::Init()
 	UIEncyclopediaInfoBkg->AttachChild(UIInfoList);
 	xml_init.InitScrollView(uiXml, "info_list", 0, UIInfoList);
 
-
-	string256 header;
-	strconcat(header, ALL_PDA_HEADER_PREFIX, "/Encyclopedia");
-	m_InfosHeaderStr = header;
-
 	xml_init.InitAutoStatic(uiXml, "left_auto_static", UIEncyclopediaInfoBkg);
 	xml_init.InitAutoStatic(uiXml, "right_auto_static", UIEncyclopediaIdxBkg);
 }
 
-
+#include "../string_table.h"
 void CUIEncyclopediaWnd::SendMessage(CUIWindow *pWnd, s16 msg, void* pData)
 {
 	if (UIIdxList == pWnd && LIST_ITEM_CLICKED == msg)
 	{
 		CUITreeViewItem *pTVItem = static_cast<CUITreeViewItem*>(pData);
-		R_ASSERT(pTVItem);
+		R_ASSERT		(pTVItem);
+		
+		if( pTVItem->vSubItems.size() )
+		{
+			CEncyclopediaArticle* A = m_ArticlesDB[pTVItem->vSubItems[0]->GetValue()];
 
-		CEncyclopediaArticle* A = m_ArticlesDB[pTVItem->GetValue()];
-		xr_string caption		= *m_InfosHeaderStr;
-		caption					+= "/";
-		caption					+= *(A->data()->group);
-		caption					+= "/";
-		caption					+= *(A->data()->name);
+			xr_string caption		= ALL_PDA_HEADER_PREFIX;
+			caption					+= "/";
+			caption					+= CStringTable().translate(A->data()->group).c_str();
 
-		UIEncyclopediaInfoHeader->UITitleText.SetText(caption.c_str());
-		SetCurrentArtice(pTVItem);
+			UIEncyclopediaInfoHeader->UITitleText.SetText(caption.c_str());
+			UIArticleHeader->SetTextST(*(A->data()->group));
+			SetCurrentArtice		(NULL);
+		}else
+		{
+			CEncyclopediaArticle* A = m_ArticlesDB[pTVItem->GetValue()];
+			xr_string caption		= ALL_PDA_HEADER_PREFIX;
+			caption					+= "/";
+			caption					+= CStringTable().translate(A->data()->group).c_str();
+			caption					+= "/";
+			caption					+= CStringTable().translate(A->data()->name).c_str();
 
-/*		xr_string caption = static_cast<xr_string>(*m_InfosHeaderStr) + *SetCurrentArtice(pTVItem);
-		UIEncyclopediaInfoHeader->UITitleText.SetText(caption.c_str());
-		caption.erase(0, caption.find_last_of("/") + 1);
-		UIArticleHeader->SetText(caption.c_str());
-*/
-		UIArticleHeader->SetTextST(*(A->data()->name));
+			UIEncyclopediaInfoHeader->UITitleText.SetText(caption.c_str());
+			SetCurrentArtice		(pTVItem);
+			UIArticleHeader->SetTextST(*(A->data()->name));
+		}
 	}
 
 	inherited::SendMessage(pWnd, msg, pData);
@@ -165,7 +168,7 @@ void CUIEncyclopediaWnd::Show(bool status)
 }
 
 
-bool CUIEncyclopediaWnd::HasArticle(ARTICLE_ID id)
+bool CUIEncyclopediaWnd::HasArticle(shared_str id)
 {
 	ReloadArticles();
 	for(std::size_t i = 0; i<m_ArticlesDB.size(); ++i)
@@ -182,12 +185,12 @@ void CUIEncyclopediaWnd::DeleteArticles()
 	delete_data			(m_ArticlesDB);
 }
 
-shared_str CUIEncyclopediaWnd::SetCurrentArtice(CUITreeViewItem *pTVItem)
+void CUIEncyclopediaWnd::SetCurrentArtice(CUITreeViewItem *pTVItem)
 {
-	R_ASSERT(pTVItem);
-
 	UIInfoList->ScrollToBegin();
 	UIInfoList->Clear();
+
+	if(!pTVItem) return;
 
 	// для начала проверим, что нажатый элемент не рутовый
 	if (!pTVItem->IsRoot())
@@ -216,11 +219,9 @@ shared_str CUIEncyclopediaWnd::SetCurrentArtice(CUITreeViewItem *pTVItem)
 			}
 		}
 	}
-
-	return pTVItem->GetHierarchyAsText().c_str();
 }
 
-void CUIEncyclopediaWnd::AddArticle(ARTICLE_ID article_id, bool bReaded)
+void CUIEncyclopediaWnd::AddArticle(shared_str article_id, bool bReaded)
 {
 	for(std::size_t i = 0; i<m_ArticlesDB.size(); i++)
 	{

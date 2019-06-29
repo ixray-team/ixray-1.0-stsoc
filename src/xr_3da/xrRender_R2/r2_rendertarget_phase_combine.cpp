@@ -24,16 +24,16 @@ void	CRenderTarget::phase_combine	()
 	RCache.set_CullMode	( CULL_NONE );
 	RCache.set_Stencil	( FALSE		);
 
+	BOOL	split_the_scene_to_minimize_wait			= FALSE;
+	if (ps_r2_ls_flags.test(R2FLAG_EXP_SPLIT_SCENE))	split_the_scene_to_minimize_wait=TRUE;
+
 	// draw skybox
+	if (1)
 	{
-		// RCache.set_Stencil			(TRUE,D3DCMP_EQUAL,0x00,0xff,0x00);
-		// if (RImplementation.o.nvstencil)	{
-		//	u_stencil_optimize				(FALSE);
-		//	RCache.set_ColorWriteEnable		();
-		// }
-		CHK_DX(HW.pDevice->SetRenderState( D3DRS_ZENABLE,	FALSE				));
-		g_pGamePersistent->Environment.RenderSky			();
-		CHK_DX(HW.pDevice->SetRenderState( D3DRS_ZENABLE,	TRUE				));
+		RCache.set_ColorWriteEnable					();
+		CHK_DX(HW.pDevice->SetRenderState			( D3DRS_ZENABLE,	FALSE				));
+		g_pGamePersistent->Environment().RenderSky	();
+		CHK_DX(HW.pDevice->SetRenderState			( D3DRS_ZENABLE,	TRUE				));
 	}
 
 	// 
@@ -65,7 +65,7 @@ void	CRenderTarget::phase_combine	()
 	{
 		// Compute params
 		Fmatrix		m_v2w;			m_v2w.invert				(Device.mView		);
-		CEnvDescriptorMixer& envdesc= g_pGamePersistent->Environment.CurrentEnv		;
+		CEnvDescriptorMixer& envdesc= g_pGamePersistent->Environment().CurrentEnv		;
 		const float minamb			= 0.001f;
 		Fvector4	ambclr			= { _max(envdesc.ambient.x*2,minamb),	_max(envdesc.ambient.y*2,minamb),			_max(envdesc.ambient.z*2,minamb),	0	};
 					ambclr.mul		(ps_r2_sun_lumscale_amb);
@@ -130,7 +130,7 @@ void	CRenderTarget::phase_combine	()
 		RCache.set_CullMode				(CULL_CCW);
 		RCache.set_Stencil				(FALSE);
 		RCache.set_ColorWriteEnable		();
-		g_pGamePersistent->Environment.RenderClouds	();
+		g_pGamePersistent->Environment().RenderClouds	();
 		RImplementation.render_forward	();
 		if (g_pGamePersistent)	g_pGamePersistent->OnRenderPPUI_main()	;	// PP-UI
 	}
@@ -208,7 +208,7 @@ void	CRenderTarget::phase_combine	()
 	RCache.set_Stencil		(FALSE);
 
 	//	if FP16-BLEND !not! supported - draw flares here, overwise they are already in the bloom target
-	if (!RImplementation.o.fp16_blend)	g_pGamePersistent->Environment.RenderFlares	();	// lens-flares
+	/* if (!RImplementation.o.fp16_blend)*/	g_pGamePersistent->Environment().RenderFlares	();	// lens-flares
 
 	//	PP-if required
 	if (PP_Complex)		{
@@ -333,6 +333,8 @@ void	CRenderTarget::phase_combine	()
 void CRenderTarget::phase_wallmarks		()
 {
 	// Targets
+	RCache.set_RT(NULL,2);
+	RCache.set_RT(NULL,1);
 	u_setrt								(rt_Color,NULL,NULL,HW.pBaseZB);
 	// Stencil	- draw only where stencil >= 0x1
 	RCache.set_Stencil					(TRUE,D3DCMP_LESSEQUAL,0x01,0xff,0x00);

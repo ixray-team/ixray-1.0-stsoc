@@ -12,7 +12,8 @@
 #include "xr_level_controller.h"
 #include "profiler.h"
 
-#pragma comment(lib,"ode.lib" )
+#pragma comment(lib,"ode.lib")
+#pragma comment(lib,"xr_3da.lib")
 
 extern "C" {
 	DLL_API DLL_Pure*	__cdecl xrFactory_Create		(CLASS_ID clsid)
@@ -42,8 +43,6 @@ BOOL APIENTRY DllMain(HANDLE hModule, u32 ul_reason_for_call, LPVOID lpReserved)
 			CCC_RegisterCommands();
 			// keyboard binding
 			CCC_RegisterInput			();
-			// xml parser options
-			XML_DisableStringCaching	();
 #ifdef DEBUG
 			g_profiler			= xr_new<CProfiler>();
 #endif

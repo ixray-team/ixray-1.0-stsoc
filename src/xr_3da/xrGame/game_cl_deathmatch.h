@@ -35,9 +35,10 @@ public :
 	string64						WinnerName;
 	
 	virtual		CUIGameCustom*		createGameUI			();
-	virtual		void				net_import_state	(NET_Packet& P);
+	virtual		void				net_import_state		(NET_Packet& P);
+	virtual		void				net_import_update		(NET_Packet& P);	
 	virtual		void				Init					();
-	virtual		CUIInventoryWnd*	GetInventoryWnd			() {return pInventoryMenu;};
+//	virtual		CUIInventoryWnd*	GetInventoryWnd			() {return pInventoryMenu;};
 
 	virtual		void				LoadSndMessages				();
 
@@ -75,11 +76,11 @@ protected:
 	IBuyWnd*						pCurBuyMenu;
 
 	CUISkinSelectorWnd*				pCurSkinMenu;
-	CUIInventoryWnd*				pInventoryMenu;
+//	CUIInventoryWnd*				pInventoryMenu;
 
-	CUIMapDesc*						pMapDesc;
+//	CUIMapDesc*						pMapDesc;
 	//-------------------------------------------------
-	CUIPdaWnd*						pPdaMenu;
+//	CUIPdaWnd*						pPdaMenu;
 	//-------------------------------------------------	
 	BOOL							m_bFirstRun;
 	BOOL							m_bMenuCalledFromReady;
@@ -120,6 +121,9 @@ protected:
 	virtual		int					GetPlayersPlace			(game_PlayerState* ps);
 
 	virtual		void				PlayParticleEffect		(LPCSTR EffName, Fvector& pos);
+
+	virtual		void				ShowBuyMenu				();
+	virtual		void				HideBuyMenu				();
 
 public:
 	virtual s16						ModifyTeam				(s16 Team)	{return Team;};
@@ -169,6 +173,7 @@ public:
 	virtual		void				SendPickUpEvent			(u16 ID_who, u16 ID_what);
 
 	virtual		void				OnGameRoundStarted				();
+	virtual		void				UpdateMapLocations		();
 };
 
 IC bool	DM_Compare_Players		(game_PlayerState* p1, game_PlayerState* p2);

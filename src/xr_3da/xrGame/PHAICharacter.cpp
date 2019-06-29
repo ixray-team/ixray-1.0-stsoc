@@ -98,7 +98,7 @@ bool CPHAICharacter::TryPosition(Fvector pos,bool exact_state){
 	m_body_interpolation.UpdatePositions();
 	if(ret)
 		Disable();
-
+	m_collision_damage_info.m_contact_velocity=0.f;
 	return ret;
 }
 

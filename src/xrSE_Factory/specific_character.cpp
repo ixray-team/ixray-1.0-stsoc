@@ -33,6 +33,7 @@ SSpecificCharacterData::~SSpecificCharacterData()
 }
 
 #endif
+
 CSpecificCharacter::CSpecificCharacter()
 {
 	m_OwnId = NULL;
@@ -52,6 +53,7 @@ void CSpecificCharacter::InitXmlIdToIndex()
 		id_to_index::file_str = pSettings->r_string("profiles", "specific_characters_files");
 }
 
+
 void CSpecificCharacter::Load(SPECIFIC_CHARACTER_ID id)
 {
 	R_ASSERT(id.size());
@@ -66,31 +68,27 @@ void CSpecificCharacter::load_shared	(LPCSTR)
 	CTimer			timer;
 	timer.Start		();
 #endif
-
-	CUIXml uiXml;
 	const id_to_index::ITEM_DATA& item_data = *id_to_index::GetById(m_OwnId);
 
-	string_path xml_file_full;
-	strconcat	(xml_file_full, *shared_str(item_data.file_name), ".xml");
+	CUIXml*		pXML = item_data._xml;
 
-	bool xml_result = uiXml.Init(CONFIG_PATH, GAME_PATH, xml_file_full);
-	R_ASSERT3(xml_result, "xml file not found", xml_file_full);
+	pXML->SetLocalRoot		(pXML->GetRoot());
 
-	//loading from XML
-	XML_NODE* item_node = uiXml.NavigateToNode(id_to_index::tag_name, item_data.pos_in_file);
+
+	XML_NODE* item_node = pXML->NavigateToNode(id_to_index::tag_name, item_data.pos_in_file);
 	R_ASSERT3(item_node, "specific_character id=", *item_data.id);
 
-	uiXml.SetLocalRoot(item_node);
+	pXML->SetLocalRoot(item_node);
 
 
 
-	int norandom = uiXml.ReadAttribInt(item_node, "no_random", 0);
+	int norandom = pXML->ReadAttribInt(item_node, "no_random", 0);
 	if (1 == norandom) 
 		data()->m_bNoRandom = true;
 	else
 		data()->m_bNoRandom = false;
 
-	int team_default = uiXml.ReadAttribInt(item_node, "team_default", 0);
+	int team_default = pXML->ReadAttribInt(item_node, "team_default", 0);
 	if (1 == team_default) 
 		data()->m_bDefaultForCommunity = true;
 	else
@@ -101,7 +99,7 @@ void CSpecificCharacter::load_shared	(LPCSTR)
 	
 #ifdef  XRGAME_EXPORTS
 
-	LPCSTR start_dialog = uiXml.Read("start_dialog", 0, NULL);
+	LPCSTR start_dialog = pXML->Read("start_dialog", 0, NULL);
 	if(start_dialog)
 	{
 		data()->m_StartDialog	= start_dialog;
@@ -109,35 +107,35 @@ void CSpecificCharacter::load_shared	(LPCSTR)
 	else
 		data()->m_StartDialog	= NULL;
 
-	int dialogs_num = uiXml.GetNodesNum(uiXml.GetLocalRoot(), "actor_dialog");
+	int dialogs_num = pXML->GetNodesNum(pXML->GetLocalRoot(), "actor_dialog");
 	data()->m_ActorDialogs.clear();
 	for(int i=0; i<dialogs_num; ++i)
 	{
-		shared_str dialog_name = uiXml.Read(uiXml.GetLocalRoot(), "actor_dialog", i, "");
+		shared_str dialog_name = pXML->Read(pXML->GetLocalRoot(), "actor_dialog", i, "");
 		data()->m_ActorDialogs.push_back(dialog_name);
 	}
 
-	data()->m_iIconX		= uiXml.ReadAttribInt("icon", 0, "x");
-	data()->m_iIconY		= uiXml.ReadAttribInt("icon", 0, "y");
+	data()->m_iIconX		= pXML->ReadAttribInt("icon", 0, "x");
+	data()->m_iIconY		= pXML->ReadAttribInt("icon", 0, "y");
 
 	//игровое имя персонажа
-	data()->m_sGameName		= uiXml.Read("name", 0, "");
-	data()->m_sBioText		= CStringTable().translate(uiXml.Read("bio", 0, ""));
+	data()->m_sGameName		= pXML->Read("name", 0, "");
+	data()->m_sBioText		= CStringTable().translate(pXML->Read("bio", 0, ""));
 
 
-	data()->m_fPanic_threshold		= uiXml.ReadFlt("panic_threshold",0,0.f);
-	data()->m_fHitProbabilityFactor	= uiXml.ReadFlt("hit_probability_factor",0,1.f);
-	data()->m_crouch_type			= uiXml.ReadInt("crouch_type",0,0);
+	data()->m_fPanic_threshold		= pXML->ReadFlt("panic_threshold",0,0.f);
+	data()->m_fHitProbabilityFactor	= pXML->ReadFlt("hit_probability_factor",0,1.f);
+	data()->m_crouch_type			= pXML->ReadInt("crouch_type",0,0);
 
-	data()->m_critical_wound_weights= uiXml.Read("critical_wound_weights", 0, "1");
+	data()->m_critical_wound_weights= pXML->Read("critical_wound_weights", 0, "1");
 
 #endif
 
-	data()->m_sVisual		= uiXml.Read("visual", 0, "");
+	data()->m_sVisual		= pXML->Read("visual", 0, "");
 	
 
 #ifdef  XRGAME_EXPORTS
-	data()->m_sSupplySpawn	= uiXml.Read("supplies", 0, "");
+	data()->m_sSupplySpawn	= pXML->Read("supplies", 0, "");
 	
 	if(!data()->m_sSupplySpawn.empty())
 	{
@@ -151,31 +149,31 @@ void CSpecificCharacter::load_shared	(LPCSTR)
 		}
 	}
 
-	data()->m_sNpcConfigSect = uiXml.Read("npc_config", 0, "");
-	data()->m_sound_voice_prefix = uiXml.Read("snd_config", 0, "");
+	data()->m_sNpcConfigSect		= pXML->Read("npc_config", 0, "");
+	data()->m_sound_voice_prefix	= pXML->Read("snd_config", 0, "");
 
-	data()->m_terrain_sect = uiXml.Read("terrain_sect", 0, "");
+	data()->m_terrain_sect			= pXML->Read("terrain_sect", 0, "");
 
 #endif
 
-	data()->m_Classes.clear();
-	int classes_num = uiXml.GetNodesNum (uiXml.GetLocalRoot(), "class");
+	data()->m_Classes.clear			();
+	int classes_num					= pXML->GetNodesNum (pXML->GetLocalRoot(), "class");
 	for(int i=0; i<classes_num; i++)
 	{
-		LPCSTR char_class = uiXml.Read	("class", 0, "");
+		LPCSTR char_class			= pXML->Read	("class", 0, "");
 		if(char_class)
 		{
-			char* buf_str = xr_strdup(char_class);
-			xr_strlwr(buf_str);
+			char* buf_str			= xr_strdup(char_class);
+			xr_strlwr				(buf_str);
 			data()->m_Classes.push_back(buf_str);
-			xr_free(buf_str);
+			xr_free					(buf_str);
 		}
 	}
 
 
 #ifdef  XRGAME_EXPORTS
 
-	LPCSTR team = uiXml.Read("community", 0, NULL);
+	LPCSTR team = pXML->Read("community", 0, NULL);
 	R_ASSERT3(team != NULL, "'community' field not fulfiled for specific character", *m_OwnId);
 	
 	char* buf_str = xr_strdup(team);
@@ -186,16 +184,16 @@ void CSpecificCharacter::load_shared	(LPCSTR)
 	if(data()->m_Community.index() == NO_COMMUNITY_INDEX)
 		Debug.fatal(DEBUG_INFO,"wrong 'community' '%s' in specific character %s ", team, *m_OwnId);
 
-	data()->m_Rank			= uiXml.ReadInt("rank", 0, NO_RANK);
+	data()->m_Rank			= pXML->ReadInt("rank", 0, NO_RANK);
 	R_ASSERT3(data()->m_Rank != NO_RANK, "'rank' field not fulfiled for specific character", *m_OwnId);
-	data()->m_Reputation	= uiXml.ReadInt("reputation", 0, NO_REPUTATION);
+	data()->m_Reputation	= pXML->ReadInt("reputation", 0, NO_REPUTATION);
 	R_ASSERT3(data()->m_Reputation != NO_REPUTATION, "'reputation' field not fulfiled for specific character", *m_OwnId);
 
-	if(uiXml.NavigateToNode(uiXml.GetLocalRoot(), "money", 0))
+	if(pXML->NavigateToNode(pXML->GetLocalRoot(), "money", 0))
 	{
-		MoneyDef().min_money	= uiXml.ReadAttribInt("money", 0, "min");
-		MoneyDef().max_money	= uiXml.ReadAttribInt("money", 0, "max");
-		MoneyDef().inf_money	= !!uiXml.ReadAttribInt("money", 0, "infinitive");
+		MoneyDef().min_money	= pXML->ReadAttribInt("money", 0, "min");
+		MoneyDef().max_money	= pXML->ReadAttribInt("money", 0, "max");
+		MoneyDef().inf_money	= !!pXML->ReadAttribInt("money", 0, "infinitive");
 		MoneyDef().max_money	= _max(MoneyDef().max_money, MoneyDef().min_money); // :)
 
 	}else{

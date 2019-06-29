@@ -1,17 +1,10 @@
-// UIFrameWindow.h: 
-//
-// окно осуществялющие граф. вывод через CUIFrameRect
-//////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "uiwindow.h"
-#include "uistatic.h"
 
 #include "../uiframerect.h"
-#include "../uistaticitem.h"
 
-
+class CUIStatic;
 
 
 class CUIFrameWindow: public CUIWindow,
@@ -22,7 +15,6 @@ private:
 public:
 	using CUIWindow::Draw;
 					CUIFrameWindow				();
-	virtual			~CUIFrameWindow				();
 
 	virtual void	Init						(LPCSTR base_name, float x, float y, float width, float height);
 	virtual void	Init						(float x, float y, float width, float height);
@@ -40,8 +32,8 @@ public:
 	virtual void	Update						();
 	
 	//текст заголовка
-	CUIStatic		UITitleText;
-	CUIStatic*		GetTitleStatic				()										{return &UITitleText;};
+	CUIStatic*		UITitleText;
+	CUIStatic*		GetTitleStatic				()										{return UITitleText;};
 	void			SetVisiblePart				(CUIFrameRect::EFramePart p, BOOL b)	{m_UIWndFrame.SetVisiblePart(p,b);};
 
 protected:

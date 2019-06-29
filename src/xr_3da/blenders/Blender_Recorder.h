@@ -6,8 +6,9 @@
 #define AFX_BLENDER_RECORDER_H__1F549674_8674_4EB2_95E6_E6BC19218A6C__INCLUDED_
 #pragma once
 
-#pragma pack(push,4)
 #include "..\tss.h"
+
+#pragma pack(push,4)
 
 class ENGINE_API CBlender_Compile  
 {

@@ -9,9 +9,10 @@
 #pragma once
 
 #include "alife_simulator_base.h"
-#include "game_graph_space.h"
+//#include "game_graph_space.h"
 
 class CALifeCombatManager : public virtual CALifeSimulatorBase, CRandom {
+/**
 protected:
 	typedef CALifeSimulatorBase inherited;
 
@@ -33,13 +34,15 @@ protected:
 			void					vfPerformAttackAction		(int						iCombatGroupIndex);
 			bool					bfCheckIfRetreated			(int						iCombatGroupIndex);
 			void					vfFinishCombat				(ALife::ECombatResult		tCombatResult);
-
+/**/
 public:
 									CALifeCombatManager			(xrServer *server, LPCSTR section);
+/**
 	virtual							~CALifeCombatManager		();
 	IC		ALife::ECombatType		combat_type					() const;
-			ALife::ERelationType	relation_type				(CSE_ALifeMonsterAbstract	*tpALifeMonsterAbstract1,	CSE_ALifeMonsterAbstract*tpALifeMonsterAbstract2) const;
 			ALife::ECombatAction	choose_combat_action		(int						iCombatGroupIndex);
+			ALife::ERelationType	relation_type				(CSE_ALifeMonsterAbstract	*tpALifeMonsterAbstract1,	CSE_ALifeMonsterAbstract*tpALifeMonsterAbstract2) const;
+/**/
 			void					kill_entity					(CSE_ALifeMonsterAbstract	*l_tpALifeMonsterAbstract,	const GameGraph::_GRAPH_ID &l_tGraphID,					CSE_ALifeSchedulable *schedulable);
 };
 

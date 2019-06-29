@@ -192,10 +192,35 @@ void CObjectActionFire::finalize		()
 CObjectActionStrapping::CObjectActionStrapping	(CInventoryItem *item, CAI_Stalker *owner, CPropertyStorage *storage, LPCSTR action_name) :
 	inherited		(item,owner,storage,action_name)
 {
+	m_callback_removed			= true;
+}
+
+CObjectActionStrapping::~CObjectActionStrapping	()
+{
+	if (m_callback_removed) {
+		VERIFY					(
+			!object().animation().torso().callback(
+				CStalkerAnimationPair::CALLBACK_ID(
+					this,
+					&CObjectActionStrapping::on_animation_end
+				)
+			)
+		);
+		return;
+	}
+
+	object().animation().torso().remove_callback(
+		CStalkerAnimationPair::CALLBACK_ID(
+			this,
+			&CObjectActionStrapping::on_animation_end
+		)
+	);
 }
 
 void CObjectActionStrapping::on_animation_end	()
 {
+	VERIFY						(!m_callback_removed);
+
 	m_storage->set_property		(ObjectHandlerSpace::eWorldPropertyStrapped,true);
 
 	object().animation().torso().remove_callback(
@@ -204,6 +229,10 @@ void CObjectActionStrapping::on_animation_end	()
 			&CObjectActionStrapping::on_animation_end
 		)
 	);
+
+	m_callback_removed			= true;
+
+//	Msg							("[[%6d][%s]][%s] removing callback on callabck CObjectActionStrapping::on_animation_end",Device.dwTimeGlobal,*object().cName());
 }
 
 void CObjectActionStrapping::initialize			()
@@ -214,6 +243,8 @@ void CObjectActionStrapping::initialize			()
 	VERIFY						(object().inventory().ActiveItem());
 	VERIFY						(object().inventory().ActiveItem()->object().ID() == m_item->object().ID());
 
+	m_callback_removed			= false;
+
 	m_storage->set_property		(ObjectHandlerSpace::eWorldPropertyStrapped2Idle,true);
 	
 	object().animation().torso().add_callback	(
@@ -222,6 +253,8 @@ void CObjectActionStrapping::initialize			()
 			&CObjectActionStrapping::on_animation_end
 		)
 	);
+
+//	Msg							("[%6d][%s] adding callback CObjectActionStrapping::on_animation_end",Device.dwTimeGlobal,*object().cName());
 }
 
 void CObjectActionStrapping::execute			()
@@ -236,12 +269,30 @@ void CObjectActionStrapping::execute			()
 void CObjectActionStrapping::finalize		()
 {
 	inherited::finalize					();
-#ifdef ALLOW_STRANGE_BEHAVIOUR
-	CStalkerAnimationPair::CALLBACK_ID	callback(this,&CObjectActionStrapping::on_animation_end);
 
-	if (object().animation().torso().callback(callback))
-		object().animation().torso().remove_callback(callback);
-#endif // ALLOW_STRANGE_BEHAVIOUR
+	if (!m_callback_removed) {
+//		Msg						("[%6d][%s] removing callback from ::finalize CObjectActionStrapping::on_animation_end",Device.dwTimeGlobal,*object().cName());
+
+		object().animation().torso().remove_callback	(
+			CStalkerAnimationPair::CALLBACK_ID(
+				this,
+				&CObjectActionStrapping::on_animation_end
+			)
+		);
+
+		m_callback_removed		= true;
+	}
+	else {
+		VERIFY					(
+			!object().animation().torso().callback(
+				CStalkerAnimationPair::CALLBACK_ID(
+					this,
+					&CObjectActionStrapping::on_animation_end
+				)
+			)
+		);
+//		Msg						("[%6d][%s] callback is already removed, do nothing on ::finalize CObjectActionStrapping::on_animation_end",Device.dwTimeGlobal,*object().cName());
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -251,10 +302,35 @@ void CObjectActionStrapping::finalize		()
 CObjectActionStrappingToIdle::CObjectActionStrappingToIdle	(CInventoryItem *item, CAI_Stalker *owner, CPropertyStorage *storage, LPCSTR action_name) :
 	inherited		(item,owner,storage,action_name)
 {
+	m_callback_removed			= true;
+}
+
+CObjectActionStrappingToIdle::~CObjectActionStrappingToIdle	()
+{
+	if (m_callback_removed) {
+		VERIFY					(
+			!object().animation().torso().callback(
+				CStalkerAnimationPair::CALLBACK_ID(
+					this,
+					&CObjectActionStrappingToIdle::on_animation_end
+				)
+			)
+		);
+		return;
+	}
+
+	object().animation().torso().remove_callback(
+		CStalkerAnimationPair::CALLBACK_ID(
+			this,
+			&CObjectActionStrappingToIdle::on_animation_end
+		)
+	);
 }
 
 void CObjectActionStrappingToIdle::on_animation_end	()
 {
+	VERIFY						(!m_callback_removed);
+
 	m_storage->set_property		(ObjectHandlerSpace::eWorldPropertyStrapped2Idle,false);
 
 	object().animation().torso().remove_callback(
@@ -263,6 +339,10 @@ void CObjectActionStrappingToIdle::on_animation_end	()
 			&CObjectActionStrappingToIdle::on_animation_end
 		)
 	);
+
+	m_callback_removed			= true;
+
+//	Msg							("[%6d][%s] removing callback on callabck CObjectActionStrappingToIdle::on_animation_end",Device.dwTimeGlobal,*object().cName());
 }
 
 void CObjectActionStrappingToIdle::initialize		()
@@ -273,12 +353,16 @@ void CObjectActionStrappingToIdle::initialize		()
 	VERIFY						(object().inventory().ActiveItem());
 	VERIFY						(object().inventory().ActiveItem()->object().ID() == m_item->object().ID());
 
+	m_callback_removed			= false;
+
 	object().animation().torso().add_callback	(
 		CStalkerAnimationPair::CALLBACK_ID(
 			this,
 			&CObjectActionStrappingToIdle::on_animation_end
 		)
 	);
+
+//	Msg							("[%6d][%s] adding callback CObjectActionStrappingToIdle::on_animation_end",Device.dwTimeGlobal,*object().cName());
 }
 
 void CObjectActionStrappingToIdle::execute			()
@@ -293,12 +377,29 @@ void CObjectActionStrappingToIdle::execute			()
 void CObjectActionStrappingToIdle::finalize		()
 {
 	inherited::finalize					();
-#ifdef ALLOW_STRANGE_BEHAVIOUR
-	CStalkerAnimationPair::CALLBACK_ID	callback(this,&CObjectActionStrappingToIdle::on_animation_end);
 
-	if (object().animation().torso().callback(callback))
-		object().animation().torso().remove_callback(callback);
-#endif // ALLOW_STRANGE_BEHAVIOUR
+	if (!m_callback_removed) {
+		object().animation().torso().remove_callback	(
+			CStalkerAnimationPair::CALLBACK_ID(
+				this,
+				&CObjectActionStrappingToIdle::on_animation_end
+			)
+		);
+
+		m_callback_removed		= true;
+//		Msg						("[%6d][%s] removing callback from ::finalize CObjectActionStrappingToIdle::on_animation_end",Device.dwTimeGlobal,*object().cName());
+	}
+	else {
+		VERIFY					(
+			!object().animation().torso().callback(
+				CStalkerAnimationPair::CALLBACK_ID(
+					this,
+					&CObjectActionStrappingToIdle::on_animation_end
+				)
+			)
+		);
+//		Msg						("[%6d][%s] callback is already removed, do nothing on ::finalize CObjectActionStrappingToIdle::on_animation_end",Device.dwTimeGlobal,*object().cName());
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -308,10 +409,35 @@ void CObjectActionStrappingToIdle::finalize		()
 CObjectActionUnstrapping::CObjectActionUnstrapping	(CInventoryItem *item, CAI_Stalker *owner, CPropertyStorage *storage, LPCSTR action_name) :
 	inherited		(item,owner,storage,action_name)
 {
+	m_callback_removed			= true;
+}
+
+CObjectActionUnstrapping::~CObjectActionUnstrapping	()
+{
+	if (m_callback_removed) {
+		VERIFY					(
+			!object().animation().torso().callback(
+				CStalkerAnimationPair::CALLBACK_ID(
+					this,
+					&CObjectActionUnstrapping::on_animation_end
+				)
+			)
+		);
+		return;
+	}
+
+	object().animation().torso().remove_callback(
+		CStalkerAnimationPair::CALLBACK_ID(
+			this,
+			&CObjectActionUnstrapping::on_animation_end
+		)
+	);
 }
 
 void CObjectActionUnstrapping::on_animation_end	()
 {
+	VERIFY						(!m_callback_removed);
+
 	m_storage->set_property		(ObjectHandlerSpace::eWorldPropertyStrapped,false);
 
 	object().animation().torso().remove_callback(
@@ -320,6 +446,10 @@ void CObjectActionUnstrapping::on_animation_end	()
 			&CObjectActionUnstrapping::on_animation_end
 		)
 	);
+
+	m_callback_removed			= true;
+
+//	Msg							("[%6d][%s] removing callback on callabck CObjectActionUnstrapping::on_animation_end",Device.dwTimeGlobal,*object().cName());
 }
 
 void CObjectActionUnstrapping::initialize		()
@@ -330,6 +460,8 @@ void CObjectActionUnstrapping::initialize		()
 	VERIFY						(object().inventory().ActiveItem());
 	VERIFY						(object().inventory().ActiveItem()->object().ID() == m_item->object().ID());
 
+	m_callback_removed			= false;
+
 	m_storage->set_property(ObjectHandlerSpace::eWorldPropertyStrapped2Idle,true);
 
 	object().animation().torso().add_callback	(
@@ -338,6 +470,8 @@ void CObjectActionUnstrapping::initialize		()
 			&CObjectActionUnstrapping::on_animation_end
 		)
 	);
+
+//	Msg							("[%6d][%s] adding callback CObjectActionUnstrapping::on_animation_end",Device.dwTimeGlobal,*object().cName());
 }
 
 void CObjectActionUnstrapping::execute			()
@@ -352,12 +486,29 @@ void CObjectActionUnstrapping::execute			()
 void CObjectActionUnstrapping::finalize		()
 {
 	inherited::finalize					();
-#ifdef ALLOW_STRANGE_BEHAVIOUR
-	CStalkerAnimationPair::CALLBACK_ID	callback(this,&CObjectActionUnstrapping::on_animation_end);
 
-	if (object().animation().torso().callback(callback))
-		object().animation().torso().remove_callback(callback);
-#endif // ALLOW_STRANGE_BEHAVIOUR
+	if (!m_callback_removed) {
+		object().animation().torso().remove_callback	(
+			CStalkerAnimationPair::CALLBACK_ID(
+				this,
+				&CObjectActionUnstrapping::on_animation_end
+			)
+		);
+
+		m_callback_removed		= true;
+//		Msg						("[%6d][%s] removing callback from ::finalize CObjectActionUnstrapping::on_animation_end",Device.dwTimeGlobal,*object().cName());
+	}
+	else {
+		VERIFY					(
+			!object().animation().torso().callback(
+				CStalkerAnimationPair::CALLBACK_ID(
+					this,
+					&CObjectActionUnstrapping::on_animation_end
+				)
+			)
+		);
+//		Msg						("[%6d][%s] callback is already removed, do nothing on ::finalize CObjectActionUnstrapping::on_animation_end",Device.dwTimeGlobal,*object().cName());
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -367,10 +518,35 @@ void CObjectActionUnstrapping::finalize		()
 CObjectActionUnstrappingToIdle::CObjectActionUnstrappingToIdle	(CInventoryItem *item, CAI_Stalker *owner, CPropertyStorage *storage, LPCSTR action_name) :
 	inherited		(item,owner,storage,action_name)
 {
+	m_callback_removed			= true;
+}
+
+CObjectActionUnstrappingToIdle::~CObjectActionUnstrappingToIdle	()
+{
+	if (m_callback_removed) {
+		VERIFY					(
+			!object().animation().torso().callback(
+				CStalkerAnimationPair::CALLBACK_ID(
+					this,
+					&CObjectActionUnstrappingToIdle::on_animation_end
+				)
+			)
+		);
+		return;
+	}
+
+	object().animation().torso().remove_callback(
+		CStalkerAnimationPair::CALLBACK_ID(
+			this,
+			&CObjectActionUnstrappingToIdle::on_animation_end
+		)
+	);
 }
 
 void CObjectActionUnstrappingToIdle::on_animation_end	()
 {
+	VERIFY						(!m_callback_removed);
+
 	m_storage->set_property		(ObjectHandlerSpace::eWorldPropertyStrapped2Idle,false);
 
 	object().animation().torso().remove_callback(
@@ -379,6 +555,10 @@ void CObjectActionUnstrappingToIdle::on_animation_end	()
 			&CObjectActionUnstrappingToIdle::on_animation_end
 		)
 	);
+
+	m_callback_removed			= true;
+
+//	Msg							("[%6d][%s] removing callback on callabck CObjectActionUnstrappingToIdle::on_animation_end",Device.dwTimeGlobal,*object().cName());
 }
 
 void CObjectActionUnstrappingToIdle::initialize		()
@@ -389,12 +569,16 @@ void CObjectActionUnstrappingToIdle::initialize		()
 	VERIFY						(object().inventory().ActiveItem());
 	VERIFY						(object().inventory().ActiveItem()->object().ID() == m_item->object().ID());
 
+	m_callback_removed			= false;
+
 	object().animation().torso().add_callback	(
 		CStalkerAnimationPair::CALLBACK_ID(
 			this,
 			&CObjectActionUnstrappingToIdle::on_animation_end
 		)
 	);
+
+//	Msg							("[%6d][%s] adding callback CObjectActionUnstrappingToIdle::on_animation_end",Device.dwTimeGlobal,*object().cName());
 }
 
 void CObjectActionUnstrappingToIdle::execute			()
@@ -409,12 +593,29 @@ void CObjectActionUnstrappingToIdle::execute			()
 void CObjectActionUnstrappingToIdle::finalize		()
 {
 	inherited::finalize					();
-#ifdef ALLOW_STRANGE_BEHAVIOUR
-	CStalkerAnimationPair::CALLBACK_ID	callback(this,&CObjectActionUnstrappingToIdle::on_animation_end);
 
-	if (object().animation().torso().callback(callback))
-		object().animation().torso().remove_callback(callback);
-#endif // ALLOW_STRANGE_BEHAVIOUR
+	if (!m_callback_removed) {
+		object().animation().torso().remove_callback	(
+			CStalkerAnimationPair::CALLBACK_ID(
+				this,
+				&CObjectActionUnstrappingToIdle::on_animation_end
+			)
+		);
+
+		m_callback_removed		= true;
+//		Msg						("[%6d][%s] removing callback from ::finalize CObjectActionUnstrappingToIdle::on_animation_end",Device.dwTimeGlobal,*object().cName());
+	}
+	else {
+		VERIFY					(
+			!object().animation().torso().callback(
+				CStalkerAnimationPair::CALLBACK_ID(
+					this,
+					&CObjectActionUnstrappingToIdle::on_animation_end
+				)
+			)
+		);
+//		Msg						("[%6d][%s] callback is already removed, do nothing on ::finalize CObjectActionUnstrappingToIdle::on_animation_end",Device.dwTimeGlobal,*object().cName());
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -185,7 +185,7 @@ BOOL CAnimatorCamEffectorScriptCB::Valid()
 
 BOOL CAnimatorCamLerpEffector::Process(Fvector &p, Fvector &d, Fvector &n, float& fFov, float& fFar, float& fAspect)
 {
-	if(!inherited::Process(p,d,n,fFov,fFar,fAspect))	return FALSE;
+	if(!inherited::inherited::Process(p,d,n,fFov,fFar,fAspect))	return FALSE;
 
 	const Fmatrix& m			= m_objectAnimator->XFORM();
 	m_objectAnimator->Update	(Device.fTimeDelta);

@@ -41,6 +41,7 @@ const float COMBAT_SOUND_PERCEIVE_RADIUS_SQR	= _sqr(5.f);
 
 CSoundMemoryManager::~CSoundMemoryManager		()
 {
+	clear_delayed_objects	();
 #ifdef USE_SELECTED_SOUND
 	xr_delete				(m_selected_sound);
 #endif
@@ -405,6 +406,8 @@ void CSoundMemoryManager::save	(NET_Packet &packet) const
 #ifdef USE_FIRST_LEVEL_TIME
 		packet.w_u32			((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_first_level_time) : 0);
 #endif // USE_FIRST_LEVEL_TIME
+		packet.w_u32			((*I).m_sound_type);
+		packet.w_float			((*I).m_power);
 	}
 }
 
@@ -455,6 +458,9 @@ void CSoundMemoryManager::load	(IReader &packet)
 		object.m_first_level_time	= packet.r_u32();
 		object.m_first_level_time	+= Device.dwTimeGlobal;
 #endif // USE_FIRST_LEVEL_TIME
+		object.m_sound_type			= (ESoundTypes)packet.r_u32();
+		object.m_power				= packet.r_float();
+
 		if (object.m_object) {
 			add						(object,true);
 			continue;

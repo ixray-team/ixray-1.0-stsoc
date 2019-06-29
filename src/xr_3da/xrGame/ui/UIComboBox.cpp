@@ -10,6 +10,7 @@
 #include "StdAfx.h"
 #include "UIComboBox.h"
 #include "UITextureMaster.h"
+#include "UIScrollBar.h"
 
 #define CB_HEIGHT 23.0f
 #define BTN_SIZE  23.0f
@@ -125,7 +126,10 @@ void CUIComboBox::SetCurrentValue()
 	m_list.SetSelected	( cur_val );
 	
 	CUIListBoxItem* itm	= m_list.GetSelectedItem();
-	m_itoken_id			= (int)(__int64)itm->GetData();
+	if(itm)
+		m_itoken_id			= (int)(__int64)itm->GetData();
+	else
+		m_itoken_id			= 1; //first
 }
 
 void CUIComboBox::SaveValue()
@@ -228,13 +232,16 @@ bool CUIComboBox::OnMouse(float x, float y, EUIMessages mouse_action){
 	if(CUIWindow::OnMouse(x, y, mouse_action)) 
 		return true;
 
-	bool bCursorOverWindow = false;
-	bCursorOverWindow |= (0 <= x) && (GetWidth() >= x) && (0 <= y) && (GetHeight() >= y);
+	bool bCursorOverScb = false;
+//.	bCursorOverScb |= (0 <= x) && (GetWidth() >= x) && (0 <= y) && (GetHeight() >= y);
 
+//.	Frect wndRect		= m_list.ScrollBar()->GetWndRect();
+//.	bCursorOverScb		= wndRect.in(m_list.ScrollBar()->cursor_pos)
+	bCursorOverScb		= m_list.ScrollBar()->CursorOverWindow();
 	switch (m_eState){
 		case LIST_EXPANDED:			
 
-			if ( /* (!bCursorOverWindow) && */ mouse_action == WINDOW_LBUTTON_DOWN)
+			if (  (!bCursorOverScb) &&  mouse_action == WINDOW_LBUTTON_DOWN)
 			{
                 ShowList(false);
 				return true;

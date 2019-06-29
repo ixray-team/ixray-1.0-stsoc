@@ -22,6 +22,9 @@ class CALifeUpdateManager :
 	public CALifeStorageManager,
 	public ISheduled
 {
+private:
+	bool				m_first_time;
+
 protected:
 	u64					m_max_process_time;
 	float				m_update_monster_factor;

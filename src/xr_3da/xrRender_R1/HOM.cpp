@@ -9,6 +9,18 @@
  
 float	psOSSR		= .001f;
 
+void __stdcall	CHOM::MT_RENDER()
+{
+	MT.Enter					();
+	if (MT_frame_rendered!=Device.dwFrame)	{
+		CFrustum					ViewBase;
+		ViewBase.CreateFromMatrix	(Device.mFullTransform, FRUSTUM_P_LRTB + FRUSTUM_P_FAR);
+		Enable						();
+		Render						(ViewBase);
+	}
+	MT.Leave					();
+}
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -55,20 +67,20 @@ void CHOM::Load			()
 	FS.update_path	(fName,"$level$","level.hom");
 	if (!FS.exist(fName))
 	{
-		Msg		("! WARNING: Occlusion map '%s' not found.",fName);
+		Msg		(" WARNING: Occlusion map '%s' not found.",fName);
 		return;
 	}
 	Msg	("* Loading HOM: %s",fName);
 	
-	destructor<IReader> fs	(FS.r_open(fName));
-	destructor<IReader>	S	(fs().open_chunk(1));
+	IReader* fs				= FS.r_open(fName);
+	IReader* S				= fs->open_chunk(1);
 
 	// Load tris and merge them
 	CDB::Collector		CL;
-	while (!S().eof())
+	while (!S->eof())
 	{
 		HOM_poly				P;
-		S().r					(&P,sizeof(P));
+		S->r					(&P,sizeof(P));
 		CL.add_face_packed_D	(P.v1,P.v2,P.v3,P.flags,0.01f);
 	}
 	
@@ -102,6 +114,8 @@ void CHOM::Load			()
 	m_pModel			= xr_new<CDB::MODEL> ();
 	m_pModel->build		(CL.getV(),int(CL.getVS()),CL.getT(),int(CL.getTS()));
 	bEnabled			= TRUE;
+	S->close			();
+	FS.r_close			(fs);
 }
 
 void CHOM::Unload		()
@@ -215,7 +229,8 @@ void CHOM::Render		(CFrustum& base)
 	Raster.clear		();
 	Render_DB			(base);
 	Raster.propagade	();
-	Device.Statistic->RenderCALC_HOM.End		();
+	MT_frame_rendered	= Device.dwFrame;
+	Device.Statistic->RenderCALC_HOM.End	();
 }
 
 ICF	BOOL	xform_b0	(Fvector2& min, Fvector2& max, float& minz, Fmatrix& X, float _x, float _y, float _z)
@@ -286,12 +301,12 @@ BOOL CHOM::visible		(vis_data& vis)
 	if (result)
 	{
 		// visible	- delay next test
-		delay			= ::Random.randI	(2,5);
+		delay			= ::Random.randI	(5*2,5*5);
 	} else {
 		// hidden	- shedule to next frame
 	}
 	vis.hom_frame			= frame_current + delay;
-	vis.hom_tested			= frame_current;
+	vis.hom_tested			= frame_current	;
 #ifdef DEBUG
 	Device.Statistic->RenderCALC_HOM.End	();
 #endif

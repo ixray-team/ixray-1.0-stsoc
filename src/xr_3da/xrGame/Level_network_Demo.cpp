@@ -100,15 +100,19 @@ void						CLevel_DemoCrash_Handler	()
 	Level().CallOldCrashHandler();
 }
 
+//#define STORE_TDEMO
+
 void						CLevel::Demo_PrepareToStore			()
 {
+	m_bDemoSaveMode = !!strstr(Core.Params,"-techdemo");
+
+	if (!m_bDemoSaveMode) return;
+
 	VERIFY						(!m_we_used_old_crach_handler);
 	m_we_used_old_crach_handler	= true;
 	m_pOldCrashHandler			= Debug.get_crashhandler();
 	Debug.set_crashhandler		(CLevel_DemoCrash_Handler);
 	//---------------------------------------------------------------
-	m_bDemoSaveMode = TRUE;
-
 	string1024 CName = "";
 	u32 CNameSize = 1024;
 	GetComputerName(CName, (DWORD*)&CNameSize);

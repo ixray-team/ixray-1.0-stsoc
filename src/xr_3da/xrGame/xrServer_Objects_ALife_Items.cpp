@@ -8,7 +8,7 @@
 
 #include "stdafx.h"
 #include "xrMessages.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include "clsid_game.h"
 #include "xrServer_Objects_ALife_Items.h"
 #include "clsid_game.h"
@@ -744,8 +744,8 @@ void CSE_ALifeItemPDA::STATE_Write		(NET_Packet	&tNetPacket)
 	tNetPacket.w_stringZ		(m_specific_character);
 	tNetPacket.w_stringZ		(m_info_portion);
 #else
-	SPECIFIC_CHARACTER_ID		tmp_1	= NULL;
-	INFO_ID						tmp_2	= NULL;
+	shared_str		tmp_1	= NULL;
+	shared_str						tmp_2	= NULL;
 
 	tNetPacket.w_stringZ		(tmp_1);
 	tNetPacket.w_stringZ		(tmp_2);

@@ -180,7 +180,6 @@ void CObjectFactory::register_classes	()
 	add<CLevel>													(CLSID_GAME_LEVEL				,"level");
 	add<CGamePersistent>										(CLSID_GAME_PERSISTANT			,"game");
 	add<CHUDManager>											(CLSID_HUDMANAGER				,"hud_manager");
-
 	//Server Game type
 	add<game_sv_Single>											(CLSID_SV_GAME_SINGLE			,"game_sv_single");
 	add<game_sv_Deathmatch>										(CLSID_SV_GAME_DEATHMATCH		,"game_sv_deathmatch");
@@ -197,7 +196,6 @@ void CObjectFactory::register_classes	()
 	add<CUIGameDM>												(CLSID_GAME_UI_DEATHMATCH		,"game_ui_deathmatch");
 	add<CUIGameTDM>												(CLSID_GAME_UI_TEAMDEATHMATCH	,"game_ui_team_deathmatch");
 	add<CUIGameAHunt>											(CLSID_GAME_UI_ARTEFACTHUNT		,"game_ui_artefact_hunt");
-
 #endif
 
 	// server entities
@@ -364,5 +362,4 @@ void CObjectFactory::register_classes	()
 	ADD(CDestroyablePhysicsObject,CSE_ALifeObjectPhysic			,CLSID_PHYSICS_DESTROYABLE		,"obj_phys_destroyable");
 
 	ADD(CInventoryBox			,CSE_InventoryBox				,CLSID_INVENTORY_BOX			,"inventory_box");
-	
 }

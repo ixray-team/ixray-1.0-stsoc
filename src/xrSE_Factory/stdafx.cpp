@@ -8,8 +8,8 @@
 
 #include "stdafx.h"
 
-#pragma comment(lib,"x:/xrCore.lib")
-#pragma comment(lib,"x:/xrLUA.lib")
+#pragma comment(lib,"xrCore.lib")
+#pragma comment(lib,"xrLUA.lib")
 
 // I need this because we have to exclude option /EHsc (exception handling) from the project
 namespace boost {

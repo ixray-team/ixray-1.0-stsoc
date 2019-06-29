@@ -48,8 +48,9 @@ public:
 
 	u32										dwWidth, dwHeight;
 	float									fWidth_2, fHeight_2;
-	BOOL									bReady;
-	BOOL									bActive;
+	BOOL									b_is_Ready;
+	BOOL									b_is_Active;
+	void									OnWM_Activate(WPARAM wParam, LPARAM lParam);
 public:
 	ref_shader								m_WireShader;
 	ref_shader								m_SelectionShader;
@@ -109,15 +110,15 @@ public:
 		#endif // PROFILE_CRITICAL_SECTIONS
 	{
 	    m_hWnd              = NULL;
-		bActive				= FALSE;
-		bReady				= FALSE;
+		b_is_Active			= FALSE;
+		b_is_Ready			= FALSE;
 		Timer.Start			();
 		m_bNearer			= FALSE;
 	};
-	void	Pause							(BOOL bOn);
-	IC BOOL	Pause							()	{return g_pauseMngr.Paused();};
 
-	void PauseSound							(BOOL val);
+	void	Pause							(BOOL bOn, BOOL bTimer, BOOL bSound, LPCSTR reason);
+	BOOL	Paused							();
+
 	// Scene control
 	void PreCache							(u32 frames);
 	BOOL Begin								();

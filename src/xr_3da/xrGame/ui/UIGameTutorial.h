@@ -56,7 +56,8 @@ protected:
 		etiStoredPauseState	= (1<<2),
 		etiCanBeStopped		= (1<<3),
 		etiGrabInput		= (1<<4),
-		eti_last			= 5
+		etiNeedPauseSound	= (1<<5),
+		eti_last			= 6
 	};
 	xr_vector<luabind::functor<void> >	m_start_lua_functions;
 	xr_vector<luabind::functor<void> >	m_stop_lua_functions;

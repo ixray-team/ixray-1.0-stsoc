@@ -162,22 +162,13 @@ void CPda::ActivePDAContacts(xr_vector<CPda*>& res)
 	xr_vector<CObject*>::iterator it_e		= m_active_contacts.end();
 
 	for(;it!=it_e;++it)
-		res.push_back(GetPdaFromOwner(*it));
+	{
+		CPda* p = GetPdaFromOwner(*it);
+		if(p)
+			res.push_back(p);
+	}
 }
 
-/*
-xr_vector<CObject*>&	CPda::ActiveContacts			()							
-{
-	m_active_contacts.clear_not_free();
-	xr_vector<CObject*>::iterator it= feel_touch.begin();
-	for(;it!=feel_touch.end();++it){
-		CEntityAlive* pEA = smart_cast<CEntityAlive*>(*it);
-		if(!!pEA->g_Alive())
-			m_active_contacts.push_back(*it);
-	}
-	return	m_active_contacts;
-}
-*/
 void CPda::save(NET_Packet &output_packet)
 {
 	inherited::save	(output_packet);
@@ -188,11 +179,6 @@ void CPda::load(IReader &input_packet)
 {
 	inherited::load	(input_packet);
 	load_data		(m_sFullName, input_packet);
-}
-
-LPCSTR		CPda::NameComplex		()
-{
-	return Name();
 }
 
 CObject* CPda::GetOwnerObject()

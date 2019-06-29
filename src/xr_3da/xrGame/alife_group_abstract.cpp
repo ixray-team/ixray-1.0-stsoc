@@ -58,7 +58,7 @@ void CSE_ALifeGroupAbstract::switch_offline	()
 		CSE_ALifeMonsterAbstract		*tpGroupMember	= smart_cast<CSE_ALifeMonsterAbstract*>(ai().alife().objects().object(*I));
 		CSE_ALifeMonsterAbstract		*tpGroup		= smart_cast<CSE_ALifeMonsterAbstract*>(this);
 		if (tpGroupMember && tpGroup) {
-			tpGroup->m_fCurSpeed		= tpGroup->m_fGoingSpeed;
+			tpGroup->m_fCurSpeed		= tpGroup->m_fCurrentLevelGoingSpeed;
 			tpGroup->o_Position			= tpGroupMember->o_Position;
 			u32	dwNodeID				= tpGroup->m_tNodeID;
 			tpGroup->m_tGraphID			= ai().cross_table().vertex(dwNodeID).game_vertex_id();
@@ -166,9 +166,9 @@ void CSE_ALifeGroupAbstract::try_switch_offline		()
 		tpGroupMember->m_bOnline			= false;
 		CSE_ALifeInventoryItem				*item = smart_cast<CSE_ALifeInventoryItem*>(tpGroupMember);
 		if (item && item->attached()) {
-				CSE_ALifeTraderAbstract		*trader = smart_cast<CSE_ALifeTraderAbstract*>(ai().alife().objects().object(tpGroupMember->ID_Parent,true));
-				if (trader)
-					trader->detach			(item);
+			CSE_ALifeDynamicObject			*object = ai().alife().objects().object(tpGroupMember->ID_Parent,true);
+			if (object)
+				object->detach				(item);
 		}
 		// store the __new separate object into the registries
 		I->alife().register_object			(tpGroupMember);

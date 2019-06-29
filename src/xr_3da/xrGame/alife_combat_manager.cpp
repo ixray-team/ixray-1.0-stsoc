@@ -8,13 +8,14 @@
 
 #include "stdafx.h"
 #include "alife_combat_manager.h"
-#include "ef_storage.h"
-#include "ef_pattern.h"
 #include "xrServer_Objects_ALife_Monsters.h"
-#include "alife_object_registry.h"
-#include "alife_spawn_registry.h"
 #include "alife_graph_registry.h"
 #include "alife_schedule_registry.h"
+/**
+#include "ef_storage.h"
+#include "ef_pattern.h"
+#include "alife_object_registry.h"
+#include "alife_spawn_registry.h"
 #include "alife_time_manager.h"
 #include "relation_registry.h"
 
@@ -36,17 +37,21 @@ void print_time(LPCSTR S, _TIME_ID tTimeID)
 	Msg("%s year %d month %d week %d day %d time %d:%d:%d.%d",S,Years,Months,Week,Days,Hours,Minutes,Seconds,Milliseconds);
 }
 
+/**/
 CALifeCombatManager::CALifeCombatManager	(xrServer *server, LPCSTR section) :
-	inherited		(server,section)
+	CALifeSimulatorBase	(server,section)
 {
+/**
 	seed						(u32(CPU::QPC() & 0xffffffff));
 	m_dwMaxCombatIterationCount	= pSettings->r_u32	(section,"max_combat_iteration_count");
 	for (int i=0; i<2; ++i) {
 		m_tpaCombatGroups[i].clear();
 		m_tpaCombatGroups[i].reserve(255);
 	}
+/**/
 }
 
+/**
 CALifeCombatManager::~CALifeCombatManager	()
 {
 }
@@ -155,7 +160,9 @@ bool CALifeCombatManager::bfCheckObjectDetection(CSE_ALifeSchedulable *tpALifeSc
 		}
 		default :										NODEFAULT;
 	}
+#ifdef DEBUG
 	return												(false);
+#endif // DEBUG
 }
 
 bool CALifeCombatManager::bfCheckForInteraction(CSE_ALifeSchedulable *tpALifeSchedulable1, CSE_ALifeSchedulable *tpALifeSchedulable2, int &iCombatGroupIndex, bool &bMutualDetection)
@@ -447,7 +454,7 @@ ALife::ERelationType	CALifeCombatManager::relation_type	(CSE_ALifeMonsterAbstrac
 	else
 		return(ALife::eRelationTypeNeutral);
 }
-
+/**/
 void CALifeCombatManager::kill_entity	(CSE_ALifeMonsterAbstract *l_tpALifeMonsterAbstract, const GameGraph::_GRAPH_ID &l_tGraphID, CSE_ALifeSchedulable *schedulable)
 {
 	VERIFY									(l_tpALifeMonsterAbstract->g_Alive());

@@ -42,10 +42,6 @@ public:
 
 	virtual void			OnH_B_Chield						()				{inherited::OnH_B_Chield();}
 
-	virtual bool 			IsPending							() const 		{return inherited::IsPending();}
-	virtual bool 			IsHidden							() const 		{return inherited::IsHidden();}
-	virtual bool 			IsHiding							() const 		{return inherited::IsHiding();}
-
 	virtual	void			Hit									(SHit* pHDS);
 
 	virtual bool			NeedToDestroyObject					() const; 

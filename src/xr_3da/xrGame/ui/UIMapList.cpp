@@ -11,6 +11,9 @@
 #include "UIListBoxItem.h"
 #include "../../xr_ioconsole.h"
 #include "../string_table.h"
+#include "CExtraContentFilter.h"
+
+#include "../object_broker.h"
 
 extern ENGINE_API string512  g_sLaunchOnExit_app;
 extern ENGINE_API string512  g_sLaunchOnExit_params;
@@ -30,6 +33,8 @@ CUIMapList::CUIMapList(){
 	m_pBtnRight		= xr_new<CUI3tButton>();
 	m_pBtnUp		= xr_new<CUI3tButton>();
 	m_pBtnDown		= xr_new<CUI3tButton>();
+
+	m_pExtraContentFilter = xr_new<CExtraContentFilter>();
 
 	m_pList1->SetAutoDelete(true);
 	m_pList2->SetAutoDelete(true);
@@ -55,13 +60,13 @@ CUIMapList::CUIMapList(){
 }
 
 CUIMapList::~CUIMapList(){
-	
+	delete_data(m_pExtraContentFilter);
 }
 
 void CUIMapList::StartDedicatedServer(){
-	strcpy					(g_sLaunchOnExit_app,"dedicated//xr_3da.exe");
+	strcpy					(g_sLaunchOnExit_app,"dedicated\\xr_3da.exe");
 
-	strcpy					(g_sLaunchOnExit_params,"-");
+	strcpy					(g_sLaunchOnExit_params,"-i -nosound -");
 	strcat					(g_sLaunchOnExit_params,GetCommandLine(""));
 	Msg						("%s","-- Going to quit before starting dedicated server");
 	Msg						("%s %s",g_sLaunchOnExit_app, g_sLaunchOnExit_params);
@@ -134,7 +139,7 @@ const char* CUIMapList::GetCLGameModeName(){
 
 EGameTypes CUIMapList::GetCurGameType()
 {
-	LPCSTR text = m_pModeSelector->GetText();
+	LPCSTR text = m_pModeSelector->GetTokenText();
 
 	if (0 == xr_strcmp(text, get_token_name(g_GameModes,GAME_DEATHMATCH)) )
 		return	GAME_DEATHMATCH;
@@ -318,6 +323,7 @@ void CUIMapList::UpdateMapList(EGameTypes GameType){
 	{
 		CUIListBoxItem* itm		= m_pList1->AddItem( CStringTable().translate(m_maps[GameType][i]).c_str() );
 		itm->SetData			( (void*)(__int64)i );
+		itm->Enable(m_pExtraContentFilter->IsDataEnabled(m_maps[GameType][i].c_str()));
 	}
 }
 
@@ -332,6 +338,7 @@ void CUIMapList::Update(){
 void CUIMapList::OnBtnRightClick()
 {
 	CUIListBoxItem* itm1			= m_pList1->GetSelectedItem();
+	if (!itm1) return;
 	CUIListBoxItem* itm2			= m_pList2->AddItem( itm1->GetText() );
 	itm2->SetData					(itm1->GetData());
 }

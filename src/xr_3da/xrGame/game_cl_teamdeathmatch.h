@@ -52,7 +52,7 @@ public :
 protected:
 	virtual const shared_str			GetBaseCostSect			() {return "teamdeathmatch_base_cost";}
 	virtual const shared_str			GetTeamMenu				(s16 team);
-	CUISpawnWnd*						pUITeamSelectWnd;
+//	CUISpawnWnd*						pUITeamSelectWnd;
 
 	PRESET_ITEMS						PresetItemsTeam1;
 	PRESET_ITEMS						PresetItemsTeam2;

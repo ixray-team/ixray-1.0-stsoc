@@ -237,7 +237,7 @@ void CStalkerMovementManager::setup_movement_params	()
 
 	if (use_desired_position()) {
 		VERIFY								(_valid(desired_position()));
-		if (!restrictions().actual() && !restrictions().accessible(desired_position())) {
+		if (!restrictions().accessible(desired_position())) {
 			Fvector							temp;
 			level_path().set_dest_vertex	(restrictions().accessible_nearest(desired_position(),temp));
 			detail().set_dest_position		(temp);
@@ -245,16 +245,29 @@ void CStalkerMovementManager::setup_movement_params	()
 		else
 			detail().set_dest_position		(desired_position());
 	}
-	else
+	else {
 		if ((path_type() != MovementManager::ePathTypePatrolPath) && (path_type() != MovementManager::ePathTypeGamePath)  && (path_type() != MovementManager::ePathTypeNoPath)) {
-			if (!restrictions().actual() && !restrictions().accessible(level_path().dest_vertex_id())) {
+			if (!restrictions().accessible(level_path().dest_vertex_id())) {
 				Fvector							temp;
 				level_path().set_dest_vertex	(restrictions().accessible_nearest(ai().level_graph().vertex_position(level_path().dest_vertex_id()),temp));
 				detail().set_dest_position		(temp);
 			}
-			else
-				detail().set_dest_position		(ai().level_graph().vertex_position(level_path().dest_vertex_id()));
+			else {
+				u32								vertex_id = level_path().dest_vertex_id();
+				Fvector							vertex_position = ai().level_graph().vertex_position(level_path().dest_vertex_id());
+				VERIFY2							(
+					restrictions().accessible(vertex_position) || show_restrictions(&restrictions()),
+					make_string(
+						"vertex_id[%d],position[%f][%f][%f],object[%s]",
+						vertex_id,
+						VPUSH(vertex_position),
+						*object().cName()
+					)
+				);
+				detail().set_dest_position		(vertex_position);
+			}
 		}
+	}
 
 	if (use_desired_direction()) {
 		VERIFY											(_valid(desired_direction()));
@@ -429,7 +442,7 @@ void CStalkerMovementManager::parse_velocity_mask	()
 			if (m_object->brain().current_action_id() == StalkerDecisionSpace::eWorldOperatorCombatPlanner) {
 				CStalkerCombatPlanner	&planner = smart_cast<CStalkerCombatPlanner&>(m_object->brain().current_action());
 				if (planner.current_action_id() != StalkerDecisionSpace::eWorldOperatorKillWoundedEnemy)
-					Msg					("! stalker %s is doing bad thing (action %s)",*m_object->cName(),planner.current_action().m_action_name);
+					Msg					("~ stalker %s is doing bad thing (action %s)",*m_object->cName(),planner.current_action().m_action_name);
 			}
 #endif // DEBUG
 			m_current.m_mental_state	= eMentalStateFree;
@@ -482,9 +495,14 @@ void CStalkerMovementManager::set_nearest_accessible_position(Fvector desired_po
 	if (!restrictions().accessible(desired_position)) {
 		level_vertex_id			= restrictions().accessible_nearest(Fvector().set(desired_position),desired_position);
 		VERIFY					(restrictions().accessible(level_vertex_id));
+		VERIFY					(restrictions().accessible(desired_position));
 	}
 	else {
-		VERIFY2					(restrictions().accessible(level_vertex_id) || show_restrictions(&restrictions()),*object().cName());
+		if (!restrictions().accessible(level_vertex_id)) {
+			level_vertex_id		= restrictions().accessible_nearest(ai().level_graph().vertex_position(level_vertex_id),desired_position);
+			VERIFY				(restrictions().accessible(level_vertex_id));
+			VERIFY				(restrictions().accessible(desired_position));
+		}
 	}
 
 	VERIFY						(ai().level_graph().inside(level_vertex_id,desired_position));

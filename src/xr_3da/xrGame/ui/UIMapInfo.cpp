@@ -30,12 +30,13 @@ void CUIMapInfo::Init(float x, float y, float width, float height){
 							text += *str_tbl.translate(z);									\
 						text += "%c[default]\\n";											\
 						st = xr_new<CUIStatic>();											\
+						st->SetTextComplexMode(true);										\
 						st->SetFont(txt_font);												\
 						st->SetTextColor(header_color);										\
 						st->SetText(text.c_str());											\
 						st->SetWidth(m_view->GetDesiredChildWidth());						\
 						st->AdjustHeightToText();											\
-						m_view->AddWindow(st, true)												\
+						m_view->AddWindow(st, true)											\
 
 void CUIMapInfo::InitMap(const char* map_name){
 	m_view->Clear();
@@ -53,37 +54,77 @@ void CUIMapInfo::InitMap(const char* map_name){
     // try to find file with info
 	xr_string info_path = "text\\map_desc\\";
 	info_path += map_name;
-	info_path += ".txt";
+	info_path += ".ltx";
 
 	if (FS.exist("$game_config$", info_path.c_str()))
 	{
-		string256 ltxPath;
-		FS.update_path	(ltxPath, CONFIG_PATH, info_path.c_str());
-		CInifile ltx	(ltxPath);
-		xr_string text;
+		string256				ltxPath;
+		FS.update_path			(ltxPath, CONFIG_PATH, info_path.c_str());
+		CInifile ltx			(ltxPath);
+		xr_string				text;
 
 
 		//map name
-		st = xr_new<CUIStatic>(); 
-		CUIXmlInit::InitStatic(xml_doc,"map_name",0,st); 
-		if (ltx.line_exist("map_info","name"))
-			st->SetTextST(*ltx.r_string_wb("map_info", "name"));
-		else
-			st->SetTextST(map_name);
-		st->SetWidth(m_view->GetDesiredChildWidth());
-		st->AdjustHeightToText();
-		m_view->AddWindow(st, true);
+		st						= xr_new<CUIStatic>(); 
+		CUIXmlInit::InitStatic	(xml_doc,"map_name",0,st); 
 
-		u32 header_color, txt_color;
-		CGameFont* txt_font;
-		CUIXmlInit::InitFont(xml_doc,"header",0,header_color, txt_font);
-		txt_color = CUIXmlInit::GetColor(xml_doc,"txt:text", 0, 0x00);
-		string64 txt_color_tag;
-		sprintf(txt_color_tag, "%s[%u,%u,%u,%u]", "%c", (txt_color & 0xff000000)>>24, (txt_color & 0x00ff0000)>>16, (txt_color & 0x0000ff00) >> 8, txt_color & 0x000000ff);
+		st->SetTextST			(map_name);
+		st->SetWidth			(m_view->GetDesiredChildWidth());
+		st->AdjustHeightToText	();
+		m_view->AddWindow		(st, true);
 
-		ADD_TEXT("mp_players",		"players",		"Unknown");		
-		ADD_TEXT("mp_modes",		"modes",		"Unknown");		
-		ADD_TEXT("mp_description",	"short_desc",	"There is no description available");
+		u32						header_color;
+		u32						txt_color;
+		CGameFont*				txt_font;
+		CUIXmlInit::InitFont	(xml_doc,"header",0,header_color, txt_font);
+		txt_color				= CUIXmlInit::GetColor(xml_doc,"txt:text", 0, 0x00);
+		string64				txt_color_tag;
+		sprintf					(txt_color_tag, "%s[%u,%u,%u,%u]", "%c", 
+								(txt_color & 0xff000000)>>24, 
+								(txt_color & 0x00ff0000)>>16, 
+								(txt_color & 0x0000ff00) >> 8, 
+								txt_color & 0x000000ff);
+
+		ADD_TEXT("mp_players",		"players",		"Unknown");
+
+//.		ADD_TEXT("mp_modes",		"modes",		"Unknown");		
+		
+		shared_str _modes = ltx.r_string_wb("map_info", "modes");
+
+			text = *str_tbl.translate("modes");
+			text += ": ";
+			text += txt_color_tag;
+			bool b_ = false;
+			if(strstr(_modes.c_str(),"st_deathmatch"))
+			{
+				text += *str_tbl.translate("st_deathmatch");
+				b_ = true;
+			}
+			if(strstr(_modes.c_str(),"st_team_deathmatch"))
+			{
+				if(b_) text			+= ", ";
+				text				+= *str_tbl.translate("st_team_deathmatch");
+				b_					= true;
+			}
+			if(strstr(_modes.c_str(),"st_artefacthunt"))
+			{
+				if(b_) text			+= ", ";
+				text				+= *str_tbl.translate("st_artefacthunt");
+			}
+
+			text += "%c[default]\\n";
+
+			st						= xr_new<CUIStatic>();
+			st->SetTextComplexMode	(true);
+			st->SetFont				(txt_font);
+			st->SetTextColor		(header_color);
+			st->SetText				(text.c_str());
+			st->SetWidth			(m_view->GetDesiredChildWidth());
+			st->AdjustHeightToText	();
+			m_view->AddWindow		(st, true);
+
+		
+		ADD_TEXT("mp_description",	"short_desc", "");
 
 		if (ltx.line_exist("map_info","large_desc"))
 			m_large_desc = str_tbl.translate(ltx.r_string_wb("map_info", "large_desc"));		
@@ -98,8 +139,8 @@ void CUIMapInfo::InitMap(const char* map_name){
 		m_view->AddWindow(st, true);
 	}
 
-	if (!m_large_desc)
-        m_large_desc = str_tbl.translate("no_desc_for_this_map");
+//.	if (!m_large_desc)
+//.       m_large_desc = str_tbl.translate("no_desc_for_this_map");
 }
 
 const char*	 CUIMapInfo::GetLargeDesc(){

@@ -51,7 +51,7 @@ public:
 	
 	void					Init			(CUIXml* xml, LPCSTR path, int idx);
 	virtual void			SetSelected		(bool b);
-	virtual bool			OnMouseDown		(bool left_button = true);
+	virtual bool			OnMouseDown		(int mouse_btn);
 };
 
 class CUIStalkerRankingElipsisItem :public CUIStalkerRankingInfoItem
@@ -60,5 +60,5 @@ class CUIStalkerRankingElipsisItem :public CUIStalkerRankingInfoItem
 public:
 					CUIStalkerRankingElipsisItem(CUIStalkersRankingWnd*);
 	virtual void			SetSelected		(bool b);
-	virtual bool			OnMouseDown		(bool left_button = true);
+	virtual bool			OnMouseDown		(int mouse_btn);
 };

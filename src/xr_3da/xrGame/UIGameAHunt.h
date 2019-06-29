@@ -14,6 +14,7 @@ class CUIAHuntFragList;
 class CUIAHuntPlayerList;
 class game_cl_ArtefactHunt;
 class CUIProgressShape;
+class CUIMessageBoxEx;
 
 class CUIGameAHunt: public CUIGameTDM
 {
@@ -24,6 +25,7 @@ private:
 
 public:
 	CUIProgressShape*	m_pReinforcementInidcator;
+	CUIMessageBoxEx*	m_pBuySpawnMsgBox;
 
 public:
 	virtual void		SetClGame				(game_cl_GameState* g);
@@ -36,6 +38,7 @@ public:
 
 	virtual void		Render					();
 	virtual void		OnFrame					();
+	virtual	void		reset_ui				();
 
 protected:
 	shared_str				m_todo_caption;			

@@ -59,7 +59,7 @@ void CRenderDevice::_Create	(LPCSTR shName)
 	Memory.mem_compact			();
 
 	// after creation
-	bReady						= TRUE;
+	b_is_Ready					= TRUE;
 	_SetupStates				();
 
 	// Signal everyone - device created
@@ -78,7 +78,7 @@ void CRenderDevice::_Create	(LPCSTR shName)
 
 void CRenderDevice::Create	() 
 {
-	if (bReady)			return;		// prevent double call
+	if (b_is_Ready)		return;		// prevent double call
 	Statistic			= xr_new<CStats>();
 	Log					("Starting RENDER device...");
 

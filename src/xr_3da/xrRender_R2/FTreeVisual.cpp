@@ -19,8 +19,6 @@ shared_str					c_c_sun		;
 
 FTreeVisual::FTreeVisual	(void)
 {
-	pVertices			= 0;
-	pIndices			= 0;
 }
 
 FTreeVisual::~FTreeVisual	(void)
@@ -30,8 +28,6 @@ FTreeVisual::~FTreeVisual	(void)
 void FTreeVisual::Release	()
 {
 	IRender_Visual::Release	();
-	_RELEASE			(pVertices);
-	_RELEASE			(pIndices);
 }
 
 void FTreeVisual::Load		(const char* N, IReader *data, u32 dwFlags)
@@ -48,8 +44,11 @@ void FTreeVisual::Load		(const char* N, IReader *data, u32 dwFlags)
 		vBase				= data->r_u32				();
 		vCount				= data->r_u32				();
 		vFormat				= RImplementation.getVB_Format	(ID);
-		pVertices			= RImplementation.getVB			(ID);
-		pVertices->AddRef	();
+		
+		VERIFY				(NULL==p_rm_Vertices);
+
+		p_rm_Vertices		= RImplementation.getVB			(ID);
+		p_rm_Vertices->AddRef();
 
 		// indices
 		dwPrimitives		= 0;
@@ -57,8 +56,10 @@ void FTreeVisual::Load		(const char* N, IReader *data, u32 dwFlags)
 		iBase				= data->r_u32				();
 		iCount				= data->r_u32				();
 		dwPrimitives		= iCount/3;
-		pIndices			= RImplementation.getIB		(ID);
-		pIndices->AddRef	();
+		
+		VERIFY				(NULL==p_rm_Indices);
+		p_rm_Indices			= RImplementation.getIB		(ID);
+		p_rm_Indices->AddRef	();
 	}
 
 	// load tree-def
@@ -71,7 +72,7 @@ void FTreeVisual::Load		(const char* N, IReader *data, u32 dwFlags)
 	}
 
 	// Geom
-	geom.create			(vFormat,pVertices,pIndices);
+	rm_geom.create			(vFormat,p_rm_Vertices,p_rm_Indices);
 
 	// Get constants
 	m_xform				= "m_xform";
@@ -131,7 +132,7 @@ void FTreeVisual::Render	(float LOD)
 	RCache.set_c			(c_c_scale,	s*c_scale.rgb.x,	s*c_scale.rgb.y,	s*c_scale.rgb.z,	s*c_scale.hemi);	// scale
 	RCache.set_c			(c_c_bias,	s*c_bias.rgb.x,		s*c_bias.rgb.y,		s*c_bias.rgb.z,		s*c_bias.hemi);		// bias
 #else
-	CEnvDescriptor&	desc	= g_pGamePersistent->Environment.CurrentEnv;
+	CEnvDescriptor&	desc	= g_pGamePersistent->Environment().CurrentEnv;
 	RCache.set_c			(c_c_scale,	s*c_scale.rgb.x,					s*c_scale.rgb.y,					s*c_scale.rgb.z,				s*c_scale.hemi);	// scale
 	RCache.set_c			(c_c_bias,	s*c_bias.rgb.x + desc.ambient.x,	s*c_bias.rgb.y + desc.ambient.y,	s*c_bias.rgb.z+desc.ambient.z,	s*c_bias.hemi);		// bias
 #endif
@@ -145,13 +146,15 @@ void	FTreeVisual::Copy	(IRender_Visual *pSrc)
 
 	FTreeVisual	*pFrom		= dynamic_cast<FTreeVisual*> (pSrc);
 
-	PCOPY(geom);
+	PCOPY(rm_geom);
 
-	PCOPY(pVertices);
+	PCOPY(p_rm_Vertices);	if (p_rm_Vertices) p_rm_Vertices->AddRef();
+
 	PCOPY(vBase);
 	PCOPY(vCount);
 
-	PCOPY(pIndices);
+	PCOPY(p_rm_Indices);	if (p_rm_Indices) p_rm_Indices->AddRef();
+
 	PCOPY(iBase);
 	PCOPY(iCount);
 	PCOPY(dwPrimitives);
@@ -181,7 +184,7 @@ void FTreeVisual_ST::Load		(const char* N, IReader *data, u32 dwFlags)
 void FTreeVisual_ST::Render		(float LOD)
 {
 	inherited::Render			(LOD);
-	RCache.set_Geometry			(geom);
+	RCache.set_Geometry			(rm_geom);
 	RCache.Render				(D3DPT_TRIANGLELIST,vBase,0,vCount,iBase,dwPrimitives);
 	RCache.stat.r.s_flora.add	(vCount);
 }
@@ -224,7 +227,7 @@ void FTreeVisual_PM::Render		(float LOD)
 	}
 	VERIFY						(lod_id>=0 && lod_id<int(pSWI->count));
 	FSlideWindow& SW			= pSWI->sw[lod_id];
-	RCache.set_Geometry			(geom);
+	RCache.set_Geometry			(rm_geom);
 	RCache.Render				(D3DPT_TRIANGLELIST,vBase,0,SW.num_verts,iBase+SW.offset,SW.num_tris);
 	RCache.stat.r.s_flora.add	(SW.num_verts);
 }

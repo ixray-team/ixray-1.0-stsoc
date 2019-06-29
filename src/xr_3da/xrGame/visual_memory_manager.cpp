@@ -90,6 +90,8 @@ CVisualMemoryManager::CVisualMemoryManager		(CCustomMonster *object, CAI_Stalker
 
 CVisualMemoryManager::~CVisualMemoryManager		()
 {
+	clear_delayed_objects	();
+
 	if (m_actor)
 		xr_delete		(m_objects);
 }
@@ -215,7 +217,7 @@ float CVisualMemoryManager::object_visible_distance(const CGameObject *game_obje
 		m_object->update_range_fov		(object_range,object_fov,m_object->eye_range,deg2rad(m_object->eye_fov));
 	else {
 		object_fov						= deg2rad(m_actor->cam_Active()->f_fov);
-		object_range					= g_pGamePersistent->Environment.CurrentEnv.far_plane;
+		object_range					= g_pGamePersistent->Environment().CurrentEnv.far_plane;
 	}
 
 	float								fov = object_fov*.5f;
@@ -392,10 +394,17 @@ void CVisualMemoryManager::add_visible_object	(const CObject *object, float time
 			*I					= visible_object;
 		}
 		else
-			m_objects->push_back	(visible_object);
+			m_objects->push_back(visible_object);
 	}
-	else
-		(*J).fill				(game_object,self,(*J).m_squad_mask.get() | mask(),(*J).m_visible.get() | mask());
+	else {
+		if (!fictitious)
+			(*J).fill			(game_object,self,(*J).m_squad_mask.get() | mask(),(*J).m_visible.get() | mask());
+		else {
+			(*J).m_visible.assign	((*J).m_visible.get() | mask());
+			(*J).m_squad_mask.assign((*J).m_squad_mask.get() | mask());
+			(*J).m_enabled			= true;
+		}
+	}
 //	STOP_PROFILE
 }
 
@@ -665,6 +674,7 @@ void CVisualMemoryManager::save	(NET_Packet &packet) const
 #ifdef USE_FIRST_LEVEL_TIME
 		packet.w_u32			((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_first_level_time) : 0);
 #endif // USE_FIRST_LEVEL_TIME
+		packet.w_u32			((*I).m_visible.flags);
 	}
 }
 
@@ -718,6 +728,8 @@ void CVisualMemoryManager::load	(IReader &packet)
 		object.m_first_level_time	= packet.r_u32();
 		object.m_first_level_time	+= Device.dwTimeGlobal;
 #endif // USE_FIRST_LEVEL_TIME
+		object.m_visible.assign		(packet.r_u32());
+
 		if (object.m_object) {
 			add_visible_object		(object);
 			continue;

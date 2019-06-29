@@ -102,11 +102,18 @@ void CStalkerActionReachWounded::execute					()
 		return;
 
 	const CEntityAlive						*enemy = object().memory().enemy().selected();
+
+	if (object().agent_manager().enemy().wounded_processed(enemy)) {
+		object().movement().set_movement_type	(eMovementTypeStand);
+		return;
+	}
+
 	CMemoryInfo								mem_object = object().memory().memory(enemy);
 
-	if (!mem_object.m_object)
+	if (!mem_object.m_object) {
+		object().movement().set_movement_type	(eMovementTypeStand);
 		return;
-
+	}
 
 	if (object().movement().accessible(mem_object.m_object_params.m_level_vertex_id))
 		object().movement().set_level_dest_vertex			(mem_object.m_object_params.m_level_vertex_id);
@@ -118,25 +125,24 @@ void CStalkerActionReachWounded::execute					()
 		return;
 	}
 
-	if (object().agent_manager().enemy().wounded_processed(enemy)) {
+	ALife::_OBJECT_ID						processor_id = object().agent_manager().enemy().wounded_processor(enemy);
+	if (processor_id == ALife::_OBJECT_ID(-1)) {
 		object().movement().set_movement_type	(eMovementTypeStand);
 		return;
 	}
 
-	ALife::_OBJECT_ID					processor_id = object().agent_manager().enemy().wounded_processor(enemy);
-	if (!((processor_id != ALife::_OBJECT_ID(-1)) && (processor_id != object().ID()))) {
+//	CObject									*processor = Level().Objects.net_Find(processor_id);
+//	if (processor && processor->Position().distance_to_sqr(object().Position()) < _sqr(3.f)) {
+//		object().movement().set_movement_type	(eMovementTypeStand);
+//		return;
+//	}
+
+	if (object().Position().distance_to_sqr(mem_object.m_object_params.m_position) < _sqr(3.f)) {
 		object().movement().set_movement_type	(eMovementTypeStand);
 		return;
 	}
 
-	CObject								*processor = Level().Objects.net_Find(processor_id);
-	VERIFY								(processor);
-	if (processor->Position().distance_to(object().Position()) < 2.f) {
-		object().movement().set_movement_type	(eMovementTypeStand);
-		return;
-	}
-
-	object().movement().set_movement_type		(eMovementTypeWalk);
+	object().movement().set_movement_type	(eMovementTypeWalk);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -251,11 +257,13 @@ void CStalkerActionPrepareWounded::execute					()
 	if (object().agent_manager().enemy().wounded_processor(enemy) != object().ID())
 		return;
 
-	VERIFY					(object().memory().visual().visible_now(enemy));
-	object().sight().setup	(CSightAction(enemy,true));
+//	not a bug since killer do not look at enemy and can be too close
+//	to see him straight forward
+//	VERIFY						(object().memory().visual().visible_now(enemy));
+	object().sight().setup		(CSightAction(enemy,true));
 
 	if (!object().sound().active_sound_count(true))
-		m_storage->set_property					(eWorldPropertyWoundedEnemyPrepared,true);
+		m_storage->set_property	(eWorldPropertyWoundedEnemyPrepared,true);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -293,9 +301,30 @@ void CStalkerActionKillWounded::execute					()
 		return;
 
 	const CEntityAlive		*enemy = object().memory().enemy().selected();
-	VERIFY					(object().memory().visual().visible_now(enemy));
 	object().sight().setup	(CSightAction(enemy,true));
 	object().set_goal		(eObjectActionFire1,weapon_to_kill(&object()),MIN_QUEUE,MAX_QUEUE,MIN_INTERVAL,MAX_INTERVAL);
+
+	if (object().memory().visual().visible_now(enemy) && object().can_kill_enemy() && !object().can_kill_member())
+		return;
+
+	// this is fake
+	// but sometimes enemy can not be visible
+	// when it plays animation inside another object
+	// therefore we should use this ugly workaround
+	// and hit enemy virtually
+	NET_Packet				P;
+	SHit					HS;
+	HS.GenHeader			(GE_HIT, enemy->ID());
+	HS.whoID				= object().ID();
+	HS.weaponID				= weapon_to_kill(&object())->object().ID();
+	HS.dir					= Fvector().set(0.f,0.f,1.f);
+	HS.power				= 1.f;
+	HS.boneID				= smart_cast<CKinematics*>((const_cast<CEntityAlive*>(enemy))->Visual())->LL_GetBoneRoot();
+	HS.p_in_bone_space		= Fvector().set(0.f,0.f,0.f);
+	HS.impulse				= 1.f;
+	HS.hit_type				= ALife::eHitTypeWound;
+	HS.Write_Packet			(P);
+	object().u_EventSend	(P);
 }
 
 //////////////////////////////////////////////////////////////////////////

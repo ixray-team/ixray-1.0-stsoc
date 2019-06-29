@@ -139,6 +139,10 @@ void	CBlender_Compile::PassSET_ZB		(BOOL bZTest, BOOL bZWrite, BOOL bInvertZTest
 	if (Pass())	bZWrite = FALSE;
 	RS.SetRS	(D3DRS_ZFUNC,			bZTest?(bInvertZTest?D3DCMP_GREATER:D3DCMP_LESSEQUAL):D3DCMP_ALWAYS);
 	RS.SetRS	(D3DRS_ZWRITEENABLE,	BC(bZWrite));
+	/*
+	if (bZWrite || bZTest)				RS.SetRS	(D3DRS_ZENABLE,	D3DZB_TRUE);
+	else								RS.SetRS	(D3DRS_ZENABLE,	D3DZB_FALSE);
+	*/
 }
 
 void	CBlender_Compile::PassSET_ablend_mode	(BOOL bABlend,	u32 abSRC, u32 abDST)

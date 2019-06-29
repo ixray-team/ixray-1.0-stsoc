@@ -64,9 +64,10 @@ CSE_ALifeItemWeapon *CSE_ALifeHumanAbstract::tpfGetBestWeapon		(ALife::EHitType 
 
 void CSE_ALifeHumanAbstract::on_register							()
 {
+	inherited2::on_register					();
 	brain().on_register						();
 	// because we need to load profile to setup graph vertex masks
-	specific_character				();
+	specific_character						();
 }
 
 void CSE_ALifeHumanAbstract::on_unregister							()

@@ -141,7 +141,7 @@ http://www.oberhumer.com/opensource/lzo/
 #  define memset    lzo_memset
 #endif
 
-#define LZO_BYTE(x)			((unsigned char) (x))
+#define LZO_BYTE(x)			((unsigned char) (x & 0xff))
 #define LZO_MAX(a,b)        _max(a,b)
 #define LZO_MIN(a,b)        _min(a,b)
 #define LZO_MAX3(a,b,c)     ((a) >= (b) ? LZO_MAX(a,c) : LZO_MAX(b,c))

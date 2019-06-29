@@ -95,7 +95,7 @@ void CConsole::OnRender	()
 
 	if (!bVisible) return;
 	if (0==pFont)
-		pFont		= xr_new<CGameFont>	("console_font",CGameFont::fsDeviceIndependent);
+		pFont		= xr_new<CGameFont>	("hud_font_di",CGameFont::fsDeviceIndependent);
 
 	bGame	=false;	
 	if ( (g_pGameLevel && g_pGameLevel->bReady)||
@@ -122,7 +122,7 @@ void CConsole::OnRender	()
 	if (bCursor) strcat(buf,"|");
 
 	pFont->SetColor( color_rgba(128  ,128  ,255, 255) );
-	pFont->SetSizeI(0.02f);
+	pFont->SetHeightI(0.025f);
 	pFont->OutI	( -1.f, fMaxY-LDIST, "%s", buf );
 
 	float ypos=fMaxY-LDIST-LDIST;
@@ -133,7 +133,7 @@ void CConsole::OnRender	()
 		if	(0==ls)		continue;
 		switch (ls[0]) {
 		case '~':
-			pFont->SetColor(color_rgba(0  ,0  ,255, 255));
+			pFont->SetColor(color_rgba(255,255,0, 255));
 			pFont->OutI  (-1.f,ypos,"%s",&ls[2]);
 			break;
 		case '!':
@@ -389,8 +389,8 @@ void CConsole::ExecuteCommand()
 			if (editor[i+1]==' ') continue;
 			if (i==len-1) goto outloop;
 			break;
-		case ';':
-			goto outloop;
+//.		case ';':
+//.			goto outloop;
 		}
 		converted[j++]=editor[i];
 	}

@@ -145,7 +145,7 @@ public:
 	ICF BOOL							getVisible			()			const	{ return Props.bVisible;			}
 	void								setEnabled			(BOOL _enabled);
 	ICF BOOL							getEnabled			()			const	{ return Props.bEnabled;			}
-	ICF void							setDestroy			(BOOL _destroy)		{ Props.bDestroy = _destroy?1:0; if(_destroy)	processing_activate(); }
+		void							setDestroy			(BOOL _destroy);
 	ICF BOOL							getDestroy			()			const	{ return Props.bDestroy;			}
 	ICF void							setLocal			(BOOL _local)		{ Props.net_Local = _local?1:0;		}
 	ICF BOOL							getLocal			()			const	{ return Props.net_Local;			}
@@ -188,6 +188,9 @@ public:
 	virtual void						OnH_B_Independent	(bool just_before_destroy);
 	virtual void						OnH_A_Chield		();		// after
 	virtual void						OnH_A_Independent	();
+
+public:
+	virtual bool						register_schedule	() const {return true;}
 };
 
 #pragma pack(pop)

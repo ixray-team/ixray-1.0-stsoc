@@ -9,7 +9,6 @@
 
 #include "StdAfx.h"
 #include "UI3tButton.h"
-#include "../../sound.h"
 #include "UIXmlInit.h"
 
 CUI3tButton::CUI3tButton(){
@@ -48,11 +47,11 @@ bool CUI3tButton::OnMouse(float x, float y, EUIMessages mouse_action)
 		return CUIButton::OnMouse(x,y,mouse_action);
 }
 
-bool CUI3tButton::OnMouseDown(bool left_button)
+bool CUI3tButton::OnMouseDown(int mouse_btn)
 {
 	if (m_bCheckMode)
 	{
-		if (left_button)
+		if (mouse_btn==MOUSE_1)
 		{
 			if (m_eButtonState == BUTTON_NORMAL)
 				m_eButtonState = BUTTON_PUSHED;
@@ -63,7 +62,14 @@ bool CUI3tButton::OnMouseDown(bool left_button)
 		return true;
 	}
 	else
-		return CUIButton::OnMouseDown(left_button);
+		return CUIButton::OnMouseDown(mouse_btn);
+}
+
+void CUI3tButton::OnFocusLost()
+{
+	CUIButton::OnFocusLost();
+//.	if(BUTTON_PUSHED == m_eButtonState)
+//.		m_eButtonState = BUTTON_NORMAL;
 }
 
 void CUI3tButton::OnFocusReceive()
@@ -144,37 +150,12 @@ void CUI3tButton::InitTexture(LPCSTR tex_enabled,
 							  LPCSTR tex_highlighted)
 {
 	m_background.InitEnabledState		(tex_enabled);
-//.	m_background.GetE()->SetStretchTexture(true);
 	m_background.InitDisabledState		(tex_disabled);
-//.	m_background.GetD()->SetStretchTexture(true);
 	m_background.InitTouchedState		(tex_touched);
-//.	m_background.GetT()->SetStretchTexture(true);
 	m_background.InitHighlightedState	(tex_highlighted);
-//.	m_background.GetH()->SetStretchTexture(true);
 	this->m_bTextureEnable = true;
 }
-/*
-void CUI3tButton::InitTextureEnabled(LPCSTR texture)
-{
-	m_background.InitEnabledState(texture);
-	m_bTextureEnable = true;
-}
 
-void CUI3tButton::InitTextureDisabled(LPCSTR texture)
-{
-	m_background.InitDisabledState(texture);
-}
-
-void CUI3tButton::InitTextureHighlighted(LPCSTR texture)
-{
-	m_background.InitHighlightedState(texture);
-}
-
-void CUI3tButton::InitTextureTouched(LPCSTR texture)
-{
-	m_background.InitTouchedState(texture);
-}
-*/
 void CUI3tButton::SetTextColor(u32 color)
 {
     m_dwTextColor[E] = color;

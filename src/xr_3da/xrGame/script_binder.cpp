@@ -17,10 +17,6 @@
 #include "gameobject.h"
 #include "level.h"
 
-#ifdef DEBUG_MEMORY_MANAGER
-	XRCORE_API	BOOL	g_bMEMO;
-#endif // DEBUG_MEMORY_MANAGER
-
 //#define DBG_DISABLE_SCRIPTS
 
 CScriptBinder::CScriptBinder		()
@@ -155,6 +151,9 @@ BOOL CScriptBinder::net_Spawn		(CSE_Abstract* DC)
 void CScriptBinder::net_Destroy		()
 {
 	if (m_object) {
+#ifdef _DEBUG
+		Msg						("* Core object %s is UNbinded from the script object",smart_cast<CGameObject*>(this) ? *smart_cast<CGameObject*>(this)->cName() : "");
+#endif // _DEBUG
 		try {
 			m_object->net_Destroy	();
 		}
@@ -162,9 +161,6 @@ void CScriptBinder::net_Destroy		()
 			clear			();
 		}
 	}
-#ifdef _DEBUG
-	Msg						("* Core object %s is UNbinded from the script object",smart_cast<CGameObject*>(this) ? *smart_cast<CGameObject*>(this)->cName() : "");
-#endif // _DEBUG
 	xr_delete				(m_object);
 }
 

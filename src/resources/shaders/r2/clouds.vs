@@ -35,8 +35,7 @@ vf main (vi v)
 	o.color		=	v.color	;			// copy color, low precision, cannot prescale even by 2
 	o.color.w	*= 	pow		(v.p.y,25);
 #ifdef USE_VTF
-	float  	scale 	= 	.5 	+ 	.5*tex2Dlod (s_tonemap,float4(.5,.5,.5,.5)).x ;
-//	o.color			*= 	.5		;
+	float  	scale 	= 	tex2Dlod (s_tonemap,float4(.5,.5,.5,.5)).x ;
 	o.color.rgb 	*= 	scale	;		// high precision
 #endif
 

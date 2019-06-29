@@ -47,6 +47,7 @@ private:
 
 private:
 			void		actualize						();
+			void		setup_current_speed				();
 			void		follow_path						(const ALife::_TIME_ID &time_delta);
 			void		update							(const ALife::_TIME_ID &time_delta);
 

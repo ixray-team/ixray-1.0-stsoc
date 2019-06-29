@@ -42,11 +42,14 @@ CxrD3D9Null::CxrD3D9Null()
 {
 	UINT cSDKVersion = D3D_SDK_VERSION;
 //	LogOut_File("In %x out %x", cSDKVersion, SDKVersion);
+//	LogOut("In %d out %d", cSDKVersion, SDKVersion);
+#ifdef NDEBUG
 	if (SDKVersion != cSDKVersion)
 	{
 //		LogOut_File("NULL");
 		return NULL;
 	}
+#endif
 	xrIDirect3D9* I = new xrIDirect3D9();
 //	LogOut_File("%x", I);
 	return I;

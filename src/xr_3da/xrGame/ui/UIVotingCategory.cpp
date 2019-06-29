@@ -9,24 +9,17 @@
 #include "UITextVote.h"
 
 
-CUIVotingCategory::CUIVotingCategory(){
-	xml_doc = NULL;
-	kick = NULL;
-	change_weather = NULL;
-	change_map = NULL;
-	text_vote = NULL;
+CUIVotingCategory::CUIVotingCategory()
+{
+	xml_doc			= NULL;
+	kick			= NULL;
+	change_weather	= NULL;
+	change_map		= NULL;
+	text_vote		= NULL;
 
-	bkgrnd = xr_new<CUIStatic>(); 
-	bkgrnd->SetAutoDelete(true);
-	AttachChild(bkgrnd);
-
-	header = xr_new<CUIStatic>();
-	header->SetAutoDelete(true);
-	AttachChild(header);
-
-	btn_cancel = xr_new<CUI3tButton>();
-	btn_cancel->SetAutoDelete(true);
-	AttachChild(btn_cancel);
+	bkgrnd			= xr_new<CUIStatic>(); bkgrnd->SetAutoDelete(true); AttachChild(bkgrnd);
+	header			= xr_new<CUIStatic>(); header->SetAutoDelete(true);	AttachChild(header);
+	btn_cancel		= xr_new<CUI3tButton>();btn_cancel->SetAutoDelete(true); AttachChild(btn_cancel);
 
 	for (int i = 0; i<7; i++)
 	{
@@ -38,11 +31,11 @@ CUIVotingCategory::CUIVotingCategory(){
 		txt[i]->SetAutoDelete(true);
 		AttachChild(txt[i]);
 	}
-
 	Init();
 }
 
-CUIVotingCategory::~CUIVotingCategory(){
+CUIVotingCategory::~CUIVotingCategory()
+{
 	xr_delete(kick);
 	xr_delete(change_map);
 	xr_delete(change_weather);
@@ -51,7 +44,8 @@ CUIVotingCategory::~CUIVotingCategory(){
 	xr_delete(xml_doc);
 }
 
-void CUIVotingCategory::Init(){
+void CUIVotingCategory::Init()
+{
 	if (!xml_doc)
 		xml_doc = xr_new<CUIXml>();
 
@@ -73,7 +67,8 @@ void CUIVotingCategory::Init(){
 	CUIXmlInit::Init3tButton(*xml_doc, "category:btn_cancel", 0, btn_cancel);
 }
 
-void CUIVotingCategory::SendMessage(CUIWindow* pWnd, s16 msg, void* pData){
+void CUIVotingCategory::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
+{
 	if (BUTTON_CLICKED == msg)
 	{
 		if (btn_cancel == pWnd)
@@ -85,28 +80,32 @@ void CUIVotingCategory::SendMessage(CUIWindow* pWnd, s16 msg, void* pData){
 			}
 		}
 	}
-
 }
 
 #include <dinput.h>
 
-bool CUIVotingCategory::OnKeyboard(int dik, EUIMessages keyboard_action){
+bool CUIVotingCategory::OnKeyboard(int dik, EUIMessages keyboard_action)
+{
 	CUIDialogWnd::OnKeyboard(dik, keyboard_action);
-	if (WINDOW_KEY_PRESSED == keyboard_action){
-		if (DIK_ESCAPE == dik){
+	
+	if (WINDOW_KEY_PRESSED == keyboard_action)
+	{
+		if (DIK_ESCAPE == dik)
+		{
 			OnBtnCancel();
 			return true;
 		}
 		if (dik >= DIK_1 && dik <= DIK_7)
 			OnBtn(dik - DIK_1);
+			return true;
 	}
-
 	return false;
 }
 
 #include "../../xr_ioconsole.h"
 
-void CUIVotingCategory::OnBtn(int i){
+void CUIVotingCategory::OnBtn(int i)
+{
 	game_cl_mp* game = smart_cast<game_cl_mp*>(&Game());
 	switch (i){
 		case 0:
@@ -155,11 +154,10 @@ void CUIVotingCategory::OnBtn(int i){
 		case 7:
 			break;
 	}
-
-//	game->StartStopMenu(this, true);
 }
 
-void CUIVotingCategory::OnBtnCancel(){
+void CUIVotingCategory::OnBtnCancel()
+{
 	game_cl_mp* game = smart_cast<game_cl_mp*>(&Game());
 	game->StartStopMenu(this, true);
 }

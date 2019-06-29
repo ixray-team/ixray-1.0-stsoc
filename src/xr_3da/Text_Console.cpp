@@ -3,6 +3,7 @@
 
 //ENGINE_API CTextConsole* TextConsole = NULL;
 extern	const char *			ioc_prompt;
+int g_svTextConsoleUpdateRate = 1;
 
 CTextConsole::CTextConsole()
 {
@@ -13,6 +14,9 @@ CTextConsole::CTextConsole()
 
 	m_bScrollLog = true;
 	m_dwStartLine = 0;
+
+	m_bNeedUpdate = false;
+	m_dwLastUpdateTime = 0;
 }
 
 CTextConsole::~CTextConsole()
@@ -182,39 +186,62 @@ void	CTextConsole::Destroy		()
 void	CTextConsole::OnPaint()
 {
 	RECT wRC;
-	GetClientRect(m_hLogWnd, &wRC);
-	//------------------------------
+	
+	//------------------------------	
 	PAINTSTRUCT ps;
 	BeginPaint(m_hLogWnd, &ps);
 	//------------------------------
-	DrawLog(m_hDC_LogWnd_BackBuffer);
+
+	if (m_bNeedUpdate)
+	{
+		m_dwLastUpdateTime = Device.dwTimeGlobal;
+		m_bNeedUpdate = false;
+		
+		GetClientRect(m_hLogWnd, &wRC);
+		DrawLog(m_hDC_LogWnd_BackBuffer, &wRC);
+	}
+	else
+	{
+		wRC = ps.rcPaint;
+	}
+	
+	
 	BitBlt(	m_hDC_LogWnd, 
 			wRC.left, wRC.top,
 			wRC.right - wRC.left, wRC.bottom - wRC.top,
+//			ps.rcPaint.left, ps.rcPaint.top,
+//			ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top,
 			m_hDC_LogWnd_BackBuffer,
-			0, 0,
-			SRCCOPY);
+			wRC.left, wRC.top,
+//			ps.rcPaint.left, ps.rcPaint.top,
+			SRCCOPY);//(FullUpdate) ? SRCCOPY : NOTSRCCOPY);
+/*
+	Msg ("URect - %d:%d - %d:%d", ps.rcPaint.left, ps.rcPaint.top, 
+		ps.rcPaint.right, ps.rcPaint.bottom);
+*/
 	//------------------------------
 	EndPaint(m_hLogWnd, &ps);
 }
 
-void	CTextConsole::DrawLog(HDC hDC)
+void	CTextConsole::DrawLog(HDC hDC, RECT* pRect)
 {
 	TEXTMETRIC tm;
 	GetTextMetrics(hDC, &tm);
 	//-------------------------------------------------
-	RECT wRC;
+	RECT wRC = *pRect;
 	GetClientRect(m_hLogWnd, &wRC);
 	//-------------------------------------------------
 	FillRect(hDC, &wRC, m_hBackGroundBrush);
 	//-------------------------------------------------
 //	INT Width = wRC.right - wRC.left;
 	INT Height = wRC.bottom - wRC.top;
+	wRC = *pRect;
 	//---------------------------------------------------------------------------------
 	char		buf	[MAX_LEN+5];
 	strcpy		(buf,ioc_prompt);
 	strcat		(buf,editor);
-	if (bCursor) strcat(buf,"|");
+//	if (bCursor) 
+		strcat(buf,"|");
 	SetTextColor(hDC, RGB(128, 128, 255));
 	TextOut(hDC, 0, Height-tm.tmHeight, buf, xr_strlen(buf));
 
@@ -261,9 +288,17 @@ void	CTextConsole::OnRender			(void)
 	//OnPaint();
 };
 
+void CTextConsole::IR_OnKeyboardPress(int dik)
+{
+	m_bNeedUpdate = true;
+	CConsole::IR_OnKeyboardPress(dik);
+}
+
 void	CTextConsole::OnFrame			(void)
 {
 	inherited::OnFrame();
+	if (!m_bNeedUpdate && m_dwLastUpdateTime+1000/g_svTextConsoleUpdateRate>Device.dwTimeGlobal) return;
 	InvalidateRect(m_hConsoleWnd, NULL, FALSE);
-	SetCursor(LoadCursor( NULL, IDC_ARROW ));
+	SetCursor(LoadCursor( NULL, IDC_ARROW ));	
+	m_bNeedUpdate = true;
 }

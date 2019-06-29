@@ -55,7 +55,7 @@ void CUIGameSP::shedule_Update(u32 dt)
 					mir==UICarBodyMenu
 				)
 			)
-		m_game->StartStopMenu			(mir,true);
+		mir->GetHolder()->StartStopMenu			(mir,true);
 
 	}
 }
@@ -72,13 +72,13 @@ bool CUIGameSP::IR_OnKeyboardPress(int dik)
 {
 	if(inherited::IR_OnKeyboardPress(dik)) return true;
 
-	if( Device.Pause()		) return false;
+	if( Device.Paused()		) return false;
 
 	CActor *pActor = smart_cast<CActor*>(Level().CurrentEntity());
 	if(!pActor)								return false;
 	if( pActor && !pActor->g_Alive() )		return false;
 
-	switch (key_binding[dik])
+	switch ( get_binded_action(dik) )
 	{
 	case kINVENTORY: 
 		if( !MainInputReceiver() || MainInputReceiver()==InventoryMenu){
@@ -125,13 +125,9 @@ bool CUIGameSP::IR_OnKeyboardRelease(int dik)
 {
 	if(inherited::IR_OnKeyboardRelease(dik)) return true;
 
-	switch (key_binding[dik])
-	{
-	case kSCORES:
-		{
+	if( is_binded(kSCORES, dik))
 			RemoveCustomStatic		("main_task");
-		}break;
-	};
+
 	return false;
 }
 
@@ -182,12 +178,12 @@ void CUIGameSP::ChangeLevel				(GameGraph::_GRAPH_ID game_vert_id, u32 level_ver
 
 void CUIGameSP::reset_ui()
 {
-	inherited::reset_ui		();
-	InventoryMenu->Reset	();
-	PdaMenu->Reset			();
-	TalkMenu->Reset			();
-	UICarBodyMenu->Reset	();
-	UIChangeLevelWnd->Reset	();
+	inherited::reset_ui				();
+	InventoryMenu->Reset			();
+	PdaMenu->Reset					();
+	TalkMenu->Reset					();
+	UICarBodyMenu->Reset			();
+	UIChangeLevelWnd->Reset			();
 }
 
 CChangeLevelWnd::CChangeLevelWnd		()
@@ -235,10 +231,11 @@ void CChangeLevelWnd::OnCancel()
 
 bool CChangeLevelWnd::OnKeyboard(int dik, EUIMessages keyboard_action)
 {
-	if(keyboard_action==WINDOW_KEY_PRESSED){
-		if(key_binding[dik]==kQUIT)
+	if(keyboard_action==WINDOW_KEY_PRESSED)
+	{
+		if(is_binded(kQUIT, dik) )
 			OnCancel		();
-			return true;
+		return true;
 	}
 	return inherited::OnKeyboard(dik, keyboard_action);
 }
@@ -247,15 +244,13 @@ bool g_block_pause	= false;
 void CChangeLevelWnd::Show()
 {
 	g_block_pause							= true;
-	Device.Pause							(TRUE);
-	Sound->pause_emitters					(!!Device.Pause());
+	Device.Pause							(TRUE, TRUE, TRUE, "CChangeLevelWnd_show");
 	bShowPauseString						= FALSE;
 }
 
 void CChangeLevelWnd::Hide()
 {
 	g_block_pause							= false;
-	Device.Pause							(FALSE);
-	Sound->pause_emitters					(!!Device.Pause());
+	Device.Pause							(FALSE, TRUE, TRUE, "CChangeLevelWnd_hide");
 }
 

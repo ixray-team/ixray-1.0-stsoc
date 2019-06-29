@@ -39,17 +39,13 @@ LPCSTR CInventoryItemObject::NameShort		()
 {
 	return						(CInventoryItem::NameShort());
 }
-
+/*
 LPCSTR CInventoryItemObject::NameComplex	()
 {
 	return						(CInventoryItem::NameComplex());
 }
+*/
 
-//void CInventoryItemObject::Hit(float P, Fvector &dir,	
-//						 CObject* who, s16 element,
-//						 Fvector position_in_object_space, 
-//						 float impulse, 
-//						 ALife::EHitType hit_type)
 void				CInventoryItemObject::Hit					(SHit* pHDS)
 {
 	/*

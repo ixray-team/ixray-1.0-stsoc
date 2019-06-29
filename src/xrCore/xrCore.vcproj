@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
@@ -38,8 +38,9 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
-				AssemblerListingLocation="Debug\"
-				ObjectFile="Debug\"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -51,16 +52,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="TRUE"
-				OutputFile="$(OutDir)/xrCore.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
-				GenerateMapFile="TRUE"
-				MapFileName="x:\xrCore.map"
+				GenerateMapFile="FALSE"
+				MapFileName=""
 				MapExports="FALSE"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/xrCore.lib"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
 				TargetMachine="0"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -85,8 +84,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			WholeProgramOptimization="TRUE">
@@ -109,7 +108,10 @@
 				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerOutput="4"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -119,15 +121,15 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/xrCore.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
 				GenerateMapFile="FALSE"
+				MapFileName=""
 				SubSystem="0"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="$(OutDir)/xrCore.lib"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
 				TargetMachine="0"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -152,8 +154,8 @@
 		</Configuration>
 		<Configuration
 			Name="Mixed|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".Mixed"
+			OutputDirectory="x:\binaries\"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			WholeProgramOptimization="FALSE">
@@ -173,10 +175,10 @@
 				EnableFunctionLevelLinking="FALSE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
-				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerOutput="0"
-				AssemblerListingLocation="Mixed\"
-				ObjectFile="Mixed\"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -186,81 +188,12 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/xrCore.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
+				GenerateMapFile="FALSE"
+				MapFileName="$(OutDir)/$(ProjectName).map"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/xrCore.lib"
-				TargetMachine="0"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="DebugNoExceptions|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			CharacterSet="2">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				EnableIntrinsicFunctions="FALSE"
-				FavorSizeOrSpeed="0"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="2"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;XRCORE_EXPORTS;FORCE_NO_EXCEPTIONS"
-				StringPooling="FALSE"
-				MinimalRebuild="TRUE"
-				ExceptionHandling="FALSE"
-				BasicRuntimeChecks="3"
-				SmallerTypeCheck="TRUE"
-				RuntimeLibrary="3"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
-				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
-				AssemblerListingLocation="DebugNoExceptions\"
-				ObjectFile="DebugNoExceptions\"
-				ProgramDataBaseFileName="$(IntDir)/"
-				BrowseInformation="0"
-				WarningLevel="4"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				IgnoreImportLibrary="TRUE"
-				OutputFile="$(OutDir)/xrCore.dll"
-				LinkIncremental="2"
-				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
-				GenerateMapFile="TRUE"
-				MapFileName="x:\xrCore.map"
-				MapExports="FALSE"
-				SubSystem="2"
-				ImportLibrary="$(OutDir)/xrCore.lib"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
 				TargetMachine="0"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -319,12 +252,6 @@
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"
 						ShowIncludes="FALSE"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugNoExceptions|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -492,11 +419,6 @@
 					<Tool
 						Name="VCCustomBuildTool"/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugNoExceptions|Win32">
-					<Tool
-						Name="VCCustomBuildTool"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="FileSystem_borland.cpp">
@@ -545,12 +467,6 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugNoExceptions|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\LocatorAPI_Notifications.h">
@@ -572,12 +488,6 @@
 					<Tool
 						Name="VCCustomBuildTool"/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugNoExceptions|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCustomBuildTool"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="log.cpp">
@@ -591,12 +501,38 @@
 			<File
 				RelativePath="xr_ini.h">
 			</File>
+			<Filter
+				Name="stream_reader"
+				Filter="">
+				<File
+					RelativePath=".\stream_reader.cpp">
+				</File>
+				<File
+					RelativePath=".\stream_reader.h">
+				</File>
+				<File
+					RelativePath=".\stream_reader_inline.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="file_stream_reader"
+				Filter="">
+				<File
+					RelativePath=".\file_stream_reader.cpp">
+				</File>
+				<File
+					RelativePath=".\file_stream_reader.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Memory manager"
 			Filter="">
 			<File
 				RelativePath=".\memory_allocation_stats.cpp">
+			</File>
+			<File
+				RelativePath=".\memory_usage.cpp">
 			</File>
 			<File
 				RelativePath="xrMemory.cpp">
@@ -668,6 +604,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\xrMemory_pure.h">
+			</File>
+			<File
 				RelativePath="xrMemory_subst_borland.cpp">
 			</File>
 			<File
@@ -703,12 +642,6 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugNoExceptions|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="xrDebug.h">
@@ -733,37 +666,6 @@
 				Name="BlackBox"
 				Filter="">
 				<File
-					RelativePath=".\blackbox\AllocAndFillProcessModuleList.cpp">
-					<FileConfiguration
-						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Mixed|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-				</File>
-				<File
 					RelativePath=".\blackbox\BlackBoxUI.cpp">
 					<FileConfiguration
 						Name="Debug|Win32">
@@ -781,13 +683,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Mixed|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
@@ -812,13 +707,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Mixed|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
@@ -851,22 +739,9 @@
 							UsePrecompiledHeader="0"
 							WarningLevel="0"/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\blackbox\CrashHandler.h">
-				</File>
-				<File
-					RelativePath=".\blackbox\CriticalSection.h">
-				</File>
-				<File
-					RelativePath=".\blackbox\CRTDBG_Internals.h">
 				</File>
 				<File
 					RelativePath=".\blackbox\DiagAssert.cpp">
@@ -878,21 +753,16 @@
 							WarningLevel="0"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32">
+						Name="Release|Win32"
+						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
 							WarningLevel="0"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Mixed|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
+						Name="Mixed|Win32"
+						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
@@ -925,75 +795,6 @@
 							UsePrecompiledHeader="0"
 							WarningLevel="0"/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\blackbox\HookImportedFunctionByName.cpp">
-					<FileConfiguration
-						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Mixed|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\blackbox\HookOrdinalExport.cpp">
-					<FileConfiguration
-						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Mixed|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\blackbox\Internal.h">
@@ -1021,87 +822,6 @@
 							UsePrecompiledHeader="0"
 							WarningLevel="0"/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\blackbox\MemDumperValidator.cpp">
-					<FileConfiguration
-						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Mixed|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\blackbox\MemDumperValidator.h">
-				</File>
-				<File
-					RelativePath=".\blackbox\MemStress.cpp">
-					<FileConfiguration
-						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Mixed|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\blackbox\MemStress.h">
-				</File>
-				<File
-					RelativePath=".\blackbox\MemStressConstants.h">
-				</File>
-				<File
-					RelativePath=".\blackbox\MSJDBG.h">
 				</File>
 				<File
 					RelativePath=".\blackbox\NT4ProcessInfo.cpp">
@@ -1126,19 +846,6 @@
 							UsePrecompiledHeader="0"
 							WarningLevel="0"/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\blackbox\Psapi.h">
-				</File>
-				<File
-					RelativePath=".\blackbox\resource.h">
 				</File>
 				<File
 					RelativePath=".\blackbox\stdafx_.cpp">
@@ -1158,13 +865,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Mixed|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
@@ -1200,13 +900,6 @@
 							UsePrecompiledHeader="0"
 							WarningLevel="0"/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\blackbox\WarningsOff.h">
@@ -1215,37 +908,6 @@
 					RelativePath=".\blackbox\WarningsOn.h">
 				</File>
 			</Filter>
-		</Filter>
-		<Filter
-			Name="Compression"
-			Filter="">
-			<File
-				RelativePath="LzHuf.cpp">
-			</File>
-			<File
-				RelativePath="lzhuf.h">
-			</File>
-			<File
-				RelativePath=".\rt_compressor.cpp">
-			</File>
-			<File
-				RelativePath=".\rt_compressor.h">
-			</File>
-			<File
-				RelativePath=".\rt_lzo.cpp">
-				<FileConfiguration
-					Name="Mixed|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AssemblerOutput="4"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\rt_lzo.h">
-			</File>
-			<File
-				RelativePath=".\rt_lzo_config.h">
-			</File>
 		</Filter>
 		<Filter
 			Name="shared memory/string library"
@@ -1274,6 +936,37 @@
 			<File
 				RelativePath=".\xrstring.h">
 			</File>
+			<Filter
+				Name="Compression"
+				Filter="">
+				<File
+					RelativePath="LzHuf.cpp">
+				</File>
+				<File
+					RelativePath="lzhuf.h">
+				</File>
+				<File
+					RelativePath=".\rt_compressor.cpp">
+				</File>
+				<File
+					RelativePath=".\rt_compressor.h">
+				</File>
+				<File
+					RelativePath=".\rt_lzo.cpp">
+					<FileConfiguration
+						Name="Mixed|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							AssemblerOutput="4"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\rt_lzo.h">
+				</File>
+				<File
+					RelativePath=".\rt_lzo_config.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="intrusive_ptr"
@@ -1283,6 +976,16 @@
 			</File>
 			<File
 				RelativePath=".\intrusive_ptr_inline.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="memory_monitor"
+			Filter="">
+			<File
+				RelativePath=".\memory_monitor.cpp">
+			</File>
+			<File
+				RelativePath=".\memory_monitor.h">
 			</File>
 		</Filter>
 		<File

@@ -21,6 +21,7 @@
 #include "ui\UIMapInfo.h"
 #include "ui\UIMMShniaga.h"
 #include "ui\UIScrollView.h"
+#include "ui\UIProgressBar.h"
 
 #include "script_space.h"
 using namespace luabind;
@@ -95,8 +96,6 @@ CUIEditBox* CScriptXmlInit::InitEditBox(LPCSTR path, CUIWindow* parent){
 }
 
 CUIStatic* CScriptXmlInit::InitStatic(LPCSTR path, CUIWindow* parent){
-	if(NULL == m_xml.NavigateToNode(path,0)) return NULL;
-
 	CUIStatic* pWnd = xr_new<CUIStatic>();
 	CUIXmlInit::InitStatic(m_xml, path, 0, pWnd);
 	pWnd->SetAutoDelete(true);
@@ -254,30 +253,36 @@ CUIMapInfo* CScriptXmlInit::InitMapInfo(LPCSTR path, CUIWindow* parent){
 }
 
 CUIWindow* CScriptXmlInit::InitKeyBinding(LPCSTR path, CUIWindow* parent){
-	CUIKeyBinding* pWnd = xr_new<CUIKeyBinding>();
-	pWnd->InitFromXml(m_xml, path);	
-	pWnd->SetAutoDelete(true);
-	_attach_child(pWnd, parent);
-//.	if(parent) parent->AttachChild(pWnd);
-	return pWnd;
+	CUIKeyBinding* pWnd				= xr_new<CUIKeyBinding>();
+	pWnd->InitFromXml				(m_xml, path);	
+	pWnd->SetAutoDelete				(true);
+	_attach_child					(pWnd, parent);
+	return							pWnd;
 }
 
 CUITrackBar* CScriptXmlInit::InitTrackBar(LPCSTR path, CUIWindow* parent){
-	CUITrackBar* pWnd = xr_new<CUITrackBar>();
-	CUIXmlInit::InitTrackBar(m_xml, path, 0, pWnd);
-	pWnd->SetAutoDelete(true);
-	_attach_child(pWnd, parent);
-//.	if(parent) parent->AttachChild(pWnd);
-	return pWnd;	
+	CUITrackBar* pWnd				= xr_new<CUITrackBar>();
+	CUIXmlInit::InitTrackBar		(m_xml, path, 0, pWnd);
+	pWnd->SetAutoDelete				(true);
+	_attach_child					(pWnd, parent);
+	return							pWnd;	
+}
+
+CUIProgressBar* CScriptXmlInit::InitProgressBar(LPCSTR path, CUIWindow* parent)
+{
+	CUIProgressBar* pWnd			= xr_new<CUIProgressBar>();
+	CUIXmlInit::InitProgressBar		(m_xml, path, 0, pWnd);
+	pWnd->SetAutoDelete				(true);
+	_attach_child					(pWnd, parent);
+	return							pWnd;	
 }
 
 CUIEditBox* CScriptXmlInit::InitCDkey(LPCSTR path, CUIWindow* parent){
-	CUICDkey* pWnd = xr_new<CUICDkey>();
-	CUIXmlInit::InitEditBox(m_xml, path, 0, pWnd);
-	pWnd->SetAutoDelete(true);
-	_attach_child(pWnd, parent);
-//.	if(parent) parent->AttachChild(pWnd);
-	return pWnd;	
+	CUICDkey* pWnd					= xr_new<CUICDkey>();
+	CUIXmlInit::InitEditBox			(m_xml, path, 0, pWnd);
+	pWnd->SetAutoDelete				(true);
+	_attach_child					(pWnd, parent);
+	return							pWnd;	
 }
 
 #pragma optimize("s",on)
@@ -313,6 +318,7 @@ void CScriptXmlInit::script_register(lua_State *L){
 		.def("InitMMShniaga",			&CScriptXmlInit::InitMMShniaga)
 		.def("InitScrollView",			&CScriptXmlInit::InitScrollView)
 		.def("InitAutoStaticGroup",		&CScriptXmlInit::InitAutoStaticGroup)
+		.def("InitProgressBar",			&CScriptXmlInit::InitProgressBar)
 	];
 
 }

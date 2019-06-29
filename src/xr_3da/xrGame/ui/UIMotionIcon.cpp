@@ -15,6 +15,13 @@ CUIMotionIcon::~CUIMotionIcon()
 {
 
 }
+
+void CUIMotionIcon::ResetVisibility()
+{
+	m_npc_visibility.clear	();
+	m_bchanged				= true;
+}
+
 void CUIMotionIcon::Init()
 {
 	CUIXml uiXml;

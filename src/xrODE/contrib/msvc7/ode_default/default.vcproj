@@ -16,8 +16,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			UseOfATL="1"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -33,6 +33,9 @@
 				SmallerTypeCheck="TRUE"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
@@ -43,14 +46,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="TRUE"
-				OutputFile="$(OutDir)/ode.dll"
 				LinkIncremental="2"
 				IgnoreAllDefaultLibraries="FALSE"
 				ModuleDefinitionFile="../../../config/msvcdefs.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
+				GenerateMapFile="FALSE"
+				MapFileName=""
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/ode.lib"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -90,8 +93,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			UseOfATL="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -114,7 +117,10 @@
 				BufferSecurityCheck="FALSE"
 				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="0"
-				ProgramDataBaseFileName="$(OutDir)/"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="3"
@@ -124,15 +130,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="TRUE"
-				OutputFile="$(OutDir)/ode.dll"
 				LinkIncremental="1"
 				ModuleDefinitionFile="../../../config/msvcdefs.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
+				GenerateMapFile="FALSE"
+				MapFileName=""
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="$(OutDir)/ode.lib"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -172,8 +179,8 @@
 		</Configuration>
 		<Configuration
 			Name="Mixed|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Mixed"
+			OutputDirectory="x:\binaries\"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			UseOfATL="1"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -195,6 +202,9 @@
 				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="FALSE"
 				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -205,15 +215,15 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="TRUE"
-				OutputFile="$(OutDir)/ode.dll"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile="..\..\..\config\msvcdefs.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
+				GenerateMapFile="FALSE"
+				MapFileName="$(OutDir)/$(ProjectName).map"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="$(OutDir)/ode.lib"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"

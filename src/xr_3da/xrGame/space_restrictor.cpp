@@ -67,9 +67,6 @@ BOOL CSpaceRestrictor::net_Spawn	(CSE_Abstract* data)
 	if (!result)
 		return						(FALSE);
 
-	if (!need_update())
-		shedule_unregister			();
-
 	setEnabled						(FALSE);
 	setVisible						(FALSE);
 
@@ -85,8 +82,13 @@ void CSpaceRestrictor::net_Destroy	()
 {
 	inherited::net_Destroy			();
 	
-	if (need_update())
-		shedule_unregister			();
+	if (!ai().get_level_graph())
+		return;
+	
+	if (RestrictionSpace::ERestrictorTypes(m_space_restrictor_type) == RestrictionSpace::eRestrictorTypeNone)
+		return;
+
+	Level().space_restriction_manager().unregister_restrictor(this);
 }
 
 bool CSpaceRestrictor::inside	(const Fsphere &sphere) const
@@ -293,3 +295,17 @@ void CSpaceRestrictor::OnRender	()
 
 }
 #endif
+
+#include "script_space.h"
+
+using namespace luabind;
+
+#pragma optimize("s",on)
+void CSpaceRestrictor::script_register(lua_State *L)
+{
+	module(L)
+	[
+		class_<CSpaceRestrictor,CGameObject>("CSpaceRestrictor")
+			.def(constructor<>())
+	];
+}

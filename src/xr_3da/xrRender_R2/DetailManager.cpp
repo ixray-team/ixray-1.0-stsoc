@@ -170,11 +170,11 @@ void CDetailManager::Unload		()
 		(*it)->Unload();
 		xr_delete		(*it);
     }
-	objects.clear	();
-	visible[0].clear();
-	visible[1].clear();
-	visible[2].clear();
-	xr_delete			(dtFS);
+	objects.clear		();
+	visible[0].clear	();
+	visible[1].clear	();
+	visible[2].clear	();
+	FS.r_close			(dtFS);
 }
 
 extern ECORE_API float r_ssaDISCARD;
@@ -270,7 +270,7 @@ void CDetailManager::Render		()
 	if (0==dtFS)						return;
 	if (!psDeviceFlags.is(rsDetails))	return;
 #endif
-	float factor				= g_pGamePersistent->Environment.wind_strength_factor;
+	float factor				= g_pGamePersistent->Environment().wind_strength_factor;
 	swing_current.lerp			(swing_desc[0],swing_desc[1],factor);
 
 	Fvector		EYE				= Device.vCameraPosition;

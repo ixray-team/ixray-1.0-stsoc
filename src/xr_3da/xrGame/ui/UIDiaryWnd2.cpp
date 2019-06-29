@@ -32,7 +32,7 @@ CUIDiaryWnd::~CUIDiaryWnd()
 	delete_data(m_DescrView);
 	delete_data(m_ArticlesDB);
 	delete_data(m_updatedSectionImage);
-//	delete_data(m_videoWnd);
+	delete_data(m_oldSectionImage);
 }
 
 void CUIDiaryWnd::Show(bool status)
@@ -41,6 +41,8 @@ void CUIDiaryWnd::Show(bool status)
 	if(status)
 		Reload( (EDiaryFilter)m_FilterTab->GetActiveIndex() );
 }
+
+void RearrangeTabButtons(CUITabControl* pTab, xr_vector<Fvector2>& vec_sign_places);
 
 void CUIDiaryWnd::Init()
 {
@@ -54,7 +56,6 @@ void CUIDiaryWnd::Init()
 	m_UILeftFrame					= xr_new<CUIFrameWindow>(); m_UILeftFrame->SetAutoDelete(true);
 	xml_init.InitFrameWindow		(uiXml,"main_wnd:left_frame",0,m_UILeftFrame);
 	AttachChild						(m_UILeftFrame);
-//.	xml_init.InitAutoStaticGroup	(uiXml,"main_wnd:left_frame",m_UILeftFrame);
 	
 	m_UILeftHeader					= xr_new<CUIFrameLineWnd>(); m_UILeftHeader->SetAutoDelete(true);
 	xml_init.InitFrameLine			(uiXml, "main_wnd:left_frame:left_frame_header", 0, m_UILeftHeader);
@@ -90,7 +91,6 @@ void CUIDiaryWnd::Init()
 	m_UIRightFrame					= xr_new<CUIFrameWindow>();		m_UIRightFrame->SetAutoDelete(true);
 	xml_init.InitFrameWindow		(uiXml,"main_wnd:right_frame",0,m_UIRightFrame);
 	AttachChild						(m_UIRightFrame);
-//.	xml_init.InitAutoStaticGroup	(uiXml,"main_wnd:right_frame",m_UIRightFrame);
 
 	m_UIRightHeader					= xr_new<CUIFrameLineWnd>();	m_UIRightHeader->SetAutoDelete(true);
 	xml_init.InitFrameLine			(uiXml, "main_wnd:right_frame:right_frame_header", 0, m_UIRightHeader);
@@ -109,9 +109,10 @@ void CUIDiaryWnd::Init()
 	m_updatedSectionImage			= xr_new<CUIStatic>();
 	xml_init.InitStatic				(uiXml, "updated_section_static", 0, m_updatedSectionImage);
 
-//	m_videoWnd						= xr_new<CUIVideoPlayerWnd>();
-//	m_videoWnd->Init				(&uiXml,"video_player");
+	m_oldSectionImage				= xr_new<CUIStatic>();
+	xml_init.InitStatic				(uiXml, "old_section_static", 0, m_oldSectionImage);
 
+	RearrangeTabButtons				(m_FilterTab, m_sign_places);
 }
 
 void	CUIDiaryWnd::SendMessage			(CUIWindow* pWnd, s16 msg, void* pData)
@@ -251,29 +252,36 @@ void CUIDiaryWnd::OnSrcListItemClicked	(CUIWindow* w,void* p)
 		m_DescrView->AddWindow		(article_info, true);
 	}
 }
-extern void draw_sign		(CUIStatic* s, Frect& r);
-void CUIDiaryWnd::Draw					()
+
+void draw_sign(CUIStatic* s, Fvector2& pos);
+void CUIDiaryWnd::Draw()
 {
 	inherited::Draw	();
 
-	Frect r;
 	m_updatedSectionImage->Update				();
+	m_oldSectionImage->Update					();
 
-	if(g_pda_info_state&pda_section::news){
-		m_FilterTab->GetButtonByIndex		(eNews)->GetAbsoluteRect(r);
-		draw_sign								(m_updatedSectionImage, r);
-	}
-/*	if(g_pda_info_state&pda_section::info){
-		r = m_FilterTab->GetButtonByIndex		(eInfo)->GetAbsoluteRect();
-		draw_sign								(m_updatedSectionImage, r);
-	}
-*/
-	if(g_pda_info_state&pda_section::journal){
-		m_FilterTab->GetButtonByIndex		(eJournal)->GetAbsoluteRect(r);
-		draw_sign								(m_updatedSectionImage, r);
-	}
+	Fvector2									tab_pos;
+	m_FilterTab->GetAbsolutePos					(tab_pos);
 
+	Fvector2 pos;
+
+	pos		= m_sign_places[eNews];
+	pos.add(tab_pos);
+	if(g_pda_info_state&pda_section::news)
+		draw_sign								(m_updatedSectionImage, pos);
+	else
+		draw_sign								(m_oldSectionImage, pos);
+	
+
+	pos		= m_sign_places[eJournal];
+	pos.add(tab_pos);
+	if(g_pda_info_state&pda_section::journal)
+		draw_sign								(m_updatedSectionImage, pos);
+	else
+		draw_sign								(m_oldSectionImage, pos);
 }
+
 void CUIDiaryWnd::Reset()
 {
 	inherited::Reset	();

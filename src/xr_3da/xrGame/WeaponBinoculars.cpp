@@ -16,8 +16,9 @@ CWeaponBinoculars::CWeaponBinoculars() : CWeaponCustomPistol("BINOCULARS")
 
 CWeaponBinoculars::~CWeaponBinoculars()
 {
-	HUD_SOUND::DestroySound(sndZoomIn);
-	HUD_SOUND::DestroySound(sndZoomOut);
+	HUD_SOUND::DestroySound	(sndZoomIn);
+	HUD_SOUND::DestroySound	(sndZoomOut);
+	xr_delete				(m_binoc_vision);
 }
 
 void CWeaponBinoculars::Load	(LPCSTR section)
@@ -49,9 +50,11 @@ void CWeaponBinoculars::OnZoomIn		()
 		HUD_SOUND::StopSound(sndZoomOut);
 		bool b_hud_mode = (Level().CurrentEntity() == H_Parent());
 		HUD_SOUND::PlaySound(sndZoomIn, H_Parent()->Position(), H_Parent(), b_hud_mode);
-		if(m_bVision)
-			m_binoc_vision = xr_new<CBinocularsVision>(this);
-
+		if(m_bVision && !m_binoc_vision) 
+		{
+			//.VERIFY			(!m_binoc_vision);
+			m_binoc_vision	= xr_new<CBinocularsVision>(this);
+		}
 	}
 
 	inherited::OnZoomIn();
@@ -66,7 +69,8 @@ void CWeaponBinoculars::OnZoomOut		()
 		HUD_SOUND::StopSound(sndZoomIn);
 		bool b_hud_mode = (Level().CurrentEntity() == H_Parent());	
 		HUD_SOUND::PlaySound(sndZoomOut, H_Parent()->Position(), H_Parent(), b_hud_mode);
-		xr_delete(m_binoc_vision);
+		VERIFY			(m_binoc_vision);
+		xr_delete		(m_binoc_vision);
 	
 		m_fRTZoomFactor = m_fZoomFactor;//store current
 	}
@@ -151,6 +155,13 @@ void CWeaponBinoculars::GetBriefInfo(xr_string& str_name, xr_string& icon_sect_n
 	icon_sect_name	= *cNameSect();
 }
 
+void CWeaponBinoculars::net_Relcase	(CObject *object)
+{
+	if (!m_binoc_vision)
+		return;
+
+	m_binoc_vision->remove_links	(object);
+}
 
 #include "script_space.h"
 

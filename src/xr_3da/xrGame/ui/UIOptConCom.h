@@ -18,4 +18,7 @@ protected:
 	int			m_iNetConSpectator;
 	int			m_iReinforcementType;
 	float		m_fNetWeatherRate;
+
+	void		ReadPlayerNameFromRegistry		();
+	void		WritePlayerNameToRegistry		();
 };

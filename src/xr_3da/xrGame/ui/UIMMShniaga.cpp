@@ -19,10 +19,10 @@ CUIMMShniaga::CUIMMShniaga(){
 	m_view			= xr_new<CUIScrollView>();	AttachChild(m_view);
 	m_shniaga		= xr_new<CUIStatic>();	AttachChild(m_shniaga);
 	m_magnifier		= xr_new<CUIStatic>();	m_shniaga->AttachChild(m_magnifier);	m_magnifier->SetPPMode();
-	m_anims[0]		= xr_new<CUIStatic>();	m_shniaga->AttachChild(m_anims[0]);
-	m_anims[1]		= xr_new<CUIStatic>();	m_shniaga->AttachChild(m_anims[1]);
 	m_gratings[0]	= xr_new<CUIStatic>();	m_shniaga->AttachChild(m_gratings[0]);
 	m_gratings[1]	= xr_new<CUIStatic>();	m_shniaga->AttachChild(m_gratings[1]);
+	m_anims[0]		= xr_new<CUIStatic>();	m_shniaga->AttachChild(m_anims[0]);
+	m_anims[1]		= xr_new<CUIStatic>();	m_shniaga->AttachChild(m_anims[1]);
 
 	m_mag_pos = 0;
 
@@ -53,6 +53,7 @@ CUIMMShniaga::~CUIMMShniaga(){
 	delete_data(m_buttons_new);
 }
 
+
 void CUIMMShniaga::Init(CUIXml& xml_doc, LPCSTR path){
 	string256 _path;
 
@@ -65,19 +66,44 @@ void CUIMMShniaga::Init(CUIXml& xml_doc, LPCSTR path){
 	CUIXmlInit::InitStatic(xml_doc, strconcat(_path,path,":shniaga:right_grating"),0,m_gratings[1]);
 	CUIXmlInit::InitScrollView(xml_doc, strconcat(_path,path,":buttons_region"),0,m_view);
 
-	if (!g_pGameLevel)
-	{
-		CreateList(m_buttons, xml_doc, "menu_main");
-		CreateList(m_buttons_new, xml_doc, "menu_new_game");
+	if (!g_pGameLevel) {
+		CreateList			(m_buttons, xml_doc, "menu_main");
+		CreateList			(m_buttons_new, xml_doc, "menu_new_game");
 	}
-	else if (GameID() == GAME_SINGLE)
-		CreateList(m_buttons, xml_doc, "menu_main_single");
-	else
-		CreateList(m_buttons, xml_doc, "menu_main_mm");
-    ShowMain();
+	else  {
+		if (GameID() == GAME_SINGLE) {
+			VERIFY			(Actor());
+			if (Actor() && !Actor()->g_Alive())
+				CreateList	(m_buttons, xml_doc, "menu_main_single_dead");
+			else
+				CreateList	(m_buttons, xml_doc, "menu_main_single");
+		}
+		else
+			CreateList		(m_buttons, xml_doc, "menu_main_mm");
+	}
+
+    ShowMain				();
 
 	m_sound->Init(xml_doc, "menu_sound");
 	m_sound->music_Play();
+
+	m_wheel_size[0]		= m_anims[0]->GetWndSize();
+	
+	m_wheel_size[1].set(m_wheel_size[0]);
+	m_wheel_size[1].x	/= 1.33f;
+}
+
+void CUIMMShniaga::OnDeviceReset()
+{
+	if(UI()->is_16_9_mode())
+	{
+		m_anims[0]->SetWndSize(m_wheel_size[1]);
+		m_anims[1]->SetWndSize(m_wheel_size[1]);
+	}else
+	{
+		m_anims[0]->SetWndSize(m_wheel_size[0]);
+		m_anims[1]->SetWndSize(m_wheel_size[0]);
+	}
 }
 
 extern CActor*		g_actor;
@@ -102,11 +128,11 @@ void CUIMMShniaga::CreateList(xr_vector<CUIStatic*>& lst, CUIXml& xml_doc, LPCST
 
 	for (int i = 0; i < nodes_num; ++i)
 	{		
-		if (0 == xr_strcmp("btn_lastsave",xml_doc.ReadAttrib("btn", i, "name")))
-		{
-			if (g_actor && Actor()->g_Alive())
-				continue;
-		}
+//		if (0 == xr_strcmp("btn_lastsave",xml_doc.ReadAttrib("btn", i, "name")))
+//		{
+//			if (g_actor && Actor()->g_Alive())
+//				continue;
+//		}
 		st = xr_new<CUIStatic>();
 		st->Init(0,0,m_view->GetDesiredChildWidth(), height);
 		st->SetTextComplexMode		(false);
@@ -197,6 +223,11 @@ void CUIMMShniaga::SelectBtn(CUIWindow* btn){
 			}
 		}
 	}	
+}
+
+void CUIMMShniaga::Draw()
+{
+	CUIWindow::Draw();
 }
 
 void CUIMMShniaga::Update(){
@@ -306,7 +337,10 @@ float CUIMMShniaga::pos(float x1, float x2, u32 t){
         return x1 + x;
 }
 
-void CUIMMShniaga::SetVisibleMagnifier(bool f){
+bool b_shniaganeed_pp = true;
+void CUIMMShniaga::SetVisibleMagnifier(bool f)
+{
+	b_shniaganeed_pp = f;
 	Fvector2 pos = m_magnifier->GetWndPos();
 	if (f)
 		pos.x = m_mag_pos;

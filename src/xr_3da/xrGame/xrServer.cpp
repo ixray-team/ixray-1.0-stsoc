@@ -9,6 +9,7 @@
 #include "level.h"
 #include "game_cl_base.h"
 #include "ai_space.h"
+#include "../IGame_Persistent.h"
 
 #include "script_space.h"
 #include "../XR_IOConsole.h"
@@ -39,7 +40,7 @@ xrClientData::~xrClientData()
 }
 
 
-xrServer::xrServer():IPureServer(Device.GetTimerGlobal())
+xrServer::xrServer():IPureServer(Device.GetTimerGlobal(), g_pGamePersistent->bDedicatedServer)
 {
 }
 
@@ -92,9 +93,9 @@ void		xrServer::client_Replicate	()
 
 IClient*	xrServer::client_Find_Get			(ClientID ID)
 {
-	char	cAddress[4];
-	DWORD	dwPort;
-	if (GetClientAddress(ID, cAddress, &dwPort))
+	char	cAddress[4] = {'a','b','c','d'};
+	DWORD	dwPort		= 0;
+	if (!psNET_direct_connect && GetClientAddress(ID, cAddress, &dwPort))
 	{		
 		for (u32 i=0; i<net_Players_disconnected.size(); i++)
 		{
@@ -117,8 +118,11 @@ IClient*	xrServer::client_Find_Get			(ClientID ID)
 	};
 
 	IClient* res = client_Create();
-	*((DWORD*)res->m_cAddress) = *((DWORD*)cAddress);	
-	res->m_dwPort = dwPort;
+	if(!psNET_direct_connect)
+	{
+		*((DWORD*)res->m_cAddress) = *((DWORD*)cAddress);	
+		res->m_dwPort = dwPort;
+	}
 	Msg("Player not found");
 	return res;
 };
@@ -337,31 +341,34 @@ u32 xrServer::OnMessage	(NET_Packet& P, ClientID sender)			// Non-Zero means bro
 			NET_Packet	tmpP;
 			while (!P.r_eof())
 			{
-				tmpP.B.count = P.r_u8();
-				P.r(&tmpP.B.data, tmpP.B.count);
+				tmpP.B.count		= P.r_u8();
+				P.r					(&tmpP.B.data, tmpP.B.count);
 
-				OnMessage (tmpP, sender);
+				OnMessage			(tmpP, sender);
 			};			
 		}break;
 	case M_CL_UPDATE:
 		{
 			xrClientData* CL		= ID_to_client	(sender);
-			if (!CL) break;
-			CL->net_Ready	= TRUE;
-			if (!CL->net_PassUpdates) break;
+			if (!CL)				break;
+			CL->net_Ready			= TRUE;
+
+			if (!CL->net_PassUpdates)
+				break;
 			//-------------------------------------------------------------------
 			u32 ClientPing = CL->stats.getPing();
 			P.w_seek(P.r_tell()+2, &ClientPing, 4);
 			//-------------------------------------------------------------------
-			if (SV_Client) SendTo	(SV_Client->ID, P, net_flags(TRUE, TRUE));
+			if (SV_Client) 
+				SendTo	(SV_Client->ID, P, net_flags(TRUE, TRUE));
 			VERIFY					(verify_entities());
 		}break;
 	case M_MOVE_PLAYERS_RESPOND:
 		{
 			xrClientData* CL		= ID_to_client	(sender);
-			if (!CL) break;
-			CL->net_Ready	= TRUE;
-			CL->net_PassUpdates = TRUE;
+			if (!CL)				break;
+			CL->net_Ready			= TRUE;
+			CL->net_PassUpdates		= TRUE;
 		}break;
 	//-------------------------------------------------------------------
 	case M_CL_PING_CHALLENGE:
@@ -687,4 +694,11 @@ void xrServer::verify_entity				(const CSE_Abstract *entity) const
 shared_str xrServer::level_name				(const shared_str &server_options) const
 {
 	return								(game->level_name(server_options));
+}
+
+void xrServer::create_direct_client()
+{
+	ClientID	_clid;
+	_clid.set	(1);
+	new_client	(_clid, "single_player", true);
 }

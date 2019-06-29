@@ -46,14 +46,9 @@ public:
 	void 			AddSubLine				(const CUISubLine* subLine);
 	void 			Clear					();
 	void 			ProcessNewLines			();
-	float			GetLength				(CGameFont* pFont);
-	int				GetTextLength			();
-	float			GetVisibleLength		(CGameFont* pFont);
 const CUILine*		CutByLength				(CGameFont* pFont, float length, BOOL cut_word);
 
 void 				Draw					(CGameFont* pFont, float x, float y)						const;
-int	 				DrawCursor				(int pos, CGameFont* pFont, float x, float y, u32 color)	const;
-static void			DrawCursor				(CGameFont* pFont, float x, float y, u32 color);
 
 protected:
 	int				GetSize					();

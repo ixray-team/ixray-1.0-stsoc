@@ -327,7 +327,8 @@ void CBulletManager::DynamicObjectHit	(CBulletManager::_event& E)
 							position_in_bone_space, 
 							impulse, 
 							E.bullet.hit_type,
-							E.bullet.ap						);
+							E.bullet.ap,
+							E.bullet.flags.aim_bullet);
 
 		Hit.GenHeader(u16((AddStatistic)? GE_HIT_STATISTIC : GE_HIT)&0xffff, E.R.O->ID());
 		Hit.whoID			= E.bullet.parent_id;

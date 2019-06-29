@@ -35,7 +35,7 @@ public:
 	virtual void	Load					(LPCSTR section);
 	virtual LPCSTR	Name					();
 	virtual LPCSTR	NameShort				();
-	virtual LPCSTR	NameComplex				();
+//.	virtual LPCSTR	NameComplex				();
 	virtual	void	Hit						(SHit* pHDS);
 
 	virtual void	OnH_B_Independent		(bool just_before_destroy);

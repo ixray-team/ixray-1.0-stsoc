@@ -20,7 +20,9 @@
 #include "CopyProtection.h"
 #include "Text_Console.h"
 #include <process.h>
+
 //---------------------------------------------------------------------
+ENGINE_API CInifile* pGameIni		= NULL;
 BOOL	g_bIntroFinished			= FALSE;
 extern	void	Intro				( void* fn );
 extern	void	Intro_DSHOW			( void* fn );
@@ -47,8 +49,10 @@ ENGINE_API	CApplication*	pApp			= NULL;
 static		HWND			logoWindow		= NULL;
 
 			int				doLauncher		();
-			void			doBenchmark		();
+			void			doBenchmark		(LPCSTR name);
 ENGINE_API	bool			g_bBenchmark	= false;
+string512	g_sBenchmarkName;
+
 
 ENGINE_API	string512		g_sLaunchOnExit_params;
 ENGINE_API	string512		g_sLaunchOnExit_app;
@@ -62,11 +66,24 @@ void InitEngine		()
 	CheckCopyProtection			( );
 }
 
+#define CHECK_OR_EXIT(expression,message) do {if (!(expression)) do_exit(message);} while (0)
+
+void do_exit	(const std::string &message)
+{
+	MessageBox			(NULL,message.c_str(),"Warning",MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL);
+	TerminateProcess	(GetCurrentProcess(),1);
+}
+
 void InitSettings	()
 {
 	string_path					fname; 
 	FS.update_path				(fname,"$game_config$","system.ltx");
 	pSettings					= xr_new<CInifile>	(fname,TRUE);
+	CHECK_OR_EXIT				(!pSettings->sections().empty(),make_string("Cannot find file %s.\nReinstalling application may fix this problem.",fname));
+
+	FS.update_path				(fname,"$game_config$","game.ltx");
+	pGameIni					= xr_new<CInifile>	(fname,TRUE);
+	CHECK_OR_EXIT				(!pGameIni->sections().empty(),make_string("Cannot find file %s.\nReinstalling application may fix this problem.",fname));
 }
 void InitConsole	()
 {
@@ -89,9 +106,6 @@ void InitConsole	()
 		sscanf					(strstr(Core.Params,"-ltx ")+5,"%[^ ] ",c_name);
 		strcpy					(Console->ConfigFile,c_name);
 	}
-//	if (!FS.exist(Console->ConfigFile))
-//		strcpy					(Console->ConfigFile,"user.ltx");
-
 }
 
 void InitInput		()
@@ -117,6 +131,7 @@ void destroySound	()
 void destroySettings()
 {
 	xr_delete					( pSettings		);
+	xr_delete					( pGameIni		);
 }
 void destroyConsole	()
 {
@@ -142,6 +157,7 @@ void execUserScript				( )
 	if (!FS.exist(Console->ConfigFile))
 		strcpy					(Console->ConfigFile,"user.ltx");
 */
+	Console->Execute			("unbindall");
 	Console->ExecuteScript		(Console->ConfigFile);
 }
 void slowdownthread	( void* )
@@ -158,7 +174,7 @@ void slowdownthread	( void* )
 }
 void CheckPrivilegySlowdown		( )
 {
-//.#ifdef DEBUG
+#ifdef DEBUG
 	if	(strstr(Core.Params,"-slowdown"))	{
 		thread_spawn(slowdownthread,"slowdown",0,0);
 	}
@@ -166,13 +182,13 @@ void CheckPrivilegySlowdown		( )
 		thread_spawn(slowdownthread,"slowdown",0,0);
 		thread_spawn(slowdownthread,"slowdown",0,0);
 	}
-//.#endif
+#endif // DEBUG
 }
 
 void Startup					( )
 {
 	execUserScript	();
-	InitInput		();
+//.	InitInput		();
 	InitSound		();
 
 	// ...command line for auto start
@@ -187,6 +203,7 @@ void Startup					( )
 
 	// Initialize APP
 //#ifndef DEDICATED_SERVER
+	ShowWindow( Device.m_hWnd , SW_SHOWNORMAL );
 	Device.Create				( );
 //#endif
 	LALib.OnCreate				( );
@@ -201,6 +218,7 @@ void Startup					( )
 
 	// Main cycle
 	CheckCopyProtection			( );
+Memory.mem_usage();
 	Device.Run					( );
 
 	// Destroy APP
@@ -311,109 +329,380 @@ void	__cdecl		intro_dshow_x	(void*)
 	g_bIntroFinished	= TRUE	;
 }
 */
+#define dwStickyKeysStructSize sizeof( STICKYKEYS )
+#define dwFilterKeysStructSize sizeof( FILTERKEYS )
+#define dwToggleKeysStructSize sizeof( TOGGLEKEYS )
+
+struct damn_keys_filter {
+	BOOL bScreenSaverState;
+
+	// Sticky & Filter & Toggle keys
+
+	STICKYKEYS StickyKeysStruct;
+	FILTERKEYS FilterKeysStruct;
+	TOGGLEKEYS ToggleKeysStruct;
+
+	DWORD dwStickyKeysFlags;
+	DWORD dwFilterKeysFlags;
+	DWORD dwToggleKeysFlags;
+
+	damn_keys_filter	()
+	{
+		// Screen saver stuff
+
+		bScreenSaverState = FALSE;
+
+		// Saveing current state
+		SystemParametersInfo( SPI_GETSCREENSAVEACTIVE , 0 , ( PVOID ) &bScreenSaverState , 0 );
+
+		if ( bScreenSaverState )
+			// Disable screensaver
+			SystemParametersInfo( SPI_SETSCREENSAVEACTIVE , FALSE , NULL , 0 );
+
+		dwStickyKeysFlags = 0;
+		dwFilterKeysFlags = 0;
+		dwToggleKeysFlags = 0;
+
+
+		ZeroMemory( &StickyKeysStruct , dwStickyKeysStructSize );
+		ZeroMemory( &FilterKeysStruct , dwFilterKeysStructSize );
+		ZeroMemory( &ToggleKeysStruct , dwToggleKeysStructSize );
+
+		StickyKeysStruct.cbSize = dwStickyKeysStructSize;
+		FilterKeysStruct.cbSize = dwFilterKeysStructSize;
+		ToggleKeysStruct.cbSize = dwToggleKeysStructSize;
+
+		// Saving current state
+		SystemParametersInfo( SPI_GETSTICKYKEYS , dwStickyKeysStructSize , ( PVOID ) &StickyKeysStruct , 0 );
+		SystemParametersInfo( SPI_GETFILTERKEYS , dwFilterKeysStructSize , ( PVOID ) &FilterKeysStruct , 0 );
+		SystemParametersInfo( SPI_GETTOGGLEKEYS , dwToggleKeysStructSize , ( PVOID ) &ToggleKeysStruct , 0 );
+
+		if ( StickyKeysStruct.dwFlags & SKF_AVAILABLE ) {
+			// Disable StickyKeys feature
+			dwStickyKeysFlags = StickyKeysStruct.dwFlags;
+			StickyKeysStruct.dwFlags = 0;
+			SystemParametersInfo( SPI_SETSTICKYKEYS , dwStickyKeysStructSize , ( PVOID ) &StickyKeysStruct , 0 );
+		}
+
+		if ( FilterKeysStruct.dwFlags & FKF_AVAILABLE ) {
+			// Disable FilterKeys feature
+			dwFilterKeysFlags = FilterKeysStruct.dwFlags;
+			FilterKeysStruct.dwFlags = 0;
+			SystemParametersInfo( SPI_SETFILTERKEYS , dwFilterKeysStructSize , ( PVOID ) &FilterKeysStruct , 0 );
+		}
+
+		if ( ToggleKeysStruct.dwFlags & TKF_AVAILABLE ) {
+			// Disable FilterKeys feature
+			dwToggleKeysFlags = ToggleKeysStruct.dwFlags;
+			ToggleKeysStruct.dwFlags = 0;
+			SystemParametersInfo( SPI_SETTOGGLEKEYS , dwToggleKeysStructSize , ( PVOID ) &ToggleKeysStruct , 0 );
+		}
+	}
+
+	~damn_keys_filter	()
+	{
+		if ( bScreenSaverState )
+			// Restoring screen saver
+			SystemParametersInfo( SPI_SETSCREENSAVEACTIVE , TRUE , NULL , 0 );
+
+		if ( dwStickyKeysFlags) {
+			// Restore StickyKeys feature
+			StickyKeysStruct.dwFlags = dwStickyKeysFlags;
+			SystemParametersInfo( SPI_SETSTICKYKEYS , dwStickyKeysStructSize , ( PVOID ) &StickyKeysStruct , 0 );
+		}
+
+		if ( dwFilterKeysFlags ) {
+			// Restore FilterKeys feature
+			FilterKeysStruct.dwFlags = dwFilterKeysFlags;
+			SystemParametersInfo( SPI_SETFILTERKEYS , dwFilterKeysStructSize , ( PVOID ) &FilterKeysStruct , 0 );
+		}
+
+		if ( dwToggleKeysFlags ) {
+			// Restore FilterKeys feature
+			ToggleKeysStruct.dwFlags = dwToggleKeysFlags;
+			SystemParametersInfo( SPI_SETTOGGLEKEYS , dwToggleKeysStructSize , ( PVOID ) &ToggleKeysStruct , 0 );
+		}
+
+	}
+};
+
+#undef dwStickyKeysStructSize
+#undef dwFilterKeysStructSize
+#undef dwToggleKeysStructSize
+
+// Приблудина для SecuROM-а
+#include "securom_api.h"
+
+// Фунция для тупых требований THQ и тупых американских пользователей
+BOOL IsOutOfVirtualMemory()
+{
+#define VIRT_ERROR_SIZE 256
+#define VIRT_MESSAGE_SIZE 512
+
+	SECUROM_MARKER_HIGH_SECURITY_ON(1)
+
+	MEMORYSTATUSEX statex;
+	DWORD dwPageFileInMB = 0;
+	DWORD dwPhysMemInMB = 0;
+	HINSTANCE hApp = 0;
+	char	pszError[ VIRT_ERROR_SIZE ];
+	char	pszMessage[ VIRT_MESSAGE_SIZE ];
+
+	ZeroMemory( &statex , sizeof( MEMORYSTATUSEX ) );
+	statex.dwLength = sizeof( MEMORYSTATUSEX );
+	
+	if ( ! GlobalMemoryStatusEx( &statex ) )
+		return 0;
+
+	dwPageFileInMB = ( DWORD ) ( statex.ullTotalPageFile / ( 1024 * 1024 ) ) ;
+	dwPhysMemInMB = ( DWORD ) ( statex.ullTotalPhys / ( 1024 * 1024 ) ) ;
+
+	// Довольно отфонарное условие
+	if ( ( dwPhysMemInMB > 500 ) && ( ( dwPageFileInMB + dwPhysMemInMB ) > 2500  ) )
+		return 0;
+
+	hApp = GetModuleHandle( NULL );
+
+	if ( ! LoadString( hApp , RC_VIRT_MEM_ERROR , pszError , VIRT_ERROR_SIZE ) )
+		return 0;
+ 
+	if ( ! LoadString( hApp , RC_VIRT_MEM_TEXT , pszMessage , VIRT_MESSAGE_SIZE ) )
+		return 0;
+
+	MessageBox( NULL , pszMessage , pszError , MB_OK | MB_ICONHAND );
+
+	SECUROM_MARKER_HIGH_SECURITY_OFF(1)
+
+	return 1;
+}
+
 #include "xr_ioc_cmd.h"
+
+typedef void DUMMY_STUFF (const void*,const u32&,void*);
+XRCORE_API DUMMY_STUFF	*g_temporary_stuff;
+
+#define TRIVIAL_ENCRYPTOR_DECODER
+#include "trivial_encryptor.h"
+
+//#define RUSSIAN_BUILD
+
+#if 0
+void foo	()
+{
+	typedef std::map<int,int>	TEST_MAP;
+	TEST_MAP					temp;
+	temp.insert					(std::make_pair(0,0));
+	TEST_MAP::const_iterator	I = temp.upper_bound(2);
+	if (I == temp.end())
+		OutputDebugString		("end() returned\r\n");
+	else
+		OutputDebugString		("last element returned\r\n");
+
+	typedef void*	pvoid;
+
+	LPCSTR			path = "d:\\network\\stalker_net2";
+	FILE			*f = fopen(path,"rb");
+	int				file_handle = _fileno(f);
+	u32				buffer_size = _filelength(file_handle);
+	pvoid			buffer = xr_malloc(buffer_size);
+	size_t			result = fread(buffer,buffer_size,1,f);
+	R_ASSERT3		(!buffer_size || (result && (buffer_size >= result)),"Cannot read from file",path);
+	fclose			(f);
+
+	u32				compressed_buffer_size = rtc_csize(buffer_size);
+	pvoid			compressed_buffer = xr_malloc(compressed_buffer_size);
+	u32				compressed_size = rtc_compress(compressed_buffer,compressed_buffer_size,buffer,buffer_size);
+
+	LPCSTR			compressed_path = "d:\\network\\stalker_net2.rtc";
+	FILE			*f1 = fopen(compressed_path,"wb");
+	fwrite			(compressed_buffer,compressed_size,1,f1);
+	fclose			(f1);
+}
+#endif // 0
+
+int APIENTRY WinMain_impl(HINSTANCE hInstance,
+                     HINSTANCE hPrevInstance,
+                     char *    lpCmdLine,
+                     int       nCmdShow)
+{
+//	foo();
+#ifndef DEDICATED_SERVER
+
+	// Check for virtual memory
+
+	if ( IsOutOfVirtualMemory() )
+		return 0;
+
+	// Check for another instance
+
+	#define STALKER_PRESENCE_MUTEX "STALKER-SoC"
+	
+	HANDLE hCheckPresenceMutex = INVALID_HANDLE_VALUE;
+	hCheckPresenceMutex = OpenMutex( READ_CONTROL , FALSE ,  STALKER_PRESENCE_MUTEX );
+	if ( hCheckPresenceMutex == NULL ) {
+		// New mutex
+		hCheckPresenceMutex = CreateMutex( NULL , FALSE , STALKER_PRESENCE_MUTEX );
+		if ( hCheckPresenceMutex == NULL )
+			// Shit happens
+			return 2;
+	} else {
+		// Already running
+		CloseHandle( hCheckPresenceMutex );
+		return 1;
+	}
+#endif // DEDICATED_SERVER
+
+	SetThreadAffinityMask		(GetCurrentThread(),1);
+
+	// Title window
+	logoWindow					= CreateDialog(GetModuleHandle(NULL),	MAKEINTRESOURCE(IDD_STARTUP), 0, logDlgProc );
+	SetWindowPos				(
+		logoWindow,
+#ifndef DEBUG
+		HWND_TOPMOST,
+#else
+		HWND_NOTOPMOST,
+#endif // NDEBUG
+		0,
+		0,
+		0,
+		0,
+		SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW
+	);
+
+	// AVI
+	g_bIntroFinished			= TRUE;
+
+	g_sLaunchOnExit_app[0]		= NULL;
+	g_sLaunchOnExit_params[0]	= NULL;
+
+	LPCSTR						fsgame_ltx_name = "-fsltx ";
+	string_path					fsgame = "";
+	if (strstr(lpCmdLine, fsgame_ltx_name)) {
+		int						sz = xr_strlen(fsgame_ltx_name);
+		sscanf					(strstr(lpCmdLine,fsgame_ltx_name)+sz,"%[^ ] ",fsgame);
+	}
+
+	g_temporary_stuff			= &trivial_encryptor::decode;
+
+	Core._initialize			("xray",NULL, TRUE, fsgame[0] ? fsgame : NULL);
+	InitSettings				();
+
+#ifndef DEDICATED_SERVER
+	{
+		damn_keys_filter		filter;
+		(void)filter;
+#endif // DEDICATED_SERVER
+
+		FPU::m24r				();
+		InitEngine				();
+		InitConsole				();
+
+		LPCSTR benchName = "-batch_benchmark ";
+		if(strstr(lpCmdLine, benchName))
+		{
+			int sz = xr_strlen(benchName);
+			string64				b_name;
+			sscanf					(strstr(Core.Params,benchName)+sz,"%[^ ] ",b_name);
+			doBenchmark				(b_name);
+			return 0;
+		}
+
+		if (strstr(lpCmdLine,"-launcher")) 
+		{
+			int l_res = doLauncher();
+			if (l_res != 0)
+				return 0;
+		};
+		
+
+		if(strstr(Core.Params,"-r2a"))	
+			Console->Execute			("renderer renderer_r2a");
+		else
+		if(strstr(Core.Params,"-r2"))	
+			Console->Execute			("renderer renderer_r2");
+		else
+		{
+			CCC_LoadCFG_custom*	pTmp = xr_new<CCC_LoadCFG_custom>("renderer ");
+			pTmp->Execute				(Console->ConfigFile);
+			xr_delete					(pTmp);
+		}
+
+
+		InitInput					( );
+		Engine.External.Initialize	( );
+		Console->Execute			("stat_memory");
+		Startup	 					( );
+		Core._destroy				( );
+
+		char* _args[3];
+		// check for need to execute something external
+		if (xr_strlen(g_sLaunchOnExit_params) && xr_strlen(g_sLaunchOnExit_app) ) 
+		{
+			string4096 ModuleFileName = "";		
+			GetModuleFileName(NULL, ModuleFileName, 4096);
+
+			string4096 ModuleFilePath = "";
+			char* ModuleName = NULL;
+			GetFullPathName(ModuleFileName, 4096, ModuleFilePath, &ModuleName);
+			ModuleName[0] = 0;
+	/*
+			char* envpath =getenv("PATH");
+
+			string4096	NewEnvPath = "";
+			sprintf(NewEnvPath , "PATH=%s;%s", ModuleFilePath,envpath);
+			_putenv(NewEnvPath);
+	*/
+			strcat(ModuleFilePath, g_sLaunchOnExit_app);
+	//		_args[0] = ModuleFilePath;//g_sLaunchOnExit_app;
+			_args[0] = g_sLaunchOnExit_app;
+			_args[1] = g_sLaunchOnExit_params;
+			_args[2] = NULL;		
+			
+			_spawnv(_P_NOWAIT, _args[0], _args);//, _envvar);
+		}
+#ifndef DEDICATED_SERVER
+		
+		// Delete application presence mutex
+		CloseHandle( hCheckPresenceMutex );
+	}
+	// here damn_keys_filter class instanse will be destroyed
+#endif // DEDICATED_SERVER
+
+	return						0;
+}
+
+int stack_overflow_exception_filter	(int exception_code)
+{
+   if (exception_code == EXCEPTION_STACK_OVERFLOW)
+   {
+       // Do not call _resetstkoflw here, because
+       // at this point, the stack is not yet unwound.
+       // Instead, signal that the handler (the __except block)
+       // is to be executed.
+       return EXCEPTION_EXECUTE_HANDLER;
+   }
+   else
+       return EXCEPTION_CONTINUE_SEARCH;
+}
 
 int APIENTRY WinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      char *    lpCmdLine,
                      int       nCmdShow)
 {
-	SetThreadAffinityMask		(GetCurrentThread(),1);
-
-	// Title window
-	logoWindow = CreateDialog	(GetModuleHandle(NULL),	MAKEINTRESOURCE(IDD_STARTUP), 0, logDlgProc );
-
-	// AVI
-	g_bIntroFinished		= TRUE;
-	/*
-	if (!IsDebuggerPresent())
+	__try 
 	{
-		g_hInstance				= hInstance;
-		g_hPrevInstance			= hPrevInstance;
-		g_nCmdShow				= nCmdShow;
-		thread_spawn			(Intro_DSHOW,"intro",0,"GameData\\Stalker_Intro.avi");
-		Sleep					(100);
+		Debug._initialize	();
+		WinMain_impl		(hInstance,hPrevInstance,lpCmdLine,nCmdShow);
 	}
-	*/
-	g_sLaunchOnExit_app[0]		= NULL;
-	g_sLaunchOnExit_params[0]	= NULL;
-	// Core
-	Core._initialize		("xray",NULL);
-//	DUMP_PHASE;
-	
-	FPU::m24r				();
-
-	// auth
+	__except(stack_overflow_exception_filter(GetExceptionCode()))
 	{
-#pragma todo("container is created in stack!")
-		xr_vector<xr_string>	ignore, test	;
-		ignore.push_back		(xr_string("user"));
-		ignore.push_back		(xr_string("Stalker_net.exe"));
-		ignore.push_back		(xr_string("map_list.ltx"));
-		ignore.push_back		(xr_string("banned.ltx"));
-		ignore.push_back		(xr_string("maprot_list.ltx"));
-
-
-		test.push_back			(xr_string(".ltx"));
-		test.push_back			(xr_string(".script"));
-		test.push_back			(xr_string(".exe"));
-		test.push_back			(xr_string(".dll"));
-		FS.auth_generate		(ignore,test)	;
-	}
-	// auth end 
-
-//#ifdef DEBUG
-//	testbed	();
-//#endif
-
-	InitEngine				();
-	InitSettings			();
-	InitConsole				();
-
-	if(strstr(lpCmdLine, "-batch_benchmark")){
-		doBenchmark();
-		return 0;
+		_resetstkoflw		();
+		FATAL				("stack overflow");
 	}
 
-	if (strstr(lpCmdLine,"-launcher")) 
-	{
-		int l_res = doLauncher();
-		if (l_res != 0)
-			return 0;
-	};
-	
-
-	if(strstr(Core.Params,"-r2a"))	
-		Console->Execute			("renderer renderer_r2a");
-	else
-	if(strstr(Core.Params,"-r2"))	
-		Console->Execute			("renderer renderer_r2");
-	else
-	{
-		CCC_LoadCFG_custom*	pTmp = xr_new<CCC_LoadCFG_custom>("renderer ");
-		pTmp->Execute				(Console->ConfigFile);
-		xr_delete					(pTmp);
-	}
-
-
-	Engine.External.Initialize	( );
-//	CheckPrivilegySlowdown		( );
-	Console->Execute			("stat_memory");
-	Startup	 					( );
-	Core._destroy				( );
-
-	char* _args[3];
-	// check for need to execute something external
-	if (xr_strlen(g_sLaunchOnExit_params) && xr_strlen(g_sLaunchOnExit_app) ) 
-	{
-		_args[0] = g_sLaunchOnExit_app;
-		_args[1] = g_sLaunchOnExit_params;
-		_args[2] = NULL;
-
-		_spawnv(_P_NOWAIT, _args[0], _args);
-	}
-
-	return						0;
+	return					(0);
 }
 
 LPCSTR _GetFontTexName (LPCSTR section)
@@ -449,8 +738,8 @@ void _InitializeFont(CGameFont*& F, LPCSTR section, u32 flags)
 
 	if (pSettings->line_exist(section,"size")){
 		float sz = pSettings->r_float(section,"size");
-		if (flags&CGameFont::fsDeviceIndependent)	F->SetSizeI(sz);
-		else										F->SetSize(sz);
+		if (flags&CGameFont::fsDeviceIndependent)	F->SetHeightI(sz);
+		else										F->SetHeight(sz);
 	}
 	if (pSettings->line_exist(section,"interval"))
 		F->SetInterval(pSettings->r_fvector2(section,"interval"));
@@ -608,11 +897,12 @@ void CApplication::LoadDraw		()
 	CheckCopyProtection			();
 }
 
-void CApplication::LoadTitle	(char *S, char *S2)
+void CApplication::LoadTitleInt(LPCSTR str)
 {
 	load_stage++;
 	VERIFY						(ll_dwReference);
-	sprintf						(app_title,S,S2);
+	VERIFY						(str && xr_strlen(str)<256);
+	strcpy						(app_title, str);
 	Msg							("* phase time: %d ms",phase_timer.GetElapsed_ms());	phase_timer.Start();
 	Msg							("* phase cmem: %d K", Memory.mem_usage()/1024);
 	Console->Execute			("stat_memory");
@@ -744,6 +1034,7 @@ void FreeLauncher(){
 
 int doLauncher()
 {
+/*
 	execUserScript();
 	InitLauncher();
 	int res = pLauncher(0);
@@ -766,32 +1057,42 @@ int doLauncher()
 		Core._destroy			();
 		return					(1);
 	}
+*/
 	return 0;
-
 }
 
-void doBenchmark()
+void doBenchmark(LPCSTR name)
 {
 	g_bBenchmark = true;
 	string_path in_file;
-	FS.update_path(in_file,"$server_root$","tmp_benchmark.ini");
+	FS.update_path(in_file,"$app_data_root$", name);
 	CInifile ini(in_file);
 	int test_count = ini.line_count("benchmark");
 	LPCSTR test_name,t;
 	shared_str test_command;
 	for(int i=0;i<test_count;++i){
-		ini.r_line( "benchmark", i, &test_name, &t);
+		ini.r_line			( "benchmark", i, &test_name, &t);
+		strcpy				(g_sBenchmarkName, test_name);
 		
-		test_command = ini.r_string_wb("benchmark",test_name);
+		test_command		= ini.r_string_wb("benchmark",test_name);
 		strlwr				(strcpy(Core.Params,*test_command));
 		
+		InitInput					();
 		if(i){
 			ZeroMemory(&HW,sizeof(CHW));
 			InitEngine();
 		}
 
+
 		Engine.External.Initialize	( );
-		execUserScript();
+
+		strcpy						(Console->ConfigFile,"user.ltx");
+		if (strstr(Core.Params,"-ltx ")) {
+			string64				c_name;
+			sscanf					(strstr(Core.Params,"-ltx ")+5,"%[^ ] ",c_name);
+			strcpy					(Console->ConfigFile,c_name);
+		}
+
 		Startup	 				();
 	}
 }

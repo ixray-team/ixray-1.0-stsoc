@@ -319,8 +319,6 @@ void CMemoryManager::on_restrictions_change	()
 	item().on_restrictions_change	();
 }
 
-void XRCORE_API LogStackTrace	(LPCSTR);
-
 void CMemoryManager::make_object_visible_somewhen	(const CEntityAlive *enemy)
 {
 	squad_mask_type				mask = stalker().agent_manager().member().mask(&stalker());
@@ -354,7 +352,7 @@ void CMemoryManager::load							(IReader &packet)
 	danger().load				(packet);
 }
 
-// we do this due to the limitation f client spawn manager
+// we do this due to the limitation of client spawn manager
 // should be revisited from the acrhitectural point of view
 void CMemoryManager::on_requested_spawn				(CObject *object)
 {

@@ -66,6 +66,17 @@ void SBinocVisibleObj::Update()
 {
 	m_flags.set		(	flVisObjNotValid,TRUE);
 
+	VERIFY2			(
+		m_object->Visual(),
+		make_string(
+			"SBinocVisibleObj::Update object [0x%08x][%d][%s][%s] has no Visual",
+			m_object,
+			m_object->ID(),
+			*m_object->cNameSect(),
+			*m_object->cName()
+		)
+	);
+
 	Fbox		b		= m_object->Visual()->vis.box;
 
 	Fmatrix				xform;
@@ -232,4 +243,13 @@ void CBinocularsVision::Load(const shared_str& section)
 	m_rotating_speed	= pSettings->r_float(section,"vis_frame_speed");
 	m_frame_color		= pSettings->r_fcolor(section,"vis_frame_color");
 	m_snd_found.create	(pSettings->r_string(section,"found_snd"),st_Effect,sg_SourceType);
+}
+
+void CBinocularsVision::remove_links(CObject *object)
+{
+	VIS_OBJECTS::iterator	I = std::find_if(m_active_objects.begin(),m_active_objects.end(),FindVisObjByObject(object));
+	if (I == m_active_objects.end())
+		return;
+
+	m_active_objects.erase	(I);
 }

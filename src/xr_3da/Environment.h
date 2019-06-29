@@ -16,6 +16,24 @@ class ENGINE_API	CPerlinNoise1D;
 
 #define DAY_LENGTH		86400.f
 
+#include "blenders\blender.h"
+class CBlender_skybox		: public IBlender  
+{
+public:
+	virtual		LPCSTR		getComment()	{ return "INTERNAL: combiner";	}
+	virtual		BOOL		canBeDetailed()	{ return FALSE;	}
+	virtual		BOOL		canBeLMAPped()	{ return FALSE;	}
+
+	virtual		void		Compile			(CBlender_Compile& C)
+	{
+		C.r_Pass			("sky2",		"sky2",			FALSE,	TRUE, FALSE);
+		C.r_Sampler_clf		("s_sky0",		"$null"			);
+		C.r_Sampler_clf		("s_sky1",		"$null"			);
+		C.r_Sampler_rtf		("s_tonemap",	"$user$tonemap"	);	//. hack
+		C.r_End				();
+	}
+};
+
 // t-defs
 class ENGINE_API	CEnvModifier
 {
@@ -136,6 +154,7 @@ public:
 public:
 	void				lerp			(CEnvironment* parent, CEnvDescriptor& A, CEnvDescriptor& B, float f, CEnvModifier& M, float m_power);
 	void				clear			();
+	void				destroy			();
 };
 
 class ENGINE_API	CEnvironment
@@ -165,6 +184,7 @@ public:
 	static bool sort_env_etl_pred	(const CEnvDescriptor* x, const CEnvDescriptor* y)
 	{	return x->exec_time_loaded < y->exec_time_loaded;	}
 protected:
+	CBlender_skybox			m_b_skybox;
 	CPerlinNoise1D*			PerlinNoise1D;
 
 	float					fGameTime;

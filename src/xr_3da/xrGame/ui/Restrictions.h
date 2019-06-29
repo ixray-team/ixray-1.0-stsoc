@@ -24,6 +24,7 @@ public:
 	shared_str				GetItemGroup			(const shared_str& section_name)	const;
 	u32						GetGroupCount			(const shared_str& group_name)		const;
 	void 					SetRank					(u32 rank)							{VERIFY(rank>=0 && rank <5); m_rank = rank;}
+	u32						GetRank					()									{return m_rank;};
 	const shared_str&		GetRankName				(u32 rank)	const					{return m_names[rank];}
 protected:
 	void					Dump					() const;

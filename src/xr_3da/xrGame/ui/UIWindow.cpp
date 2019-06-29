@@ -28,8 +28,8 @@ poolSS< _12b, 128>	ui_allocator;
 #endif
 
 xr_vector<Frect> g_wnds_rects;
-ref_shader  dbg_draw_sh;
-ref_geom	dbg_draw_gm;
+ref_shader  dbg_draw_sh =0;
+ref_geom	dbg_draw_gm =0;
 
 BOOL g_show_wnd_rect = FALSE;
 BOOL g_show_wnd_rect2 = FALSE;
@@ -46,6 +46,7 @@ void add_rect_to_draw(Frect r)
 }
 void draw_rect(Frect& r, u32 color)
 {
+
 	if(!dbg_draw_sh){
 		dbg_draw_sh.create("hud\\default","ui\\ui_pop_up_active_back");
 		dbg_draw_gm.create(FVF::F_TL, RCache.Vertex.Buffer(), 0);
@@ -67,8 +68,7 @@ void draw_rect(Frect& r, u32 color)
 }
 void draw_wnds_rects()
 {
-
-	if(!g_wnds_rects.size())	return;
+	if(0==g_wnds_rects.size())	return;
 
 	xr_vector<Frect>::iterator it = g_wnds_rects.begin();
 	xr_vector<Frect>::iterator it_e = g_wnds_rects.end();
@@ -127,7 +127,6 @@ CUIWindow::CUIWindow()
 
 CUIWindow::~CUIWindow()
 {
-//.	VERIFY(	m_dbg_flag.get()==0);
 	VERIFY( !(GetParent()&&IsAutoDelete()) );
 
 	CUIWindow* parent	= GetParent();
@@ -205,10 +204,12 @@ void CUIWindow::Update()
 #endif
 		// RECEIVE and LOST focus
 		if(m_bCursorOverWindow != cursor_on_window)
+		{
 			if(cursor_on_window)
 				OnFocusReceive();			
 			else
 				OnFocusLost();			
+		}
 	}
 	
 	for(WINDOW_LIST_it it = m_ChildWndList.begin(); m_ChildWndList.end()!=it; ++it){
@@ -221,7 +222,7 @@ void CUIWindow::AttachChild(CUIWindow* pChild)
 {
 	if(!pChild) return;
 	
-	VERIFY( !IsChild(pChild) );
+	R_ASSERT( !IsChild(pChild) );
 	pChild->SetParent(this);
 	m_ChildWndList.push_back(pChild);
 }
@@ -325,12 +326,13 @@ bool CUIWindow::OnMouse(float x, float y, EUIMessages mouse_action)
 		case WINDOW_MOUSE_WHEEL_UP:
 			OnMouseScroll(WINDOW_MOUSE_WHEEL_UP);	break;
 		case WINDOW_LBUTTON_DOWN:
-			if(OnMouseDown())		return true;	break;
+			if(OnMouseDown(MOUSE_1))				return true;	break;
 		case WINDOW_RBUTTON_DOWN:
-			if(OnMouseDown(false))	return true;	break;
+			if(OnMouseDown(MOUSE_2))				return true;	break;
+		case WINDOW_CBUTTON_DOWN:
+			if(OnMouseDown(MOUSE_3))				return true;	break;
 		case WINDOW_LBUTTON_DB_CLICK:
-			if (OnDbClick()) return true;
-			break;
+			if (OnDbClick())						return true;	break;
 		default:
             break;
 	}
@@ -391,11 +393,11 @@ bool CUIWindow::OnDbClick(){
 	return false;
 }
 
-bool CUIWindow::OnMouseDown(bool left_button){
+bool CUIWindow::OnMouseDown(int mouse_btn){
 	return false;
 }
 
-void CUIWindow::OnMouseUp(bool left_button){
+void CUIWindow::OnMouseUp(int mouse_btn){
 }
 
 void CUIWindow::OnFocusReceive()
@@ -629,7 +631,7 @@ CUIWindow*	CUIWindow::FindChild(const shared_str name)
 
 void CUIWindow::SetParent(CUIWindow* pNewParent) 
 {
-	VERIFY( !(m_pParentWnd && m_pParentWnd->IsChild(this)) );
+	R_ASSERT( !(m_pParentWnd && m_pParentWnd->IsChild(this)) );
 
 	m_pParentWnd = pNewParent;
 }

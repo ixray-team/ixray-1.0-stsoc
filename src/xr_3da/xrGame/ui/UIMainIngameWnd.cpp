@@ -54,6 +54,7 @@
 
 void test_draw	();
 void test_key	(int dik);
+void test_update();
 #endif
 
 
@@ -155,15 +156,6 @@ void CUIMainIngameWnd::Init()
 		UIZoneMap->Background().AttachChild	(&UIPdaOnline);
 	}
 
-	// Для информационных сообщений
-	u32							color;
-	CGameFont*					pFont;
-	AttachChild					(&UIInfoMessages);
-	xml_init.InitScrollView		(uiXml, "info_list", 0, &UIInfoMessages);
-	CUIXmlInit::InitFont		(uiXml, "info_list:font", 0, color, pFont);
-	UIInfoMessages.SetTextAtrib	(pFont, color);
-
-		
 
 	//Полоса прогресса здоровья
 	UIStaticHealth.AttachChild	(&UIHealthBar);
@@ -362,6 +354,9 @@ void CUIMainIngameWnd::SetAmmoIcon (const shared_str& sect_name)
 
 void CUIMainIngameWnd::Update()
 {
+#ifdef DEBUG
+	test_update();
+#endif
 	if (m_pMPChatWnd)
 		m_pMPChatWnd->Update();
 	if (m_pMPLogWnd)
@@ -398,91 +393,91 @@ void CUIMainIngameWnd::Update()
 	if( !(Device.dwFrame%5) )
 	{
 
-	if(!(Device.dwFrame%30))
-	{
-		bool b_God = (GodMode()||(!Game().local_player)) ? true : Game().local_player->testFlag(GAME_PLAYER_FLAG_INVINCIBLE);
-		if(b_God)
-			SetWarningIconColor	(ewiInvincible,0xffffffff);
-		else
-			SetWarningIconColor	(ewiInvincible,0x00ffffff);
-	}
-	// ewiArtefact
-	if( (GameID() == GAME_ARTEFACTHUNT) && !(Device.dwFrame%30) ){
-		bool b_Artefact = (NULL != m_pActor->inventory().ItemFromSlot(ARTEFACT_SLOT));
-		if(b_Artefact)
-			SetWarningIconColor	(ewiArtefact,0xffffffff);
-		else
-			SetWarningIconColor	(ewiArtefact,0x00ffffff);
-	}
-
-	// Armor indicator stuff
-	PIItem	pItem = m_pActor->inventory().ItemFromSlot(OUTFIT_SLOT);
-	if (pItem)
-	{
-		UIArmorBar.Show					(true);
-		UIStaticArmor.Show				(true);
-		UIArmorBar.SetProgressPos		(pItem->GetCondition()*100);
-	}
-	else
-	{
-		UIArmorBar.Show					(false);
-		UIStaticArmor.Show				(false);
-	}
-
-	UpdateActiveItemInfo				();
-
-
-	EWarningIcons i					= ewiWeaponJammed;
-		
-	while (i < ewiInvincible)
-	{
-		float value = 0;
-		switch (i)
+		if(!(Device.dwFrame%30))
 		{
-		//radiation
-		case ewiRadiation:
-			value = m_pActor->conditions().GetRadiation();
-			break;
-		case ewiWound:
-			value = m_pActor->conditions().BleedingSpeed();
-			break;
-		case ewiWeaponJammed:
-			if (m_pWeapon)
-				value = 1 - m_pWeapon->GetConditionToShow();
-			break;
-		case ewiStarvation:
-			value = 1 - m_pActor->conditions().GetSatiety();
-			break;		
-		case ewiPsyHealth:
-			value = 1 - m_pActor->conditions().GetPsyHealth();
-			break;
-		default:
-			R_ASSERT(!"Unknown type of warning icon");
+			bool b_God = (GodMode()||(!Game().local_player)) ? true : Game().local_player->testFlag(GAME_PLAYER_FLAG_INVINCIBLE);
+			if(b_God)
+				SetWarningIconColor	(ewiInvincible,0xffffffff);
+			else
+				SetWarningIconColor	(ewiInvincible,0x00ffffff);
+		}
+		// ewiArtefact
+		if( (GameID() == GAME_ARTEFACTHUNT) && !(Device.dwFrame%30) ){
+			bool b_Artefact = (NULL != m_pActor->inventory().ItemFromSlot(ARTEFACT_SLOT));
+			if(b_Artefact)
+				SetWarningIconColor	(ewiArtefact,0xffffffff);
+			else
+				SetWarningIconColor	(ewiArtefact,0x00ffffff);
 		}
 
-		xr_vector<float>::reverse_iterator	rit;
+		// Armor indicator stuff
+		PIItem	pItem = m_pActor->inventory().ItemFromSlot(OUTFIT_SLOT);
+		if (pItem)
+		{
+			UIArmorBar.Show					(true);
+			UIStaticArmor.Show				(true);
+			UIArmorBar.SetProgressPos		(pItem->GetCondition()*100);
+		}
+		else
+		{
+			UIArmorBar.Show					(false);
+			UIStaticArmor.Show				(false);
+		}
 
-		// Сначала проверяем на точное соответсвие
-		rit  = std::find(m_Thresholds[i].rbegin(), m_Thresholds[i].rend(), value);
+		UpdateActiveItemInfo				();
 
-		// Если его нет, то берем последнее меньшее значение ()
-		if (rit == m_Thresholds[i].rend())
-			rit = std::find_if(m_Thresholds[i].rbegin(), m_Thresholds[i].rend(), std::bind2nd(std::less<float>(), value));
 
-		// Минимальное и максимальное значения границы
-		float min = m_Thresholds[i].front();
-		float max = m_Thresholds[i].back();
+		EWarningIcons i					= ewiWeaponJammed;
 
-		if (rit != m_Thresholds[i].rend()){
-			float v = *rit;
-			SetWarningIconColor(i, color_argb(0xFF, clampr<u32>(static_cast<u32>(255 * ((v - min) / (max - min) * 2)), 0, 255), 
-												   clampr<u32>(static_cast<u32>(255 * (2.0f - (v - min) / (max - min) * 2)), 0, 255),
-												   0));
-		}else
-			TurnOffWarningIcon(i);
+		while (i < ewiInvincible)
+		{
+			float value = 0;
+			switch (i)
+			{
+				//radiation
+			case ewiRadiation:
+				value = m_pActor->conditions().GetRadiation();
+				break;
+			case ewiWound:
+				value = m_pActor->conditions().BleedingSpeed();
+				break;
+			case ewiWeaponJammed:
+				if (m_pWeapon)
+					value = 1 - m_pWeapon->GetConditionToShow();
+				break;
+			case ewiStarvation:
+				value = 1 - m_pActor->conditions().GetSatiety();
+				break;		
+			case ewiPsyHealth:
+				value = 1 - m_pActor->conditions().GetPsyHealth();
+				break;
+			default:
+				R_ASSERT(!"Unknown type of warning icon");
+			}
 
-		i = (EWarningIcons)(i + 1);
-	}
+			xr_vector<float>::reverse_iterator	rit;
+
+			// Сначала проверяем на точное соответсвие
+			rit  = std::find(m_Thresholds[i].rbegin(), m_Thresholds[i].rend(), value);
+
+			// Если его нет, то берем последнее меньшее значение ()
+			if (rit == m_Thresholds[i].rend())
+				rit = std::find_if(m_Thresholds[i].rbegin(), m_Thresholds[i].rend(), std::bind2nd(std::less<float>(), value));
+
+			// Минимальное и максимальное значения границы
+			float min = m_Thresholds[i].front();
+			float max = m_Thresholds[i].back();
+
+			if (rit != m_Thresholds[i].rend()){
+				float v = *rit;
+				SetWarningIconColor(i, color_argb(0xFF, clampr<u32>(static_cast<u32>(255 * ((v - min) / (max - min) * 2)), 0, 255), 
+					clampr<u32>(static_cast<u32>(255 * (2.0f - (v - min) / (max - min) * 2)), 0, 255),
+					0));
+			}else
+				TurnOffWarningIcon(i);
+
+			i = (EWarningIcons)(i + 1);
+		}
 	}
 
 	// health&armor
@@ -500,7 +495,7 @@ void CUIMainIngameWnd::Update()
 
 bool CUIMainIngameWnd::OnKeyboardPress(int dik)
 {
-#ifdef DEBUG
+#if 0//def DEBUG
 	test_key(dik);
 #endif
 	// поддержка режима adjust hud mode
@@ -909,12 +904,6 @@ bool CUIMainIngameWnd::OnKeyboardPress(int dik)
 	return false;
 }
 
-void CUIMainIngameWnd::AddInfoMessage(LPCSTR message)
-{
-	CUIStatic* pItem = UIInfoMessages.AddLogMessage(message);
-	pItem->SetClrLightAnim("ui_main_msgs", false, true, true, true);
-	pItem->SetTextAlignment(CGameFont::alCenter);
-}
 
 void CUIMainIngameWnd::RenderQuickInfos()
 {
@@ -1155,6 +1144,16 @@ void CUIMainIngameWnd::UpdateActiveItemInfo()
 	}
 }
 
+void CUIMainIngameWnd::OnConnected()
+{
+	UIZoneMap->SetupCurrentMap		();
+}
+
+void CUIMainIngameWnd::reset_ui()
+{
+	UIMotionIcon.ResetVisibility	();
+}
+
 #ifdef DEBUG
 /*
 #include "d3dx9core.h"
@@ -1177,10 +1176,32 @@ CUIGameTutorial* g_tut = NULL;
 //#include "UIVotingCategory.h"
 
 //CUIVotingCategory* v = NULL;
+#include "UIFrameWindow.h"
+CUIFrameWindow*		pUIFrame = NULL;
+
+void test_update()
+{
+	if(pUIFrame)
+		pUIFrame->Update();
+}
+
 void test_key	(int dik)
 {
-/*
 
+	if(dik==DIK_K)
+	{
+		if(!pUIFrame)
+		{
+			CUIXml uiXML;
+			uiXML.Init(CONFIG_PATH, UI_PATH, "talk.xml");
+
+			pUIFrame					= xr_new<CUIFrameWindow>();
+			CUIXmlInit::InitFrameWindow	(uiXML, "frame_window", 0, pUIFrame);
+		}else
+			xr_delete(pUIFrame);
+	}
+
+/*
 	if(dik==DIK_K){
 		if(g_pTestFont){
 			g_pTestFont->Release();
@@ -1214,6 +1235,8 @@ int _len		= 43;
 */
 void test_draw	()
 {
+	if(pUIFrame)
+		pUIFrame->Draw();
 /*
 	if(g_pTestFont){
 
@@ -1276,7 +1299,7 @@ void CUIMainIngameWnd::draw_adjust_mode()
 		string32 _3rd_person_view="3-rd person view";
 		CGameFont* F		= UI()->Font()->pFontDI;
 		F->SetAligment		(CGameFont::alCenter);
-		F->SetSizeI			(0.02f);
+//.		F->SetSizeI			(0.02f);
 		F->OutSetI			(0.f,-0.8f);
 		F->SetColor			(0xffffffff);
 		F->OutNext			("Hud_adjust_mode=%d",g_bHudAdjustMode);

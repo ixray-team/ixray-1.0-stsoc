@@ -49,6 +49,7 @@ public:
 	IC					CBasePathManager			(CRestrictedObject *object);
 	IC			void	reinit						(const CLevelGraph *graph = 0);
 	IC			bool	actual						() const;
+	IC			void	on_restrictions_change		();
 };
 
 #include "level_path_manager_inline.h"

@@ -2,7 +2,7 @@
 
 struct SHit
 {
-	SHit										(float Power, Fvector &dir, CObject *who, u16 element, Fvector p_in_object_space, float impulse,  ALife::EHitType hit_type, float ap = 0.0f);
+	SHit										(float Power, Fvector &dir, CObject *who, u16 element, Fvector p_in_object_space, float impulse,  ALife::EHitType hit_type, float ap = 0.0f, bool AimBullet=false);
 	SHit										();	
 	bool				is_valide				()		const	;	
 	void				invalidate				()				;
@@ -35,6 +35,7 @@ IC	ALife::EHitType		type					()		const	{VERIFY(is_valide());return hit_type;}
 	float				impulse																																					;
 	ALife::EHitType		hit_type																																				;
 	float				ap;
+	bool				aim_bullet;
 	//---------------------------------------------------
 	//GE_HIT_STATISTIC
 	u32					BulletID;

@@ -4,55 +4,96 @@
 #include "GameSpy_Browser.h"
 #include "GameSpy_Base_Defs.h"
 #include "..\ui\ServerList.h"
-
+#include "..\MainMenu.h"
 
 #include "GameSpy_Available.h"
+#include "GameSpy_QR2.h"
+
+#include "../object_broker.h"
+#include "../string_table.h"
 
 void __cdecl SBCallback(void* sb, SBCallbackReason reason, void* server, void *instance);
 
 CGameSpy_Browser::CGameSpy_Browser()
-{
-	m_SecretKey[0] = 't';
-	m_SecretKey[1] = '9';
-	m_SecretKey[2] = 'F';
-	m_SecretKey[3] = 'j';
-	m_SecretKey[4] = '3';
-	m_SecretKey[5] = 'M';
-	m_SecretKey[6] = 'x';
-	m_SecretKey[7] = '\0';
-	//-------------------------
-	hGameSpyDLL = NULL;
+#ifdef PROFILE_CRITICAL_SECTIONS
+	:m_refresh_lock(MUTEX_PROFILE_ID(CGameSpy_Browser::m_refresh_lock))
+#endif // PROFILE_CRITICAL_SECTIONS
 
-	LoadGameSpy();
+{
 	//-------------------------
+	m_hGameSpyDLL = NULL;
+	m_pQR2 = NULL;
 	m_pGSBrowser = NULL;
-	//-------------------------
 	m_pServerList = NULL;
-	
+	//-------------------------
+	LPCSTR			g_name	= "xrGameSpy.dll";
+	Log				("Loading DLL:",g_name);
+	m_hGameSpyDLL			= LoadLibrary	(g_name);
+	if (0==m_hGameSpyDLL)	R_CHK			(GetLastError());
+	R_ASSERT2		(m_hGameSpyDLL,"GameSpy DLL raised exception during loading or there is no game DLL at all");
+	//-------------------------
+	LoadGameSpy(m_hGameSpyDLL);
+	//-------------------------
+	InitInternalData(m_hGameSpyDLL);
+};
+
+CGameSpy_Browser::CGameSpy_Browser(HMODULE hGameSpyDLL)
+#ifdef PROFILE_CRITICAL_SECTIONS
+	:m_refresh_lock(MUTEX_PROFILE_ID(CGameSpy_Browser::m_refresh_lock))
+#endif // PROFILE_CRITICAL_SECTIONS
+
+{
+	//-------------------------
+	m_hGameSpyDLL = NULL;
+	m_pQR2 = NULL;
+	m_pGSBrowser = NULL;
+	m_pServerList = NULL;
+	//-------------------------
+	LoadGameSpy(hGameSpyDLL);
+	//-------------------------
+	InitInternalData(hGameSpyDLL);
+};
+
+void	CGameSpy_Browser::InitInternalData(HMODULE hGameSpyDLL)
+{
+	m_pQR2	= xr_new<CGameSpy_QR2>(hGameSpyDLL);
+	m_pQR2->RegisterAdditionalKeys();
+
+	m_bAbleToConnectToMasterServer = true;
+	m_bTryingToConnectToMasterServer = false;
+	m_bShowCMSErr = false;
+
+	m_pGSBrowser = xrGS_ServerBrowserNew(SBFalse, SBCallback, this);
+	if (!m_pGSBrowser)
+	{
+		Msg("! Unable to init Server Browser!");
+	}
+	//	else
+	//		Msg("- GS Server Browser Inited!");
+
+
 };
 
 CGameSpy_Browser::~CGameSpy_Browser()
 {
+	Clear();
+
+	delete_data(m_pQR2);
 	if (m_pGSBrowser)
 	{		
 		xrGS_ServerBrowserFree(m_pGSBrowser);
 		m_pGSBrowser = NULL;
 	}
-	if (hGameSpyDLL)
+
+	if (m_hGameSpyDLL)
 	{
-		FreeLibrary(hGameSpyDLL);
-		hGameSpyDLL = NULL;
-	}
+		FreeLibrary(m_hGameSpyDLL);
+		m_hGameSpyDLL = NULL;
+	}	
 };
 
-void	CGameSpy_Browser::LoadGameSpy()
-{
-	LPCSTR			g_name	= "xrGameSpy.dll";
-	Log				("Loading DLL:",g_name);
-	hGameSpyDLL			= LoadLibrary	(g_name);
-	if (0==hGameSpyDLL)	R_CHK			(GetLastError());
-	R_ASSERT2		(hGameSpyDLL,"GameSpy DLL raised exception during loading or there is no game DLL at all");
-	
+void	CGameSpy_Browser::LoadGameSpy(HMODULE hGameSpyDLL)
+{	
 	GAMESPY_LOAD_FN(xrGS_ServerBrowserNew);	
 	GAMESPY_LOAD_FN(xrGS_ServerBrowserFree);
 	GAMESPY_LOAD_FN(xrGS_ServerBrowserClear);
@@ -88,60 +129,96 @@ void	CGameSpy_Browser::LoadGameSpy()
 	GAMESPY_LOAD_FN(xrGS_ServerBrowserRemoveIP);
 	GAMESPY_LOAD_FN(xrGS_ServerBrowserRemoveServer);
 
+	GAMESPY_LOAD_FN(xrGS_SBServerGetConnectionInfo);
+	GAMESPY_LOAD_FN(xrGS_SBServerDirectConnect);
+
+	GAMESPY_LOAD_FN(xrGS_ServerBrowserSort);
+
+	GAMESPY_LOAD_FN(xrGS_SBServerHasFullKeys);
+
+	GAMESPY_LOAD_FN(xrGS_GetGameID);
+
+	GAMESPY_LOAD_FN(xrGS_ServerBrowserErrorDesc);
 }
 
 static services_checked = false;
 
 bool	CGameSpy_Browser::Init(CServerList* pServerList)
 {
-	//-------------------------------------
-	CGameSpy_Available GSA;
-	if (!services_checked)
-	{
-        if (!GSA.CheckAvailableServices()) 
-			return false;
-		else
-			services_checked = true;
-	}
-	//-------------------------------------
-	m_QR2.RegisterAdditionalKeys();
-
-	m_pGSBrowser = xrGS_ServerBrowserNew(GAMESPY_GAMENAME, GAMESPY_GAMENAME, m_SecretKey, 0, GAMESPY_MAX_UPDATES, GSA.xrGS_GetQueryVersion(), SBFalse, SBCallback, this);
-	if (!m_pGSBrowser)
-	{
-		Msg("! Unable to init GameSpy Server Browser!");
-	}
-	else
-		Msg("- GameSpy Server Browser Inited!");
-
 	m_pServerList = pServerList;
 
 	return true;
 };
 
-void			CGameSpy_Browser::RefreshList_Full(bool Local)
+void			CGameSpy_Browser::Clear()
 {
+	m_pServerList = NULL;
+};
+
+struct RefreshData
+{
+	CGameSpy_Browser*	pGSBrowser;
+	string4096			FilterStr;
+};
+void	RefreshInternetList	(void * inData)
+{
+	RefreshData* pRData = (RefreshData*) inData;
+	pRData->pGSBrowser->RefreshListInternet(pRData->FilterStr);
+	xr_delete(pRData);
+};
+
+void			CGameSpy_Browser::RefreshListInternet (const char* FilterStr)
+{
+	m_refresh_lock.Enter();
+
+	SBError error = sbe_noerror;
+	error = xrGS_ServerBrowserUpdate(m_pGSBrowser, m_pServerList ? SBTrue : SBFalse, SBFalse, FilterStr);
+	m_bAbleToConnectToMasterServer = (error == sbe_noerror);
+	m_bShowCMSErr = (error != sbe_noerror);
+	m_bTryingToConnectToMasterServer = false;
+
+	m_refresh_lock.Leave();
+};
+
+void			CGameSpy_Browser::RefreshList_Full(bool Local, const char* FilterStr)
+{
+	if (!m_pGSBrowser) return;
 	SBState state = xrGS_ServerBrowserState(m_pGSBrowser);               
 	if((state != sb_connected) && (state != sb_disconnected))
 	{
 		xrGS_ServerBrowserHalt(m_pGSBrowser);
-		Msg("GameSpy Refresh Stopped\n");		
+		Msg("xrGSB Refresh Stopped\n");		
 	};
 	xrGS_ServerBrowserClear(m_pGSBrowser);
 
-	// fields we're interested in	
-	int numFields = sizeof(Fields_Of_Interest) / sizeof(Fields_Of_Interest[0]);
-
 	// do an update
-	SBError error;
+	SBError error = sbe_noerror;
 	if(!Local)
-		error = xrGS_ServerBrowserUpdate(m_pGSBrowser, m_pServerList ? SBTrue : SBFalse, SBFalse, Fields_Of_Interest, numFields, (char *)(const char *)"");
+	{	
+		m_refresh_lock.Enter();
+		m_refresh_lock.Leave();
+		if (m_bAbleToConnectToMasterServer)
+		{
+			RefreshData*	pRData = xr_new<RefreshData>();
+			strcpy(pRData->FilterStr, FilterStr);
+			pRData->pGSBrowser = this;
+
+			m_bTryingToConnectToMasterServer = true;
+			if (MainMenu()) MainMenu()->Show_CTMS_Dialog();
+
+			thread_spawn(RefreshInternetList, "GS Internet Refresh", 0, pRData);
+		}
+		if (error != sbe_noerror || !m_bAbleToConnectToMasterServer)
+		{			
+			MainMenu()->SetErrorDialog(CMainMenu::ErrMasterServerConnectFailed);
+		}
+	}
 	else
-		error = xrGS_ServerBrowserLANUpdate(m_pGSBrowser, m_pServerList ? SBTrue : SBFalse, START_PORT, END_PORT);
+		error = xrGS_ServerBrowserLANUpdate(m_pGSBrowser, m_pServerList ? SBTrue : SBFalse);
 
 	if (error != sbe_noerror)
 	{
-		Msg("! GameSpy Update Error!");	
+		Msg("! xrGSB Error - %s", xrGS_ServerBrowserErrorDesc(m_pGSBrowser, error));
 	}
 };
 
@@ -154,34 +231,43 @@ void __cdecl SBCallback(void* sb, SBCallbackReason reason, void* server, void *i
 	case sbc_serveradded : //a server was added to the list, may just have an IP & port at this point
 		{
 #ifdef _DEBUG
-			Msg("sbc_serveradded");
+//.			Msg("sbc_serveradded");
 #endif
+//			pGSBrowser->SortBrowserByPing();
+//			pGSBrowser->UpdateServerList();			
 		}break;
 	case sbc_serverupdated : //server information has been updated - either basic or full information is now available about this server
 		{
 #ifdef _DEBUG
-			Msg("sbc_serverupdated");
+//.			Msg("sbc_serverupdated");
 #endif
+//			pGSBrowser->SortBrowserByPing();
 			pGSBrowser->UpdateServerList();
 		}break;
 	case sbc_serverupdatefailed : //an attempt to retrieve information about this server, either directly or from the master, failed
 		{
 #ifdef _DEBUG
-			Msg("sbc_serverupdatefailed");
+//.			Msg("sbc_serverupdatefailed");
 #endif
-			pGSBrowser->OnUpdateFailed(server);
+//			pGSBrowser->OnUpdateFailed(server);
+//			pGSBrowser->SortBrowserByPing();
+			pGSBrowser->UpdateServerList();
 		}break;
 	case sbc_serverdeleted : //a server was removed from the list
 		{
 #ifdef _DEBUG
 			Msg("sbc_serverdeleted");
 #endif
+//			pGSBrowser->SortBrowserByPing();
+			pGSBrowser->UpdateServerList();
 		}break;
 	case sbc_updatecomplete : //the server query engine is now idle 
 		{
 #ifdef _DEBUG
-			Msg("sbc_updatecomplete");
+//.			Msg("sbc_updatecomplete");
 #endif
+//			pGSBrowser->SortBrowserByPing();
+			pGSBrowser->UpdateServerList();
 		}break;
 	case sbc_queryerror		://the master returned an error string for the provided query
 		{
@@ -192,7 +278,7 @@ void __cdecl SBCallback(void* sb, SBCallbackReason reason, void* server, void *i
 	case sbc_serverchallengereceived:
 		{
 #ifdef _DEBUG
-			Msg("sbc_serverchallengereceived");
+//.			Msg("sbc_serverchallengereceived");
 #endif
 		}break;
 	default:
@@ -226,154 +312,161 @@ void CGameSpy_Browser::GetServerInfoByIndex(ServerInfo* pServerInfo, int idx)
 	pServerInfo->Index = idx;
 }
 
-#define ADD_BOOL_INFO(i, s, t, k)	i->m_aInfos.push_back(GameInfo(t, ((xrGS_SBServerGetBoolValue(s, m_QR2.xrGS_RegisteredKey(k), SBFalse)) == SBTrue)? "Yes" : "No"))
-#define ADD_INT_INFO(i, s, t, k)	{string256 tmp; sprintf(tmp, "%d", xrGS_SBServerGetIntValue(s, m_QR2.xrGS_RegisteredKey(k), 0));\
+#define ADD_BOOL_INFO(i, s, t, k)	i->m_aInfos.push_back(GameInfo(t, ((xrGS_SBServerGetBoolValue(s, m_pQR2->xrGS_RegisteredKey(k), SBFalse)) == SBTrue)? *st.translate("mp_si_yes") : *st.translate("mp_si_no")))
+#define ADD_INT_INFO(i, s, t, k)	{string256 tmp; sprintf(tmp, "%d", xrGS_SBServerGetIntValue(s, m_pQR2->xrGS_RegisteredKey(k), 0));\
 	i->m_aInfos.push_back(GameInfo(t, tmp));}
 
-#define ADD_INT_INFO_N(i, s, t1, t2, k)	{if (xrGS_SBServerGetIntValue(s, m_QR2.xrGS_RegisteredKey(k), 0))\
-{string256 tmp; sprintf(tmp, "%d" t2, xrGS_SBServerGetIntValue(s, m_QR2.xrGS_RegisteredKey(k), 0));\
+#define ADD_INT_INFO_N(i, s, m, t1, t2, k)	{if (xrGS_SBServerGetIntValue(s, m_pQR2->xrGS_RegisteredKey(k), 0))\
+{string256 tmp; sprintf(tmp, "%d" t2, xrGS_SBServerGetIntValue(s, m_pQR2->xrGS_RegisteredKey(k), 0)*m);\
 	i->m_aInfos.push_back(GameInfo(t1, tmp));}\
-	else {i->m_aInfos.push_back(GameInfo(t1, "No"));}}
+	else {i->m_aInfos.push_back(GameInfo(t1, *st.translate("mp_si_no")));}}
 
-#define ADD_TIME_INFO(i, s, m, t1, t2, k)	{if (xrGS_SBServerGetIntValue(s, m_QR2.xrGS_RegisteredKey(k), 0))\
-{string256 tmp; sprintf(tmp,t2, xrGS_SBServerGetFloatValue(s, m_QR2.xrGS_RegisteredKey(k), 0)*m);\
+#define ADD_TIME_INFO(i, s, m, t1, t2, t3, k)	{if (xrGS_SBServerGetIntValue(s, m_pQR2->xrGS_RegisteredKey(k), 0))\
+{string256 tmp; sprintf(tmp,t2, xrGS_SBServerGetFloatValue(s, m_pQR2->xrGS_RegisteredKey(k), 0)*m, t3);\
 	i->m_aInfos.push_back(GameInfo(t1, tmp));}\
-	else {i->m_aInfos.push_back(GameInfo(t1, "No"));}}
+	else {i->m_aInfos.push_back(GameInfo(t1, *st.translate("mp_si_no")));}}
 
 void	CGameSpy_Browser::ReadServerInfo	(ServerInfo* pServerInfo, void* pServer)
 {
+	CStringTable st;
+
 	if (!pServer || !pServerInfo) return;
 	sprintf(pServerInfo->m_Address, "%s:%d", xrGS_SBServerGetPublicAddress(pServer), xrGS_SBServerGetPublicQueryPort(pServer));
 	sprintf(pServerInfo->m_HostName, "%s", xrGS_SBServerGetPublicAddress(pServer));
-	sprintf(pServerInfo->m_ServerName, "%s", xrGS_SBServerGetStringValue(pServer, m_QR2.xrGS_RegisteredKey(HOSTNAME_KEY), pServerInfo->m_HostName));
+	sprintf(pServerInfo->m_ServerName, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(HOSTNAME_KEY), pServerInfo->m_HostName));
 
-	sprintf(pServerInfo->m_SessionName, "%s", xrGS_SBServerGetStringValue(pServer, m_QR2.xrGS_RegisteredKey(MAPNAME_KEY), "Unknown"));	
-	sprintf(pServerInfo->m_ServerGameType, "%s", xrGS_SBServerGetStringValue(pServer, m_QR2.xrGS_RegisteredKey(GAMETYPE_NAME_KEY), "UNKNOWN"));
-	pServerInfo->m_bPassword	= xrGS_SBServerGetBoolValue(pServer, m_QR2.xrGS_RegisteredKey(PASSWORD_KEY), SBFalse) == SBTrue;
+	sprintf(pServerInfo->m_SessionName, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(MAPNAME_KEY), "Unknown"));	
+	sprintf(pServerInfo->m_ServerGameType, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(GAMETYPE_KEY), "Unknown"));
+	pServerInfo->m_bPassword	= xrGS_SBServerGetBoolValue(pServer, m_pQR2->xrGS_RegisteredKey(PASSWORD_KEY), SBFalse) == SBTrue;
 	pServerInfo->m_Ping = (s16)(xrGS_SBServerGetPing(pServer) & 0xffff);
-	pServerInfo->m_ServerNumPlayers = (s16)xrGS_SBServerGetIntValue(pServer, m_QR2.xrGS_RegisteredKey(NUMPLAYERS_KEY), 0);
-	pServerInfo->m_ServerMaxPlayers = (s16)xrGS_SBServerGetIntValue(pServer, m_QR2.xrGS_RegisteredKey(MAXPLAYERS_KEY), 32);
-	pServerInfo->m_ServerNumTeams = (s16)xrGS_SBServerGetIntValue(pServer, m_QR2.xrGS_RegisteredKey(NUMTEAMS_KEY), 0);
-	pServerInfo->m_Port		= (s16)xrGS_SBServerGetIntValue(pServer, m_QR2.xrGS_RegisteredKey(HOSTPORT_KEY), 0);
+	pServerInfo->m_ServerNumPlayers = (s16)xrGS_SBServerGetIntValue(pServer, m_pQR2->xrGS_RegisteredKey(NUMPLAYERS_KEY), 0);
+	pServerInfo->m_ServerMaxPlayers = (s16)xrGS_SBServerGetIntValue(pServer, m_pQR2->xrGS_RegisteredKey(MAXPLAYERS_KEY), 32);
+	pServerInfo->m_ServerNumTeams = (s16)xrGS_SBServerGetIntValue(pServer, m_pQR2->xrGS_RegisteredKey(NUMTEAMS_KEY), 0);
+	pServerInfo->m_Port		= (s16)xrGS_SBServerGetIntValue(pServer, m_pQR2->xrGS_RegisteredKey(HOSTPORT_KEY), 0);
 	pServerInfo->m_HPort	= (s16)xrGS_SBServerGetPublicQueryPort(pServer);
-	pServerInfo->m_bDedicated	= (xrGS_SBServerGetBoolValue(pServer, m_QR2.xrGS_RegisteredKey(DEDICATED_KEY), SBFalse)) == SBTrue;
-	pServerInfo->m_GameType = (u8)xrGS_SBServerGetIntValue(pServer, m_QR2.xrGS_RegisteredKey(GAMETYPE_KEY), 0);
+	pServerInfo->m_bDedicated	= (xrGS_SBServerGetBoolValue(pServer, m_pQR2->xrGS_RegisteredKey(DEDICATED_KEY), SBFalse)) == SBTrue;
+	pServerInfo->m_GameType = (u8)xrGS_SBServerGetIntValue(pServer, m_pQR2->xrGS_RegisteredKey(GAMETYPE_NAME_KEY), 0);
+	if (pServerInfo->m_GameType == 0)
+	{
+		if (!xr_strcmp(pServerInfo->m_ServerGameType, "deathmatch"))
+			pServerInfo->m_GameType = GAME_DEATHMATCH;
+		else if (!xr_strcmp(pServerInfo->m_ServerGameType, "teamdeathmatch"))
+			pServerInfo->m_GameType = GAME_TEAMDEATHMATCH;
+		else if (!xr_strcmp(pServerInfo->m_ServerGameType, "artefacthunt"))
+			pServerInfo->m_GameType = GAME_ARTEFACTHUNT;
+	}
+	sprintf(pServerInfo->m_ServerVersion, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(GAMEVER_KEY), "--"));
 
 	//--------- Read Game Infos ---------------------------//
 	pServerInfo->m_aInfos.clear();
+	pServerInfo->m_aPlayers.clear();
+	pServerInfo->m_aTeams.clear();
+	//-------------------------------------------------------//
+	if (xrGS_SBServerHasFullKeys(pServer) == SBFalse) return;
 
-	ADD_BOOL_INFO(pServerInfo, pServer, "Map Rotation", G_MAP_ROTATION_KEY);
-	ADD_BOOL_INFO(pServerInfo, pServer, "Voting", G_VOTING_ENABLED_KEY);
-	//-----------------------------------------------------------------------
-	pServerInfo->m_aInfos.push_back(GameInfo("Spectator Modes:", ""));
-	int SpectrModes = xrGS_SBServerGetIntValue(pServer, m_QR2.xrGS_RegisteredKey(G_SPECTATOR_MODES_KEY), 0);
+//	pServerInfo->m_aInfos.push_back(GameInfo("Version:", pServerInfo->m_ServerVersion));
+	pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_servername"), pServerInfo->m_ServerName));
+	pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_version"), pServerInfo->m_ServerVersion));
 	
-	pServerInfo->m_aInfos.push_back(GameInfo("  Free Fly", ((SpectrModes & (1<<CSpectator::eacFreeFly	)) != 0) ? "Yes" : "No"));
-	pServerInfo->m_aInfos.push_back(GameInfo("  First Eye", ((SpectrModes & (1<<CSpectator::eacFirstEye	)) != 0) ? "Yes" : "No"));
-	pServerInfo->m_aInfos.push_back(GameInfo("  Look At", ((SpectrModes & (1<<CSpectator::eacLookAt	)) != 0) ? "Yes" : "No"));
-	pServerInfo->m_aInfos.push_back(GameInfo("  Free Look", ((SpectrModes & (1<<CSpectator::eacFreeLook	)) != 0) ? "Yes" : "No"));
+	ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_maprotation"), G_MAP_ROTATION_KEY);
+	
+	pServerInfo->m_aInfos.push_back(
+		GameInfo(*st.translate("mp_si_voting"), 
+		(xrGS_SBServerGetBoolValue(pServer, m_pQR2->xrGS_RegisteredKey(G_VOTING_ENABLED_KEY), SBFalse) == SBTrue) ?
+			*st.translate("mp_si_enabled") : *st.translate("mp_si_disabled")));
+
+//	ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_voting"), G_VOTING_ENABLED_KEY);
+	//-----------------------------------------------------------------------
+	pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_spectatormodes"), ""));
+	int SpectrModes = xrGS_SBServerGetIntValue(pServer, m_pQR2->xrGS_RegisteredKey(G_SPECTATOR_MODES_KEY), 0);
+	
+	pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_free_fly"), ((SpectrModes & (1<<CSpectator::eacFreeFly	)) != 0) ? *st.translate("mp_si_yes") : *st.translate("mp_si_no")));
+	pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_first_eye"), ((SpectrModes & (1<<CSpectator::eacFirstEye	)) != 0) ? *st.translate("mp_si_yes") : *st.translate("mp_si_no")));
+	pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_look_at"), ((SpectrModes & (1<<CSpectator::eacLookAt	)) != 0) ? *st.translate("mp_si_yes") : *st.translate("mp_si_no")));
+	pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_free_look"), ((SpectrModes & (1<<CSpectator::eacFreeLook	)) != 0) ? *st.translate("mp_si_yes") : *st.translate("mp_si_no")));
 	if (pServerInfo->m_GameType != GAME_DEATHMATCH)
-		pServerInfo->m_aInfos.push_back(GameInfo("  Team Only", ((SpectrModes & (1<<CSpectator::eacMaxCam	)) != 0) ? "Yes" : "No"));
+		pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_team_only"), ((SpectrModes & (1<<CSpectator::eacMaxCam	)) != 0) ? *st.translate("mp_si_yes") : *st.translate("mp_si_no")));
 	//-----------------------------------------------------------------------
 	
 	if (pServerInfo->m_GameType == GAME_DEATHMATCH || pServerInfo->m_GameType == GAME_TEAMDEATHMATCH) 
-		ADD_INT_INFO_N (pServerInfo, pServer, "Frag Limit", "", G_FRAG_LIMIT_KEY);	
-	ADD_TIME_INFO(pServerInfo, pServer, 1/60000.0f, "Time Limit", "%.0f min", G_TIME_LIMIT_KEY);
+	{
+		ADD_INT_INFO_N (pServerInfo, pServer, 1, *st.translate("mp_si_fraglimit"), "", G_FRAG_LIMIT_KEY);	
+	}
+	ADD_TIME_INFO(pServerInfo, pServer, 1.0f, *st.translate("mp_si_time_limit"), "%.0f %s",*st.translate("mp_si_min"), G_TIME_LIMIT_KEY);
 
-	ADD_BOOL_INFO(pServerInfo, pServer, "Invinsibility Indicators", G_DAMAGE_BLOCK_INDICATOR_KEY);
-	ADD_TIME_INFO(pServerInfo, pServer, 1/1000.0f, "Invinsibility Tyme", "%.f sec", G_DAMAGE_BLOCK_TIME_KEY);
+	if (xrGS_SBServerGetIntValue(pServer, m_pQR2->xrGS_RegisteredKey(G_DAMAGE_BLOCK_TIME_KEY), 0) != 0)
+	{
+		pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_invinsibility"), ""));
+		ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_invinsibility_indicators"), G_DAMAGE_BLOCK_INDICATOR_KEY);
+		ADD_TIME_INFO(pServerInfo, pServer, 1.0f, *st.translate("mp_si_invinsibility_time"), "%.f %s",*st.translate("mp_si_sec"), G_DAMAGE_BLOCK_TIME_KEY);
+	}	
 
-	ADD_TIME_INFO(pServerInfo, pServer, 1/1000.0f, "Force Respawn", "%.f sec", G_FORCE_RESPAWN_KEY);
-	ADD_BOOL_INFO(pServerInfo, pServer, "Anomalies", G_ANOMALIES_ENABLED_KEY);
-	if ((xrGS_SBServerGetBoolValue(pServer, m_QR2.xrGS_RegisteredKey(G_ANOMALIES_ENABLED_KEY), SBFalse)) == SBTrue)
-		ADD_TIME_INFO(pServerInfo, pServer, 1/60000.0f, "Anomalies Period", "%.1f min", G_ANOMALIES_TIME_KEY);
+	ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_anomalies"), G_ANOMALIES_ENABLED_KEY);
+	if ((xrGS_SBServerGetBoolValue(pServer, m_pQR2->xrGS_RegisteredKey(G_ANOMALIES_ENABLED_KEY), SBFalse)) == SBTrue)
+	{
+		if (xrGS_SBServerGetIntValue(pServer, m_pQR2->xrGS_RegisteredKey(G_ANOMALIES_TIME_KEY),0) != 0)
+		{
+			ADD_TIME_INFO(pServerInfo, pServer, 1.0f, *st.translate("mp_si_anomalies_period"), "%.1f %s",*st.translate("mp_si_min"), G_ANOMALIES_TIME_KEY);
+		}
+		else
+			pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_anomalies_period"), *st.translate("mp_si_infinite")));
+	}
 
-	ADD_TIME_INFO(pServerInfo, pServer, 1/1000.0f, "Warm Up Time", "%.0f sec", G_WARM_UP_TIME_KEY);
-
+	ADD_TIME_INFO(pServerInfo, pServer, 1.0f, *st.translate("mp_si_forcerespawn"), "%.f %s",*st.translate("mp_si_sec"), G_FORCE_RESPAWN_KEY);
+	ADD_TIME_INFO(pServerInfo, pServer, 1.0f, *st.translate("mp_si_warmuptime"), "%.0f %s",*st.translate("mp_si_sec"), G_WARM_UP_TIME_KEY);
+/*
 	if (pServerInfo->m_GameType == GAME_TEAMDEATHMATCH || pServerInfo->m_GameType == GAME_ARTEFACTHUNT)
 	{
-		ADD_BOOL_INFO(pServerInfo, pServer, "Auto Team Balance", G_AUTO_TEAM_BALANCE_KEY);
-		ADD_BOOL_INFO(pServerInfo, pServer, "Auto Team Swap", G_AUTO_TEAM_SWAP_KEY);
-		ADD_BOOL_INFO(pServerInfo, pServer, "Friendly Indicators", G_FRIENDLY_INDICATORS_KEY);
-		ADD_BOOL_INFO(pServerInfo, pServer, "Friendly Names", G_FRIENDLY_NAMES_KEY);
+		ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_autoteam_balance"), G_AUTO_TEAM_BALANCE_KEY);
+		ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_autoteam_swap"), G_AUTO_TEAM_SWAP_KEY);
+		ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_friendly_indicators"), G_FRIENDLY_INDICATORS_KEY);
+		ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_friendly_names"), G_FRIENDLY_NAMES_KEY);
 
-		ADD_INT_INFO_N (pServerInfo, pServer, "Friendly Fire", " %%", G_FRIENDLY_FIRE_KEY);
+		ADD_INT_INFO_N (pServerInfo, pServer, 1/100.0f, *st.translate("mp_si_friendly_fire"), " %%", G_FRIENDLY_FIRE_KEY);
 	};
 
 	if (pServerInfo->m_GameType == GAME_ARTEFACTHUNT)
 	{
-		pServerInfo->m_aInfos.push_back(GameInfo("Artefacts:", ""));
-		ADD_INT_INFO(pServerInfo, pServer, "  Count",					G_ARTEFACTS_COUNT_KEY	);
+		pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_artefacts"), ""));
+		ADD_INT_INFO(pServerInfo, pServer, *st.translate("mp_si_afcount"),					G_ARTEFACTS_COUNT_KEY	);
 
-		ADD_TIME_INFO(pServerInfo, pServer, 1/60000.0f, "  Stay Time", "%.2f min", G_ARTEFACT_STAY_TIME_KEY);
-		ADD_TIME_INFO(pServerInfo, pServer, 1/1000, "  Respawn Time", "%.0f sec", G_ARTEFACT_RESPAWN_TIME_KEY);
+		ADD_TIME_INFO(pServerInfo, pServer, 1.0f, *st.translate("mp_si_afstaytime"), "%.2f %s",*st.translate("mp_si_min"), G_ARTEFACT_STAY_TIME_KEY);
+		ADD_TIME_INFO(pServerInfo, pServer, 1.0f, *st.translate("mp_si_afrespawntime"), "%.0f %s",*st.translate("mp_si_sec"), G_ARTEFACT_RESPAWN_TIME_KEY);
 
-		int Reinforcement = atoi(xrGS_SBServerGetStringValue(pServer, m_QR2.xrGS_RegisteredKey(G_REINFORCEMENT_KEY), "0"));		
+		int Reinforcement = atoi(xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(G_REINFORCEMENT_KEY), "0"));		
 		switch (Reinforcement)
 		{
 		case -1:
-			pServerInfo->m_aInfos.push_back(GameInfo("Players Respawn", "Artefact Captured"));
+			pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_players_respawn"), *st.translate("mp_si_artefact_captured")));
 			break;
 		case 0:
-			pServerInfo->m_aInfos.push_back(GameInfo("Players Respawn", "Any Time"));
+			pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_players_respawn"), *st.translate("mp_si_any_time")));
 			break;
 		default:
-			ADD_TIME_INFO(pServerInfo, pServer, 1/1000, "Players Respawn", "each %.0f sec", G_REINFORCEMENT_KEY);
+			ADD_TIME_INFO(pServerInfo, pServer, 1.0f, *st.translate("mp_si_players_respawn"), "%.0f %s",*st.translate("mp_si_sec"), G_REINFORCEMENT_KEY);
 			break;
 		}
 
-		ADD_BOOL_INFO(pServerInfo, pServer, "Shielded Bases",					G_SHIELDED_BASES_KEY	);
-		ADD_BOOL_INFO(pServerInfo, pServer, "Return Players",					G_RETURN_PLAYERS_KEY	);
-		ADD_BOOL_INFO(pServerInfo, pServer, "AfBearer Can't Sprint",			G_BEARER_CANT_SPRINT_KEY);
+		ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_shielded_bases"),					G_SHIELDED_BASES_KEY	);
+		ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_return_players"),					G_RETURN_PLAYERS_KEY	);
+		ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_afbearer_cant_sprint"),			G_BEARER_CANT_SPRINT_KEY);
 	}
-//	pServerInfo->m_aInfos.push_back(GameInfo("Map Rotation", ((xrGS_SBServerGetBoolValue(pServer, m_QR2.xrGS_RegisteredKey(G_MAP_ROTATION_KEY), SBFalse)) == SBTrue)? "Yes" : "No"));
-//	pServerInfo->m_aInfos.push_back(GameInfo("Voting", ((xrGS_SBServerGetBoolValue(pServer, m_QR2.xrGS_RegisteredKey(G_VOTING_ENABLED_KEY), SBFalse)) == SBTrue)? "Yes" : "No"));
-	/*
-	pQR2->KeyBufferAdd(keybuffer, G_MAP_ROTATION_KEY);
-	pQR2->KeyBufferAdd(keybuffer, G_VOTING_ENABLED_KEY);
-	//---- game sv mp ----
-	pQR2->KeyBufferAdd(keybuffer, G_SPECTATOR_MODES_KEY);
-	//---- game_sv_deathmatch ----
-	pQR2->KeyBufferAdd(keybuffer, G_FRAG_LIMIT_KEY);				
-	pQR2->KeyBufferAdd(keybuffer, G_TIME_LIMIT_KEY);				
-	pQR2->KeyBufferAdd(keybuffer, G_DAMAGE_BLOCK_TIME_KEY);			
-	pQR2->KeyBufferAdd(keybuffer, G_DAMAGE_BLOCK_INDICATOR_KEY);
-	pQR2->KeyBufferAdd(keybuffer, G_ANOMALIES_ENABLED_KEY);		
-	pQR2->KeyBufferAdd(keybuffer, G_ANOMALIES_TIME_KEY);		
-	pQR2->KeyBufferAdd(keybuffer, G_WARM_UP_TIME_KEY);			
-	pQR2->KeyBufferAdd(keybuffer, G_FORCE_RESPAWN_KEY);			
-	//---- game_sv_teamdeathmatch ----
-	pQR2->KeyBufferAdd(keybuffer, G_AUTO_TEAM_BALANCE_KEY);		
-	pQR2->KeyBufferAdd(keybuffer, G_AUTO_TEAM_SWAP_KEY);		
-	pQR2->KeyBufferAdd(keybuffer, G_FRIENDLY_INDICATORS_KEY);	
-	pQR2->KeyBufferAdd(keybuffer, G_FRIENDLY_NAMES_KEY);		
-	pQR2->KeyBufferAdd(keybuffer, G_FRIENDLY_FIRE_KEY);			
-	//---- game_sv_artefacthunt ----	
-	pQR2->KeyBufferAdd(keybuffer, G_ARTEFACTS_COUNT_KEY);		
-	pQR2->KeyBufferAdd(keybuffer, G_ARTEFACT_STAY_TIME_KEY);	
-	pQR2->KeyBufferAdd(keybuffer, G_ARTEFACT_RESPAWN_TIME_KEY);	
-	pQR2->KeyBufferAdd(keybuffer, G_REINFORCEMENT_KEY);			
-	pQR2->KeyBufferAdd(keybuffer, G_SHIELDED_BASES_KEY);		
-	pQR2->KeyBufferAdd(keybuffer, G_RETURN_PLAYERS_KEY);		
-	pQR2->KeyBufferAdd(keybuffer, G_BEARER_CANT_SPRINT_KEY);	
 	*/
-	//--------- Read Players Info -------------------------//
-	pServerInfo->m_aPlayers.clear();
+	//--------- Read Players Info -------------------------//	
 	for (int i=0; i<pServerInfo->m_ServerNumPlayers; i++)
 	{
-		PlayerInfo PI;
-		sprintf(PI.Name, "%s", xrGS_SBServerGetPlayerStringValue(pServer, i,	"name", "Unknown"));
-		PI.Frags =		s16(xrGS_SBServerGetPlayerIntValue(pServer, i,			"frags", 0));
-		PI.Deaths =		u16(xrGS_SBServerGetPlayerIntValue(pServer, i,			"death", 0));
-		PI.Rank =		u8(xrGS_SBServerGetPlayerIntValue(pServer, i,			"rank", 0));
-		PI.Team =		u8(xrGS_SBServerGetPlayerIntValue(pServer, i,			"p_team", 0));
-		PI.Spectator =	(xrGS_SBServerGetPlayerIntValue(pServer, i,				"spectator", 1)) != 0;
-		PI.Artefacts =	u8(xrGS_SBServerGetPlayerIntValue(pServer, i,			"artefacts", 0));
+		PlayerInfo PInfo;
+		sprintf(PInfo.Name, "%s", xrGS_SBServerGetPlayerStringValue(pServer, i,	"player", "Unknown"));
+		PInfo.Frags =		s16(xrGS_SBServerGetPlayerIntValue(pServer, i,			"score", 0));
+		PInfo.Deaths =		u16(xrGS_SBServerGetPlayerIntValue(pServer, i,			"deaths", 0));
+		PInfo.Rank =		u8(xrGS_SBServerGetPlayerIntValue(pServer, i,			"skill", 0));
+		PInfo.Team =		u8(xrGS_SBServerGetPlayerIntValue(pServer, i,			"team", 0));
+		PInfo.Spectator =	(xrGS_SBServerGetPlayerIntValue(pServer, i,				"spectator", 1)) != 0;
+		PInfo.Artefacts =	u8(xrGS_SBServerGetPlayerIntValue(pServer, i,			"artefacts", 0));
 
-		pServerInfo->m_aPlayers.push_back(PI);
+		pServerInfo->m_aPlayers.push_back(PInfo);
 	};
 	//----------- Read Team Info ---------------------------//
-	pServerInfo->m_aTeams.clear();
 	if (pServerInfo->m_GameType == GAME_TEAMDEATHMATCH || pServerInfo->m_GameType == GAME_ARTEFACTHUNT)
 	{
 		for (int i=0; i<pServerInfo->m_ServerNumTeams; i++)
@@ -392,7 +485,14 @@ void			CGameSpy_Browser::RefreshQuick(int Index)
 	ServerInfo xServerInfo;
 	ReadServerInfo(&xServerInfo, pServer);
 	xrGS_ServerBrowserAuxUpdateServer(m_pGSBrowser, pServer, SBFalse, SBTrue);
-//	xrGS_ServerBrowserAuxUpdateIP(m_pGSBrowser, xServerInfo.m_HostName, xServerInfo.m_Port, SBFalse, SBFalse, SBTrue);
+};
+
+bool			CGameSpy_Browser::CheckDirectConnection(int Index)
+{
+	void* pServer = xrGS_ServerBrowserGetServer(m_pGSBrowser, Index);
+	if (!pServer) return false;
+	SBBool res = xrGS_SBServerDirectConnect(pServer);
+	return res == SBTrue;
 };
 
 void			CGameSpy_Browser::OnUpdateFailed		(void* server)
@@ -402,10 +502,38 @@ void			CGameSpy_Browser::OnUpdateFailed		(void* server)
 
 void			CGameSpy_Browser::Update()
 {
-	xrGS_ServerBrowserThink(m_pGSBrowser);
+	xrGS_ServerBrowserThink(m_pGSBrowser);	
+	if (!m_bTryingToConnectToMasterServer)
+		if (MainMenu()) MainMenu()->Hide_CTMS_Dialog();
+	if (m_bShowCMSErr)
+	{
+		if (MainMenu()) MainMenu()->SetErrorDialog(CMainMenu::ErrMasterServerConnectFailed);
+		m_bShowCMSErr = false;
+	}
 };
 
 void			CGameSpy_Browser::UpdateServerList()
 {
-	if (m_pServerList) m_pServerList->RefreshList();
+//	SortBrowserByPing();
+	if (m_pServerList) 
+	{
+//		m_pServerList->SetSortFunc("", false);
+//		m_pServerList->SetSortFunc("ping", false);
+		m_pServerList->RefreshList();
+	}
 }
+
+void			CGameSpy_Browser::SortBrowserByPing	()
+{
+	xrGS_ServerBrowserSort(m_pGSBrowser, SBTrue, "ping", sbcm_int);
+}
+
+bool			CGameSpy_Browser::HasAllKeys(int Index)
+{
+	void* pServer = xrGS_ServerBrowserGetServer(m_pGSBrowser, Index);
+	if (!pServer) return true;
+	ServerInfo xServerInfo;
+	ReadServerInfo(&xServerInfo, pServer);
+//	xrGS_ServerBrowserAuxUpdateServer(m_pGSBrowser, pServer, SBFalse, SBTrue);
+	return (xrGS_SBServerHasFullKeys(pServer) == SBTrue);
+};

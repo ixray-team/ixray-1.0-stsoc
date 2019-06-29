@@ -28,11 +28,9 @@ const LPCSTR goodwillField			= "goodwill_names";
 
 ref_shader	g_BuyMenuShader			= NULL;
 ref_shader	g_EquipmentIconsShader	= NULL;
-ref_shader	g_CharIconsShader		= NULL;
-ref_shader	g_MapIconsShader		= NULL;
 ref_shader	g_MPCharIconsShader		= NULL;
+ref_shader	g_tmpWMShader			= NULL;
 static CUIStatic*	GetUIStatic				();
-const int			hugeValue				= 0x0ddddddd;
 
 typedef				std::pair<CHARACTER_RANK_VALUE, shared_str>	CharInfoStringID;
 DEF_MAP				(CharInfoStrings, CHARACTER_RANK_VALUE, shared_str);
@@ -41,14 +39,17 @@ CharInfoStrings		*charInfoReputationStrings	= NULL;
 CharInfoStrings		*charInfoRankStrings		= NULL;
 CharInfoStrings		*charInfoGoodwillStrings	= NULL;
 
+void InventoryUtilities::CreateShaders()
+{
+	g_tmpWMShader.create("effects\\wallmark",  "wm\\wm_grenade");
+}
 
 void InventoryUtilities::DestroyShaders()
 {
-	g_BuyMenuShader.destroy();
-	g_EquipmentIconsShader.destroy();
-	g_CharIconsShader.destroy();	
-	g_MapIconsShader.destroy();
-	g_MPCharIconsShader.destroy();
+	g_BuyMenuShader.destroy			();
+	g_EquipmentIconsShader.destroy	();
+	g_MPCharIconsShader.destroy		();
+	g_tmpWMShader.destroy			();
 }
 
 bool InventoryUtilities::GreaterRoomInRuck(PIItem item1, PIItem item2)
@@ -173,26 +174,6 @@ ref_shader& InventoryUtilities::GetEquipmentIconsShader()
 	return g_EquipmentIconsShader;
 }
 
-ref_shader& InventoryUtilities::GetCharIconsShader()
-{
-	if(!g_CharIconsShader)
-	{
-		g_CharIconsShader.create("hud\\default", CHAR_ICONS);
-	}
-
-	return g_CharIconsShader;
-}
-
-ref_shader&  InventoryUtilities::GetMapIconsShader()
-{
-	if(!g_MapIconsShader)
-	{
-		g_MapIconsShader.create("hud\\default",  MAP_ICONS);
-	}
-
-	return g_MapIconsShader;
-}
-
 ref_shader&	InventoryUtilities::GetMPCharIconsShader()
 {
 	if(!g_MPCharIconsShader)
@@ -224,7 +205,7 @@ const shared_str InventoryUtilities::GetTimeAsString(ALife::_TIME_ID time, ETime
 {
 	string32 bufTime;
 
-	ZeroMemory(bufTime, 32);
+	ZeroMemory(bufTime, sizeof(bufTime));
 
 	u32 year = 0, month = 0, day = 0, hours = 0, mins = 0, secs = 0, milisecs = 0;
 
@@ -256,7 +237,7 @@ const shared_str InventoryUtilities::GetDateAsString(ALife::_TIME_ID date, EDate
 {
 	string32 bufDate;
 
-	ZeroMemory(bufDate, 32);
+	ZeroMemory(bufDate, sizeof(bufDate));
 
 	u32 year = 0, month = 0, day = 0, hours = 0, mins = 0, secs = 0, milisecs = 0;
 
@@ -317,13 +298,13 @@ void InventoryUtilities::UpdateWeight(CUIStatic &wnd, bool withPrefix)
 	CInventoryOwner *pInvOwner = smart_cast<CInventoryOwner*>(Level().CurrentEntity());
 	R_ASSERT(pInvOwner);
 	string128 buf;
-	ZeroMemory(buf, 128);
+	ZeroMemory(buf, sizeof(buf));
 
 	float total = pInvOwner->inventory().CalcTotalWeight();
 	float max	= pInvOwner->MaxCarryWeight();
 
 	string16 cl;
-	ZeroMemory(cl, 16);
+	ZeroMemory(cl, sizeof(cl));
 
 	if (total > max)
 	{
@@ -335,7 +316,7 @@ void InventoryUtilities::UpdateWeight(CUIStatic &wnd, bool withPrefix)
 	}
 
 	string32 prefix;
-	ZeroMemory(prefix, 32);
+	ZeroMemory(prefix, sizeof(prefix));
 
 	if (withPrefix)
 	{
@@ -360,7 +341,7 @@ void LoadStrings(CharInfoStrings *container, LPCSTR section, LPCSTR field)
 	LPCSTR				cfgRecord	= pSettings->r_string(section, field);
 	u32					count		= _GetItemCount(cfgRecord);
 	R_ASSERT3			(count%2, "there're must be an odd number of elements", field);
-	string32			singleThreshold;
+	string64			singleThreshold;
 	ZeroMemory			(singleThreshold, sizeof(singleThreshold));
 	int					upBoundThreshold	= 0;
 	CharInfoStringID	id;
@@ -370,17 +351,14 @@ void LoadStrings(CharInfoStrings *container, LPCSTR section, LPCSTR field)
 		_GetItem(cfgRecord, k, singleThreshold);
 		id.second = singleThreshold;
 
-		if (count == k + 1)
-		{
-			// Indicate greatest value
-			id.first = hugeValue;
-		}
-		else
-		{
-			_GetItem(cfgRecord, k + 1, singleThreshold);
+		_GetItem(cfgRecord, k + 1, singleThreshold);
+		if(k+1!=count)
 			sscanf(singleThreshold, "%i", &upBoundThreshold);
-			id.first = upBoundThreshold;
-		}
+		else
+			upBoundThreshold	+= 1;
+
+		id.first = upBoundThreshold;
+
 		container->insert(id);
 	}
 }
@@ -431,11 +409,10 @@ void InventoryUtilities::ClearCharacterInfoStrings()
 LPCSTR InventoryUtilities::GetRankAsText(CHARACTER_RANK_VALUE rankID)
 {
 	InitCharacterInfoStrings();
-	R_ASSERT(charInfoRankStrings);
-
 	CharInfoStrings::const_iterator cit = charInfoRankStrings->upper_bound(rankID);
-	R_ASSERT(charInfoRankStrings->end() != cit);
-	return *cit->second;
+	if(charInfoRankStrings->end() == cit)
+		return charInfoRankStrings->rbegin()->second.c_str();
+	return cit->second.c_str();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -443,11 +420,12 @@ LPCSTR InventoryUtilities::GetRankAsText(CHARACTER_RANK_VALUE rankID)
 LPCSTR InventoryUtilities::GetReputationAsText(CHARACTER_REPUTATION_VALUE rankID)
 {
 	InitCharacterInfoStrings();
-	R_ASSERT(charInfoReputationStrings);
 
 	CharInfoStrings::const_iterator cit = charInfoReputationStrings->upper_bound(rankID);
-	R_ASSERT(charInfoReputationStrings->end() != cit);
-	return *cit->second;
+	if(charInfoReputationStrings->end() == cit)
+		return charInfoReputationStrings->rbegin()->second.c_str();
+
+	return cit->second.c_str();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -455,11 +433,12 @@ LPCSTR InventoryUtilities::GetReputationAsText(CHARACTER_REPUTATION_VALUE rankID
 LPCSTR InventoryUtilities::GetGoodwillAsText(CHARACTER_GOODWILL goodwill)
 {
 	InitCharacterInfoStrings();
-	R_ASSERT(charInfoGoodwillStrings);
 
 	CharInfoStrings::const_iterator cit = charInfoGoodwillStrings->upper_bound(goodwill);
-	R_ASSERT(charInfoGoodwillStrings->end() != cit);
-	return *cit->second;
+	if(charInfoGoodwillStrings->end() == cit)
+		return charInfoGoodwillStrings->rbegin()->second.c_str();
+
+	return cit->second.c_str();
 }
 
 

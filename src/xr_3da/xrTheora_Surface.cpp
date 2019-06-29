@@ -22,6 +22,7 @@ CTheoraSurface::CTheoraSurface()
 	// controls
 	playing				= FALSE;
 	looped				= FALSE;
+	bShaderYUV2RGB		= TRUE;
 }
 
 CTheoraSurface::~CTheoraSurface()
@@ -44,81 +45,7 @@ BOOL CTheoraSurface::Valid()
 {
 	return				ready;
 }
-/*
-void CTheoraSurface::write_tga(u32 width, u32 height, u32 frame, u32 pixelformat)
-{
-	VERIFY		(m_rgb);
-	yuv_buffer*	yuv_rgb		= m_rgb->current_yuv_buffer();
-	yuv_buffer*	yuv_alpha	= m_alpha?m_alpha->current_yuv_buffer():0;
 
-	u32* data		= xr_alloc<u32>(width*height*4);
-
-	int uv_w, uv_h;
-	switch (pixelformat){
-	case OC_PF_444:	uv_w=1; uv_h=1; break;
-	case OC_PF_422:	uv_w=2; uv_h=1; break;
-	case OC_PF_420:	uv_w=2; uv_h=2; break;
-	default: NODEFAULT;
-	}
-	float K = 0.256788f + 0.504129f + 0.097906f;
-
-	// rgb
-	if (yuv_rgb){
-		yuv_buffer&	yuv	= *yuv_rgb;
-		u32 pos = 0;
-		for (u32 h=0; h<height; ++h){
-			u8* Y		= yuv.y+yuv.y_stride*h;
-			u8* U		= yuv.u+yuv.uv_stride*(h/uv_h);
-			u8* V		= yuv.v+yuv.uv_stride*(h/uv_h);
-			for (u32 w=0; w<width; ++w){
-				u8 y	= Y[w];
-				u8 u	= U[w/uv_w];
-				u8 v	= V[w/uv_w];
-
-				int C	= y - 16;
-				int D	= u - 128;
-				int E	= v - 128;
-
-				int R	= clampr(( 298 * C           + 409 * E + 128) >> 8,0,255);
-				int G	= clampr(( 298 * C - 100 * D - 208 * E + 128) >> 8,0,255);
-				int B	= clampr(( 298 * C + 516 * D           + 128) >> 8,0,255);
-				data[pos++] = color_rgba(R,G,B,0);
-			}
-		}
-	}
-
-	// alpha
-	if (yuv_alpha){
-		yuv_buffer&	yuv	= *yuv_alpha;
-		u32 pos = 0;
-		for (u32 h=0; h<height; ++h){
-			u8* Y		= yuv.y+yuv.y_stride*h;
-			u8* U		= yuv.u+yuv.uv_stride*(h/uv_h);
-			u8* V		= yuv.v+yuv.uv_stride*(h/uv_h);
-			for (u32 w=0; w<width; ++w){
-				u8 y	= Y[w];
-				u32& clr= data[pos++];
-				clr		= subst_alpha(clr,iFloor(float((y-16))/K));
-			}
-		}
-	}
-
-	TGAdesc		tga;
-	tga.data	= data;
-	tga.format	= IMG_32B;
-	tga.height	= height;
-	tga.width	= width;
-	tga.scanlenght=width*4;
-
-	string_path p;
-	sprintf_s	(p,sizeof(p),"u:\\data\\test_#%04d.tga",frame);
-
-	vfs::writer w = vfs::wopen(p);
-	tga.maketga	(w);
-
-	u_free(data);
-}
-*/
 void CTheoraSurface::Play(BOOL _looped, u32 _time)		
 {	
 	playing				= TRUE;
@@ -176,7 +103,7 @@ BOOL CTheoraSurface::Load(const char* fname)
 			VERIFY		(m_rgb->t_info.pixelformat==m_alpha->t_info.pixelformat);
 		}
 #endif
-		VERIFY3			(btwIsPow2(m_rgb->t_info.frame_width)&&btwIsPow2(m_rgb->t_info.frame_height),"Invalid size.",fname);
+//.		VERIFY3			(btwIsPow2(m_rgb->t_info.frame_width)&&btwIsPow2(m_rgb->t_info.frame_height),"Invalid size.",fname);
 		tm_total		= m_rgb->tm_total;
 		VERIFY			(0!=tm_total);
 		// reset playback
@@ -190,53 +117,84 @@ BOOL CTheoraSurface::Load(const char* fname)
 		xr_delete		(m_rgb);
 		xr_delete		(m_alpha);
 	}
+	if(res){
+		u32		v_dev	= CAP_VERSION(HW.Caps.raster_major, HW.Caps.raster_minor);
+		u32		v_need	= CAP_VERSION(2,0);
+		bShaderYUV2RGB = (v_dev>=v_need);
+	}
 	return				res;
 }
 
-u32	CTheoraSurface::Width()
+u32	CTheoraSurface::Width(bool bRealSize)
 {
-	return				m_rgb->t_info.frame_width;
+//	return				m_rgb->t_info.frame_width;
+
+	if(bRealSize)
+		return				m_rgb->t_info.frame_width;
+	else
+		return btwPow2_Ceil((u32)m_rgb->t_info.frame_width);
+
 }
 
-u32	CTheoraSurface::Height()
+u32	CTheoraSurface::Height(bool bRealSize)
 {
-	return				m_rgb->t_info.frame_height;
+//	return				m_rgb->t_info.frame_height;
+
+	if(bRealSize)
+		return				m_rgb->t_info.frame_height;
+	else
+		return btwPow2_Ceil((u32)m_rgb->t_info.frame_height);;
+
 }
 
-void CTheoraSurface::DecompressFrame(u32* data)
+#ifndef _EDITOR
+	#define MMX_TV_YUV2ARGB
+#endif
+
+#undef MMX_TV_YUV2ARGB
+
+// #define MMX_TV_YUV2ARGB
+void CTheoraSurface::DecompressFrame(u32* data, u32 _width, int& _pos)
 {
 	VERIFY		(m_rgb);
 	yuv_buffer*	yuv_rgb		= m_rgb->CurrentFrame();
 	yuv_buffer*	yuv_alpha	= m_alpha?m_alpha->CurrentFrame():0;
 
-	u32 width		= m_rgb->t_info.frame_width;
-	u32 height		= m_rgb->t_info.frame_height;
-	u32 pixelformat	= m_rgb->t_info.pixelformat;
+	u32 width				= Width(true);
+	u32 height				= Height(true);
 
-	int uv_w=1, uv_h=1;
-	switch (pixelformat){
-	case OC_PF_444:	uv_w=1; uv_h=1; break;
-	case OC_PF_422:	uv_w=2; uv_h=1; break;
-	case OC_PF_420:	uv_w=2; uv_h=2; break;
-	default: NODEFAULT;
+	u32 pixelformat			= m_rgb->t_info.pixelformat;
+
+	int uv_w				=1;
+	int uv_h				=1;
+	switch (pixelformat)
+	{
+		case OC_PF_444:	uv_w=1; uv_h=1; break;
+		case OC_PF_422:	uv_w=2; uv_h=1; break;
+		case OC_PF_420:	uv_w=2; uv_h=2; break;
+		default:		NODEFAULT;
 	}
 	static const float K = 0.256788f + 0.504129f + 0.097906f;
-
 
 	// rgb
 	if (yuv_rgb){
 		yuv_buffer&	yuv	= *yuv_rgb;
-#ifdef _EDITOR
+
+#ifndef MMX_TV_YUV2ARGB
 		u32 pos = 0;
-		for (u32 h=0; h<height; ++h){
+		for (u32 h=0; h<height; ++h)
+		{
 			u8* Y		= yuv.y+yuv.y_stride*h;
 			u8* U		= yuv.u+yuv.uv_stride*(h/uv_h);
 			u8* V		= yuv.v+yuv.uv_stride*(h/uv_h);
-			for (u32 w=0; w<width; ++w){
+
+			for (u32 w=0; w<width; ++w)
+			{
 				u8 y	= Y[w];
 				u8 u	= U[w/uv_w];
 				u8 v	= V[w/uv_w];
-
+if(!bShaderYUV2RGB)
+{
 				int C	= y - 16;
 				int D	= u - 128;
 				int E	= v - 128;
@@ -244,27 +202,61 @@ void CTheoraSurface::DecompressFrame(u32* data)
 				int R	= clampr(( 298 * C           + 409 * E + 128) >> 8,0,255);
 				int G	= clampr(( 298 * C - 100 * D - 208 * E + 128) >> 8,0,255);
 				int B	= clampr(( 298 * C + 516 * D           + 128) >> 8,0,255);
-				data[pos++] = color_rgba(R,G,B,255);
+
+				data[pos] = color_rgba(R,G,B,255);
+}else
+{
+				data[pos] = color_rgba(int(y),int(u),int(v),255);
+}
+				pos++;
+				if(w==width-1)
+					pos += _width;
 			}
+		_pos = pos;
 		}
 #else
+if(!bShaderYUV2RGB)
+{
 		tv_yuv2argb		( ( lp_tv_uchar ) data, width, height,
 						yuv.y,yuv.y_width,yuv.y_height,yuv.y_stride,
 						yuv.u,yuv.v,
-						yuv.uv_width,yuv.uv_height,yuv.uv_stride);
+						yuv.uv_width,yuv.uv_height,yuv.uv_stride, 0);
+}else
+{
+		u32 pos = 0;
+		for (u32 h=0; h<height; ++h)
+		{
+
+			u8* Y		= yuv.y+yuv.y_stride*h;
+			u8* U		= yuv.u+yuv.uv_stride*(h/uv_h);
+			u8* V		= yuv.v+yuv.uv_stride*(h/uv_h);
+
+			for (u32 w=0; w<width; ++w)
+			{
+				u8 y			= Y[w];
+				u8 u			= U[w/uv_w];
+				u8 v			= V[w/uv_w];
+				data[++pos]		= color_rgba(int(y),int(u),int(v),255);
+			}
+		}
+	_pos = pos;
+}
 #endif        
 	}
 
 	// alpha
-	if (yuv_alpha){
-		yuv_buffer&	yuv	= *yuv_alpha;
-		u32 pos = 0;
-		for (u32 h=0; h<height; ++h){
+	if (yuv_alpha)
+	{
+		yuv_buffer&	yuv			= *yuv_alpha;
+		u32 pos					= 0;
+		for (u32 h=0; h<height; ++h)
+		{
 			u8* Y		= yuv.y+yuv.y_stride*h;
-			for (u32 w=0; w<width; ++w){
-				u8 y	= Y[w];
-				u32& clr= data[pos++];
-				clr		= subst_alpha(clr,iFloor(float((y-16))/K));
+			for (u32 w=0; w<width; ++w)
+			{
+				u8 y			= Y[w];
+				u32& clr		= data[++pos];
+				clr				= subst_alpha(clr,iFloor(float((y-16))/K));
 			}
 		}
 	}

@@ -7,7 +7,7 @@
 #define AFX_XRSERVER_H__65728A25_16FC_4A7B_8CCE_D798CA5EC64E__INCLUDED_
 #pragma once
 
-#include "net_server.h"
+#include "../../xrNetServer/net_server.h"
 #include "game_sv_base.h"
 #include "id_generator.h"
 
@@ -113,7 +113,7 @@ public:
 	void					Process_event_destroy	(NET_Packet& P, ClientID sender, u32 time, u16 ID, NET_Packet* pEPack);
 	
 	xrClientData*			SelectBestClientToMigrateTo		(CSE_Abstract* E, BOOL bForceAnother=FALSE);
-	void					SendConnectResult		(IClient* CL, u8 res, char* ResultStr);
+	void					SendConnectResult		(IClient* CL, u8 res, u8 res1, char* ResultStr);
 
 	void					AttachNewClient			(IClient* CL);
 	virtual void			OnBuildVersionRespond				(IClient* CL, NET_Packet& P);
@@ -167,6 +167,9 @@ public:
 	void					SLS_Save			(IWriter&	fs);
 	void					SLS_Load			(IReader&	fs);	
 			shared_str		level_name			(const shared_str &server_options) const;
+
+	void					create_direct_client();
+	BOOL					IsDedicated			() const	{return m_bDedicated;};
 
 public:
 #ifdef DEBUG

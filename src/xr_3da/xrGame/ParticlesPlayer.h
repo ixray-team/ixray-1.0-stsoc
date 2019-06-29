@@ -47,13 +47,14 @@ public:
 	};
 	DEFINE_VECTOR			(SBoneInfo,BoneInfoVec,BoneInfoVecIt);
 
-protected :
-	bool					m_bActiveBones;	//есть ли косточки на которых играются партиклы
 private:
 	// список костей
 	u64						bone_mask; // используемые кости
 	BoneInfoVec				m_Bones;	
 	CObject					*m_self_object;
+
+protected :
+	bool					m_bActiveBones;	//есть ли косточки на которых играются партиклы
 
 public:
 	IC SBoneInfo*			get_bone_info			(u16 bone_index)

@@ -17,13 +17,9 @@ struct CFontManager :public pureDeviceReset			{
 	void					Render					();
 
 	// hud font
-	CGameFont*				pFontSmall;
 	CGameFont*				pFontMedium;
 	CGameFont*				pFontDI;
-	//חאדמכמגמקםûי רנטפע
-//.	CGameFont*				pFontHeaderRussian;
-//.	CGameFont*				pFontHeaderEurope;
-	//רנטפעû הכÿ טםעונפויסא
+
 	CGameFont*				pFontArial14;
 	CGameFont*				pFontGraffiti19Russian;
 	CGameFont*				pFontGraffiti22Russian;
@@ -49,6 +45,7 @@ private:
 	CUI*					pUI;
 	CHitMarker				HitMarker;
 	CHUDTarget*				m_pHUDTarget;
+	bool					b_online;
 public:
 							CHUDManager			();
 	virtual					~CHUDManager		();
@@ -76,4 +73,6 @@ public:
 
 	void					SetHitmarkType		(LPCSTR tex_name);
 	virtual void			OnScreenRatioChanged();
+	virtual void			OnDisconnected		();
+	virtual void			OnConnected			();
 };

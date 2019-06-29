@@ -308,6 +308,9 @@ SPS*	CResourceManager::_CreatePS			(LPCSTR name)
 				}
 			}
 			else	_hr = E_FAIL;
+		}else
+		{
+			Msg("error is %s", (LPCSTR)pErrorBuf->GetBufferPointer());	
 		}
 		_RELEASE		(pShaderBuf);
 		_RELEASE		(pErrorBuf);
@@ -355,11 +358,11 @@ CRT*	CResourceManager::_CreateRT		(LPCSTR Name, u32 w, u32 h,	D3DFORMAT f)
 	if (I!=m_rtargets.end())	return		I->second;
 	else
 	{
-		CRT *RT				=	xr_new<CRT>();
-		RT->dwFlags			|=	xr_resource_flagged::RF_REGISTERED;
-		m_rtargets.insert	(mk_pair(RT->set_name(Name),RT));
-		if (Device.bReady)	RT->create	(Name,w,h,f);
-		return				RT;
+		CRT *RT					=	xr_new<CRT>();
+		RT->dwFlags				|=	xr_resource_flagged::RF_REGISTERED;
+		m_rtargets.insert		(mk_pair(RT->set_name(Name),RT));
+		if (Device.b_is_Ready)	RT->create	(Name,w,h,f);
+		return					RT;
 	}
 }
 void	CResourceManager::_DeleteRT		(const CRT* RT)
@@ -384,11 +387,11 @@ CRTC*	CResourceManager::_CreateRTC		(LPCSTR Name, u32 size,	D3DFORMAT f)
 	if (I!=m_rtargets_c.end())	return I->second;
 	else
 	{
-		CRTC *RT			=	xr_new<CRTC>();
-		RT->dwFlags			|=	xr_resource_flagged::RF_REGISTERED;
-		m_rtargets_c.insert	(mk_pair(RT->set_name(Name),RT));
-		if (Device.bReady)	RT->create	(Name,size,f);
-		return				RT;
+		CRTC *RT				=	xr_new<CRTC>();
+		RT->dwFlags				|=	xr_resource_flagged::RF_REGISTERED;
+		m_rtargets_c.insert		(mk_pair(RT->set_name(Name),RT));
+		if (Device.b_is_Ready)	RT->create	(Name,size,f);
+		return					RT;
 	}
 }
 void	CResourceManager::_DeleteRTC		(const CRTC* RT)
@@ -477,7 +480,7 @@ CTexture* CResourceManager::_CreateTexture	(LPCSTR _Name)
 		T->dwFlags			|=	xr_resource_flagged::RF_REGISTERED;
 		m_textures.insert	(mk_pair(T->set_name(Name),T));
 		T->Preload			();
-		if (Device.bReady && !bDeferredLoad) T->Load();
+		if (Device.b_is_Ready && !bDeferredLoad) T->Load();
 		return		T;
 	}
 }

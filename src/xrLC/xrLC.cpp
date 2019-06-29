@@ -11,9 +11,9 @@
 #pragma comment(lib,"d3dx9.lib")
 #pragma comment(lib,"IMAGEHLP.LIB")
 #pragma comment(lib,"winmm.LIB")
-#pragma comment(lib,"X:\\xrCDB.lib")
-#pragma comment(lib,"X:\\FreeImage.lib")
-#pragma comment(lib,"X:\\xrCore.lib")
+#pragma comment(lib,"xrCDB.lib")
+#pragma comment(lib,"FreeImage.lib")
+#pragma comment(lib,"xrCore.lib")
 
 CBuild*	pBuild		= NULL;
 

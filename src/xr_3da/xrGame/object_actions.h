@@ -148,10 +148,14 @@ protected:
 	typedef CObjectActionBase<CInventoryItem> inherited;
 
 private:
+	bool				m_callback_removed;
+
+private:
 		void xr_stdcall	on_animation_end		();
 
 public:
 						CObjectActionStrapping	(CInventoryItem *item, CAI_Stalker *owner, CPropertyStorage *storage, LPCSTR action_name = "");
+	virtual				~CObjectActionStrapping	();
 	virtual void		initialize				();
 	virtual void		execute					();
 	virtual void		finalize				();
@@ -166,13 +170,17 @@ protected:
 	typedef CObjectActionBase<CInventoryItem> inherited;
 
 private:
+	bool				m_callback_removed;
+
+private:
 		void xr_stdcall	on_animation_end		();
 
 public:
-						CObjectActionStrappingToIdle(CInventoryItem *item, CAI_Stalker *owner, CPropertyStorage *storage, LPCSTR action_name = "");
-	virtual void		initialize					();
-	virtual void		execute						();
-	virtual void		finalize					();
+						CObjectActionStrappingToIdle	(CInventoryItem *item, CAI_Stalker *owner, CPropertyStorage *storage, LPCSTR action_name = "");
+	virtual				~CObjectActionStrappingToIdle	();
+	virtual void		initialize						();
+	virtual void		execute							();
+	virtual void		finalize						();
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -184,13 +192,17 @@ protected:
 	typedef CObjectActionBase<CInventoryItem> inherited;
 
 private:
-		void xr_stdcall	on_animation_end		();
+	bool				m_callback_removed;
+
+private:
+		void xr_stdcall	on_animation_end			();
 
 public:
-						CObjectActionUnstrapping(CInventoryItem *item, CAI_Stalker *owner, CPropertyStorage *storage, LPCSTR action_name = "");
-	virtual void		initialize				();
-	virtual void		execute					();
-	virtual void		finalize				();
+						CObjectActionUnstrapping	(CInventoryItem *item, CAI_Stalker *owner, CPropertyStorage *storage, LPCSTR action_name = "");
+	virtual				~CObjectActionUnstrapping	();
+	virtual void		initialize					();
+	virtual void		execute						();
+	virtual void		finalize					();
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -202,10 +214,14 @@ protected:
 	typedef CObjectActionBase<CInventoryItem> inherited;
 
 private:
+	bool				m_callback_removed;
+
+private:
 		void xr_stdcall	on_animation_end		();
 
 public:
 						CObjectActionUnstrappingToIdle	(CInventoryItem *item, CAI_Stalker *owner, CPropertyStorage *storage, LPCSTR action_name = "");
+	virtual				~CObjectActionUnstrappingToIdle	();
 	virtual void		initialize						();
 	virtual void		execute							();
 	virtual void		finalize						();

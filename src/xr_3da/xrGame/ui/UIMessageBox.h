@@ -16,12 +16,21 @@ public:
 	virtual		~CUIMessageBox		();
 
 	//разновидности MessageBox
-	typedef enum {MESSAGEBOX_OK, MESSAGEBOX_YES_NO, MESSAGEBOX_YES_NO_CANCEL, MESSAGEBOX_DIRECT_IP, MESSAGEBOX_PASSWORD, MESSAGEBOX_QUIT_WINDOWS, MESSAGEBOX_QUIT_GAME } 
-				E_MESSAGEBOX_STYLE;
+	typedef enum {		
+		MESSAGEBOX_OK, 
+		MESSAGEBOX_INFO,
+		MESSAGEBOX_YES_NO, 
+		MESSAGEBOX_YES_NO_CANCEL, 
+		MESSAGEBOX_DIRECT_IP, 
+		MESSAGEBOX_PASSWORD, 
+		MESSAGEBOX_QUIT_WINDOWS, 
+		MESSAGEBOX_QUIT_GAME 
+	} E_MESSAGEBOX_STYLE;
 
 			void Init				(LPCSTR box_template);
 			void Clear				();
 	virtual void SetText			(LPCSTR str);
+	virtual LPCSTR GetText			();
 	LPCSTR		 GetHost			();
 	LPCSTR		 GetPassword		();
 

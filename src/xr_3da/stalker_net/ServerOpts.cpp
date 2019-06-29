@@ -42,6 +42,11 @@ void ServerOpts2::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 	int Min, Max;
 	GetScrollRange(SB_VERT, &Min, &Max);
+	RECT WindowRect;
+	GetClientRect(&WindowRect);
+	long WindowHeight = WindowRect.bottom - WindowRect.top;
+	long PageSize = WindowHeight;
+	long LineSize = PageSize/10;
 
 	switch (nSBCode)
 	{
@@ -59,28 +64,28 @@ void ServerOpts2::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		{
 			if (OldScrollPos < Max)
 			{
-				SetScrollPos(SB_VERT, OldScrollPos+1, TRUE);
-				ScrollWindow(0, -1);
+				SetScrollPos(SB_VERT, OldScrollPos+LineSize, TRUE);
+				ScrollWindow(0, -LineSize);
 			};
 		};break;
 	case SB_LINEUP : // Scroll one line up.
 		{
 			if (OldScrollPos > Min)
 			{
-                SetScrollPos(SB_VERT, OldScrollPos-1, TRUE);
-				ScrollWindow(0, 1);
+                SetScrollPos(SB_VERT, OldScrollPos-LineSize, TRUE);
+				ScrollWindow(0, LineSize);
 			}
 		}break;
 	case SB_PAGEDOWN : //  Scroll one page down.
 		{
-			int NewPos = OldScrollPos + 20;
+			int NewPos = OldScrollPos + PageSize;
 			if (NewPos > Max) NewPos = Max;
 			SetScrollPos(SB_VERT, NewPos, TRUE);
 			ScrollWindow(0, OldScrollPos - NewPos);
 		}break;
 	case SB_PAGEUP : //  Scroll one page up.
 		{
-			int NewPos = OldScrollPos - 20;
+			int NewPos = OldScrollPos - PageSize;
 			if (NewPos < Min) NewPos = Min;
 			SetScrollPos(SB_VERT, NewPos, TRUE);
 			ScrollWindow(0, OldScrollPos - NewPos);

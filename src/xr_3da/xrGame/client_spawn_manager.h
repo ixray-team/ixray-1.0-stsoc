@@ -44,9 +44,15 @@ public:
 			void		add						(ALife::_OBJECT_ID	requesting_id, ALife::_OBJECT_ID requested_id, CSpawnCallback &callback);
 			void		remove					(ALife::_OBJECT_ID	requesting_id, ALife::_OBJECT_ID requested_id);
 			void		clear					(ALife::_OBJECT_ID	requested_id);
+			void		clear					();
 			void		callback				(CObject			*object);
 			void		callback				(CSpawnCallback		&spawn_callback, CObject *object);
 			const CSpawnCallback *callback		(ALife::_OBJECT_ID	requesting_id, ALife::_OBJECT_ID requested_id) const;
+#ifdef DEBUG
+	IC		const REQUEST_REGISTRY &registry	() const;
+			void		dump					() const;
+			void		dump					(ALife::_OBJECT_ID	requesting_id) const;
+#endif // DEBUG
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 add_to_type_list(CClientSpawnManager)

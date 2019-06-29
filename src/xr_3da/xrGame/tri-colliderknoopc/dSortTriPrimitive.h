@@ -226,7 +226,8 @@ IC int dcTriListCollider::dSortTriPrimitiveCollide (
 			if(ph_dbg_draw_mask.test(phDBgDrawPositiveTries))
 				DBG_DrawTri(T,V_array,D3DCOLOR_XRGB(255,0,0));
 #endif	
-//				if(ret>10) continue;
+				if(ret>flags-10) 
+							continue;
 				if(!b_pushing&&(!intersect||no_last_pos))
 					ret+=primitive.Collide(
 					vertices[0],
@@ -323,15 +324,17 @@ IC int dcTriListCollider::dSortTriPrimitiveCollide (
 		if(include)	
 		{	
 			VERIFY(b_neg_tri.T);
-			int bret=primitive.CollidePlain(
-				b_neg_tri.side0,
-				b_neg_tri.side1,
-				b_neg_tri.norm,
-				b_neg_tri.T,
-				b_neg_tri.dist,
-				o1,o2,flags,
-				CONTACT(contact,*pushing_neg ? ret * skip : 0),
-				skip);	
+			int bret = 0;
+			if(ret<flags-10)
+				bret=primitive.CollidePlain(
+					b_neg_tri.side0,
+					b_neg_tri.side1,
+					b_neg_tri.norm,
+					b_neg_tri.T,
+					b_neg_tri.dist,
+					o1,o2,flags,
+					CONTACT(contact,*pushing_neg ? ret * skip : 0),
+					skip);	
 			*pushing_b_neg=!!bret;
 			if(*pushing_neg)ret+=bret;
 			else if(*pushing_b_neg)ret=bret;

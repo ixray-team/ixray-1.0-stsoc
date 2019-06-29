@@ -28,5 +28,5 @@ public:
 
 protected:
 	//индекс информации, содержащейс€ в документе
-	INFO_ID m_Info;
+	shared_str m_Info;
 };

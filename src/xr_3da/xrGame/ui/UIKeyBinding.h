@@ -1,7 +1,4 @@
 #pragma once
-
-
-//Satan 2 ANDY: there is no necessity to use forward declaration ;)
 #include "UIWindow.h"
 #include "UILabel.h"
 #include "UIListWnd.h"
@@ -9,20 +6,21 @@
 #include "UIEditBox.h"
 
 class CUIXml;
+class CUIScrollView;
 
-class CUIKeyBinding : public CUIWindow {
+class CUIKeyBinding : public CUIWindow 
+{
 public:
-	CUIKeyBinding();
-	void InitFromXml(CUIXml& xml_doc, LPCSTR path);
+					CUIKeyBinding			();
+	void			InitFromXml				(CUIXml& xml_doc, LPCSTR path);
 #ifdef DEBUG
-	void CheckStructure(CUIXml& xml_doc);
-	bool IsActionExist(LPCSTR action, CUIXml& xml_doc);
+	void			CheckStructure			(CUIXml& xml_doc);
+	bool			IsActionExist			(LPCSTR action, CUIXml& xml_doc);
 #endif
 protected:
-	void FillUpList();
-	CUILabel		m_header[2];
+	void			FillUpList				(CUIXml& xml_doc, LPCSTR path);
+
+	CUILabel		m_header[3];
 	CUIFrameWindow	m_frame;
-	CUIListWnd		m_list;
-	u32				m_dwGroupColor;
-	u32				m_dwItemColor;
+	CUIScrollView*	m_scroll_wnd;
 };

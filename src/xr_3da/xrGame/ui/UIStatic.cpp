@@ -111,9 +111,6 @@ ref_shader& CUIStatic::GetShader(){
 	return m_UIStaticItem.GetShader();
 }
 
-ref_geom CUIStatic::GetGeom(){
-	return m_UIStaticItem.GetGeom();
-}
 
 void CUIStatic::SetTextureColor(u32 color){
 	m_UIStaticItem.SetColor(color);
@@ -125,7 +122,15 @@ u32 CUIStatic::GetTextureColor() const{
 
 void CUIStatic::InitTextureEx(LPCSTR tex_name, LPCSTR sh_name)
 {
-	CUITextureMaster::InitTexture	(tex_name, sh_name, &m_UIStaticItem);
+
+	string_path buff;
+	u32		v_dev	= CAP_VERSION(HW.Caps.raster_major, HW.Caps.raster_minor);
+	u32		v_need	= CAP_VERSION(2,0);
+	if (/*strstr(Core.Params,"-ps_movie") &&*/ (v_dev >= v_need) && FS.exist(buff,"$game_textures$", tex_name, ".ogm") )
+		CUITextureMaster::InitTexture	(tex_name, "hud\\movie", &m_UIStaticItem);
+	else
+		CUITextureMaster::InitTexture	(tex_name, sh_name, &m_UIStaticItem);
+
 	Fvector2 p						= GetWndPos();
 	m_UIStaticItem.SetPos			(p.x, p.y);
 	m_bAvailableTexture				= true;
@@ -487,6 +492,7 @@ CGameFont::EAligment CUIStatic::GetTextAlignment(){
 void CUIStatic::SetTextAlignment(CGameFont::EAligment align){
 	CREATE_LINES;
 	m_pLines->SetTextAlignment(align);
+	m_pLines->GetFont()->SetAligment((CGameFont::EAligment)align);
 }
 
 void CUIStatic::SetVTextAlignment(EVTextAlignment al){
@@ -494,11 +500,14 @@ void CUIStatic::SetVTextAlignment(EVTextAlignment al){
 	m_pLines->SetVTextAlignment(al);
 }
 
-void CUIStatic::SetTextAlign_script(u32 align){
+void CUIStatic::SetTextAlign_script(u32 align)
+{
 	m_pLines->SetTextAlignment((CGameFont::EAligment)align);
+	m_pLines->GetFont()->SetAligment((CGameFont::EAligment)align);
 }
 
-u32 CUIStatic::GetTextAlign_script(){
+u32 CUIStatic::GetTextAlign_script()
+{
 	return static_cast<u32>(m_pLines->GetTextAlignment());
 }
 
@@ -548,8 +557,11 @@ void CUIStatic::AdjustHeightToText(){
 	SetHeight				(m_pLines->GetVisibleHeight());
 }
 
-void CUIStatic::AdjustWidthToText(){
-	SetWidth(m_pLines->GetTextLength());
+void CUIStatic::AdjustWidthToText()
+{
+	float _len		= m_pLines->GetFont()->SizeOf_(m_pLines->GetText());
+	UI()->ClientToScreenScaledWidth(_len);
+	SetWidth		(_len);
 }
 
 void CUIStatic::RescaleRelative2Rect(const Frect& r){
@@ -592,16 +604,6 @@ void CUIStatic::DrawHighlightedText(){
 	GetAbsoluteRect		(rect);
 	u32 def_col			= m_pLines->GetTextColor();
 	m_pLines->SetTextColor(m_HighlightColor);
-/*
-	m_pLines->Draw(	rect.left + 1 + m_iTextOffsetX, rect.top + 1 + m_iTextOffsetY);
-	m_pLines->Draw(	rect.left - 1 + m_iTextOffsetX, rect.top - 1 + m_iTextOffsetY);
-	m_pLines->Draw(	rect.left - 1 + m_iTextOffsetX, rect.top + 1 + m_iTextOffsetY);
-	m_pLines->Draw(	rect.left + 1 + m_iTextOffsetX, rect.top - 1 + m_iTextOffsetY);
-	m_pLines->Draw(	rect.left + 1 + m_iTextOffsetX, rect.top + 0 + m_iTextOffsetY);
-	m_pLines->Draw(	rect.left - 1 + m_iTextOffsetX, rect.top - 0 + m_iTextOffsetY);
-	m_pLines->Draw(	rect.left - 0 + m_iTextOffsetX,	rect.top + 1 + m_iTextOffsetY);
-	m_pLines->Draw(	rect.left + 0 + m_iTextOffsetX, rect.top - 1 + m_iTextOffsetY);
-*/
 	m_pLines->Draw(	rect.left + 0 + m_TextOffset.x, rect.top - 0 + m_TextOffset.y);
 	m_pLines->SetTextColor(def_col);
 }

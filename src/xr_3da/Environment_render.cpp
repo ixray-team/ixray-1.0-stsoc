@@ -2,7 +2,6 @@
 #pragma hdrstop
 
 #include "Environment.h"
-#include "blenders\blender.h"
 #include "render.h"
 #include "xr_efflensflare.h"
 #include "rain.h"
@@ -53,28 +52,6 @@ static	u16			hbox_faces[20*3]	=
 	4,	 6,	11
 };
 
-//////////////////////////////////////////////////////////////////////////
-// shader/blender
-class CBlender_skybox		: public IBlender  
-{
-public:
-	virtual		LPCSTR		getComment()	{ return "INTERNAL: combiner";	}
-	virtual		BOOL		canBeDetailed()	{ return FALSE;	}
-	virtual		BOOL		canBeLMAPped()	{ return FALSE;	}
-
-	virtual		void		Compile			(CBlender_Compile& C)
-	{
-		C.r_Pass			("sky2",		"sky2",		FALSE,	TRUE, FALSE);
-		C.r_Sampler_clf		("s_sky0",		"$null"			);
-		C.r_Sampler_clf		("s_sky1",		"$null"			);
-		C.r_Sampler_rtf		("s_tonemap",	"$user$tonemap"	);	//. hack
-		C.r_End				();
-	}
-};
-static CBlender_skybox		b_skybox;
-
-//////////////////////////////////////////////////////////////////////////
-// vertex
 #pragma pack(push,1)
 struct v_skybox				{
 	Fvector3	p;
@@ -108,23 +85,27 @@ const	u32 v_clouds_fvf	= D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_SPECULAR;
 // Environment render
 //-----------------------------------------------------------------------------
 extern float psHUD_FOV;
+BOOL bNeed_re_create_env = FALSE;
 void CEnvironment::RenderSky		()
 {
 #ifndef _EDITOR
 	if (0==g_pGameLevel)		return	;
 #endif
-//	sh_2sky.create			(&b_skybox,"skybox_2t");
-//	clouds_sh.create		("clouds","null");
+	// clouds_sh.create		("clouds","null");
 	//. this is the bug-fix for the case when the sky is broken
 	//. for some unknown reason the geoms happen to be invalid sometimes
 	//. if vTune show this in profile, please add simple cache (move-to-forward last found) 
 	//. to the following functions:
 	//.		CResourceManager::_CreateDecl
 	//.		CResourceManager::CreateGeom
-	sh_2geom.create			(v_skybox_fvf,RCache.Vertex.Buffer(), RCache.Index.Buffer());
-	clouds_geom.create		(v_clouds_fvf,RCache.Vertex.Buffer(), RCache.Index.Buffer());
-
-    
+	if(bNeed_re_create_env)
+	{
+		sh_2sky.create			(&m_b_skybox,"skybox_2t");
+		sh_2geom.create			(v_skybox_fvf,RCache.Vertex.Buffer(), RCache.Index.Buffer());
+		clouds_sh.create		("clouds","null");
+		clouds_geom.create		(v_clouds_fvf,RCache.Vertex.Buffer(), RCache.Index.Buffer());
+		bNeed_re_create_env		= FALSE;
+	}
 	::Render->rmFar				();
 
 	// draw sky box
@@ -224,11 +205,12 @@ void CEnvironment::RenderLast		()
 
 void CEnvironment::OnDeviceCreate()
 {
-	sh_2sky.create			(&b_skybox,"skybox_2t");
+//.	bNeed_re_create_env			= TRUE;
+	sh_2sky.create			(&m_b_skybox,"skybox_2t");
 	sh_2geom.create			(v_skybox_fvf,RCache.Vertex.Buffer(), RCache.Index.Buffer());
 	clouds_sh.create		("clouds","null");
 	clouds_geom.create		(v_clouds_fvf,RCache.Vertex.Buffer(), RCache.Index.Buffer());
-	// on create 
+
 	// weathers
 	{
 		EnvsMapIt _I,_E;
@@ -247,14 +229,21 @@ void CEnvironment::OnDeviceCreate()
 			for (EnvIt it=_I->second.begin(); it!=_I->second.end(); it++)
 				(*it)->on_device_create();
 	}
+
+
+	Invalidate	();
+	OnFrame		();
 }
 
 void CEnvironment::OnDeviceDestroy()
 {
-	sh_2sky.destroy			();
-	sh_2geom.destroy		();
-	clouds_sh.destroy		();
-	clouds_geom.destroy		();
+	tsky0->surface_set						(NULL);
+	tsky1->surface_set						(NULL);
+	
+	sh_2sky.destroy							();
+	sh_2geom.destroy						();
+	clouds_sh.destroy						();
+	clouds_geom.destroy						();
 	// weathers
 	{
 		EnvsMapIt _I,_E;
@@ -273,6 +262,8 @@ void CEnvironment::OnDeviceDestroy()
 			for (EnvIt it=_I->second.begin(); it!=_I->second.end(); it++)
 				(*it)->on_device_destroy();
 	}
+	CurrentEnv.destroy();
+
 }
 
 #ifdef _EDITOR

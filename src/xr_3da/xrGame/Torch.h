@@ -64,10 +64,10 @@ protected:
 	HUD_SOUND				m_NightVisionIdleSnd;
 	HUD_SOUND				m_NightVisionBrokenSnd;
 
-	float					m_NightVisionRechargeTime;
+	/*float					m_NightVisionRechargeTime;
 	float					m_NightVisionRechargeTimeMin;
 	float					m_NightVisionDischargeTime;
-	float					m_NightVisionChargeTime;
+	float					m_NightVisionChargeTime;*/
 
 	enum EStats{
 		eTorchActive				= (1<<0),

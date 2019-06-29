@@ -105,7 +105,7 @@ void CHUDTarget::CursorOnFrame ()
 	// Render cursor
 	if(Level().CurrentEntity()){
 		RQ.O			= 0; 
-		RQ.range		= g_pGamePersistent->Environment.CurrentEnv.far_plane*0.99f;
+		RQ.range		= g_pGamePersistent->Environment().CurrentEnv.far_plane*0.99f;
 		RQ.element		= -1;
 		
 		collide::ray_defs	RD(p1, dir, RQ.range, CDB::OPT_CULL, collide::rqtBoth);
@@ -139,9 +139,8 @@ void CHUDTarget::Render()
 	PT.transform		(p2,Device.mFullTransform);
 	float				di_size = C_SIZE/powf(PT.p.w,.2f);
 
-	CGameFont* F		= HUD().Font().pFontDI;
+	CGameFont* F		= HUD().Font().pFontGraffiti19Russian;
 	F->SetAligment		(CGameFont::alCenter);
-	F->SetSizeI			(0.02f);
 	F->OutSetI			(0.f,0.05f);
 
 	if (psHUD_Flags.test(HUD_CROSSHAIR_DIST)){
@@ -190,7 +189,7 @@ void CHUDTarget::Render()
 					{
 						if (fuzzyShowInfo>0.5f){
 							F->SetColor	(subst_alpha(C,u8(iFloor(255.f*(fuzzyShowInfo-0.5f)*2.f))));
-							F->OutNext	("%s",l_pI->NameComplex());
+							F->OutNext	("%s",l_pI->Name/*Complex*/());
 						}
 						fuzzyShowInfo += SHOW_INFO_SPEED*Device.fTimeDelta;
 					}

@@ -14,12 +14,16 @@ class CUITDMPlayerList;
 class CUISkinSelectorWnd;
 class game_cl_TeamDeathmatch;
 class CUIStatic;
+class CUISpawnWnd;
 
 class CUIGameTDM: public CUIGameDM
 {
 private:
 	game_cl_TeamDeathmatch * m_game;
 	typedef CUIGameDM inherited;
+
+public:
+	CUISpawnWnd*		m_pUITeamSelectWnd;
 
 protected:
 	CUIStatic*			m_team1_icon;
@@ -39,4 +43,5 @@ public:
 	
 	virtual	bool		IR_OnKeyboardPress		( int dik );
 	virtual bool		IR_OnKeyboardRelease	( int dik );
+	virtual	void		reset_ui				();
 };

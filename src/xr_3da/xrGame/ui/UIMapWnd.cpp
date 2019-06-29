@@ -180,9 +180,8 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 	m_hint->SetAutoDelete				(false);
 
 // Load maps
-	string256								gameLtxPath;
-	FS.update_path							(gameLtxPath, CONFIG_PATH, "game.ltx");
-	CInifile gameLtx						(gameLtxPath);
+
+	CInifile& gameLtx						= *pGameIni;
 
 	m_GlobalMap								= xr_new<CUIGlobalMap>(this);
 	m_GlobalMap->SetAutoDelete				(true);
@@ -226,11 +225,11 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 			if(it==it2) continue;
 			CUILevelMap* l2 = smart_cast<CUILevelMap*>(it2->second);VERIFY(l2);
 			if(l->GlobalRect().intersected(l2->GlobalRect())){
-				Msg(" --error-incorrect map definition!!! global rect of map [%s] intersects with [%s]", *l->MapName(), *l2->MapName());
+				Msg(" --error-incorrect map definition global rect of map [%s] intersects with [%s]", *l->MapName(), *l2->MapName());
 			}
 		}
 		if(FALSE == l->GlobalRect().intersected(GlobalMap()->BoundRect())){
-			Msg("! --error-incorrect map definition!!! map [%s] places outside global map", *l->MapName());
+			Msg(" --error-incorrect map definition map [%s] places outside global map", *l->MapName());
 		}
 
 	}
@@ -497,7 +496,7 @@ u16 CUIMapWnd::GetIdxByName			(const shared_str& map_name)
 {
 	GameMapsPairIt it				= m_GameMaps.find(map_name);
 	if(it==m_GameMaps.end()){	
-		Msg							("! Level Map '%s' not registered",map_name.c_str());
+		Msg							("~ Level Map '%s' not registered",map_name.c_str());
 		return						u16(-1);
 	}
 	return (u16)std::distance		(m_GameMaps.begin(),it);

@@ -30,7 +30,7 @@ void FS_File::set(xr_string nm, long sz, time_t modif,unsigned attr)
 //////////////////////////////////////////////////////////////////////
 FS_Path::FS_Path	(LPCSTR _Root, LPCSTR _Add, LPCSTR _DefExt, LPCSTR _FilterCaption, u32 flags)
 {
-	VERIFY			(_Root&&_Root[0]);
+//	VERIFY			(_Root&&_Root[0]);
 	string_path		temp;
     strcpy			(temp,_Root); 
     if (_Add) 		strcat(temp,_Add);
@@ -71,6 +71,21 @@ void	FS_Path::_set	(LPSTR add)
 	m_Path			= xr_strlwr(xr_strdup(temp));
 }
 
+void	FS_Path::_set_root	(LPSTR root)
+{
+	// m_Root
+//	R_ASSERT		(root);
+	xr_free			(m_Root);
+	m_Root			= xr_strlwr(xr_strdup(root));
+	if (m_Root[0] && m_Root[xr_strlen(m_Root)-1]!='\\') strcat(m_Root,"\\");
+
+	// m_Path
+	string_path		temp;
+	strconcat		(temp,m_Root,m_Add ? m_Add : "");
+	if (*temp && temp[xr_strlen(temp)-1]!='\\') strcat(temp,"\\");
+	xr_free			(m_Path);
+	m_Path			= xr_strlwr(xr_strdup(temp));
+}
 
 LPCSTR FS_Path::_update(LPSTR dest, LPCSTR src)const
 {

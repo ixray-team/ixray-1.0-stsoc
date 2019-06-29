@@ -46,7 +46,7 @@ CInput::CInput						( BOOL bExclusive, int deviceForInit)
 	//===================== Dummy pack
 	iCapture	(&dummyController);
 
-	if (!pDI) CHK_DX(DirectInputCreateEx( GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput7, (void**)&pDI, NULL ));
+	if (!pDI) CHK_DX(DirectInput8Create( GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&pDI, NULL ));
 
 	// KEYBOARD
 	if (deviceForInit & keyboard_device_key)
@@ -99,10 +99,11 @@ CInput::~CInput(void)
 // Name: CreateInputDevice()
 // Desc: Create a DirectInput device.
 //-----------------------------------------------------------------------------
-HRESULT CInput::CreateInputDevice( LPDIRECTINPUTDEVICE7* device, GUID guidDevice, const DIDATAFORMAT* pdidDataFormat, u32 dwFlags, u32 buf_size )
+HRESULT CInput::CreateInputDevice( LPDIRECTINPUTDEVICE8* device, GUID guidDevice, const DIDATAFORMAT* pdidDataFormat, u32 dwFlags, u32 buf_size )
 {
 	// Obtain an interface to the input device
-	CHK_DX( pDI->CreateDeviceEx( guidDevice, IID_IDirectInputDevice7, (void**)device, NULL ) );
+//.	CHK_DX( pDI->CreateDeviceEx( guidDevice, IID_IDirectInputDevice8, (void**)device, NULL ) );
+	CHK_DX( pDI->CreateDevice( guidDevice, /*IID_IDirectInputDevice8,*/ device, NULL ) );
 
 	// Set the device data format. Note: a data format specifies which
 	// controls on a device we are interested in, and how they should be
@@ -145,6 +146,7 @@ void CInput::SetKBDAcquire( BOOL bAcquire )
 	if (pKeyboard)	bAcquire ? pKeyboard->Acquire()	: pKeyboard->Unacquire();
 }
 //-----------------------------------------------------------------------
+BOOL b_altF4 = FALSE;
 void CInput::KeyUpdate	( )
 {
 	HRESULT						hr;
@@ -162,7 +164,8 @@ void CInput::KeyUpdate	( )
 		if ( hr != S_OK ) return;
 	}
 
-	for (u32 i = 0; i < dwElements; i++){
+	for (u32 i = 0; i < dwElements; i++)
+	{
 		key					= od[i].dwOfs;
 		KBState[key]		= od[i].dwData & 0x80;
 		if ( KBState[key])	cbStack.back()->IR_OnKeyboardPress	( key );
@@ -170,6 +173,38 @@ void CInput::KeyUpdate	( )
 	}
 	for ( i = 0; i < COUNT_KB_BUTTONS; i++ )
 		if (KBState[i]) cbStack.back()->IR_OnKeyboardHold( i );
+
+	if(!b_altF4 && iGetAsyncKeyState(DIK_F4) && (iGetAsyncKeyState(DIK_RMENU) || iGetAsyncKeyState(DIK_LMENU)))
+	{
+		b_altF4				= TRUE;
+		Engine.Event.Defer	("KERNEL:disconnect");
+		Engine.Event.Defer	("KERNEL:quit");
+	}
+}
+
+bool CInput::get_dik_name(int dik, LPSTR dest_str, int dest_sz)
+{
+	DIPROPSTRING keyname;
+	keyname.diph.dwSize			= sizeof(DIPROPSTRING);
+	keyname.diph.dwHeaderSize	= sizeof(DIPROPHEADER);
+	keyname.diph.dwObj			= static_cast<DWORD>(dik);
+	keyname.diph.dwHow			= DIPH_BYOFFSET; // DIPH_BYID; //DIPH_DEVICE;//
+	HRESULT hr = pKeyboard->GetProperty(DIPROP_KEYNAME, &keyname.diph);
+	if(FAILED(hr))
+		return false;
+
+	const wchar_t* wct			= keyname.wsz;
+	if(0==wcslen(wct))
+		return					false;
+
+	size_t cnt					= wcstombs(dest_str, wct, dest_sz);
+//.	Msg("dik_name for[%d], is w[%S] ch[%s]", dik, wct, dest_str);
+	if(cnt==-1)
+	{
+		Msg("! cant convert dik_name for dik[%d], prop=[%S]", dik, wct);
+		return					false;
+	}
+	return						(cnt!=-1);
 }
 
 BOOL CInput::iGetAsyncKeyState( int dik )
@@ -197,6 +232,11 @@ void CInput::MouseUpdate( )
 		hr = pMouse->GetDeviceData( sizeof(DIDEVICEOBJECTDATA), &od[0], &dwElements, 0 );
 		if ( hr != S_OK ) return;
 	};
+	BOOL				mouse_prev[COUNT_MOUSE_BUTTONS];
+
+	mouse_prev[0]		= mouseState[0];
+	mouse_prev[1]		= mouseState[1];
+	mouse_prev[2]		= mouseState[2];
 
 	offs[0] = offs[1] = offs[2] = 0;
 	for (u32 i = 0; i < dwElements; i++){
@@ -219,10 +259,21 @@ void CInput::MouseUpdate( )
 		}
 	}
 
-	if (mouseState[0]) 		cbStack.back()->IR_OnMouseHold(0);
-	if (mouseState[1])		cbStack.back()->IR_OnMouseHold(1);
-	if (mouseState[2])		cbStack.back()->IR_OnMouseHold(2);
+	if (mouseState[0] && mouse_prev[0])
+	{
+		cbStack.back()->IR_OnMouseHold(0);
 
+	}
+
+	if (mouseState[1] && mouse_prev[1])		
+	{
+		cbStack.back()->IR_OnMouseHold(1);
+	}
+
+	if (mouseState[2] && mouse_prev[2])		
+	{
+		cbStack.back()->IR_OnMouseHold(2);
+	}
 	if ( dwElements ){
 		if (offs[0] || offs[1]) cbStack.back()->IR_OnMouseMove	( offs[0], offs[1] );
 		if (offs[2])			cbStack.back()->IR_OnMouseWheel	( offs[2] );

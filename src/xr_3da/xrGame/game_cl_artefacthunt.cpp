@@ -43,10 +43,16 @@ game_cl_ArtefactHunt::game_cl_ArtefactHunt()
 	m_Eff_Af_Disappear = "";
 	//---------------------------------
 	LoadSndMessages();
+	//---------------------------------
+	m_iSpawn_Cost = READ_IF_EXISTS(pSettings, r_s32, "artefacthunt_gamedata", "spawn_cost", -10000);
 }
 
 void game_cl_ArtefactHunt::Init ()
 {
+//	pInventoryMenu	= xr_new<CUIInventoryWnd>();	
+//	pPdaMenu = xr_new<CUIPdaWnd>();
+//	pMapDesc = xr_new<CUIMapDesc>();
+
 	LoadTeamData(TEAM1_MENU);
 	LoadTeamData(TEAM2_MENU);
 
@@ -273,12 +279,13 @@ CUIGameCustom* game_cl_ArtefactHunt::createGameUI()
 	m_game_ui->SetClGame(this);
 	m_game_ui->Init();
 
+//	pUITeamSelectWnd	= xr_new<CUISpawnWnd>	();
 	//----------------------------------------------------------------
-	pInventoryMenu = xr_new<CUIInventoryWnd>();
+//	pInventoryMenu = xr_new<CUIInventoryWnd>();
 	//-----------------------------------------------------------	
-	pPdaMenu = xr_new<CUIPdaWnd>();
+//	pPdaMenu = xr_new<CUIPdaWnd>();
 	//-----------------------------------------------------------
-	pMapDesc = xr_new<CUIMapDesc>();
+//	pMapDesc = xr_new<CUIMapDesc>();
 	//-----------------------------------------------------------
 	LoadMessagesMenu(MESSAGE_MENUS);
 	//-----------------------------------------------------------
@@ -332,6 +339,8 @@ void game_cl_ArtefactHunt::shedule_Update			(u32 dt)
 {
 	CStringTable st;
 	string1024 msg;
+	if(!m_game_ui && HUD().GetUI() ) m_game_ui = smart_cast<CUIGameAHunt*>( HUD().GetUI()->UIGame() );
+
 	inherited::shedule_Update		(dt);
 	
 	//out game information
@@ -386,7 +395,7 @@ void game_cl_ArtefactHunt::shedule_Update			(u32 dt)
 					{
 						if (iReinforcementTime != 0)
 						{
-							if (!pBuySpawnMsgBox->IsShown() && 							
+							if (!m_game_ui->m_pBuySpawnMsgBox->IsShown() &&
 								(local_player->money_for_round+m_iSpawn_Cost)>=0)
 							{
 								if (m_game_ui) m_game_ui->SetPressJumpMsgCaption(*st.translate("mp_press_jump2pay_spaw"));
@@ -485,6 +494,13 @@ void game_cl_ArtefactHunt::shedule_Update			(u32 dt)
 		}break;
 	};
 
+	if (m_game_ui->m_pBuySpawnMsgBox->IsShown())
+	{
+		if (phase != GAME_PHASE_INPROGRESS || (!local_player || !local_player->testFlag(GAME_PLAYER_FLAG_VERY_VERY_DEAD)))
+		{
+			StartStopMenu(m_game_ui->m_pBuySpawnMsgBox, true);
+		};
+	};
 	//-------------------------------------------
 
 }
@@ -504,7 +520,7 @@ BOOL game_cl_ArtefactHunt::CanCallBuyMenu			()
 	if (!m_bBuyEnabled) return FALSE;
 	if (Phase()!=GAME_PHASE_INPROGRESS) return false;
 	
-	if (pUITeamSelectWnd && pUITeamSelectWnd->IsShown())
+	if (m_game_ui->m_pUITeamSelectWnd && m_game_ui->m_pUITeamSelectWnd->IsShown())
 	{
 		return FALSE;
 	};
@@ -512,7 +528,7 @@ BOOL game_cl_ArtefactHunt::CanCallBuyMenu			()
 	{
 		return FALSE;
 	};
-	if (pInventoryMenu && pInventoryMenu->IsShown())
+	if (m_game_ui->m_pInventoryMenu && m_game_ui->m_pInventoryMenu->IsShown())
 	{
 		return FALSE;
 	};
@@ -534,7 +550,7 @@ bool game_cl_ArtefactHunt::CanBeReady				()
 	if (!m_bTeamSelected)
 	{
 		if (CanCallTeamSelectMenu())
-			StartStopMenu(pUITeamSelectWnd,true);
+			StartStopMenu(m_game_ui->m_pUITeamSelectWnd,true);
 		return false;
 	};
 /*
@@ -661,16 +677,16 @@ bool	game_cl_ArtefactHunt::NeedToSendReady_Spectator			(int key, game_PlayerStat
 	
 	if (GAME_PHASE_INPROGRESS == Phase() && kJUMP == key &&
 		iReinforcementTime != 0 && 
-		!pBuySpawnMsgBox->IsShown() && 
+		!m_game_ui->m_pBuySpawnMsgBox->IsShown() && 
 		local_player && (local_player->money_for_round+m_iSpawn_Cost)>=0) 
 	{
 		string1024	BuySpawnText;
 		sprintf(BuySpawnText, *st.translate("mp_press_yes2pay"), 
 			abs(local_player->money_for_round), abs(m_iSpawn_Cost));
-		pBuySpawnMsgBox->SetText(BuySpawnText);
+		m_game_ui->m_pBuySpawnMsgBox->SetText(BuySpawnText);
 
 		if (m_bTeamSelected && m_bSkinSelected)
-			StartStopMenu(pBuySpawnMsgBox, true);
+			StartStopMenu(m_game_ui->m_pBuySpawnMsgBox, true);
 		return false;
 	};
 	return res;
@@ -744,22 +760,7 @@ void	game_cl_ArtefactHunt::OnSellItemsFromRuck		()
 	};	
 	pCurActor->u_EventSend(P);
 };
-/*
-extern BOOL	g_bShildedBases;
-void			game_cl_ArtefactHunt::OnPlayerFlagsChanged	(game_PlayerState* ps)
-{
-	inherited::OnPlayerFlagsChanged(ps);
-	if (!ps) return;
-	if (ps->testFlag(GAME_PLAYER_FLAG_VERY_VERY_DEAD)) return;
-	CObject* pObject = Level().Objects.net_Find(ps->GameID);
-	if (!pObject) return;
 
-	if (pObject->CLS_ID != CLSID_OBJECT_ACTOR) return;
-	CActor* pActor = smart_cast<CActor*>(pObject);
-	if (!pActor) return;
-	pActor->conditions().SetCanBeHarmedState(!g_bShildedBases || !ps->testFlag(GAME_PLAYER_FLAG_ONBASE));
-};
-*/
 void			game_cl_ArtefactHunt::SendPickUpEvent		(u16 ID_who, u16 ID_what)
 {
 	game_cl_GameState::SendPickUpEvent(ID_who, ID_what);

@@ -79,9 +79,15 @@ void	MODEL::build			(Fvector* V, int Vcnt, TRI* T, int Tcnt, build_callback* bc,
 #ifdef _EDITOR    
 	build_internal				(V,Vcnt,T,Tcnt,bc,bcp);
 #else
-	BTHREAD_params				P = { this, V, Vcnt, T, Tcnt, bc, bcp };
-	thread_spawn				(build_thread,"CDB-construction",0,&P);
-	while						(S_INIT	== status)	Sleep	(5);
+	if(!strstr(Core.Params, "-mt_cdb"))
+	{
+		build_internal				(V,Vcnt,T,Tcnt,bc,bcp);
+	}else
+	{
+		BTHREAD_params				P = { this, V, Vcnt, T, Tcnt, bc, bcp };
+		thread_spawn				(build_thread,"CDB-construction",0,&P);
+		while						(S_INIT	== status)	Sleep	(5);
+	}
 #endif
 }
 

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "xrtheora_stream.h"
+#include "../xrCore/stream_reader.h"
 
 #ifdef _EDITOR
 //#	pragma comment(lib,	"x:\\oggB.lib")
@@ -179,7 +180,8 @@ BOOL CTheoraStream::Decode(u32 tm_play)
 						VERIFY				((0!=d_frame%key_rate)||(0==d_frame%key_rate)&&theora_packet_iskeyframe(&o_packet));
 						continue; 
 					}
-					VERIFY					((d_frame!=k_frame)||((d_frame==k_frame)&&theora_packet_iskeyframe(&o_packet)));
+					BOOL is_key				= theora_packet_iskeyframe(&o_packet);
+					VERIFY					( (d_frame!=k_frame) || ((d_frame==k_frame) && is_key) );
 					// real decode
 //.					dbg_log					((stderr,"%04d: decode\n",d_frame)); 
 					int res					= theora_decode_packetin(&t_state,&o_packet);
@@ -212,7 +214,9 @@ BOOL CTheoraStream::Load(const char* fname)
 {
 	VERIFY				(0==source);
 	// open source
-	source				= FS.r_open(fname); VERIFY(source);
+	source				= FS.rs_open(0,fname);
+	VERIFY				(source);
+
 	// parse headers
 	BOOL res			= ParseHeaders();
 	// seek to start

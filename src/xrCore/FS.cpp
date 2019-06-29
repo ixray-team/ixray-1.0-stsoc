@@ -10,9 +10,65 @@
 #include <sys\stat.h>
 #pragma warning(default:4995)
 
+typedef void DUMMY_STUFF (const void*,const u32&,void*);
+XRCORE_API DUMMY_STUFF	*g_dummy_stuff = 0;
+
 #ifdef M_BORLAND
-	#define O_SEQUENTIAL 0
-#endif
+#	define O_SEQUENTIAL 0
+#endif // M_BORLAND
+
+#ifdef DEBUG
+	XRCORE_API	u32								g_file_mapped_memory = 0;
+	u32								g_file_mapped_count	= 0;
+	typedef std::map<u32,std::pair<u32,shared_str> >	FILE_MAPPINGS;
+	FILE_MAPPINGS					g_file_mappings;
+
+void register_file_mapping			(void *address, const u32 &size, LPCSTR file_name)
+{
+	FILE_MAPPINGS::const_iterator	I = g_file_mappings.find(*(u32*)&address);
+	VERIFY							(I == g_file_mappings.end());
+	g_file_mappings.insert			(std::make_pair(*(u32*)&address,std::make_pair(size,shared_str(file_name))));
+
+	g_file_mapped_memory			+= size;
+	++g_file_mapped_count;
+#ifdef USE_MEMORY_MONITOR
+//	memory_monitor::monitor_alloc	(addres,size,"file mapping");
+	string512						temp;
+	sprintf							(temp,"file mapping: %s",file_name);
+	memory_monitor::monitor_alloc	(address,size,temp);
+#endif // USE_MEMORY_MONITOR
+}
+
+void unregister_file_mapping		(void *address, const u32 &size)
+{
+	FILE_MAPPINGS::iterator			I = g_file_mappings.find(*(u32*)&address);
+	VERIFY							(I != g_file_mappings.end());
+//	VERIFY2							((*I).second.first == size,make_string("file mapping sizes are different: %d -> %d",(*I).second.first,size));
+	g_file_mapped_memory			-= (*I).second.first;
+	--g_file_mapped_count;
+
+	g_file_mappings.erase			(I);
+
+#ifdef USE_MEMORY_MONITOR
+	memory_monitor::monitor_free	(address);
+#endif // USE_MEMORY_MONITOR
+}
+
+XRCORE_API void dump_file_mappings	()
+{
+	Msg								("* active file mappings (%d):",g_file_mappings.size());
+
+	FILE_MAPPINGS::const_iterator	I = g_file_mappings.begin();
+	FILE_MAPPINGS::const_iterator	E = g_file_mappings.end();
+	for ( ; I != E; ++I)
+		Msg							(
+			"* [0x%08x][%d][%s]",
+			(*I).first,
+			(*I).second.first,
+			(*I).second.second.c_str()
+		);
+}
+#endif // DEBUG
 //////////////////////////////////////////////////////////////////////
 // Tools
 //////////////////////////////////////////////////////////////////////
@@ -55,9 +111,9 @@ void*  FileDownload(LPCSTR fn, u32* pdwSize)
 #endif
 
 	buf		= Memory.mem_alloc	(size
-#ifdef DEBUG_MEMORY_MANAGER
+#ifdef DEBUG_MEMORY_NAME
 		,"FILE in memory"
-#endif // DEBUG_MEMORY_MANAGER
+#endif // DEBUG_MEMORY_NAME
 		);
 	int r_bytes	= _read	(hFile,buf,size);
 	R_ASSERT3(r_bytes==(int)size,"Can't read file data:",fn);
@@ -115,14 +171,14 @@ void CMemoryWriter::w	(const void* ptr, u32 count)
 		if (mem_size==0)	mem_size=128;
 		while (mem_size <= (position+count)) mem_size*=2;
 		if (0==data)		data = (BYTE*)	Memory.mem_alloc	(mem_size
-#ifdef DEBUG_MEMORY_MANAGER
+#ifdef DEBUG_MEMORY_NAME
 			,		"CMemoryWriter - storage"
-#endif // DEBUG_MEMORY_MANAGER
+#endif // DEBUG_MEMORY_NAME
 			);
 		else				data = (BYTE*)	Memory.mem_realloc	(data,mem_size
-#ifdef DEBUG_MEMORY_MANAGER
+#ifdef DEBUG_MEMORY_NAME
 			,	"CMemoryWriter - storage"
-#endif // DEBUG_MEMORY_MANAGER
+#endif // DEBUG_MEMORY_NAME
 			);
 	}
 	CopyMemory	(data+position,ptr,count);
@@ -164,15 +220,21 @@ u32	IWriter::chunk_size	()					// returns size of currently opened chunk, 0 othe
 	if (chunk_pos.empty())	return 0;
 	return tell() - chunk_pos.top()-4;
 }
+
 void	IWriter::w_compressed(void* ptr, u32 count)
 {
 	BYTE*		dest	= 0;
 	unsigned	dest_sz	= 0;
-	_compressLZ(&dest,&dest_sz,ptr,count);
+	_compressLZ	(&dest,&dest_sz,ptr,count);
+	
+	if (g_dummy_stuff)
+		g_dummy_stuff	(dest,dest_sz,dest);
+
 	if (dest && dest_sz)
 		w(dest,dest_sz);
 	xr_free		(dest);
 }
+
 void	IWriter::w_chunk(u32 type, void* data, u32 size)
 {
 	open_chunk	(type);
@@ -260,7 +322,7 @@ void	IReader::r	(void *p,int cnt)
 	if (dynamic_cast<CFileReader*>(this))			bShow = TRUE;
 	if (dynamic_cast<CVirtualFileReader*>(this))	bShow = TRUE;
 	if (bShow)			{
-		FS.dwOpenCounter	++		;
+  		FS.dwOpenCounter	++		;
 	}
 #endif
 };
@@ -320,47 +382,6 @@ void	IReader::skip_stringZ	()
 	while ((src[Pos]!=0) && (!eof())) Pos++;
 	Pos		++;
 };
-u32 	IReader::find_chunk		(u32 ID, BOOL* bCompressed)	
-{
-	u32	dwSize,dwType;
-
-	rewind();
-	while (!eof()) {
-		dwType = r_u32();
-		dwSize = r_u32();
-		if ((dwType&(~CFS_CompressMark)) == ID) {
-			
-			VERIFY	((u32)Pos + dwSize <= (u32)Size);
-			static bool oops = false;
-			if (oops)
-				Msg		("Pos[%d],dwSize[%d],Size[%d],Compressed[%s]",Pos,dwSize,Size,bCompressed ? "TRUE" : "FALSE");
-
-			if (bCompressed) *bCompressed = dwType&CFS_CompressMark;
-			return dwSize;
-		}
-		else	advance(dwSize);
-	}
-	return 0;
-};
-BOOL	IReader::r_chunk		(u32 ID, void *dest)	// чтение XR Chunk'ов (4b-ID,4b-size,??b-data)
-{
-	u32	dwSize = find_chunk(ID);
-	if (dwSize!=0) {
-		r(dest,dwSize);
-		return TRUE;
-	} else return FALSE;
-};
-BOOL	IReader::r_chunk_safe	(u32 ID, void *dest, u32 dest_size)	// чтение XR Chunk'ов (4b-ID,4b-size,??b-data)
-{
-	u32	dwSize = find_chunk(ID);
-	if (dwSize!=0) {
-		R_ASSERT(dwSize==dest_size);
-		r(dest,dwSize);
-		return TRUE;
-	} else return FALSE;
-};
-
-
 
 //---------------------------------------------------
 // temp stream
@@ -369,7 +390,13 @@ CTempReader::~CTempReader()
 //---------------------------------------------------
 // pack stream
 CPackReader::~CPackReader()
-{	UnmapViewOfFile(base_address);	};
+{
+#ifdef DEBUG
+	unregister_file_mapping	(base_address,Size);
+#endif // DEBUG
+
+	UnmapViewOfFile	(base_address);
+};
 //---------------------------------------------------
 // file stream
 CFileReader::CFileReader(const char *name)
@@ -403,9 +430,18 @@ CVirtualFileRW::CVirtualFileRW(const char *cFileName)
 
 	data			= (char*)MapViewOfFile (hSrcMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
 	R_ASSERT3		(data,cFileName,Debug.error2string(GetLastError()));
+
+#ifdef DEBUG
+	register_file_mapping	(data,Size,cFileName);
+#endif // DEBUG
 }
+
 CVirtualFileRW::~CVirtualFileRW() 
 {
+#ifdef DEBUG
+	unregister_file_mapping	(data,Size);
+#endif // DEBUG
+
 	UnmapViewOfFile ((void*)data);
 	CloseHandle		(hSrcMap);
 	CloseHandle		(hSrcFile);
@@ -424,9 +460,18 @@ CVirtualFileReader::CVirtualFileReader(const char *cFileName)
 
 	data			= (char*)MapViewOfFile (hSrcMap, FILE_MAP_READ, 0, 0, 0);
 	R_ASSERT3		(data,cFileName,Debug.error2string(GetLastError()));
+
+#ifdef DEBUG
+	register_file_mapping	(data,Size,cFileName);
+#endif // DEBUG
 }
+
 CVirtualFileReader::~CVirtualFileReader() 
 {
+#ifdef DEBUG
+	unregister_file_mapping	(data,Size);
+#endif // DEBUG
+
 	UnmapViewOfFile ((void*)data);
 	CloseHandle		(hSrcMap);
 	CloseHandle		(hSrcFile);

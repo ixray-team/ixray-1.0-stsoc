@@ -26,6 +26,7 @@
 
 CEntity::CEntity()
 {
+	m_registered_member		= false;
 }
 
 CEntity::~CEntity()
@@ -73,7 +74,10 @@ void CEntity::Die(CObject* who)
 	if (!AlreadyDie()) set_death_time();
 	set_ready_to_save	();
 	SetfHealth			(-1.f);
-	Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member(this,false);
+
+	VERIFY				(m_registered_member);
+	m_registered_member	= false;
+	Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member(this);
 }
 
 //обновление состояния
@@ -216,6 +220,7 @@ BOOL CEntity::net_Spawn		(CSE_Abstract* DC)
 	}
 
 	if (g_Alive()) {
+		m_registered_member		= true;
 		Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).register_member(this);
 		++Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).m_dwAliveCount;
 	}
@@ -243,9 +248,13 @@ BOOL CEntity::net_Spawn		(CSE_Abstract* DC)
 
 void CEntity::net_Destroy	()
 {
-	if (g_Alive())
-		Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member(this,true);
+	if (m_registered_member) {
+		m_registered_member	= false;
+		Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member(this);
+	}
+
 	inherited::net_Destroy	();
+
 	set_ready_to_save		();
 }
 
@@ -330,7 +339,7 @@ const u32 FORGET_KILLER_TIME = 180000;
 void CEntity::shedule_Update	(u32 dt)
 {
 	inherited::shedule_Update	(dt);
-	if (!g_Alive() && (m_killer_id != u16(-1))) {
+	if (!getDestroy() && !g_Alive() && (m_killer_id != u16(-1))) {
 		if (Device.dwTimeGlobal > m_level_death_time + FORGET_KILLER_TIME) {
 			m_killer_id			= u16(-1);
 			NET_Packet			P;
@@ -340,13 +349,25 @@ void CEntity::shedule_Update	(u32 dt)
 		}
 	}
 }
+
+void CEntity::on_before_change_team	()
+{
+}
+
+void CEntity::on_after_change_team	()
+{
+}
+
 void CEntity::ChangeTeam(int team, int squad, int group)
 {
 	if ((team == g_Team()) && (squad == g_Squad()) && (group == g_Group())) return;
-	VERIFY2(g_Alive(), "Try to change team of a dead object");
+
+	VERIFY2					(g_Alive(), "Try to change team of a dead object");
 	
+	VERIFY					(m_registered_member);
 	// remove from current team
-	Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member	(this,false);
+	on_before_change_team	();
+	Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member	(this);
 
 	id_Team					= team;
 	id_Squad				= squad;
@@ -354,4 +375,5 @@ void CEntity::ChangeTeam(int team, int squad, int group)
 
 	// add to new team
 	Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).register_member		(this);
+	on_after_change_team	();
 }

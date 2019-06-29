@@ -129,6 +129,19 @@ void CUITaskRootItem::SetGameTask(CGameTask* gt, u16 obj_idx)
 
 	m_remTimeStatic->Show			(	GameTask()->Objective(0).TaskState()==eTaskStateInProgress && 
 										(GameTask()->m_ReceiveTime!=GameTask()->m_TimeToComplete) );
+	
+	if( m_remTimeStatic->IsShown() )
+	{
+		float _height	= GetWndSize().y;
+		Fvector2 _pos	= m_captionTime->GetWndPos();
+		_pos.y			+= m_captionTime->GetWndSize().y;
+		_pos.x			= m_remTimeStatic->GetWndPos().x;
+
+		m_remTimeStatic->SetWndPos(_pos);
+
+		_height			= _max(_height, _pos.y+m_remTimeStatic->GetWndSize().y);
+		SetHeight		(_height);
+	}
 }
 
 void CUITaskRootItem::Update		()

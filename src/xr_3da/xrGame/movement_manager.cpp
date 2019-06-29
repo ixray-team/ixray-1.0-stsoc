@@ -111,6 +111,7 @@ void CMovementManager::net_Destroy	()
 {
 	level_path_builder().remove		();
 	detail_path_builder().remove	();
+	restrictions().net_Destroy		();
 }
 
 CMovementManager::EPathType CMovementManager::path_type() const
@@ -332,6 +333,7 @@ void CMovementManager::on_restrictions_change	()
 	m_path_actuality				= false;
 	level_path_builder().remove		();
 	detail_path_builder().remove	();
+	level_path().on_restrictions_change	();
 }
 
 bool CMovementManager::can_use_distributed_compuations(u32 option) const

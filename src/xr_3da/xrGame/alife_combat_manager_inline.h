@@ -8,7 +8,9 @@
 
 #pragma once
 
+/**
 IC	ALife::ECombatType		CALifeCombatManager::combat_type	() const
 {
 	return				(m_combat_type);
 }
+/**/

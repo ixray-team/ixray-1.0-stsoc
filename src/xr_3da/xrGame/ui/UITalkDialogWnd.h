@@ -1,14 +1,9 @@
-////////////////////////////////////////////////
-// UITalkDialogWnd.h
-// меню диалога со сталкером в режиме разговора
-////////////////////////////////////////////////
-
 #pragma once
 
 
 #include "UIStatic.h"
-#include "UIButton.h"
-#include "UIFrameWindow.h"
+#include "UI3tButton.h"
+#include "UIFrameLineWnd.h"
 
 #include "../InfoPortion.h"
 
@@ -47,13 +42,13 @@ public:
 	//список вопросов, которые мы можем задавать персонажу
 
 	//элементы интерфейса диалога
-	CUIFrameWindow		UIDialogFrame;
-	CUIFrameWindow		UIOurPhrasesFrame;
+	CUIFrameLineWnd		UIDialogFrame;
+	CUIFrameLineWnd		UIOurPhrasesFrame;
 
 	CUIStatic			UIStaticTop;
 	CUIStatic			UIStaticBottom;
 
-	CUIButton			UIToTradeButton;
+	CUI3tButton			UIToTradeButton;
 
 	//информация о персонажах 
 	CUIStatic			UIOurIcon;
@@ -66,6 +61,8 @@ public:
 	void				AddIconedAnswer(LPCSTR text, LPCSTR texture_name, Frect texture_rect, LPCSTR templ_name);
 	void				ClearAll();
 	void				ClearQuestions();
+
+	void				SetOsoznanieMode(bool b);
 private:
 	CUIScrollView*			UIQuestionsList;
 	CUIScrollView*			UIAnswersList;

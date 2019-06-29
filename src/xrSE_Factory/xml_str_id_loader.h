@@ -8,11 +8,11 @@
 #pragma once
 
 #ifdef XRGAME_EXPORTS
-	#include "ui/xrUIXmlParser.h"
-#else
-	#include "xrUIXmlParser.h"
-#endif
-
+#	include "ui/xrUIXmlParser.h"
+#else // XRGAME_EXPORTS
+#	include "xrUIXmlParser.h"
+#	include "object_broker.h"
+#endif // XRGAME_EXPORTS
 
 
 //T_ID    - уникальный текстовый идентификатор (аттрибут id в XML файле)
@@ -34,6 +34,7 @@ public:
 		T_INDEX		index;
 		int			pos_in_file;
 		shared_str	file_name;
+		CUIXml*		_xml;
 	};
 
 private:
@@ -133,9 +134,24 @@ const typename CSXML_IdToIndex::ITEM_DATA* CSXML_IdToIndex::GetByIndex(T_INDEX i
 TEMPLATE_SPECIALIZATION
 void CSXML_IdToIndex::DeleteIdToIndexData	()
 {
+	T_VECTOR::iterator it		= m_pItemDataVector->begin();
+	T_VECTOR::iterator it_e		= m_pItemDataVector->end();
+
+	xr_vector<CUIXml*>			_tmp;	
+	for(;it!=it_e;++it)
+	{
+		xr_vector<CUIXml*>::iterator it_f = find(_tmp.begin(), _tmp.end(), (*it)._xml);
+		if(it_f==_tmp.end())
+			_tmp.push_back	((*it)._xml);
+	}
+	delete_data	(_tmp);
+
 	VERIFY		(m_pItemDataVector);
 	xr_delete	(m_pItemDataVector);
+
+
 }
+
 TEMPLATE_SPECIALIZATION
 typename void	CSXML_IdToIndex::InitInternal ()
 {
@@ -154,23 +170,23 @@ typename void	CSXML_IdToIndex::InitInternal ()
 		{
 			_GetItem	(file_str, it, xml_file);
 
-			CUIXml uiXml;
-			xr_string xml_file_full;
-			xml_file_full = xml_file;
-			xml_file_full += ".xml";
-			//strconcat(xml_file_full, *shared_str(xml_file), ".xml");
-			bool xml_result = uiXml.Init(CONFIG_PATH, GAME_PATH, xml_file_full.c_str());
-			R_ASSERT3(xml_result, "xml file not found", xml_file_full.c_str());
+			CUIXml* uiXml			= xr_new<CUIXml>();
+			xr_string				xml_file_full;
+			xml_file_full			= xml_file;
+			xml_file_full			+= ".xml";
+			bool xml_result			= uiXml->Init(CONFIG_PATH, GAME_PATH, xml_file_full.c_str());
+			R_ASSERT3				(xml_result, "error while parsing XML file", xml_file_full.c_str());
 
 			//общий список
-			int items_num = uiXml.GetNodesNum(uiXml.GetRoot(), tag_name);
+			int items_num			= uiXml->GetNodesNum(uiXml->GetRoot(), tag_name);
+
 			for(int i=0; i<items_num; ++i)
 			{
-				LPCSTR item_name = uiXml.ReadAttrib(uiXml.GetRoot(), tag_name, i, "id", NULL);
+				LPCSTR item_name	= uiXml->ReadAttrib(uiXml->GetRoot(), tag_name, i, "id", NULL);
 
-				string256 buf;
-				sprintf(buf, "id for item don't set, number %d in %s", i, xml_file);
-				R_ASSERT2(item_name, buf);
+				string256			buf;
+				sprintf				(buf, "id for item don't set, number %d in %s", i, xml_file);
+				R_ASSERT2			(item_name, buf);
 
 
 				//проверетить ID на уникальность
@@ -183,11 +199,12 @@ typename void	CSXML_IdToIndex::InitInternal ()
 
 				R_ASSERT3(m_pItemDataVector->end() == t_it, "duplicate item id", item_name);
 
-				ITEM_DATA data;
-				data.id = item_name;
-				data.index = index;
-				data.pos_in_file = i;
-				data.file_name = xml_file;
+				ITEM_DATA			data;
+				data.id				= item_name;
+				data.index			= index;
+				data.pos_in_file	= i;
+				data.file_name		= xml_file;
+				data._xml			= uiXml;
 				m_pItemDataVector->push_back(data);
 
 				index++; 

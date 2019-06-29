@@ -119,7 +119,7 @@ protected:
 	CUICellItem*				m_pCurrentCellItem;
 
 	bool						DropItem					(PIItem itm, CUIDragDropListEx* lst);
-	void						TryUseItem					(PIItem itm);
+	bool						TryUseItem					(PIItem itm);
 	//----------------------	-----------------------------------------------
 	void						SendEvent_Item2Slot			(PIItem	pItem);
 	void						SendEvent_Item2Belt			(PIItem	pItem);
@@ -137,7 +137,7 @@ protected:
 	void						Activate_Artefact			();
 
 	void						DropCurrentItem				(bool b_all);
-	void						EatCurrentItem				();
+	void						EatItem						(PIItem itm);
 	
 	bool						ToSlot						(CUICellItem* itm, bool force_place);
 	bool						ToBag						(CUICellItem* itm, bool b_use_cursor_pos);

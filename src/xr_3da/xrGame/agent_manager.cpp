@@ -26,15 +26,22 @@ CAgentManager::CAgentManager			()
 CAgentManager::~CAgentManager			()
 {
 	VERIFY						(member().members().empty());
+#ifdef USE_SCHEDULER_IN_AGENT_MANAGER
 	remove_scheduler			();
+#endif // USE_SCHEDULER_IN_AGENT_MANAGER
 	remove_components			();
 }
 
 void CAgentManager::init_scheduler		()
 {
+#ifdef USE_SCHEDULER_IN_AGENT_MANAGER
 	shedule.t_min				= 1000;
 	shedule.t_max				= 1000;
 	shedule_register			();
+#else // USE_SCHEDULER_IN_AGENT_MANAGER
+	m_last_update_time			= 0;
+	m_update_rate				= 1000;
+#endif // USE_SCHEDULER_IN_AGENT_MANAGER
 }
 
 void CAgentManager::init_components		()
@@ -49,10 +56,12 @@ void CAgentManager::init_components		()
 	brain().setup				(this);
 }
 
+#ifdef USE_SCHEDULER_IN_AGENT_MANAGER
 void CAgentManager::remove_scheduler	()
 {
 	shedule_unregister			();
 }
+#endif // USE_SCHEDULER_IN_AGENT_MANAGER
 
 void CAgentManager::remove_components	()
 {
@@ -76,24 +85,28 @@ void CAgentManager::remove_links		(CObject *object)
 	brain().remove_links		(object);
 }
 
+void CAgentManager::update_impl			()
+{
+	VERIFY						(!member().members().empty());
+
+	memory().update				();
+	corpse().update				();
+	enemy().update				();
+	explosive().update			();
+	location().update			();
+	member().update				();
+	brain().update				();
+}
+
+#ifdef USE_SCHEDULER_IN_AGENT_MANAGER
 void CAgentManager::shedule_Update		(u32 time_delta)
 {
 	START_PROFILE("Agent_Manager")
+
 	ISheduled::shedule_Update	(time_delta);
 
-	if (!member().members().empty()) {
-		memory().update			();
-		corpse().update			();
-		enemy().update			();
-		explosive().update		();
-		location().update		();
-		member().update			();
-		brain().update			();
-		return;
-	}
+	update_impl					();
 
-	CAgentManager				*self = this;
-	xr_delete					(self);
 	STOP_PROFILE
 }
 
@@ -101,3 +114,19 @@ float CAgentManager::shedule_Scale		()
 {
 	return						(.5f);
 }
+
+#else // USE_SCHEDULER_IN_AGENT_MANAGER
+
+void CAgentManager::update				()
+{
+	if (Device.dwTimeGlobal <= m_last_update_time)
+		return;
+
+	if (Device.dwTimeGlobal - m_last_update_time < m_update_rate)
+		return;
+
+	m_last_update_time			= Device.dwTimeGlobal;
+	update_impl					();
+}
+
+#endif // USE_SCHEDULER_IN_AGENT_MANAGER

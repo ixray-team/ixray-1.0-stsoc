@@ -185,6 +185,10 @@ void CALifeSwitchManager::try_switch_online	(CSE_ALifeDynamicObject	*I)
 	);
 
 	I->try_switch_online		();
+
+	if (!I->m_bOnline && !I->keep_saved_data_anyway())
+		I->client_data.clear	();
+
 	STOP_PROFILE
 }
 
@@ -215,6 +219,11 @@ void CALifeSwitchManager::try_switch_offline(CSE_ALifeDynamicObject	*I)
 
 void CALifeSwitchManager::switch_object	(CSE_ALifeDynamicObject	*I)
 {
+	if (I->redundant()) {
+		release				(I);
+		return;
+	}
+
 	if (!synchronize_location(I))
 		return;
 

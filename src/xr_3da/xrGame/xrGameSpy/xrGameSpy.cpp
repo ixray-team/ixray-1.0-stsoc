@@ -18,20 +18,54 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 	}
     return TRUE;
 }
-/*
-// This is an example of an exported variable
-XRGAMESPY_API int nxrGameSpy=0;
 
-// This is an example of an exported function.
-XRGAMESPY_API int fnxrGameSpy(void)
+void	FillSecretKey(char* SecretKey)
 {
-	return 42;
+	SecretKey[0] = 't';
+	SecretKey[1] = '9';
+	SecretKey[2] = 'F';
+	SecretKey[3] = 'j';
+	SecretKey[4] = '3';
+	SecretKey[5] = 'M';
+	SecretKey[6] = 'x';
+	SecretKey[7] = '\0';
 }
 
-// This is the constructor of a class that has been exported.
-// see xrGameSpy.h for the class definition
-CxrGameSpy::CxrGameSpy()
-{ 
-	return; 
+XRGAMESPY_API const char* xrGS_GetGameVersion	(const char*KeyValue)
+{
+	HKEY KeyCDKey = 0;
+	long res = RegOpenKeyEx(REGISTRY_BASE, 
+		REGISTRY_PATH, 0, KEY_READ, &KeyCDKey);
+
+//	char	KeyValue[1024] = "";
+	DWORD KeyValueSize = 128;
+	DWORD KeyValueType = REG_SZ;
+	if (res == ERROR_SUCCESS && KeyCDKey != 0)
+	{
+		res = RegQueryValueEx(KeyCDKey, REGISTRY_VALUE_VERSION, NULL, &KeyValueType, (LPBYTE)KeyValue, &KeyValueSize);
+	};
+	if (KeyCDKey != 0) RegCloseKey(KeyCDKey);
+
+	if (res == ERROR_PATH_NOT_FOUND ||
+		res == ERROR_FILE_NOT_FOUND ||
+		KeyValueSize == 0)
+	{
+		return GAME_VERSION;
+	};
+	return KeyValue;	
 }
-*/
+
+XRGAMESPY_API void xrGS_GetGameID	(int* GameID, int verID)
+{
+	*GameID = int(GAMESPY_GAMEID);
+
+#ifdef DEMO_BUILD
+	switch (verID)
+	{
+	case 1: *GameID = int(1067); break;
+	case 2: *GameID = int(1576); break;
+	case 3: *GameID = int(1620); break;
+	default: *GameID = int(GAMESPY_GAMEID); break;
+	}	
+#endif
+}

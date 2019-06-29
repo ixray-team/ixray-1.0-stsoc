@@ -17,7 +17,7 @@ struct 	v2p
 
 half	luminance	(float2	tc)	{
 	half3	source 	= tex2D(s_image,tc);
-	return 	dot	(source,LUMINANCE_VECTOR*def_hdr);
+	return 	dot		(source, LUMINANCE_VECTOR*def_hdr );
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 // 	perform 2x2=4s convolution, working on 4x4=16p area

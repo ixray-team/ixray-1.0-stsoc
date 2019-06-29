@@ -71,7 +71,7 @@ add_to_registry_type_list(CGameNewsRegistry);
 
 
 //список описаний персонажей, которые уже задействованы в игре
-typedef CALifeAbstractRegistry<SPECIFIC_CHARACTER_ID, int > CSpecificCharacterRegistry;
+typedef CALifeAbstractRegistry<shared_str, int > CSpecificCharacterRegistry;
 add_to_registry_type_list(CSpecificCharacterRegistry);
 #define specific_characters define_constant(CSpecificCharacterRegistry) 
 #define registry_type_list save_registry_type_list(CSpecificCharacterRegistry)

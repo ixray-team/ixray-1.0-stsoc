@@ -16,7 +16,7 @@ private:
 
 	bool	m_bScrollLog;
 	u32		m_dwStartLine;
-	void	DrawLog(HDC hDC);
+	void	DrawLog(HDC hDC, RECT* pRect);
 private:
 	HFONT	m_hLogWndFont;
 	HFONT	m_hPrevFont;
@@ -25,6 +25,9 @@ private:
 	HDC		m_hDC_LogWnd;
 	HDC		m_hDC_LogWnd_BackBuffer;
 	HBITMAP m_hBB_BM, m_hOld_BM;
+
+	bool	m_bNeedUpdate;
+	u32		m_dwLastUpdateTime;
 public:
 	CTextConsole();
 	virtual ~CTextConsole();
@@ -37,6 +40,8 @@ public:
 
 	virtual void	OnRender			(void);
 	virtual void	OnFrame				(void);
+
+	virtual void	IR_OnKeyboardPress		(int dik);
 };
 
 //extern ENGINE_API CTextConsole* TextConsole;

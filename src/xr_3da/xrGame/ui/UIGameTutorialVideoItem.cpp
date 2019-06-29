@@ -46,6 +46,9 @@ void CUISequenceVideoItem::Load(CUIXml* xml, int idx)
 	m_flags.set										(etiNeedPauseOn,	0==_stricmp(str, "on"));
 	m_flags.set										(etiNeedPauseOff,	0==_stricmp(str, "off"));
 	
+	LPCSTR str2				= xml->Read				("pause_sound",0,"ignore");
+	m_flags.set										(etiNeedPauseSound, 0==_stricmp(str2, "on"));
+
 	str						= xml->Read				("can_be_stopped",0,"on");
 	m_flags.set										(etiCanBeStopped,	0==_stricmp(str, "on"));
 
@@ -57,13 +60,32 @@ void CUISequenceVideoItem::Load(CUIXml* xml, int idx)
 	m_delay					= _max(xml->ReadFlt		("delay",0,0.f),0.f);
 
 	//ui-components
-	m_wnd					= xr_new<CUIStatic>();
-	m_wnd->SetAutoDelete	(false);
-	CUIXmlInit xml_init;
-	xml_init.InitStatic		(*xml, "video_wnd", 0, m_wnd);
+	m_wnd											= xr_new<CUIStatic>();
+	m_wnd->SetAutoDelete							(false);
+	CUIXmlInit::InitStatic							(*xml, "video_wnd", 0, m_wnd);
+	bool bFullScreen								= (1==xml->ReadAttribInt("video_wnd", 0, "fullscreen", 0));
+	if(!bFullScreen)
+	{
+		m_wnd->SetWndPos								(Fvector2().set(512.0f,384.0f));
+		m_wnd->SetAlignment								(waCenter);
+		Frect texture_coords							= m_wnd->GetUIStaticItem().GetOriginalRect();
 
-	LPCSTR m_snd_name		= xml->Read			("sound",0,"");
-	if (m_snd_name&&m_snd_name[0]){
+		bool is_16_9									= UI()->is_16_9_mode();
+		float kw_image									= UI_BASE_WIDTH / texture_coords.width();
+
+		Fvector2										wnd_size;
+
+		wnd_size.x										= UI_BASE_WIDTH;
+		wnd_size.y										= texture_coords.height()*kw_image;
+		if(is_16_9)
+			wnd_size.y									*= 1.328f;
+
+		m_wnd->SetWndSize								(wnd_size);
+	}
+	LPCSTR m_snd_name								= xml->Read("sound",0,"");
+
+	if (m_snd_name&&m_snd_name[0])
+	{
 		string_path			_l, _r;
 		strconcat			(_l, m_snd_name, "_l");
 		strconcat			(_r, m_snd_name, "_r");
@@ -119,15 +141,18 @@ void CUISequenceVideoItem::OnRender()
 void CUISequenceVideoItem::Start()
 {
 	inherited::Start			();
-	m_flags.set					(etiStoredPauseState, Device.Pause());
+	m_flags.set					(etiStoredPauseState, Device.Paused());
 
 	if(m_flags.test(etiNeedPauseOn) && !m_flags.test(etiStoredPauseState)){
-		Device.Pause			(TRUE);
+		Device.Pause			(TRUE, TRUE, TRUE, "videoitem_start");
 		bShowPauseString		= FALSE;
 	}
 
 	if(m_flags.test(etiNeedPauseOff) && m_flags.test(etiStoredPauseState))
-		Device.Pause			(FALSE);
+		Device.Pause			(FALSE, TRUE, TRUE, "videoitem_start");
+
+	if(m_flags.test(etiNeedPauseSound))
+		Device.Pause			(TRUE, FALSE, TRUE, "videoitem_start");
 
 	m_flags.set					(etiPlaying,TRUE);
 	m_flags.set					(etiNeedStart,TRUE);
@@ -157,10 +182,13 @@ bool CUISequenceVideoItem::Stop	(bool bForce)
 	m_texture					= 0;
 
 	if(m_flags.test(etiNeedPauseOn) && !m_flags.test(etiStoredPauseState))
-		Device.Pause			(FALSE);
+		Device.Pause			(FALSE, TRUE, TRUE, "videoitem_stop");
 
 	if(m_flags.test(etiNeedPauseOff) && m_flags.test(etiStoredPauseState))
-		Device.Pause			(TRUE);
+		Device.Pause			(TRUE, TRUE, TRUE, "videoitem_stop");
+
+	if(m_flags.test(etiNeedPauseSound))
+		Device.Pause			(FALSE, FALSE, TRUE, "videoitem_stop");
 
 	inherited::Stop				();
 	return true;

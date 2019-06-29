@@ -118,9 +118,9 @@ public:
 
 public:
 	//information receive & dialogs
-	virtual bool OnReceiveInfo		(INFO_ID info_id) const;
-	virtual void OnDisableInfo		(INFO_ID info_id) const;
-//	virtual void ReceivePdaMessage	(u16 who, EPdaMsg msg, INFO_ID info_id);
+	virtual bool OnReceiveInfo		(shared_str info_id) const;
+	virtual void OnDisableInfo		(shared_str info_id) const;
+//	virtual void ReceivePdaMessage	(u16 who, EPdaMsg msg, shared_str info_id);
 
 	virtual void	 NewPdaContact		(CInventoryOwner*);
 	virtual void	 LostPdaContact		(CInventoryOwner*);
@@ -412,6 +412,7 @@ protected:
 	shared_str				m_sDefaultObjAction;
 	shared_str				m_sCharacterUseAction;
 	shared_str				m_sDeadCharacterUseAction;
+	shared_str				m_sDeadCharacterUseOrDragAction;
 	shared_str				m_sCarCharacterUseAction;
 	shared_str				m_sInventoryItemUseAction;
 	shared_str				m_sInventoryBoxUseAction;
@@ -683,7 +684,7 @@ protected:
 		void							SelectBestWeapon				(CObject* O);
 public:
 		void							SetWeaponHideState				(u32 State, bool bSet);
-		CCustomOutfit*					GetOutfit();
+		virtual CCustomOutfit*			GetOutfit() const;
 private:
 	CActorCondition				*m_entity_condition;
 
@@ -761,6 +762,12 @@ public:
 		VERIFY						(m_location_manager);
 		return						(*m_location_manager);
 	}
+
+private:
+	ALife::_OBJECT_ID	m_holder_id;
+
+public:
+	virtual bool				register_schedule				() const {return false;}
 };
 
 extern bool		isActorAccelerated			(u32 mstate, bool ZoomMode);

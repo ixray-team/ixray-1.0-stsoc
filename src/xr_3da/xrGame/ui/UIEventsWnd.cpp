@@ -129,7 +129,7 @@ void CUIEventsWnd::ReloadList(bool bClearOnly)
 	m_ListWnd->Clear			();
 	if(bClearOnly)				return;
 
-	if(!Actor())				return;
+	if(!g_actor)				return;
 	GameTasks& tasks			= Actor()->GameTaskManager().GameTasks();
 	GameTasks::iterator it		= tasks.begin();
 	CGameTask* task				= NULL;
@@ -255,13 +255,13 @@ void CUIEventsWnd::ShowDescription			(CGameTask* t, int idx)
 						u32 sz			= xr_strlen(need_group);
 						if ( group.size()== sz || group.c_str()[sz]=='/' )
 							m_UITaskInfoWnd->AddArticle(&A);
+					}else
+					if(o.article_id.size() && it->article_id ==o.article_id)
+					{
+						CEncyclopediaArticle			A;
+						A.Load							(it->article_id);
+						m_UITaskInfoWnd->AddArticle		(&A);
 					}
-				}else
-				if(o.article_id.size() && it->article_id ==o.article_id)
-				{
-					CEncyclopediaArticle			A;
-					A.Load							(it->article_id);
-					m_UITaskInfoWnd->AddArticle		(&A);
 				}
 			}
 		}

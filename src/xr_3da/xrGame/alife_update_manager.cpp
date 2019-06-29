@@ -64,6 +64,7 @@ CALifeUpdateManager::CALifeUpdateManager	(xrServer *server, LPCSTR section) :
 	m_update_monster_factor	= pSettings->r_float(section,"update_monster_factor");
 	m_objects_per_update	= pSettings->r_u32	(section,"objects_per_update");
 	m_changing_level		= false;
+	m_first_time			= true;
 }
 
 CALifeUpdateManager::~CALifeUpdateManager	()
@@ -114,7 +115,7 @@ void CALifeUpdateManager::shedule_Update	(u32 dt)
 	if (!initialized())
 		return;
 
-	if (g_mt_config.test(mtALife)) {
+	if (!m_first_time && g_mt_config.test(mtALife)) {
 		Device.seqParallel.push_back(
 			fastdelegate::FastDelegate0<>(
 				this,
@@ -123,6 +124,8 @@ void CALifeUpdateManager::shedule_Update	(u32 dt)
 		);
 		return;
 	}
+
+	m_first_time					= false;
 
 	START_PROFILE("ALife/update")
 	update							();
@@ -222,9 +225,10 @@ bool CALifeUpdateManager::change_level	(NET_Packet &net_packet)
 	return							(true);
 }
 
+#include "../igame_persistent.h"
 void CALifeUpdateManager::new_game			(LPCSTR save_name)
 {
-	pApp->LoadTitle						("Creating new game...");
+	g_pGamePersistent->LoadTitle		("st_creating_new_game");
 	Msg									("* Creating new game...");
 
 	unload								();
@@ -250,7 +254,7 @@ void CALifeUpdateManager::new_game			(LPCSTR save_name)
 
 void CALifeUpdateManager::load			(LPCSTR game_name, bool no_assert, bool new_only)
 {
-	pApp->LoadTitle						("SERVER: Loading alife simulator...");
+	g_pGamePersistent->LoadTitle		("st_loading_alife_simulator");
 
 #ifdef DEBUG
 	Memory.mem_compact					();
@@ -265,7 +269,7 @@ void CALifeUpdateManager::load			(LPCSTR game_name, bool no_assert, bool new_onl
 #ifdef DEBUG
 	Msg									("* Loading alife simulator is successfully completed (%7.3f Mb)",float(Memory.mem_usage() - memory_usage)/1048576.0);
 #endif
-	pApp->LoadTitle						("SERVER: Connecting...");
+	g_pGamePersistent->LoadTitle		("st_server_connecting");
 }
 
 void CALifeUpdateManager::reload		(LPCSTR section)
@@ -475,7 +479,7 @@ void CALifeUpdateManager::remove_restriction(ALife::_OBJECT_ID id, ALife::_OBJEC
 		case RestrictionSpace::eRestrictorTypeOut : {
 			xr_vector<ALife::_OBJECT_ID>::iterator	I = std::find(creature->m_dynamic_out_restrictions.begin(),creature->m_dynamic_out_restrictions.end(),restriction_id);
 			if (I == creature->m_dynamic_out_restrictions.end()) {
-				Msg							("! cannot remove restriction with id [%d][%s] to the entity with id [%d][%s], because it is not added",restriction_id,object_restrictor->name_replace(),id,object->name_replace());
+				Msg							("~ cannot remove restriction with id [%d][%s] to the entity with id [%d][%s], because it is not added",restriction_id,object_restrictor->name_replace(),id,object->name_replace());
 				return;
 			}
 
@@ -486,7 +490,7 @@ void CALifeUpdateManager::remove_restriction(ALife::_OBJECT_ID id, ALife::_OBJEC
 		case RestrictionSpace::eRestrictorTypeIn : {
 			xr_vector<ALife::_OBJECT_ID>::iterator	I = std::find(creature->m_dynamic_in_restrictions.begin(),creature->m_dynamic_in_restrictions.end(),restriction_id);
 			if (I == creature->m_dynamic_in_restrictions.end()) {
-				Msg							("! cannot remove restriction with id [%d][%s] to the entity with id [%d][%s], because it is not added",restriction_id,object_restrictor->name_replace(),id,object->name_replace());
+				Msg							("~ cannot remove restriction with id [%d][%s] to the entity with id [%d][%s], because it is not added",restriction_id,object_restrictor->name_replace(),id,object->name_replace());
 				return;
 			}
 

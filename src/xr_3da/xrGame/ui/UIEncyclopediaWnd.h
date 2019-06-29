@@ -27,7 +27,6 @@ private:
 	typedef CUIWindow inherited;
 	enum {eNeedReload=(1<<0),};
 	Flags16				m_flags;
-	shared_str			m_InfosHeaderStr;
 public:
 						CUIEncyclopediaWnd			();
 	virtual				~CUIEncyclopediaWnd			();
@@ -37,9 +36,9 @@ public:
 	virtual void		SendMessage					(CUIWindow *pWnd, s16 msg, void* pData = NULL);
 	virtual void		Draw						();
 
-	void				AddArticle					(ARTICLE_ID, bool bReaded);
+	void				AddArticle					(shared_str, bool bReaded);
 	void				DeleteArticles				();
-	bool				HasArticle					(ARTICLE_ID);
+	bool				HasArticle					(shared_str);
 
 	void				ReloadArticles				();
 	virtual void		Reset						();
@@ -55,7 +54,8 @@ protected:
 
 	// Хранилище статей
 	typedef xr_vector<CEncyclopediaArticle*>			ArticlesDB;
-	typedef xr_vector<CEncyclopediaArticle*>::iterator	ArticlesDB_it;
+	typedef ArticlesDB::iterator						ArticlesDB_it;
+
 	ArticlesDB				m_ArticlesDB;
 	CGameFont*				m_pTreeRootFont;
 	u32						m_uTreeRootColor;
@@ -65,5 +65,5 @@ protected:
 	CUIListWnd*				UIIdxList;
 	CUIScrollView*			UIInfoList;
 
-	shared_str				SetCurrentArtice(CUITreeViewItem *pTVItem);
+	void				SetCurrentArtice(CUITreeViewItem *pTVItem);
 };

@@ -44,7 +44,7 @@ void CEncyclopediaArticle::Load	(ARTICLE_STR_ID str_id)
 	Load	(id_to_index::IdToIndex(str_id));
 }
 */
-void CEncyclopediaArticle::Load	(ARTICLE_ID  id)
+void CEncyclopediaArticle::Load	(shared_str  id)
 {
 	m_ArticleId = id;
 	inherited_shared::load_shared(m_ArticleId, NULL);
@@ -53,29 +53,23 @@ void CEncyclopediaArticle::Load	(ARTICLE_ID  id)
 
 void CEncyclopediaArticle::load_shared	(LPCSTR)
 {
-//	const id_to_index::ITEM_DATA& item_data = *id_to_index::GetByIndex(m_ArticleIndex);
-	const id_to_index::ITEM_DATA& item_data = *id_to_index::GetById(m_ArticleId);
+	const ITEM_DATA& item_data = *id_to_index::GetById(m_ArticleId);
 
-	CUIXml		uiXml;
-	CUIXmlInit	xml_init;
-	string_path xml_file_full;
-	strconcat	(xml_file_full, *shared_str(item_data.file_name), ".xml");
-
-	bool xml_result = uiXml.Init(CONFIG_PATH, GAME_PATH, xml_file_full);
-	THROW3(xml_result, "xml file not found", xml_file_full);
+	CUIXml*		pXML		= item_data._xml;
+	pXML->SetLocalRoot		(pXML->GetRoot());
 
 	//loading from XML
-	XML_NODE* pNode = uiXml.NavigateToNode(id_to_index::tag_name, item_data.pos_in_file);
+	XML_NODE* pNode = pXML->NavigateToNode(id_to_index::tag_name, item_data.pos_in_file);
 	THROW3(pNode, "encyclopedia article id=", *item_data.id);
 
 	//текст
-	data()->text = uiXml.Read(pNode, "text", 0, "");
+	data()->text = pXML->Read(pNode, "text", 0, "");
 	//имя
-	data()->name = uiXml.ReadAttrib(pNode, "name", "");
+	data()->name = pXML->ReadAttrib(pNode, "name", "");
 	//группа
-	data()->group = uiXml.ReadAttrib(pNode, "group", "");
+	data()->group = pXML->ReadAttrib(pNode, "group", "");
 	//секция ltx, откуда читать данные
-	LPCSTR ltx = uiXml.Read(pNode, "ltx", 0, NULL);
+	LPCSTR ltx = pXML->Read(pNode, "ltx", 0, NULL);
 
 
 	if(ltx)
@@ -93,10 +87,10 @@ void CEncyclopediaArticle::load_shared	(LPCSTR)
 	}
 	else 
 	{
-		if( uiXml.NavigateToNode(pNode,"texture",0) ){
-			uiXml.SetLocalRoot(pNode);
-			xml_init.InitTexture(uiXml, "", 0, &data()->image);
-			uiXml.SetLocalRoot(uiXml.GetRoot());
+		if( pXML->NavigateToNode(pNode,"texture",0) ){
+			pXML->SetLocalRoot(pNode);
+			CUIXmlInit::InitTexture(*pXML, "", 0, &data()->image);
+			pXML->SetLocalRoot(pXML->GetRoot());
 		}
 	}
 
@@ -125,7 +119,7 @@ void CEncyclopediaArticle::load_shared	(LPCSTR)
 	};
 
 	// Тип статьи
-	xr_string atricle_type = uiXml.ReadAttrib(pNode, "article_type", "encyclopedia");
+	xr_string atricle_type = pXML->ReadAttrib(pNode, "article_type", "encyclopedia");
 	if(0==stricmp(atricle_type.c_str(),"encyclopedia")){
 		data()->articleType = ARTICLE_DATA::eEncyclopediaArticle;
 	}else
@@ -141,7 +135,7 @@ void CEncyclopediaArticle::load_shared	(LPCSTR)
 		Msg("incorrect article type definition for [%s]",*item_data.id);
 	}
 
-	data()->ui_template_name = uiXml.ReadAttrib(pNode, "ui_template", "common");
+	data()->ui_template_name = pXML->ReadAttrib(pNode, "ui_template", "common");
 }
 
 void CEncyclopediaArticle::InitXmlIdToIndex()

@@ -28,8 +28,8 @@ class CPHCharacter :
 {
 public:
 
-bool					b_exist						;
 u64						m_creation_step				;
+bool					b_exist						;
 protected:
 
 ////////////////////////// dynamic

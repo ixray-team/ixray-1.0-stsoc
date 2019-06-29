@@ -45,16 +45,17 @@ void game_cl_Deathmatch::OnBuyMenu_Ok	()
 	l_pPlayer->u_EventGen		(P,GE_GAME_EVENT,l_pPlayer->ID()	);
 	P.w_u16(GAME_EVENT_PLAYER_BUY_FINISHED);
 	//-------------------------------------------------------------------------------
-	pCurPresetItems->clear();
-	PRESET_ITEMS		TmpPresetItems;
-	TmpPresetItems.clear();
+//	pCurPresetItems->clear();
+	PRESET_ITEMS	tmpItems;
+	tmpItems.clear();
 
-	const preset_items& _p	= pCurBuyMenu->GetPreset(_preset_idx_last);
+	const preset_items* _p	= &(pCurBuyMenu->GetPreset(_preset_idx_last));//_preset_idx_last : _preset_idx_origin);
+	if (_p->size() == 0) _p	= &(pCurBuyMenu->GetPreset(_preset_idx_origin));
 	
-	u32 ItemsCount							= _p.size();
+	u32 ItemsCount							= _p->size();
 	for (u32 i=0; i<ItemsCount; ++i)
 	{
-		const _preset_item& _pitem = _p[i];
+		const _preset_item& _pitem = _p[0][i];
 
 		for(u32 idx=0; idx<_pitem.count; ++idx)
 		{
@@ -64,53 +65,40 @@ void game_cl_Deathmatch::OnBuyMenu_Ok	()
 
 			u8 Addons		= _pitem.addon_state;
 
-//			s16 ID			= GetBuyMenuItemIndex(u8(SlotID), ItemID);
 			s16 ID			= GetBuyMenuItemIndex(Addons, ItemID);
-			pCurPresetItems->push_back(ID);
-//			TmpPresetItems.push_back(ID);
+//			pCurPresetItems->push_back(ID);
+			tmpItems.push_back(ID);
 		}
 	}
-/*
-	for (u8 s =0; s<3; s++)
-	{
-//		u8 ItemID = pCurBuyMenu->GetWeaponIndex(SlotsToCheck[s]);
-		u8 SectionID = 0xff;
-		u8 ItemID = pCurBuyMenu->GetItemIndex(SlotsToCheck[s], 0, SectionID);
-		if (ItemID == 0xff) continue;
-		u16 SlotID = SlotsToCheck[s];
-		s16 ID = GetBuyMenuItemIndex(u8((SectionID != 0xff)?SectionID:SlotID), ItemID);
-		pCurPresetItems->push_back(ID);
-	}
 
-	for (u8 i=0; i<pCurBuyMenu->GetBeltSize(); i++)
-	{
-		u8 SectID, ItemID, Count;
-		pCurBuyMenu->GetWeaponIndexInBelt(i, SectID, ItemID, Count);
-//		s16	ID = (s16(SectID) << 0x08) | s16(ItemID);
-		s16 ID = GetBuyMenuItemIndex(SectID, ItemID);
-		for (u8 c=0; c<Count; c++)
-		{
-			pCurPresetItems->push_back(ID);
-		}		
-	};
-
-	//-------------------------------------------------------------------------------
-*/
 	//принудительно добавляем нож
 	u8 SectID, ItemID;
 	pCurBuyMenu->GetWeaponIndexByName("mp_wpn_knife", SectID, ItemID);
-	pCurPresetItems->push_back(GetBuyMenuItemIndex(SectID, ItemID));
-//	TmpPresetItems.push_back(GetBuyMenuItemIndex(SectID, ItemID));
+//	pCurPresetItems->push_back(GetBuyMenuItemIndex(SectID, ItemID));
+	tmpItems.push_back(GetBuyMenuItemIndex(SectID, ItemID));
 	//-------------------------------------------------------------------------------
-	P.w_s32		(s32(pCurBuyMenu->GetMoneyAmount()) - Pl->money_for_round);
-	P.w_u8		(u8(pCurPresetItems->size()));
-//	P.w_u8		(u8(TmpPresetItems.size()));
-	for (u8 s=0; s<pCurPresetItems->size(); s++)
-//	for (u8 s=0; s<TmpPresetItems.size(); s++)
+	if (pCurBuyMenu->IsIgnoreMoneyAndRank())
 	{
-		P.w_s16((*pCurPresetItems)[s].BigID);
-//		P.w_s16((TmpPresetItems)[s].BigID);
+		P.w_s32(0);
 	}
+	else
+	{
+		s32 MoneyDiff = pCurBuyMenu->GetPresetCost(_preset_idx_origin)- pCurBuyMenu->GetPresetCost(_preset_idx_last);
+//		P.w_s32		(s32(pCurBuyMenu->GetMoneyAmount()) - Pl->money_for_round);
+		P.w_s32(MoneyDiff);
+	}
+//	P.w_u8		(u8(pCurPresetItems->size()));
+//	for (u8 s=0; s<pCurPresetItems->size(); s++)
+//	{
+//		P.w_s16((*pCurPresetItems)[s].BigID);
+//	}
+	
+	P.w_u8		(u8(tmpItems.size()));
+	for (u8 s=0; s<tmpItems.size(); s++)
+	{
+		P.w_s16(tmpItems[s].BigID);
+	}
+
 	//-------------------------------------------------------------------------------
 	l_pPlayer->u_EventSend		(P);
 	//-------------------------------------------------------------------------------
@@ -139,10 +127,11 @@ void game_cl_Deathmatch::SetBuyMenuItems		(PRESET_ITEMS* pItems, BOOL OnlyPreset
 {
 	game_PlayerState* P = local_player;
 	if (!P) return;
+	if (pCurBuyMenu->IsShown()) return;
 	//---------------------------------------------------------
 //	AdditionalPresetItems.clear();
 	//---------------------------------------------------------
-	ClearBuyMenu			();
+	pCurBuyMenu->ResetItems();
 	//---------------------------------------------------------
 	pCurBuyMenu->SetupPlayerItemsBegin();
 	//---------------------------------------------------------
@@ -229,27 +218,14 @@ void game_cl_Deathmatch::SetBuyMenuItems		(PRESET_ITEMS* pItems, BOOL OnlyPreset
 		for ( ; It != Et; ++It) 
 		{
 			PresetItem PIT = *It;
-			//		s16 ID = (*It).BigID;
 			if (PIT.ItemID == KnifeIndex) continue;
-//			TmpPresetItems.push_back(PIT);
 			pCurBuyMenu->ItemToSlot(pCurBuyMenu->GetWeaponNameByIndex(0, PIT.ItemID), PIT.SlotID);
 		};
 		//---------------------------------------------------------
-/*		It = TmpPresetItems.begin();
-		Et = TmpPresetItems.end();
-		for ( ; It != Et; ++It) 
-		{
-			u8 SlotID = (*It).SlotID;
-			u8 ItemID = (*It).ItemID;
-
-			if (SlotID != (UNBUYABLESLOT-1))
-				pCurBuyMenu->SectionToSlot(SlotID, ItemID, false);
-		};
-*/		//---------------------------------------------------------
 	};
+	pCurBuyMenu->SetMoneyAmount(P->money_for_round);
 	pCurBuyMenu->SetupPlayerItemsEnd();
 
-	pCurBuyMenu->SetMoneyAmount(P->money_for_round);
 	pCurBuyMenu->CheckBuyAvailabilityInSlots();
 };
 
@@ -420,6 +396,7 @@ void				game_cl_Deathmatch::LoadDefItemsForRank(IBuyWnd* pBuyMenu)
 		PresetItem *pDefItem = &(PlayerDefItems[it]);
 		const shared_str& ItemName = pBuyMenu->GetWeaponNameByIndex(pDefItem->SlotID, pDefItem->ItemID);
 		if ( !ItemName.size() ) continue;
+		if (!xr_strcmp(*ItemName, "mp_wpn_knife")) continue;
 		if (!pSettings->line_exist(ItemName, "ammo_class")) continue;
 		
 		string1024 wpnAmmos, BaseAmmoName;
@@ -431,10 +408,33 @@ void				game_cl_Deathmatch::LoadDefItemsForRank(IBuyWnd* pBuyMenu)
 		if (SlotID == 0xff || ItemID == 0xff) continue;
 
 //		s16 ID = GetBuyMenuItemIndex(SlotID, ItemID);
+
 		s16 ID = GetBuyMenuItemIndex(0, ItemID);
-		PlayerDefItems.push_back(ID);
-		PlayerDefItems.push_back(ID);
+		if (GameID() == GAME_ARTEFACTHUNT)
+		{
+			PlayerDefItems.push_back(ID);
+			PlayerDefItems.push_back(ID);
+		}		
 	};
+	//-------------------------------------------------------------
+	if (pCurBuyMenu->IsShown()) return;
+	pCurBuyMenu->ResetItems();
+	pCurBuyMenu->SetupDefaultItemsBegin();
+	//---------------------------------------------------------
+	u8 KnifeSlot, KnifeIndex;
+	pCurBuyMenu->GetWeaponIndexByName("mp_wpn_knife", KnifeSlot, KnifeIndex);
+	//---------------------------------------------------------
+	PRESET_ITEMS		TmpPresetItems;
+	PRESET_ITEMS_it		It = PlayerDefItems.begin();
+	PRESET_ITEMS_it		Et = PlayerDefItems.end();
+	for ( ; It != Et; ++It) 
+	{
+		PresetItem PIT = *It;
+		if (PIT.ItemID == KnifeIndex) continue;
+		pCurBuyMenu->ItemToSlot(pCurBuyMenu->GetWeaponNameByIndex(0, PIT.ItemID), PIT.SlotID);
+	};
+	//---------------------------------------------------------
+	pCurBuyMenu->SetupDefaultItemsEnd();
 };
 
 void				game_cl_Deathmatch::ChangeItemsCosts			(IBuyWnd* pBuyMenu)

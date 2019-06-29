@@ -104,6 +104,8 @@ public:
 	void			export 					(light_Package& dest);
 #endif
 
+	float			get_LOD					();
+
 	light();
 	virtual ~light();
 };

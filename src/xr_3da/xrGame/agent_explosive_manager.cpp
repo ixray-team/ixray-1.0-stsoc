@@ -97,8 +97,8 @@ void CAgentExplosiveManager::react_on_explosives	()
 {
 	for (;;) {
 		bool						changed = false;
-		CAgentMemberManager::iterator	I = object().member().members().begin();
-		CAgentMemberManager::iterator	E = object().member().members().end();
+		CAgentMemberManager::iterator	I = object().member().combat_members().begin();
+		CAgentMemberManager::iterator	E = object().member().combat_members().end();
 		for ( ; I != E; ++I)
 			if (!(*I)->grenade_reaction().m_processing)
 				changed				= process_explosive(**I);

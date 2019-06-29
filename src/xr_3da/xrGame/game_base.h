@@ -153,7 +153,8 @@ protected:
 	virtual		void				OnSwitchPhase			(u32 old_phase, u32 new_phase)	{};	
 
 public:
-	game_GameState();
+									game_GameState			();
+	virtual							~game_GameState			()								{}
 				u32					Type					() const						{return type;};
 				u32					Phase					() const						{return phase;};
 				s32					Round					() const						{return round;};

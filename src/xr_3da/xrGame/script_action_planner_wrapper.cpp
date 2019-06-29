@@ -26,8 +26,6 @@ void CScriptActionPlannerWrapper::setup_static	(CScriptActionPlanner *planner, C
 
 void CScriptActionPlannerWrapper::update		()
 {
-	THROW_EXCEPTION_IF_NO_SCRIPTS_IN_GOAP;
-
 #ifdef LOG_ACTION
 	if ((psAI_Flags.test(aiGOAPScript) && !m_use_log) || (!psAI_Flags.test(aiGOAPScript) && m_use_log))
 		set_use_log							(!!psAI_Flags.test(aiGOAPScript));

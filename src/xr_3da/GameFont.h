@@ -18,7 +18,7 @@ private:
 	{
 		string128	string;
 		float		x,y;
-		float		size;
+		float		height;
 		u32			c;
 		EAligment	align;
 	};
@@ -28,7 +28,7 @@ protected:
 
 	EAligment				eCurrentAlignment;
 	u32						dwCurrentColor;
-	float					fCurrentSize;
+	float					fCurrentHeight;
 	float					fCurrentX, fCurrentY;
 	Fvector2				vInterval;
 
@@ -65,22 +65,19 @@ public:
 
 	IC void					SetColor		(u32 C)		{dwCurrentColor=C;};
 
-	IC void					SetSizeI		(float S)	{fCurrentSize=S*Device.dwWidth;};
-	IC void					SetSize			(float S)	{fCurrentSize=S;};
+	IC void					SetHeightI		(float S);
+	IC void					SetHeight			(float S);
 
-	IC float				GetSize			()			{return fCurrentSize;};
+	IC float				GetHeight		()					{return fCurrentHeight;};
 	IC void					SetInterval		(float x, float y) {vInterval.set(x,y);};
 	IC void					SetInterval		(const Fvector2& v) {vInterval.set(v);};
 	IC void					SetAligment		(EAligment aligment){ eCurrentAlignment=aligment; }
-	IC void					Add				(float _x, float _y, LPCSTR s, u32 _c=0xffffffff, float _size=0.01f);
 	float					SizeOf_			(char c, float size);
-	float					SizeOf_			(char c){return SizeOf_(c,fCurrentSize);}
+	float					SizeOf_			(char c){return SizeOf_(c,fCurrentHeight);}
 	float					SizeOf_			(LPCSTR s, float size);
-	float					SizeOf_			(LPCSTR s){return SizeOf_(s,fCurrentSize);}
-	float					CurrentHeight_	();//{return fCurrentSize*vInterval.y;}
-//.	IC float				SizeOfRel		(LPCSTR s);
-//.	IC float				SizeOfRel		(char s);
-//.	IC float				CurrentHeightRel();
+	float					SizeOf_			(LPCSTR s){return SizeOf_(s,fCurrentHeight);}
+	float					CurrentHeight_	();
+
 	void					OutSetI			(float x, float y);
 	void					OutSet			(float x, float y);
 	void __cdecl            OutNext			(LPCSTR fmt, ...);

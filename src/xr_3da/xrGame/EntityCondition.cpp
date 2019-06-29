@@ -368,9 +368,11 @@ CWound* CEntityCondition::ConditionHit(SHit* pHDS)
 		// -------------------------------------------------
 		// temp (till there is no death from psy hits)
 		hit_power *= m_HitTypeK[pHDS->hit_type];
+/*
 		m_fHealthLost = hit_power*m_fHealthHitPart*m_fHitBoneScale;
 		m_fDeltaHealth -= CanBeHarmed() ? m_fHealthLost : 0;
 		m_fDeltaPower -= hit_power*m_fPowerHitPart;
+*/
 		// -------------------------------------------------
 
 		hit_power *= m_HitTypeK[pHDS->hit_type];

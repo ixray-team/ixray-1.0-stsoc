@@ -16,8 +16,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="2">
@@ -30,6 +30,10 @@
 				BufferSecurityCheck="TRUE"
 				TreatWChar_tAsBuiltInType="TRUE"
 				UsePrecompiledHeader="3"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
@@ -38,11 +42,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="dplayx.lib dxerr8.lib dxguid.lib"
-				OutputFile="x:\Stalker_net.exe "
 				LinkIncremental="2"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
+				MapFileName=""
 				SubSystem="2"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -72,8 +77,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			CharacterSet="2">
@@ -87,6 +92,10 @@
 				BufferSecurityCheck="FALSE"
 				TreatWChar_tAsBuiltInType="TRUE"
 				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
@@ -95,12 +104,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="dplayx.lib dxerr8.lib dxguid.lib"
-				OutputFile="x:\Stalker_net.exe "
 				LinkIncremental="1"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
+				GenerateMapFile="FALSE"
+				MapFileName=""
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -150,6 +163,9 @@
 			</File>
 			<File
 				RelativePath=".\PasswordDlg.cpp">
+			</File>
+			<File
+				RelativePath=".\PortsDlg.cpp">
 			</File>
 			<File
 				RelativePath=".\ServerDlg.cpp">
@@ -221,6 +237,9 @@
 			</File>
 			<File
 				RelativePath=".\PasswordDlg.h">
+			</File>
+			<File
+				RelativePath=".\PortsDlg.h">
 			</File>
 			<File
 				RelativePath=".\Resource.h">

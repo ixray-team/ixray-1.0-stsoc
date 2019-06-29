@@ -26,8 +26,8 @@ SERVER_ENTITY_DECLARE_BEGIN0(CSE_ALifeTraderAbstract)
 		eTraderFlagInfiniteAmmo		= u32(1) << 0,
 		eTraderFlagDummy			= u32(-1),
 	};
-	float							m_fCumulativeItemMass;
-	int								m_iCumulativeItemVolume;
+//	float							m_fCumulativeItemMass;
+//	int								m_iCumulativeItemVolume;
 	u32								m_dwMoney;
 	float							m_fMaxItemMass;
 	Flags32							m_trader_flags;
@@ -35,10 +35,10 @@ SERVER_ENTITY_DECLARE_BEGIN0(CSE_ALifeTraderAbstract)
 	////////////////////////////////////////////////////
 	//character profile info
 #ifndef  AI_COMPILER
-	PROFILE_ID						character_profile		();
-	void							set_character_profile	(PROFILE_ID);
-	SPECIFIC_CHARACTER_ID			specific_character		();
-	void							set_specific_character	(SPECIFIC_CHARACTER_ID);
+	shared_str						character_profile		();
+	void							set_character_profile	(shared_str);
+	shared_str			specific_character		();
+	void							set_specific_character	(shared_str);
 #endif
 
 	CHARACTER_COMMUNITY_INDEX		m_community_index;
@@ -57,12 +57,12 @@ SERVER_ENTITY_DECLARE_BEGIN0(CSE_ALifeTraderAbstract)
 
 #endif
 
-	PROFILE_ID						m_sCharacterProfile;
-	SPECIFIC_CHARACTER_ID			m_SpecificCharacter;
+	shared_str						m_sCharacterProfile;
+	shared_str			m_SpecificCharacter;
 
 	//буферный вектор проверенных персонажей
-	xr_vector<SPECIFIC_CHARACTER_ID> m_CheckedCharacters;
-	xr_vector<SPECIFIC_CHARACTER_ID> m_DefaultCharacters;
+	xr_vector<shared_str> m_CheckedCharacters;
+	xr_vector<shared_str> m_DefaultCharacters;
 
 public:	
 									CSE_ALifeTraderAbstract		(LPCSTR caSection);
@@ -77,11 +77,9 @@ public:
 			void __stdcall			OnChangeProfile				(PropValue* sender);
 
 #ifdef XRGAME_EXPORTS
-			void					attach						(CSE_ALifeInventoryItem *tpALifeInventoryItem,	bool		bALifeRequest,	bool bAddChildren = true);
-			void					detach						(CSE_ALifeInventoryItem *tpALifeInventoryItem,	ALife::OBJECT_IT	*I = 0,	bool bALifeRequest = true,	bool bRemoveChildren = true);
 	virtual	void					add_online					(const bool &update_registries);
 	virtual	void					add_offline					(const xr_vector<ALife::_OBJECT_ID> &saved_children, const bool &update_registries);
-#ifdef DEBUG
+#if 0//def DEBUG
 			bool					check_inventory_consistency	();
 #endif
 			void					vfInitInventory				();
@@ -234,6 +232,7 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeMonsterAbstract,CSE_ALifeCreatureAbstract,
 	GameGraph::_GRAPH_ID				m_tNextGraphID;
 	GameGraph::_GRAPH_ID				m_tPrevGraphID;
 	float								m_fGoingSpeed;
+	float								m_fCurrentLevelGoingSpeed;
 	float								m_fCurSpeed;
 	float								m_fDistanceFromPoint;
 	float								m_fDistanceToPoint;
@@ -256,7 +255,10 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeMonsterAbstract,CSE_ALifeCreatureAbstract,
 	//---------------------------------------------------------
 
 	int									m_rank;
-	
+
+	ALife::_TIME_ID						m_stay_after_death_time_interval;
+
+public:
 									CSE_ALifeMonsterAbstract(LPCSTR					caSection);
 	virtual							~CSE_ALifeMonsterAbstract();
 	IC		float					g_MaxHealth				()	const									{ return m_fMaxHealthValue;	}
@@ -288,6 +290,7 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeMonsterAbstract,CSE_ALifeCreatureAbstract,
 	virtual	void					add_online				(const bool &update_registries);
 	virtual	void					add_offline				(const xr_vector<ALife::_OBJECT_ID> &saved_children, const bool &update_registries);
 	virtual Fvector					draw_level_position		() const;
+	virtual	bool					redundant				() const;
 #endif
 	virtual bool					need_update				(CSE_ALifeDynamicObject *object);
 
@@ -380,10 +383,6 @@ add_to_type_list(CSE_ALifeMonsterZombie)
 
 SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeMonsterBase,CSE_ALifeMonsterAbstract,CSE_PHSkeleton)
 	u16								m_spec_object_id;
-	enum {
-		flNeedCheckSpawnItem			= flCustom << 1,
-		flSkipSpawnItem					= flCustom << 2
-	};
 
 									CSE_ALifeMonsterBase	(LPCSTR caSection);				// constructor for variable initialization
 	virtual							~CSE_ALifeMonsterBase	();
@@ -391,6 +390,11 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeMonsterBase,CSE_ALifeMonsterAbstract,CSE_P
 	virtual CSE_Abstract			*cast_abstract			() {return this;}
 	virtual void					spawn_supplies			(LPCSTR){}
 	virtual void					spawn_supplies			(){}
+#ifdef XRGAME_EXPORTS
+	virtual void					on_spawn				();
+	virtual	void					add_online				(const bool &update_registries);
+	virtual	void					add_offline				(const xr_vector<ALife::_OBJECT_ID> &saved_children, const bool &update_registries);
+#endif // XRGAME_EXPORTS
 SERVER_ENTITY_DECLARE_END
 add_to_type_list(CSE_ALifeMonsterBase)
 #define script_type_list save_type_list(CSE_ALifeMonsterBase)

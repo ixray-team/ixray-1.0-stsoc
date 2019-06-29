@@ -24,8 +24,9 @@ using namespace luabind;
 void CHelicopter::script_register(lua_State *L)
 {
 	module(L)
-		[
-			class_<CHelicopter>("CHelicopter")
+	[
+		class_<CHelicopter,CGameObject>("CHelicopter")
+			.def(constructor<>())
 			.enum_("state")
 				[
 					value("eAlive",									int(CHelicopter::eAlive)),

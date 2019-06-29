@@ -496,6 +496,7 @@ void	CActor::net_Import_Physic_proceed	( )
 
 BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 {
+	m_holder_id				= ALife::_OBJECT_ID(-1);
 	m_feel_touch_characters = 0;
 	m_snd_noise			= 0.0f;
 	m_sndShockEffector	= NULL;
@@ -582,7 +583,6 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 
 	setEnabled				(E->s_flags.is(M_SPAWN_OBJECT_LOCAL));
 
-	Engine.Sheduler.Unregister	(this);
 	Engine.Sheduler.Register	(this,TRUE);
 
 	hit_slowmo				= 0.f;
@@ -652,7 +652,9 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 	typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
 	CALLBACK_TYPE	callback;
 	callback.bind	(this,&CActor::on_requested_spawn);
-	Level().client_spawn_manager().add(E->m_holderID,ID(),callback);
+	m_holder_id				= E->m_holderID;
+	if (E->m_holderID != ALife::_OBJECT_ID(-1))
+		Level().client_spawn_manager().add(E->m_holderID,ID(),callback);
 	//F
 	//-------------------------------------------------------------
 	m_iLastHitterID = u16(-1);
@@ -685,6 +687,10 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 void CActor::net_Destroy	()
 {
 	inherited::net_Destroy	();
+
+	if (m_holder_id != ALife::_OBJECT_ID(-1))
+		Level().client_spawn_manager().remove	(m_holder_id,ID());
+
 	delete_data				(m_game_task_manager);
 	delete_data				(m_statistic_manager);
 	Level().MapManager		().RemoveMapLocationByObjectID(ID());
@@ -722,6 +728,8 @@ void CActor::net_Destroy	()
 	
 
 	if(g_actor == this) g_actor= NULL;
+
+	Engine.Sheduler.Unregister	(this);
 }
 
 void CActor::net_Relcase	(CObject* O)

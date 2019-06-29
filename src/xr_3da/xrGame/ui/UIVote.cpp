@@ -10,16 +10,18 @@
 #include "../game_cl_teamdeathmatch.h"
 #include "../../xr_ioconsole.h"
 
-CUIVote::CUIVote(){
-	m_prev_upd_time = 0;
-	bkgrnd = xr_new<CUIStatic>();	bkgrnd->SetAutoDelete(true);	AttachChild(bkgrnd);
-//	header = xr_new<CUIStatic>();	header->SetAutoDelete(true);	AttachChild(header);
-	msg_back = xr_new<CUIStatic>();	msg_back->SetAutoDelete(true);	AttachChild(msg_back);
-	msg = xr_new<CUIStatic>();		msg->SetAutoDelete(true);		AttachChild(msg);
-	for (int i = 0; i<3; i++){
-		cap[i]		= xr_new<CUIStatic>();		cap[i]->SetAutoDelete(true);	AttachChild(cap[i]);
-		frame[i]	= xr_new<CUIFrameWindow>();	frame[i]->SetAutoDelete(true);	AttachChild(frame[i]);
-		list[i]		= xr_new<CUIListBox>();		list[i]->SetAutoDelete(true);	AttachChild(list[i]);
+CUIVote::CUIVote()
+{
+	m_prev_upd_time		= 0;
+	bkgrnd				= xr_new<CUIStatic>();	bkgrnd->SetAutoDelete(true);	AttachChild(bkgrnd);
+	msg_back			= xr_new<CUIStatic>();	msg_back->SetAutoDelete(true);	AttachChild(msg_back);
+	msg					= xr_new<CUIStatic>();	msg->SetAutoDelete(true);		AttachChild(msg);
+
+	for (int i = 0; i<3; i++)
+	{
+		cap[i]			= xr_new<CUIStatic>();		cap[i]->SetAutoDelete(true);	AttachChild(cap[i]);
+		frame[i]		= xr_new<CUIFrameWindow>();	frame[i]->SetAutoDelete(true);	AttachChild(frame[i]);
+		list[i]			= xr_new<CUIListBox>();		list[i]->SetAutoDelete(true);	AttachChild(list[i]);
 	}	
 
 	btn_yes		= xr_new<CUI3tButton>();	btn_yes->SetAutoDelete(true);		AttachChild(btn_yes);
@@ -29,25 +31,25 @@ CUIVote::CUIVote(){
 	Init();
 }
 
-void CUIVote::Init(){
+void CUIVote::Init()
+{
 	CUIXml xml_doc;
-	xml_doc.Init(CONFIG_PATH, UI_PATH, "voting_category.xml");
-	CUIXmlInit::InitWindow(xml_doc, "vote", 0, this);
-	CUIXmlInit::InitStatic(xml_doc, "vote:background", 0, bkgrnd);
-//	CUIXmlInit::InitStatic(xml_doc, "vote:header", 0, header);
-	CUIXmlInit::InitStatic(xml_doc, "vote:msg_back", 0, msg_back);
-	CUIXmlInit::InitStatic(xml_doc, "vote:msg", 0, msg);
+	xml_doc.Init			(CONFIG_PATH, UI_PATH, "voting_category.xml");
+	CUIXmlInit::InitWindow	(xml_doc, "vote",				0, this);
+	CUIXmlInit::InitStatic	(xml_doc, "vote:background",	0, bkgrnd);
+	CUIXmlInit::InitStatic	(xml_doc, "vote:msg_back",		0, msg_back);
+	CUIXmlInit::InitStatic	(xml_doc, "vote:msg",			0, msg);
 
 	string256 path;
 
 	for (int i = 0; i<3; i++)
 	{
-		sprintf(path, "vote:list_cap_%d", i+1);
-		CUIXmlInit::InitStatic(xml_doc, path, 0, cap[i]);
-		sprintf(path, "vote:list_back_%d", i+1);
-		CUIXmlInit::InitFrameWindow(xml_doc, path, 0, frame[i]);
-		sprintf(path, "vote:list_%d", i+1);
-		CUIXmlInit::InitListBox(xml_doc, path, 0, list[i]);
+		sprintf						(path, "vote:list_cap_%d", i+1);
+		CUIXmlInit::InitStatic		(xml_doc, path, 0, cap[i]);
+		sprintf						(path, "vote:list_back_%d", i+1);
+		CUIXmlInit::InitFrameWindow	(xml_doc, path, 0, frame[i]);
+		sprintf						(path, "vote:list_%d", i+1);
+		CUIXmlInit::InitListBox		(xml_doc, path, 0, list[i]);
 	}	
 
 	CUIXmlInit::Init3tButton(xml_doc, "vote:btn_yes", 0, btn_yes);
@@ -55,11 +57,13 @@ void CUIVote::Init(){
 	CUIXmlInit::Init3tButton(xml_doc, "vote:btn_cancel", 0, btn_cancel);
 }
 
-void CUIVote::SetVoting(LPCSTR txt){
+void CUIVote::SetVoting(LPCSTR txt)
+{
 	msg->SetText(txt);
 }
 
-void CUIVote::Update(){
+void CUIVote::Update()
+{
 	CUIDialogWnd::Update();
 
 	static string512 teaminfo;
@@ -73,7 +77,6 @@ void CUIVote::Update(){
 	ItemVec			items;
 	for (;I!=E;++I)		
 	{
-//		game_PlayerState* p = (game_PlayerState*) I->second;
 		items.push_back(I->second);
 	};
 
@@ -92,11 +95,10 @@ void CUIVote::Update(){
 		else
 			list[2]->AddItem(p->name);
 	}
-
-    //lst->SetSelected(selected_item);
 }
 
-void CUIVote::SendMessage(CUIWindow* pWnd, s16 msg, void* pData){
+void CUIVote::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
+{
     if (BUTTON_CLICKED == msg)
 	{
 		if (btn_yes == pWnd)
@@ -108,19 +110,22 @@ void CUIVote::SendMessage(CUIWindow* pWnd, s16 msg, void* pData){
 	}
 }
 
-void CUIVote::OnBtnYes(){
+void CUIVote::OnBtnYes()
+{
     Console->Execute("cl_voteyes");
 	game_cl_mp* game = smart_cast<game_cl_mp*>(&Game());
 	game->StartStopMenu(this, true);
 }
 
-void CUIVote::OnBtnNo(){
+void CUIVote::OnBtnNo()
+{
     Console->Execute("cl_voteno");
 	game_cl_mp* game = smart_cast<game_cl_mp*>(&Game());
 	game->StartStopMenu(this, true);
 }
 
-void CUIVote::OnBtnCancel(){
+void CUIVote::OnBtnCancel()
+{
 	game_cl_mp* game = smart_cast<game_cl_mp*>(&Game());
 	game->StartStopMenu(this, true);
 }

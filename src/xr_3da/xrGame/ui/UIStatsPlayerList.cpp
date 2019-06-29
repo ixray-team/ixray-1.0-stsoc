@@ -103,7 +103,9 @@ LPCSTR CUIStatsPlayerList::GetST_entry(LPCSTR itm){
 	else
 		NODEFAULT;
 
+#ifdef DEBUG
 	return NULL;
+#endif // DEBUG
 }
 
 void CUIStatsPlayerList::InitHeader(CUIXml& xml_doc, LPCSTR path){

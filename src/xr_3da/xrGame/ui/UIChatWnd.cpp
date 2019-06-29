@@ -37,7 +37,12 @@ void CUIChatWnd::Init(CUIXml& uiXml)
 
 void CUIChatWnd::SetEditBoxPrefix(const shared_str &prefix)
 {
-	UIPrefix.SetText(*prefix);
+	UIPrefix.SetText			(*prefix);
+	UIPrefix.AdjustWidthToText	();
+	Fvector2					_pos;
+	_pos.x						= UIPrefix.GetWndPos().x + UIPrefix.GetWidth() + 5.0f;
+	_pos.y						= UIEditBox.GetWndPos().y;
+	UIEditBox.SetWndPos			(_pos);
 }
 
 void CUIChatWnd::Show()

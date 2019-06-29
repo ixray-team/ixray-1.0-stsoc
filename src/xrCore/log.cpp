@@ -6,7 +6,7 @@
 #include "log.h"
 
 extern BOOL					LogExecCB		= TRUE;
-static string64				logFName		= "engine.log";
+static string_path			logFName		= "engine.log";
 static BOOL 				no_log			= TRUE;
 #ifdef PROFILE_CRITICAL_SECTIONS
 	static xrCriticalSection	logCS(MUTEX_PROFILE_ID(log));
@@ -51,7 +51,7 @@ void AddOne				(const char *split)
 	//exec CallBack
 	if (LogExecCB&&LogCB)LogCB(split);
 
-	logCS.Leave			();
+	logCS.Leave				();
 }
 
 void Log				(const char *s) 

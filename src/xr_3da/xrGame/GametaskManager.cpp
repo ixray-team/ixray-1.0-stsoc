@@ -13,6 +13,11 @@
 #include "encyclopedia_article.h"
 #include "ui/UIEventsWnd.h"
 
+#pragma warning(push)
+#pragma warning(disable:4995)
+#include <malloc.h>
+#pragma warning(pop)
+
 shared_str	g_active_task_id			= "";
 u16			g_active_task_objective_id	= u16(-1);
 
@@ -142,7 +147,7 @@ void CGameTaskManager::SetTaskState(CGameTask* t, u16 objective_num, ETaskState 
 	o->SetTaskState					(state);
 	
 	//highlight next objective if needed
-	if( isRoot && (ActiveTask()==t) )
+	if( (isRoot || !t->HasInProgressObjective()) && (ActiveTask()==t) )
 	{
 		SetActiveTask					("", 1 );
 	}else
@@ -178,11 +183,22 @@ void CGameTaskManager::SetTaskState(const TASK_ID& id, u16 objective_num, ETaskS
 
 void CGameTaskManager::UpdateTasks						()
 {
-	GameTasks_it it		= GameTasks().begin();
-	GameTasks_it it_e	= GameTasks().end();
-	for( ;it!=it_e; ++it ){
-		CGameTask* t		= (*it).game_task;
-		for(u16 i=0; i<t->m_Objectives.size() ;++i){
+	u32					task_count = GameTasks().size();
+	if(0==task_count)	return;
+
+	SGameTaskKey		*tasks = (SGameTaskKey*)_alloca(task_count*sizeof(SGameTaskKey));
+	SGameTaskKey		*I = tasks;
+	SGameTaskKey		*E = tasks + task_count;
+	GameTasks_it		i = GameTasks().begin();
+	
+	for ( ; I != E; ++I, ++i)
+		new	(I)	SGameTaskKey(*i);
+
+	for (I = tasks; I != E; ++I)
+	{
+		CGameTask		*t = (*I).game_task;
+		for(u16 i=0; i<t->m_Objectives.size() ;++i)
+		{
 			SGameTaskObjective& obj = t->Objective(i);
 			if(obj.TaskState()!=eTaskStateInProgress && i==0) break;
 			if(obj.TaskState()!=eTaskStateInProgress) continue;
@@ -194,6 +210,9 @@ void CGameTaskManager::UpdateTasks						()
 		}
 	}
 	
+	for ( ; I != E; ++I, ++i)
+		I->~SGameTaskKey	();
+
 	SGameTaskObjective* obj = ActiveObjective();
 	if(obj)
 	{
@@ -202,6 +221,7 @@ void CGameTaskManager::UpdateTasks						()
 		if(ml && !ml->PointerEnabled())
 			ml->EnablePointer();
 	}
+
 	if(	m_flags.test(eChanged) )
 		UpdateActiveTask	();
 }

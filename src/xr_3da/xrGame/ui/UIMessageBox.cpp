@@ -92,7 +92,10 @@ void CUIMessageBox::Init	(LPCSTR box_template)
 	}else 
 	if(0==stricmp(_type,"quit_game")){
 		m_eMessageBoxStyle	= MESSAGEBOX_QUIT_GAME;
-	};
+	}else 
+		if(0==stricmp(_type,"info")){
+			m_eMessageBoxStyle	= MESSAGEBOX_INFO;
+		};
 	
 
 	switch (m_eMessageBoxStyle){
@@ -102,6 +105,9 @@ void CUIMessageBox::Init	(LPCSTR box_template)
 			m_UIButtonYesOk						= xr_new<CUI3tButton>();
 			AttachChild							(m_UIButtonYesOk);
 			xml_init.Init3tButton				(uiXml, str, 0, m_UIButtonYesOk);
+		}break;
+		case MESSAGEBOX_INFO:
+		{
 		}break;
 
 		case MESSAGEBOX_DIRECT_IP:
@@ -211,6 +217,11 @@ void CUIMessageBox::SendMessage(CUIWindow *pWnd, s16 msg, void *pData)
 void CUIMessageBox::SetText(LPCSTR str)
 {
 	m_UIStaticText->SetText(*(CStringTable().translate(str)));
+}
+
+LPCSTR CUIMessageBox::GetText()
+{
+	return m_UIStaticText->GetText();
 }
 
 LPCSTR CUIMessageBox::GetHost(){

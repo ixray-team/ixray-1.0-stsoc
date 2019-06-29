@@ -74,7 +74,7 @@ CUIStatsListItem * CUIStatsWnd::AddItem()
 
 CUIStatsListItem * CUIStatsWnd::FindFrom(const u32 beg_pos, const char *strCaption)
 {
-	for (int i = 0; i < UIStatsList.GetSize(); ++i)
+	for (int i = 0; i < UIStatsList.GetItemsCount(); ++i)
 	{
 		CUIStatsListItem *pSLItem = smart_cast<CUIStatsListItem*>(UIStatsList.GetItem(i));
 		R_ASSERT(beg_pos < pSLItem->FieldsVector.size());
@@ -103,7 +103,7 @@ void CUIStatsWnd::RemoveItemFrom(const u32 beg_pos, const char *strCaption)
 
 void CUIStatsWnd::HighlightItem(const u32 uItem)
 {
-	R_ASSERT(static_cast<int>(uItem) < UIStatsList.GetSize());
+	R_ASSERT(static_cast<int>(uItem) < UIStatsList.GetItemsCount());
 	if (m_uHighlightedItem != uItem)
 	{
 		if (m_uHighlightedItem != 0xffffffff)
@@ -118,7 +118,7 @@ void CUIStatsWnd::HighlightItem(const u32 uItem)
 
 void CUIStatsWnd::SelectItem(const u32 uItem)
 {
-	R_ASSERT(static_cast<int>(uItem) < UIStatsList.GetSize());
+	R_ASSERT(static_cast<int>(uItem) < UIStatsList.GetItemsCount());
 	UIStatsList.SetFocusedItem(static_cast<signed int>(uItem));
 }
 
@@ -152,7 +152,6 @@ void CUIStatsListItem::XmlInit(const char *path, CUIXml &uiXml)
 		pButton = xr_new<CUIButton>();
 		pButton->SetAutoDelete(true);
 		xml_init.InitStatic(uiXml, "static", i, pButton);
-		//pButton->SetNewRenderMethod(true);
 		pButton->SetTextAlignment(CGameFont::alLeft);
 		AttachChild(pButton);
 		FieldsVector.push_back(pButton);

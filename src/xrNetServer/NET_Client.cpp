@@ -9,7 +9,9 @@
 
 static	INetLog* pClNetLog = NULL; 
 
-#define BASE_PORT		5445
+#define BASE_PORT_LAN_CL	5446
+#define BASE_PORT		0
+#define END_PORT		65535
 
 void	dump_URL	(LPCSTR p, IDirectPlay8Address* A)
 {
@@ -44,14 +46,14 @@ NET_Packet*		INetQueue::Create	()
 {
 	NET_Packet*	P			= 0;
 	cs.Enter		();
+//#ifdef _DEBUG
+//		Msg ("- INetQueue::Create - ready %d, unused %d", ready.size(), unused.size());
+//#endif
 	if (unused.empty())	
 	{
 		ready.push_back		(xr_new<NET_Packet> ());
 		P					= ready.back	();
 		//---------------------------------------------
-#ifdef _DEBUG
-//		Msg ("- INetQueue::Create - ready %d, unused %d", ready.size(), unused.size());
-#endif
 		LastTimeCreate = GetTickCount();
 		//---------------------------------------------
 	} else {
@@ -66,14 +68,14 @@ NET_Packet*		INetQueue::Create	(const NET_Packet& _other)
 {
 	NET_Packet*	P			= 0;
 	cs.Enter		();
+//#ifdef _DEBUG
+//		Msg ("- INetQueue::Create - ready %d, unused %d", ready.size(), unused.size());
+//#endif
 	if (unused.empty())	
 	{
 		ready.push_back		(xr_new<NET_Packet> ());
 		P					= ready.back	();
 		//---------------------------------------------
-#ifdef _DEBUG
-//		Msg ("- INetQueue::Create - ready %d, unused %d", ready.size(), unused.size());
-#endif
 		LastTimeCreate = GetTickCount();
 		//---------------------------------------------
 	} else {
@@ -89,6 +91,9 @@ NET_Packet*		INetQueue::Retreive	()
 {
 	NET_Packet*	P			= 0;
 	cs.Enter		();
+//#ifdef _DEBUG
+//			Msg ("INetQueue::Retreive - ready %d, unused %d", ready.size(), unused.size());
+//#endif
 	if (!ready.empty())		P = ready.front();
 	//---------------------------------------------	
 	else
@@ -99,9 +104,6 @@ NET_Packet*		INetQueue::Retreive	()
 		{
 			xr_delete(unused.back());
 			unused.pop_back();
-#ifdef _DEBUG
-//			Msg ("INetQueue::Retreive - ready %d, unused %d", ready.size(), unused.size());
-#endif
 		}		
 	}
 	//---------------------------------------------	
@@ -111,6 +113,9 @@ NET_Packet*		INetQueue::Retreive	()
 void			INetQueue::Release	()
 {
 	cs.Enter		();
+//#ifdef _DEBUG
+//		Msg ("INetQueue::Release - ready %d, unused %d", ready.size(), unused.size());
+//#endif
 	VERIFY			(!ready.empty());
 	//---------------------------------------------
 	u32 tmp_time = GetTickCount()-60000;
@@ -118,9 +123,6 @@ void			INetQueue::Release	()
 	if ((LastTimeCreate < tmp_time) &&  (size > 32))
 	{
 		xr_delete(ready.front());
-#ifdef _DEBUG
-//		Msg ("INetQueue::Release - ready %d, unused %d", ready.size(), unused.size());
-#endif
 	}
 	else
 		unused.push_back(ready.front());
@@ -158,6 +160,7 @@ XRNETSERVER_API Flags32	psNET_Flags			= {0};
 XRNETSERVER_API int		psNET_ClientUpdate	= 30;		// FPS
 XRNETSERVER_API int		psNET_ClientPending	= 2;
 XRNETSERVER_API char	psNET_Name[32]		= "Player";
+XRNETSERVER_API BOOL	psNET_direct_connect = FALSE;
 
 // {0218FA8B-515B-4bf2-9A5F-2F079D1759F3}
 static const GUID NET_GUID = 
@@ -178,6 +181,9 @@ IPureClient::IPureClient	(CTimer* timer): net_Statistic(timer)
 	,net_csEnumeration(MUTEX_PROFILE_ID(IPureClient::net_csEnumeration))
 #endif // PROFILE_CRITICAL_SECTIONS
 {
+	NET						= NULL;
+	net_Address_server		= NULL;
+	net_Address_device		= NULL;
 	device_timer			= timer;
 	net_TimeDelta_User		= 0;
 	net_Time_LastUpdate		= 0;
@@ -190,15 +196,27 @@ IPureClient::IPureClient	(CTimer* timer): net_Statistic(timer)
 IPureClient::~IPureClient	()
 {
 	xr_delete(pClNetLog); pClNetLog = NULL;
+	psNET_direct_connect = FALSE;
 }
 
+void gen_auth_code();
 BOOL IPureClient::Connect	(LPCSTR options)
 {
 	R_ASSERT						(options);
+	net_Disconnected				= FALSE;
 
+	if(!psNET_direct_connect && !strstr(options,"localhost") )
+	{
+		gen_auth_code	();
+	}
+
+if(!psNET_direct_connect)
+{
 	//
-	string64						server_name;
-	strcpy							(server_name,options);
+	string64						server_name = "";
+//	strcpy							(server_name,options);
+	if (strchr(options, '/'))
+		strncpy(server_name,options, strchr(options, '/')-options);
 	if (strchr(server_name,'/'))	*strchr(server_name,'/') = 0;
 
 	string64				password_str = "";
@@ -212,13 +230,26 @@ BOOL IPureClient::Connect	(LPCSTR options)
 	}
 
 	
-	int				psNET_Port	= BASE_PORT;
+	int				psSV_Port	= BASE_PORT_LAN_CL;
 	if (strstr(options, "port="))
 	{
 		string64	portstr;
         strcpy(portstr, strstr(options, "port=")+5);
 		if (strchr(portstr,'/'))	*strchr(portstr,'/') = 0;
-		psNET_Port = atol(portstr);
+		psSV_Port = atol(portstr);
+		clamp(psSV_Port, int(BASE_PORT), int(END_PORT));
+	};
+	
+	BOOL bPortWasSet = FALSE;
+	int				psCL_Port = BASE_PORT_LAN_CL;
+	if (strstr(options, "portcl="))
+	{
+		string64	portstr;
+		strcpy(portstr, strstr(options, "portcl=")+7);
+		if (strchr(portstr,'/'))	*strchr(portstr,'/') = 0;
+		psCL_Port = atol(portstr);
+		clamp(psCL_Port, int(BASE_PORT), int(END_PORT));
+		bPortWasSet = TRUE;
 	};
 //	Msg("* Client connect on port %d\n",psNET_Port);
 /*
@@ -277,7 +308,7 @@ BOOL IPureClient::Connect	(LPCSTR options)
     R_CHK(CoCreateInstance	(CLSID_DirectPlay8Address,NULL, CLSCTX_INPROC_SERVER, IID_IDirectPlay8Address,(LPVOID*) &net_Address_server )); 
     R_CHK(net_Address_server->SetSP			(bSimulator? &CLSID_NETWORKSIMULATOR_DP8SP_TCPIP : &CLSID_DP8SP_TCPIP  ));
 	R_CHK(net_Address_server->AddComponent	(DPNA_KEY_HOSTNAME, ServerNameUNICODE, 2*u32(wcslen(ServerNameUNICODE) + 1), DPNA_DATATYPE_STRING ));
-	R_CHK(net_Address_server->AddComponent	(DPNA_KEY_PORT,	&psNET_Port, sizeof(psNET_Port), DPNA_DATATYPE_DWORD ));
+	R_CHK(net_Address_server->AddComponent	(DPNA_KEY_PORT,	&psSV_Port, sizeof(psSV_Port), DPNA_DATATYPE_DWORD ));
     
 
 	// Debug
@@ -311,9 +342,9 @@ BOOL IPureClient::Connect	(LPCSTR options)
 			dpAppDesc.pwszPassword	=	SessionPasswordUNICODE;
 		};
 
-		u32 c_port			= psNET_Port+1;
+		u32 c_port			= psCL_Port;
 		HRESULT res = S_FALSE;
-		while (res != S_OK && c_port <=BASE_PORT + 100)
+		while (res != S_OK && c_port <=END_PORT)
 		{
 			R_CHK(net_Address_device->AddComponent	(DPNA_KEY_PORT, &c_port, sizeof(c_port), DPNA_DATATYPE_DWORD ));
 			res = NET->Connect(
@@ -329,11 +360,22 @@ BOOL IPureClient::Connect	(LPCSTR options)
 			if (res != S_OK)
 			{
 				//			xr_string res = Debug.error2string(HostSuccess);
+
+				if (bPortWasSet) 
+				{
+					Msg("! IPureClient : port %d is BUSY!", c_port);
+					return FALSE;
+				}				
 #ifdef DEBUG
-				Msg("IPureClient : port %d is BUSY!", c_port);
+				else
+					Msg("! IPureClient : port %d is BUSY!", c_port);
 #endif
 				c_port++;
-			};
+			}
+			else
+			{
+				Msg("- IPureClient : created on port %d!", c_port);
+			}
 		};
 
 //		R_CHK(res);
@@ -365,9 +407,9 @@ BOOL IPureClient::Connect	(LPCSTR options)
 		strcat	(EnumData, "ToConnect");
 		DWORD	EnumSize = xr_strlen(EnumData) + 1;
 		// We now have the host address so lets enum
-		u32 c_port			= BASE_PORT;
+		u32 c_port			= psCL_Port;
 		HRESULT res = S_FALSE;
-		while (res != S_OK && c_port <=BASE_PORT + 100)
+		while (res != S_OK && c_port <=END_PORT)
 		{
 			R_CHK(net_Address_device->AddComponent	(DPNA_KEY_PORT, &c_port, sizeof(c_port), DPNA_DATATYPE_DWORD ));
 
@@ -399,15 +441,26 @@ BOOL IPureClient::Connect	(LPCSTR options)
 						return FALSE;
 					}break;
 				};
+
+				if (bPortWasSet) 
+				{
+					Msg("! IPureClient : port %d is BUSY!", c_port);
+					return FALSE;
+				}				
 #ifdef DEBUG
+				else
+					Msg("! IPureClient : port %d is BUSY!", c_port);
+
 //				const char* x = DXGetErrorString9(res);
 				string1024 tmp = "";
 				DXTRACE_ERR(tmp, res);
-				Msg("! IPureClient : port %d is BUSY!", c_port);
-#endif
+#endif				
 				c_port++;
-			};
-
+			}
+			else
+			{
+				Msg("- IPureClient : created on port %d!", c_port);
+			}
 		};
 
 		
@@ -479,7 +532,7 @@ BOOL IPureClient::Connect	(LPCSTR options)
 	R_CHK			(NET->SetSPCaps(&sp_guid,&sp_caps,0));
 	R_CHK			(NET->GetSPCaps(&sp_guid,&sp_caps,0));
 	*/
-
+} //psNET_direct_connect
 	// Sync
 	net_TimeDelta	= 0;	
 	return			TRUE;
@@ -487,7 +540,7 @@ BOOL IPureClient::Connect	(LPCSTR options)
 
 void IPureClient::Disconnect()
 {
-    if( NET )	NET->Close(0);
+	if( NET )	NET->Close(0);
 
     // Clean up Host _list_
 	net_csEnumeration.Enter			();
@@ -693,7 +746,10 @@ void	IPureClient::OnMessage(void* data, u32 size)
 	// One of the messages - decompress it
 	NET_Packet* P	= net_Queue.Create			();
 	P->B.count		= net_Compressor.Decompress	(P->B.data,LPBYTE(data),size);
-	P->timeReceive	= timeServer_Async();//TimerAsync				(device_timer);		
+	P->timeReceive	= timeServer_Async();//TimerAsync				(device_timer);	
+
+	u16			m_type;
+	P->r_begin	(m_type);
 }
 
 void	IPureClient::timeServer_Correct(u32 sv_time, u32 cl_time)
@@ -755,11 +811,20 @@ BOOL	IPureClient::net_HasBandwidth	()
 	if (psNET_ClientUpdate != 0) dwInterval = 1000/psNET_ClientUpdate;
 	if		(psNET_Flags.test(NETFLAG_MINIMIZEUPDATES))	dwInterval	= 1000;	// approx 3 times per second
 
-	HRESULT hr;
+	if(psNET_direct_connect)
+	{
+		if( 0 != psNET_ClientUpdate && (dwTime-net_Time_LastUpdate)>dwInterval)
+		{
+			net_Time_LastUpdate		= dwTime;
+			return					TRUE;
+		}else
+			return					FALSE;
+
+	}else
 	if (0 != psNET_ClientUpdate && (dwTime-net_Time_LastUpdate)>dwInterval)	
 	{
+		HRESULT hr;
 		R_ASSERT			(NET);
-		
 		// check queue for "empty" state
 		DWORD				dwPending=0;
 		hr					= NET->GetSendQueueInfo(&dwPending,0,0);

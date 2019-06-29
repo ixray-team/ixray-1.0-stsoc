@@ -6,6 +6,7 @@
 #include "Version_Define.h"
 #include "SVServerOptDlg.h"
 #include ".\svserveroptdlg.h"
+#include "PortsDlg.h"
 
 
 // SVServerOpt dialog
@@ -31,9 +32,12 @@ void SVServerOptDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DEDICATED, m_pDedicated);
 	DDX_Control(pDX, IDC_PUBLIC, m_pPublic);
 	DDX_Control(pDX, IDC_CDKEY, m_pCheckCDKey);
-//	DDX_Control(pDX, IDC_MAPROTATION, m_pMapRotation);
-//	DDX_Control(pDX, IDC_MAPROTFILE, m_pMapRotationFile);
+	//	DDX_Control(pDX, IDC_MAPROTATION, m_pMapRotation);
+	//	DDX_Control(pDX, IDC_MAPROTFILE, m_pMapRotationFile);
 	DDX_Control(pDX, IDC_VOTINGALLOWED, m_pVotingAllowed);
+	DDX_Control(pDX, IDC_SERVERPORT, m_pSVPort);
+	DDX_Control(pDX, IDC_GAMESPYPORT, m_pGSPort);
+	DDX_Control(pDX, IDC_CLIENTPORT, m_pCLPort);
 }
 
 BOOL SVServerOptDlg::OnInitDialog()
@@ -51,12 +55,20 @@ BOOL SVServerOptDlg::OnInitDialog()
 	m_pPassword.SetWindowText("");
 	m_pPassword.LimitText(MAX_SERVERPASSW_LEN);
 
+
+	m_pSVPort.SetWindowText("5445");
+	m_pSVPort.LimitText(MAX_PORTNUMBER_LEN);
+	m_pCLPort.SetWindowText("5446");
+	m_pCLPort.LimitText(MAX_PORTNUMBER_LEN);
+	m_pGSPort.SetWindowText("5447");
+	m_pGSPort.LimitText(MAX_PORTNUMBER_LEN);
+
 	m_pMaxPlayers.SetWindowText("32");
 	m_pSpectrMode.SetCheck(0);
 	m_pSpectrSwitchTime.SetWindowText("20"); 
 	m_pSpectrSwitchTime.EnableWindow(FALSE);
-	m_pDedicated.SetCheck(0);
 
+	m_pDedicated.SetCheck(0);
 	m_pPublic.SetCheck(0);
 	m_pCheckCDKey.SetCheck(0);
 	m_pCheckCDKey.EnableWindow(FALSE);
@@ -75,6 +87,9 @@ BEGIN_MESSAGE_MAP(SVServerOptDlg, CSubDlg)
 	ON_BN_CLICKED(IDC_SPECTATORONLY, OnBnClickedSpectatoronly)
 	ON_BN_CLICKED(IDC_PUBLIC, OnBnClickedPublic)
 	ON_BN_CLICKED(IDC_MAPROTATION, OnBnClickedMapRotation)
+	ON_BN_CLICKED(IDC_SV_PORTBUTTON, OnBnClickedSvPortButton)
+	ON_BN_CLICKED(IDC_CL_PORTBUTTON, OnBnClickedClPortbutton)
+	ON_BN_CLICKED(IDC_GS_PORTBUTTON, OnBnClickedGsPortbutton)
 END_MESSAGE_MAP()
 
 
@@ -98,11 +113,13 @@ void SVServerOptDlg::OnBnClickedPublic()
 	// TODO: Add your control notification handler code here
 	if (m_pPublic.GetCheck())
 	{
-		m_pCheckCDKey.EnableWindow(TRUE);
+		m_pCheckCDKey.EnableWindow(FALSE);
+		m_pCheckCDKey.SetCheck(1);
 	}
 	else
 	{
 		m_pCheckCDKey.EnableWindow(FALSE);
+		m_pCheckCDKey.SetCheck(0);
 	}
 }
 
@@ -117,4 +134,55 @@ void SVServerOptDlg::OnBnClickedMapRotation()
 //	{
 //		m_pMapRotationFile.EnableWindow(FALSE);
 //	};
+}
+
+void	SVServerOptDlg::SetPort(CEdit* pPortItem, int NumPorts, int* UsedPorts)
+{
+	if (!pPortItem) return;
+	int ResPort = 0;
+	// TODO: Add your control notification handler code here
+	CPortsDlg dlg;	
+	INT_PTR nResponse = dlg.DoModal(NumPorts, UsedPorts, &ResPort);
+	if (nResponse == IDCANCEL) return;
+	if (nResponse == IDOK)
+	{
+		char tmp[1024];
+		pPortItem->SetWindowText(ltoa(ResPort, tmp, 10));
+	};
+};
+
+void SVServerOptDlg::OnBnClickedSvPortButton()
+{
+	int UsedPorts[2];
+	char tmp[1024];
+	m_pCLPort.GetWindowText(tmp, 1024);
+	UsedPorts[0] = atol(tmp);
+	m_pGSPort.GetWindowText(tmp, 1024);
+	UsedPorts[1] = atol(tmp);
+
+	SetPort(&m_pSVPort, 2, UsedPorts);
+}
+
+void SVServerOptDlg::OnBnClickedClPortbutton()
+{
+	int UsedPorts[2];
+	char tmp[1024];
+	m_pSVPort.GetWindowText(tmp, 1024);
+	UsedPorts[0] = atol(tmp);
+	m_pGSPort.GetWindowText(tmp, 1024);
+	UsedPorts[1] = atol(tmp);
+
+	SetPort(&m_pCLPort, 2, UsedPorts);
+}
+
+void SVServerOptDlg::OnBnClickedGsPortbutton()
+{
+	int UsedPorts[2];
+	char tmp[1024];
+	m_pSVPort.GetWindowText(tmp, 1024);
+	UsedPorts[0] = atol(tmp);
+	m_pCLPort.GetWindowText(tmp, 1024);
+	UsedPorts[1] = atol(tmp);
+
+	SetPort(&m_pGSPort, 2, UsedPorts);
 }

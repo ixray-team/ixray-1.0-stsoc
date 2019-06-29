@@ -53,6 +53,7 @@ public:
 	virtual void			shedule_Update			( u32 T ); 
 	virtual void			UpdateCL				( );
 	virtual BOOL			net_Spawn				( CSE_Abstract*	DC );
+	virtual void			net_Destroy			();
 
 	virtual void			Center					(Fvector& C)	const	{ C.set(Position());	}
 	virtual float			Radius					()				const	{ return EPS;}

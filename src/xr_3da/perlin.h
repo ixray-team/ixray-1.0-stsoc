@@ -14,6 +14,7 @@ protected:
 	int		mOctaves;
 	float	mFrequency;
 	float	mAmplitude;
+	xr_vector<float> mTimes;
 public:
 			CPerlinNoiseCustom	(int seed):
 								mOctaves(2),mFrequency(1),mAmplitude(1),mSeed(seed),mReady(false){}
@@ -23,7 +24,7 @@ public:
 		mFrequency				= freq;
 		mAmplitude				= amp;
 	}
-	IC void	SetOctaves			(int oct)	{mOctaves	= oct;}
+	IC void	SetOctaves			(int oct)	{mOctaves	= oct; mTimes.resize(mOctaves);}
 	IC void	SetFrequency		(float freq){mFrequency	= freq;}
 	IC void	SetAmplitude		(float amp)	{mAmplitude	= amp;}
 };
@@ -35,9 +36,11 @@ private:
 	float	g1					[SAMPLE_SIZE + SAMPLE_SIZE + 2];
 
 	void	init				();
+	float	mPrevContiniousTime;
 public:
-			CPerlinNoise1D		(int seed):CPerlinNoiseCustom(seed){}
+			CPerlinNoise1D		(int seed):CPerlinNoiseCustom(seed){mPrevContiniousTime=0.0f;}
 	float	Get					(float x);
+	float	GetContinious		(float v);
 };
 
 class ENGINE_API CPerlinNoise2D: public CPerlinNoiseCustom

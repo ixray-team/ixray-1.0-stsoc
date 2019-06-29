@@ -29,10 +29,6 @@ CUIZoneMap::~CUIZoneMap()
 
 void CUIZoneMap::Init()
 {
-	string256			gameLtxPath;
-	FS.update_path		(gameLtxPath, CONFIG_PATH, "game.ltx");
-	CInifile			gameLtx		(gameLtxPath);
-
 
 	CUIXml uiXml;
 	bool xml_result			= uiXml.Init(CONFIG_PATH, UI_PATH, "zone_map.xml");
@@ -51,22 +47,11 @@ void CUIZoneMap::Init()
 
 	xml_init.InitStatic(uiXml, "minimap:center", 0, &m_center);
 	
-
 	
 	m_activeMap						= xr_new<CUIMiniMap>();
-	m_activeMap->SetAutoDelete		(true);
-	m_activeMap->Init(Level().name(),gameLtx,"hud\\default");
 	m_clipFrame.AttachChild			(m_activeMap);
-	Frect r;
-	m_clipFrame.GetAbsoluteRect		(r);
-	m_activeMap->SetClipRect		( r );
-	
-	Fvector2	wnd_size;
-	float zoom_factor				= float(m_clipFrame.GetWndRect().width())/100.0f;
-	wnd_size.x	= m_activeMap->BoundRect().width()*zoom_factor;
-	wnd_size.y	= m_activeMap->BoundRect().height()*zoom_factor;
-	m_activeMap->SetWndSize(wnd_size);
-//	m_activeMap->SetZoomFactor( float(m_clipFrame.GetWndRect().width())/100.0f );
+	m_activeMap->SetAutoDelete		(true);
+
 	m_activeMap->EnableHeading		(true);  
 	xml_init.InitStatic				(uiXml, "minimap:compass", 0, &m_compass);
 
@@ -114,4 +99,19 @@ bool CUIZoneMap::ZoomIn()
 bool CUIZoneMap::ZoomOut()
 {
 	return true;
+}
+
+void CUIZoneMap::SetupCurrentMap()
+{
+	CInifile& gameLtx				= *pGameIni;
+	m_activeMap->Init				(Level().name(),gameLtx,"hud\\default");
+	Frect r;
+	m_clipFrame.GetAbsoluteRect		(r);
+	m_activeMap->SetClipRect		(r);
+	
+	Fvector2						wnd_size;
+	float zoom_factor				= float(m_clipFrame.GetWndRect().width())/100.0f;
+	wnd_size.x						= m_activeMap->BoundRect().width()*zoom_factor;
+	wnd_size.y						= m_activeMap->BoundRect().height()*zoom_factor;
+	m_activeMap->SetWndSize			(wnd_size);
 }

@@ -26,6 +26,12 @@ u32 CUIListBoxItem::GetID(){
 
 void CUIListBoxItem::Draw(){
 	m_bTextureAvailable = m_bSelected;
+
+	u32 CurColor = GetTextColor();
+	u32 ResColor = (IsEnabled() ? 0xff000000 : 0x80000000) | (CurColor & 0x00ffffff);
+	SetTextColor(ResColor);
+
+	
 	CUILabel::Draw();
 
 //	for (int i = 0; i<fields.size(); i++)
@@ -41,8 +47,9 @@ void CUIListBoxItem::InitDefault(){
 	InitTexture("ui_listline");
 }
 
-bool CUIListBoxItem::OnMouseDown(bool left_button){
-	if (left_button){
+bool CUIListBoxItem::OnMouseDown(int mouse_btn){
+	if (mouse_btn==MOUSE_1)
+	{
 		smart_cast<CUIScrollView*>(GetParent()->GetParent())->SetSelected(this);
 		GetMessageTarget()->SendMessage(this,LIST_ITEM_SELECT, &uid);
 		GetMessageTarget()->SendMessage(this,LIST_ITEM_CLICKED, &uid);

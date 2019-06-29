@@ -40,6 +40,8 @@ public:
 	u32									iReinforcementTime;
 	s32									dReinforcementTime;
 
+	int									m_iSpawn_Cost;
+
 public :
 										game_cl_ArtefactHunt	();
 	virtual							~game_cl_ArtefactHunt		();

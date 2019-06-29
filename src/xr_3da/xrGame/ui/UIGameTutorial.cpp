@@ -16,14 +16,7 @@ void CUISequenceItem::Load(CUIXml* xml, int idx)
 	int disabled_cnt				= xml->GetNodesNum	(xml->GetLocalRoot(), "disabled_key");
 	for(int i=0; i<disabled_cnt;++i){
 		LPCSTR str					= xml->Read			("disabled_key", i, NULL);
-		if(str){
-			for(int i=0; keybind[i].name; ++i){
-				if(0==_stricmp(keybind[i].name,str)){
-					m_disabled_actions.push_back(keybind[i].DIK);
-					break;
-				} 
-			}
-		}
+		m_disabled_actions.push_back( action_name_to_id(str) );
 	};
 
 	LPCSTR		str;
@@ -50,7 +43,7 @@ void CUISequenceItem::Load(CUIXml* xml, int idx)
 
 bool CUISequenceItem::AllowKey(int dik)
 {
-	xr_vector<int>::iterator it = std::find(m_disabled_actions.begin(),m_disabled_actions.end(),key_binding[dik]);
+	xr_vector<int>::iterator it = std::find(m_disabled_actions.begin(),m_disabled_actions.end(),get_binded_action(dik));
 	if(it==m_disabled_actions.end())
 		return true;
 	else
@@ -254,7 +247,8 @@ void CUISequencer::IR_OnKeyboardPress	(int dik)
 	bool b = true;
 	if(m_items.size()) b &= m_items.front()->AllowKey(dik);
 
-	if(b && (key_binding[dik]==kQUIT)){
+	if(b && is_binded(kQUIT, dik) )
+	{
 		Stop		();
 		return;
 	}
@@ -267,10 +261,11 @@ void CUISequencer::IR_OnActivate()
 {
 	if(!pInput) return;
 	int i;
-	for (i = 0; i < CInput::COUNT_KB_BUTTONS; i++ ){
-		if(IR_GetKeyState(i)){
-
-			int action = key_binding[i];
+	for (i = 0; i < CInput::COUNT_KB_BUTTONS; i++ )
+	{
+		if(IR_GetKeyState(i))
+		{
+			EGameActions action		= get_binded_action(i);
 			switch (action){
 			case kFWD			:
 			case kBACK			:

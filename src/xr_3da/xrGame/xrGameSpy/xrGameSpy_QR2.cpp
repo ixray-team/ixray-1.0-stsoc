@@ -52,7 +52,8 @@ XRGAMESPY_API void xrGS_qr2_register_publicaddress_callback (qr2_t qrec, qr2_pub
 	qr2_register_publicaddress_callback (qrec, pacallback);
 };
 
-XRGAMESPY_API qr2_error_t xrGS_qr2_init(/*[out]*/qr2_t *qrec, const gsi_char *ip, int baseport, const gsi_char *gamename, const gsi_char *secret_key,
+//XRGAMESPY_API qr2_error_t xrGS_qr2_init(/*[out]*/qr2_t *qrec, const gsi_char *ip, int baseport, const gsi_char *gamename, const gsi_char *secret_key,
+XRGAMESPY_API qr2_error_t xrGS_qr2_init(/*[out]*/qr2_t *qrec, const gsi_char *ip, int baseport, 
 			   int ispublic, int natnegotiate,
 			   qr2_serverkeycallback_t server_key_callback,
 			   qr2_playerteamkeycallback_t player_key_callback,
@@ -62,8 +63,21 @@ XRGAMESPY_API qr2_error_t xrGS_qr2_init(/*[out]*/qr2_t *qrec, const gsi_char *ip
 			   qr2_adderrorcallback_t adderror_callback,
 			   void *userdata)
 {
-	return qr2_init(qrec, ip, baseport, gamename, secret_key,
-		ispublic, natnegotiate,
+	int BasePort = baseport;
+	if (BasePort == -1) BasePort = GAMESPY_QR2_BASEPORT;
+	else
+	{
+		if (BasePort < START_PORT) BasePort = START_PORT;
+		if (BasePort > END_PORT) BasePort = END_PORT;
+	}
+
+	char SecretKey[16];
+	FillSecretKey(SecretKey);
+
+	qr2_error_t res = 
+		qr2_init(qrec, ip, BasePort, GAMESPY_GAMENAME, SecretKey,
+		ispublic, 
+		natnegotiate,
 		server_key_callback,
 		player_key_callback,
 		team_key_callback,
@@ -71,4 +85,6 @@ XRGAMESPY_API qr2_error_t xrGS_qr2_init(/*[out]*/qr2_t *qrec, const gsi_char *ip
 		playerteam_count_callback,
 		adderror_callback,
 		userdata);
+
+	return res;
 }

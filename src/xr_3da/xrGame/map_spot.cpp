@@ -45,7 +45,7 @@ void CMapSpot::Update()
 	}
 }
 
-bool CMapSpot::OnMouseDown		(bool left_button)
+bool CMapSpot::OnMouseDown		(int mouse_btn)
 {
 /*
 	if(left_button){
@@ -178,14 +178,14 @@ void CMiniMapSpot::Draw()
 
 		if(d>1.8f){
 			GetUIStaticItem().SetShader(m_icon_below);
-			GetUIStaticItem().SetOriginalRect(m_tex_rect_below.x1,m_tex_rect_below.y1,m_tex_rect_below.x2,m_tex_rect_below.y2);
+			GetUIStaticItem().SetOriginalRect(m_tex_rect_below.x1,m_tex_rect_below.y1,m_tex_rect_below.width(),m_tex_rect_below.height());
 		}else
 		if(d<-1.8f){
 			GetUIStaticItem().SetShader(m_icon_above);
-			GetUIStaticItem().SetOriginalRect(m_tex_rect_above.x1,m_tex_rect_above.y1,m_tex_rect_above.x2,m_tex_rect_above.y2);
+			GetUIStaticItem().SetOriginalRect(m_tex_rect_above.x1,m_tex_rect_above.y1,m_tex_rect_above.width(),m_tex_rect_above.height());
 		}else{
 			GetUIStaticItem().SetShader(m_icon_normal);
-			GetUIStaticItem().SetOriginalRect(m_tex_rect_normal.x1,m_tex_rect_normal.y1,m_tex_rect_normal.x2,m_tex_rect_normal.y2);
+			GetUIStaticItem().SetOriginalRect(m_tex_rect_normal.x1,m_tex_rect_normal.y1,m_tex_rect_normal.width(),m_tex_rect_normal.height());
 		}
 	};
 

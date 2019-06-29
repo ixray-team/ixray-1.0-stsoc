@@ -13,9 +13,6 @@ CUIListBox::CUIListBox()
 	m_text_color_s			= 0xff000000;
 	m_text_al				= CGameFont::alLeft;
 
-//.	m_cur_wnd_it			= NULL;
-//.	m_last_wnd				= NULL;
-
 	m_bImmediateSelection	= false;
 
 	SetFixedScrollBar		(false);
@@ -85,37 +82,6 @@ void CUIListBox::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 	CUIScrollView::SendMessage(pWnd, msg, pData);
 }
 
-/*
-LPCSTR CUIListBox::GetNextSelectedText()
-{
-	m_cur_wnd_it++;
-	for(WINDOW_LIST_it it = m_cur_wnd_it; m_pad->GetChildWndList().end()!=it; ++it)
-	{
-		if (smart_cast<CUISelectable*>(*it)->GetSelected())
-		{
-			m_cur_wnd_it = it;
-			return smart_cast<IUITextControl*>(*it)->GetText();
-		}
-	}
-	m_cur_wnd_it = m_pad->GetChildWndList().end();
-	return NULL;
-}
-
-LPCSTR CUIListBox::GetFirstText()
-{
-	m_cur_wnd_it = m_pad->GetChildWndList().begin();
-	return smart_cast<IUITextControl*>(*m_cur_wnd_it)->GetText();
-}
-
-LPCSTR CUIListBox::GetNextText()
-{
-	m_cur_wnd_it++;
-	if (m_pad->GetChildWndList().end() == m_cur_wnd_it)
-		return NULL;
-	else
-		return smart_cast<IUITextControl*>(*m_cur_wnd_it)->GetText();
-}
-*/
 
 CUIListBoxItem* CUIListBox::GetSelectedItem()
 {
@@ -136,6 +102,25 @@ LPCSTR CUIListBox::GetSelectedText()
 		return smart_cast<IUITextControl*>(w)->GetText();
 	else
 		return NULL;
+}
+
+u32 CUIListBox::GetSelectedIDX()
+{
+	u32			_idx	= 0;
+	CUIWindow*	w		= GetSelected();
+
+	for(WINDOW_LIST_it it = m_pad->GetChildWndList().begin(); m_pad->GetChildWndList().end()!=it; ++it)
+	{
+		CUIListBoxItem* item = smart_cast<CUIListBoxItem*>(*it);
+		if (item)
+		{
+			if(*it==w)
+				return _idx;
+
+			++_idx;
+		}
+	}
+	return u32(-1);
 }
 
 LPCSTR CUIListBox::GetText(u32 idx)
@@ -192,85 +177,7 @@ void CUIListBox::MoveSelectedDown()
 		}
 	}
 }
-/*
-#include "../../xr_input.h"
-void CUIListBox::SetSelected(CUIWindow* pWnd)
-{
-	if (NULL == pWnd)
-		return;
-	if(!m_flags.test(eItemsSelectabe)) return;
 
-	bool shift = !!pInput->iGetAsyncKeyState(DIK_LSHIFT);
-	bool ctrl = !!pInput->iGetAsyncKeyState(DIK_LCONTROL);
-
-	if (shift && m_flags.test(CUIScrollView::eMultiSelect))
-	{	
-		CUIWindow* selected = m_last_wnd;
-
-		if (NULL == selected)
-		{
-			CUIScrollView::SetSelected(pWnd);
-			m_last_wnd = GetSelected();
-			return;
-		}
-
-		WINDOW_LIST_it first;	first = m_pad->GetChildWndList().end();
-		WINDOW_LIST_it second;	second = m_pad->GetChildWndList().end();
-		for(WINDOW_LIST_it it = m_pad->GetChildWndList().begin(); m_pad->GetChildWndList().end()!=it; ++it){
-			if (selected == *it){
-				if (first==m_pad->GetChildWndList().end())
-					first = it;
-				else{
-					second = it;
-					break;
-				}
-			}
-			if (pWnd == *it){
-				if (first==m_pad->GetChildWndList().end())
-					first = it;
-				else{
-					second = it;
-					break;
-				}
-			}
-		}
-
-		bool flag = false;
-
-		for(WINDOW_LIST_it it = m_pad->GetChildWndList().begin(); m_pad->GetChildWndList().end()!=it; ++it)
-		{			
-            if (it == first && flag == false)
-				flag = true;
-
-			smart_cast<CUISelectable*>(*it)->SetSelected(flag);
-
-			if (it == second)
-				flag = false;
-		}
-        return;
-	}
-
-	if (ctrl && m_flags.test(CUIScrollView::eMultiSelect))
-	{		
-		for(WINDOW_LIST_it it = m_pad->GetChildWndList().begin(); m_pad->GetChildWndList().end()!=it; ++it)
-		{
-			if (*it==pWnd)
-			{
-				CUIListBoxItem* s = smart_cast<CUIListBoxItem*>(*it);
-				s->SetSelected(!s->GetSelected());
-				m_last_wnd = s;
-				GetMessageTarget()->SendMessage(this, LIST_ITEM_CLICKED);
-				break;
-			}
-		}
-
-		return;
-	}
-
-	CUIScrollView::SetSelected(pWnd);
-	m_last_wnd = GetSelected();
-}
-*/
 void CUIListBox::SetSelectedIDX(u32 idx)
 {
 	SetSelected(GetItemByIDX(idx));
@@ -386,11 +293,12 @@ float CUIListBox::GetLongestLength()
 		CUIListBoxItem* item = smart_cast<CUIListBoxItem*>(*it);
 		if (item)
 		{
-			float tmp_len = item->GetFont()->SizeOf_/*Rel*/(item->GetText());
+			float tmp_len = item->GetFont()->SizeOf_(item->GetText()); //all ok
+			UI()->ClientToScreenScaledWidth(tmp_len);
+
 			if (tmp_len > len)
 				len = tmp_len;
 		}
-		
 	}
 	return len;
 }

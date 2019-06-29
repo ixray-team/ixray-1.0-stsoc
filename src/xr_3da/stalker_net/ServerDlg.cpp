@@ -113,15 +113,7 @@ BOOL CServerDlg::OnInitDialog()
 			BOOL ret = m_pSVServerOptDlg->Create(IDD_SERVEROPT,m_pSVO2);
 			if(!ret)   //Create failed.
 				AfxMessageBox("Error Creating Server Options Dialog");
-			AddDlg(m_pSVServerOptDlg, m_pSVO2, CX, CY);
-			/*
-			m_pSVServerOptDlg->ShowWindow(SW_SHOW);
-			m_pSVServerOptDlg->SetWindowPos(NULL, CX, CY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-
-			RECT R;
-			m_pSVServerOptDlg->GetWindowRect(&R);
-			CY += R.bottom - R.top + 1;
-			*/
+			AddDlg(m_pSVServerOptDlg, m_pSVO2, CX, CY);			
 		}
 		else
 			AfxMessageBox("Error Creating Dialog Object");
@@ -132,15 +124,7 @@ BOOL CServerDlg::OnInitDialog()
 			BOOL ret = m_pSVGameTypeDlg->Create(IDD_GAMETYPE,m_pSVO2);
 			if(!ret)   //Create failed.
 				AfxMessageBox("Error Creating Game Type Dialog");
-			AddDlg(m_pSVGameTypeDlg, m_pSVO2, CX, CY);
-			/*
-			m_pSVGameTypeDlg->ShowWindow(SW_SHOW);
-			m_pSVGameTypeDlg->SetWindowPos(NULL, CX, CY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-
-			RECT R;
-			m_pSVGameTypeDlg->GetWindowRect(&R);
-			CY += R.bottom - R.top + 1;
-			*/
+			AddDlg(m_pSVGameTypeDlg, m_pSVO2, CX, CY);			
 		}
 		else
 			AfxMessageBox("Error Creating Dialog Object");
@@ -156,6 +140,7 @@ BOOL CServerDlg::OnInitDialog()
 		else
 			AfxMessageBox("Error Creating Dialog Object");
 		//-------------------------------------------------------
+		
 //		int LastCY = CY;
 		m_pSVRepawnDlg = new SVRespawnDlg();
 		if (m_pSVRepawnDlg)
@@ -189,6 +174,7 @@ BOOL CServerDlg::OnInitDialog()
 		}
 		else
 			AfxMessageBox("Error Creating Dialog Object");		
+		
 		//-------------------------------------------------------
 		m_pSVO2->GetClientRect(&R);
 		if (CY > R.bottom)
@@ -269,7 +255,7 @@ void	CServerDlg::LoadMapList()
 		WeatherTime			= map_list_cfg.r_string(weather_sect, *WeatherType);
 
 //		AddWeather			(WeatherType, WeatherTime);
-		m_pSVWeatherOptDlg->AddWeather(*WeatherType, *WeatherTime);
+		if (m_pSVWeatherOptDlg) m_pSVWeatherOptDlg->AddWeather(*WeatherType, *WeatherTime);
 	}
 }
 /*
@@ -423,6 +409,8 @@ void CServerDlg::OnBnClickedStartServer()
 	char Name[1024];
 	char NameAdd[1024];
 	char pTeam[2][1024] = {"/team=1", "/team=2"};
+	char sLogsPath[1024] = "";
+	char sCDKeyStr[1024] = "";
 	
 	int FragLimit = 0;
 	int TimeLimit = 0;
@@ -509,6 +497,19 @@ void CServerDlg::OnBnClickedStartServer()
 		iPrefetch  = pMainDlg->m_pPrefetch.GetCheck();
 		iR2 = pMainDlg->m_pR2.GetCheck();
 		iDistort = pMainDlg->m_pDistort.GetCheck();
+		if (pMainDlg->m_pLogsPath.GetWindowTextLength() != 0)
+		{
+			char tmp[1024];
+			pMainDlg->m_pLogsPath.GetWindowText(tmp, 1024);
+			sprintf(sLogsPath, "-overlaypath %s ", tmp);
+		}
+		if (pMainDlg->m_pCDKeyBtn.GetWindowTextLength() != 0)
+		{
+			char tmp[1024];
+			pMainDlg->m_pCDKeyBtn.GetWindowText(tmp, 1024);
+			if (xr_strcmp(tmp, "- No CD Key -") != 0)
+				sprintf(sCDKeyStr, "/cdkey=%s", tmp);
+		}
 	};
 	//--------- Server Options -----------------------------
 	char HostNameStr[1024] = "";
@@ -635,18 +636,49 @@ void CServerDlg::OnBnClickedStartServer()
 		sprintf(WeatherTime, "/estime=%d:%d", Time/60, Time%60);
 	}
 
+	//-------------------------------------------------
+	//ports
+	string512 SVPortStr = "";
+	if (m_pSVServerOptDlg->m_pSVPort.GetWindowTextLength() > 0)
+	{
+		char tmp[1024];
+		m_pSVServerOptDlg->m_pSVPort.GetWindowText(tmp, 1024);
+		int Port = atol(tmp);		
+		clamp(Port, START_PORT, END_PORT);
+		sprintf(SVPortStr, "/portsv=%d", Port);
+	};
+	string512 CLPortStr = "";
+	if (m_pSVServerOptDlg->m_pCLPort.GetWindowTextLength() > 0)
+	{
+		char tmp[1024];
+		m_pSVServerOptDlg->m_pCLPort.GetWindowText(tmp, 1024);
+		int Port = atol(tmp);		
+		clamp(Port, START_PORT, END_PORT);
+		sprintf(CLPortStr, "/portcl=%d", Port);
+	};
+	string512 GSPortStr = "";
+	if (m_pSVServerOptDlg->m_pGSPort.GetWindowTextLength() > 0)
+	{
+		char tmp[1024];
+		m_pSVServerOptDlg->m_pGSPort.GetWindowText(tmp, 1024);
+		int Port = atol(tmp);		
+		clamp(Port, START_PORT, END_PORT);
+		sprintf(GSPortStr, "/portgs=%d", Port);
+	};
 
 //	-noprefetch
 	string512	temp;
 	char cmdline[4096];
-	sprintf(cmdline, "%sxr_3da.exe -xclsx %s%s%s%s%s%s -nointro -external -nocache -start Server(%s/%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s) client(localhost%s)", 
+	sprintf(cmdline, "%sxr_3da.exe %s -xclsx %s%s%s%s%s%s%s -nointro -external -nocache -start Server(%s/%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s) client(localhost%s%s%s)", 
 			(iDedicated == 1) ? "dedicated\\" : "",
+			(iDedicated == 1) ? "-nosound" : "",
 			//---------------------------------
-			(iCatchInput == 1) ? "-i " : "", 
+			(iCatchInput == 1 || iDedicated == 1) ? "-i " : "", 
 			(iBuild == 1) ? "-build " : "",
 			(iPrefetch == 1) ? "" : "-noprefetch ",
 			(iR2 == 1) ? "-r2 " : "",
 			(iDistort == 1) ? "" : "-nodistort ",
+			(sLogsPath[0] == 0) ? "" : sLogsPath,
 			//---------------------------------
 			LTX,
 			//---------------------------------
@@ -681,23 +713,60 @@ void CServerDlg::OnBnClickedStartServer()
 			(WeatherCoeff[0]) ? WeatherCoeff : "",
 			(WarmUpStr[0]) ? WarmUpStr : "",
 			m_pSVSpectatorOptsDlg->GetSpectatorModesStr(temp,sizeof(temp)),
+			(SVPortStr[0]) ? SVPortStr : "",
+			(GSPortStr[0]) ? GSPortStr : "",			
 			//-------------------------------------
-			(NameLen) ? NameAdd : ""
+			(NameLen) ? NameAdd : "",
+			(CLPortStr[0]) ? CLPortStr : "",
+			(sCDKeyStr[0]) ? sCDKeyStr : ""
 			);
 	
-	if (xr_strlen(cmdline) > 4096) _ASSERT(0);
+//	if (xr_strlen(cmdline) > 4096) _ASSERT(0);
 	OutputDebugString( cmdline );
 	int res = WinExec(cmdline, SW_SHOW);	
+	//-------------------------------------------------------
+	/*
+	char* _args[3];
+	// check for need to execute something external
+
+	{
+		string4096 ModuleFileName = "";		
+		GetModuleFileName(NULL, ModuleFileName, 4096);
+
+		string4096 ModuleFilePath = "";
+		char* ModuleName = NULL;
+		GetFullPathName(ModuleFileName, 4096, ModuleFilePath, &ModuleName);
+		ModuleName[0] = 0;
+
+		if (iDedicated == 1)
+		{
+			char* envpath =getenv("PATH");
+			string4096	NewEnvPath = "";
+			sprintf(NewEnvPath , "PATH=%s;%s", ModuleFilePath,envpath);
+			_putenv(NewEnvPath);
+
+			strcat(ModuleFilePath, "dedicated\\xr_3DA.exe");
+		}
+		else
+			strcat(ModuleFilePath, "xr_3da.exe");
+
+		_args[0] = ModuleFilePath;//g_sLaunchOnExit_app;
+		_args[1] = cmdline;//g_sLaunchOnExit_params;
+		_args[2] = NULL;		
+
+		_spawnv(_P_NOWAIT, _args[0], _args);//, _envvar);
+	}
+	*/
 }
 
 void		CServerDlg::SwitchGameType(GAME_TYPE NewGameType)
 {
 	m_GameType = NewGameType;
 
-	m_pSVGameTypeDlg->OnGameTypeSwitch(NewGameType);
-	m_pSVGameOptDlg->OnGameTypeSwitch(NewGameType);
-	m_pSVRepawnDlg->OnGameTypeSwitch(NewGameType);
-	m_pSVSpectatorOptsDlg->OnGameTypeSwitch(NewGameType);
+	if (m_pSVGameTypeDlg) m_pSVGameTypeDlg->OnGameTypeSwitch(NewGameType);
+	if (m_pSVGameOptDlg) m_pSVGameOptDlg->OnGameTypeSwitch(NewGameType);
+	if (m_pSVRepawnDlg) m_pSVRepawnDlg->OnGameTypeSwitch(NewGameType);
+	if (m_pSVSpectatorOptsDlg) m_pSVSpectatorOptsDlg->OnGameTypeSwitch(NewGameType);
 
 	UpdateMapList(m_GameType);
 };
@@ -797,8 +866,17 @@ void	CServerDlg::SaveMapList()
 	u32 size = xr_strlen(MapRotFileName);
 //	memmove(MapRotFileFullPath, MapRotFileName, xr_strlen(MapRotFileName));
 	strcpy(MapRotFileFullPath, MapRotFileName);
-
+	
 	FS.update_path		(MapRotFileFullPath, "$app_data_root$", MapRotFileName);
+	CStalker_netDlg* pMainDlg = (CStalker_netDlg*) (GetParent()->GetParent());
+	if (pMainDlg && pMainDlg->m_pLogsPath.GetWindowTextLength() != 0)
+	{
+		char tmp[1024];
+		string_path NewPath;
+		pMainDlg->m_pLogsPath.GetWindowText(tmp, 1024);
+		sprintf(NewPath, "%s%s", tmp, MapRotFileFullPath);
+		strcpy(MapRotFileFullPath, NewPath);
+	}
 	if (m_pMapList2.GetCount()<=0)
 	{
 		FS.file_delete(MapRotFileFullPath);

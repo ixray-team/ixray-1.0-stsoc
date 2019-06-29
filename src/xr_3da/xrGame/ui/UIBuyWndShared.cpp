@@ -6,7 +6,7 @@
 extern LPCSTR _list_names[];
 
 void CItemMgr::Load(const shared_str& sect_cost)
-{
+{	
 	CInifile::Sect &sect = pSettings->r_section(sect_cost);
 
 	u32 idx	=0;
@@ -40,7 +40,7 @@ void CItemMgr::Load(const shared_str& sect_cost)
 			R_ASSERT3				(it->second.slot_idx==0xff,"item has duplicate record in [buy_menu_items_place] section ",_one);
 			it->second.slot_idx		= i;
 		}
-	}
+	}	
 }
 
 const u32	CItemMgr::GetItemCost(const shared_str& sect_name, u32 rank) const

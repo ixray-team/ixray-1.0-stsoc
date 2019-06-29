@@ -32,6 +32,7 @@ ULONG	xrIDirect3D9::Release(void)
 	if (m_refCount < 0)
 	{
 		delete this;
+		return ULONG_Proc(-1);
 	}
 	return ULONG_Proc(m_refCount);
 }

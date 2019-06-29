@@ -2,6 +2,7 @@
 #pragma hdrstop
 
 #include	"xrsharedmem.h"
+#include	"xrMemory_pure.h"
 
 #include	<malloc.h>
 
@@ -46,7 +47,7 @@ xrMemory::xrMemory()
 }
 
 #ifdef DEBUG_MEMORY_MANAGER
-	XRCORE_API	BOOL	g_bMEMO		= FALSE;
+	BOOL	g_bMEMO		= FALSE;
 #endif // DEBUG_MEMORY_MANAGER
 
 void	xrMemory::_initialize	(BOOL bDebug)
@@ -72,15 +73,17 @@ void	xrMemory::_initialize	(BOOL bDebug)
 	}
 
 #ifndef M_BORLAND
-	// initialize POOLs
-	u32	element		= mem_pools_ebase;
-	u32 sector		= mem_pools_ebase*1024;
-	for (u32 pid=0; pid<mem_pools_count; pid++)
-	{
-		mem_pools[pid]._initialize(element,sector,0x1);
-		element		+=	mem_pools_ebase;
+	if (!strstr(Core.Params,"-pure_alloc")) {
+		// initialize POOLs
+		u32	element		= mem_pools_ebase;
+		u32 sector		= mem_pools_ebase*1024;
+		for (u32 pid=0; pid<mem_pools_count; pid++)
+		{
+			mem_pools[pid]._initialize(element,sector,0x1);
+			element		+=	mem_pools_ebase;
+		}
 	}
-#endif    
+#endif // M_BORLAND
 
 #ifdef DEBUG_MEMORY_MANAGER
 	if (0==strstr(Core.Params,"-memo"))	mem_initialized				= TRUE;
@@ -137,46 +140,8 @@ void	xrMemory::mem_compact	()
 	HeapCompact						(GetProcessHeap(),0);
 	if (g_pStringContainer)			g_pStringContainer->clean		();
 	if (g_pSharedMemoryContainer)	g_pSharedMemoryContainer->clean	();
-//	SetProcessWorkingSetSize		(GetCurrentProcess(),size_t(-1),size_t(-1));
-}
-
-u32		xrMemory::mem_usage		(u32* pBlocksUsed, u32* pBlocksFree)
-{
-	_HEAPINFO		hinfo;
-	int				heapstatus;
-	hinfo._pentry	= NULL;
-	size_t	total	= 0;
-	u32	blocks_free	= 0;
-	u32	blocks_used	= 0;
-	while( ( heapstatus = _heapwalk( &hinfo ) ) == _HEAPOK )
-	{ 
-		if (hinfo._useflag == _USEDENTRY)	{
-			total		+= hinfo._size;
-			blocks_used	+= 1;
-		} else {
-			blocks_free	+= 1;
-		}
-	}
-	if (pBlocksFree)	*pBlocksFree= (u32)blocks_free;
-	if (pBlocksUsed)	*pBlocksUsed= (u32)blocks_used;
-
-	switch( heapstatus )
-	{
-	case _HEAPEMPTY:
-		break;
-	case _HEAPEND:
-		break;
-	case _HEAPBADPTR:
-		FATAL			("bad pointer to heap");
-		break;
-	case _HEAPBADBEGIN:
-		FATAL			("bad start of heap");
-		break;
-	case _HEAPBADNODE:
-		FATAL			("bad node in heap");
-		break;
-	}
-	return (u32) total;
+	if (!strstr(Core.Params,"-~swap_on_compact"))
+		SetProcessWorkingSetSize	(GetCurrentProcess(),size_t(-1),size_t(-1));
 }
 
 #ifdef DEBUG_MEMORY_MANAGER
@@ -295,9 +260,9 @@ char*			xr_strdup		(const char* string)
 	VERIFY	(string);
 	u32		len			= u32(xr_strlen(string))+1	;
 	char *	memory		= (char*)	Memory.mem_alloc( len
-#ifdef DEBUG_MEMORY_MANAGER
+#ifdef DEBUG_MEMORY_NAME
 		, "strdup"
-#endif // DEBUG_MEMORY_MANAGER
+#endif // DEBUG_MEMORY_NAME
 	);
 	CopyMemory		(memory,string,len);
 	return	memory;

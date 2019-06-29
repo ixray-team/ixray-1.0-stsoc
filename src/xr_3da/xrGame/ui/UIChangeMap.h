@@ -8,25 +8,23 @@ class CUIFrameWindow;
 class CUIListBox;
 class CUIXml;
 
-class CUIChangeMap : public CUIDialogWnd {
+class CUIChangeMap : public CUIDialogWnd 
+{
 public:
 	using CUIDialogWnd::Init;
 
-	CUIChangeMap();
+					CUIChangeMap			();
+			void	Init					(CUIXml& xml_doc);
 
-			void Init(CUIXml& xml_doc);
+	virtual bool	OnKeyboard				(int dik, EUIMessages keyboard_action);
+	virtual void	SendMessage				(CUIWindow* pWnd, s16 msg, void* pData = 0);
 
-	virtual bool OnKeyboard(int dik, EUIMessages keyboard_action);
-	virtual void SendMessage(CUIWindow* pWnd, s16 msg, void* pData = 0);
-//	virtual void Update();
-
-	void OnBtnOk();
-	void OnBtnCancel();
-	void OnItemSelect();
+	void 			OnBtnOk					();
+	void 			OnBtnCancel				();
+	void 			OnItemSelect			();
 
 protected:
-//	void Init(CUIXml& xml_doc);
-			void FillUpList();
+			void	FillUpList				();
 
 	CUIStatic*		bkgrnd;
 	CUIStatic*		header;
@@ -39,9 +37,7 @@ protected:
 	CUI3tButton*	btn_ok;
 	CUI3tButton*	btn_cancel;
 
-	u32			m_prev_upd_time;
-
-//.	DEFINE_VECTOR	(LPVOID,ItemVec,ItemIt);
-//.	ItemVec			items;
+	u32				m_prev_upd_time;
 	u32				selected_item;
+	xr_vector<shared_str> maps;
 };

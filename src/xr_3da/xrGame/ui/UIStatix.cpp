@@ -21,11 +21,19 @@ void CUIStatix::stop_anim()
 }
 
 void CUIStatix::Update(){
+
+	SetColor(0xffffffff);
+
 	if (m_bCursorOverWindow)
 	{
 		SetColor(0xff349F06);
 	}
 
+	if (!IsEnabled())
+	{
+		SetColor(0x80ffffff);
+	};
+	
 	CUIStatic::Update();
 }
 
@@ -33,6 +41,10 @@ void CUIStatix::OnFocusLost()
 {
 	CUIStatic::OnFocusLost	();
 	SetColor				(0xffffffff);
+	if (!IsEnabled())
+	{
+		SetColor(0x80ffffff);
+	};
 }
 
 void CUIStatix::OnFocusReceive()
@@ -41,7 +53,7 @@ void CUIStatix::OnFocusReceive()
 	ResetClrAnimation				();
 }
 
-bool CUIStatix::OnMouseDown(bool left_button)
+bool CUIStatix::OnMouseDown(int mouse_btn)
 {
 	GetMessageTarget()->SendMessage(this, BUTTON_CLICKED);
 	return true;

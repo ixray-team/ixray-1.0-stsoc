@@ -5,21 +5,8 @@ class CInventory;
 class CInventoryItem;
 class CEntity;
 
-/**
-struct TradeFactors {
-	float   fBuyFactorHostile;
-	float   fBuyFactorFriendly;
-	float   fSellFactorHostile;
-	float   fSellFactorFriendly;
-
-//	bool	Loaded;
-
-//	TradeFactors(){Loaded = false;}
-	TradeFactors(){}
-};
-/**/
-
-class CTrade {
+class CTrade 
+{
 	xr_vector<CObject*>	m_nearest;
 
 	bool	TradeState;					// режим торговли. true - включен
@@ -44,40 +31,38 @@ class CTrade {
 	bool	m_bNeedToUpdateArtefactTasks;
 
 public:
-	void TradeCB(bool bStart);
-	SInventoryOwner	pThis;
-	SInventoryOwner pPartner;
+	void TradeCB			(bool bStart);
+	SInventoryOwner			pThis;
+	SInventoryOwner			pPartner;
 
 public:
 	
-	CTrade(CInventoryOwner	*p_io);
-	~CTrade();
+							CTrade					(CInventoryOwner	*p_io);
+							~CTrade					();
 
 	
 
-	bool		CanTrade();								// Проверяет, может ли данный объект торговать и устанавливает pPartner
+	bool					CanTrade				();
 	
-	void		StartTrade(CInventoryOwner* pInvOwner);
-	void		StartTrade();
-	void		StopTrade();
-	bool		IsInTradeState() {return TradeState;}
+	void					StartTrade				(CInventoryOwner* pInvOwner);
+	void					StartTrade				();
+	void					StopTrade				();
+	bool					IsInTradeState			() {return TradeState;}
 
-	void		OnPerformTrade		(u32 money_get, u32 money_put);
+	void					OnPerformTrade			(u32 money_get, u32 money_put);
 
-	void		SellItem(CInventoryItem* pItem);
+	void					TransferItem			(CInventoryItem* pItem, bool bBuying);
 
-	CInventoryOwner*	GetPartner();	
-	CTrade*				GetPartnerTrade();
-	CInventory*			GetPartnerInventory();
+	CInventoryOwner*		GetPartner				();	
+	CTrade*					GetPartnerTrade			();
+	CInventory*				GetPartnerInventory		();
 
-	//возвращает цену элемента с учетом отношения конкретного торговца.
-	u32			GetItemPrice(CInventoryItem* pItem);
+	u32						GetItemPrice			(CInventoryItem* pItem, bool b_buying);
 
-	void		UpdateTrade();
+	void					UpdateTrade				();
 private:
-	bool		SetPartner(CEntity *p);
-	void		RemovePartner();
+	bool					SetPartner				(CEntity *p);
+	void					RemovePartner			();
 
-	// выбор инвентаря для торговли (если TRADER, то торговать через ammunition_depot)
-	CInventory	&GetTradeInv(SInventoryOwner owner);
+	CInventory&				GetTradeInv				(SInventoryOwner owner);
 };

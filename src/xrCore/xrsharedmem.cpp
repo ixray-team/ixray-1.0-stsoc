@@ -39,9 +39,9 @@ smem_value*			smem_container::dock			(u32 dwCRC, u32 dwLength, void* ptr)
 	if (0==result)
 	{
 		result					= (smem_value*)	Memory.mem_alloc	(4*sizeof(u32) + dwLength
-#ifdef DEBUG_MEMORY_MANAGER
+#ifdef DEBUG_MEMORY_NAME
 			, "storage: smem"
-#endif // DEBUG_MEMORY_MANAGER
+#endif // DEBUG_MEMORY_NAME
 			);
 		result->dwReference		= 0;
 		result->dwCRC			= dwCRC;
@@ -84,9 +84,13 @@ u32					smem_container::stat_economy	()
 	cdb::iterator	it		= container.begin	();
 	cdb::iterator	end		= container.end		();
 	s64				counter	= 0;
+	counter			-= sizeof(*this);
+	counter			-= sizeof(cdb::allocator_type);
+	const int		node_size = 20;
 	for (; it!=end; it++)	{
-		counter		+=		s64( s64((*it)->dwReference) * s64((*it)->dwLength) );
-		counter		-=		s64( (*it)->dwLength );
+		counter		-= 16;
+		counter		-= node_size;
+		counter		+= s64((s64((*it)->dwReference) - 1)*s64((*it)->dwLength));
 	}
 	cs.Leave		();
 

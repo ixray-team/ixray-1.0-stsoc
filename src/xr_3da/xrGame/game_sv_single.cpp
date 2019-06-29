@@ -5,11 +5,11 @@
 #include "alife_object_registry.h"
 #include "alife_graph_registry.h"
 #include "alife_time_manager.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include "object_broker.h"
 #include "gamepersistent.h"
 #include "xrServer.h"
-#include "../x_ray.h"
+#include "..\x_ray.h"
 
 game_sv_Single::game_sv_Single			()
 {
@@ -84,12 +84,10 @@ BOOL	game_sv_Single::OnTouch			(u16 eid_who, u16 eid_what, BOOL bForced)
 	CSE_Abstract*		e_what	= get_entity_from_eid(eid_what);	VERIFY(e_what	);
 
 	if (ai().get_alife()) {
-		CSE_ALifeTraderAbstract	*l_tpTraderParams		= smart_cast<CSE_ALifeTraderAbstract*>(e_who);
 		CSE_ALifeInventoryItem	*l_tpALifeInventoryItem	= smart_cast<CSE_ALifeInventoryItem*>	(e_what);
 		CSE_ALifeDynamicObject	*l_tpDynamicObject		= smart_cast<CSE_ALifeDynamicObject*>	(e_who);
 		
 		if	(
-				l_tpTraderParams && 
 				l_tpALifeInventoryItem && 
 				l_tpDynamicObject && 
 				ai().alife().graph().level().object(l_tpALifeInventoryItem->base()->ID,true) &&
@@ -331,7 +329,7 @@ void game_sv_Single::restart_simulator			(LPCSTR saved_game_name)
 
 	pApp->LoadBegin			();
 	m_alife_simulator		= xr_new<CALifeSimulator>(&server(),&options);
-	pApp->LoadTitle			("CLIENT: Synchronising...");
+	g_pGamePersistent->LoadTitle		("st_client_synchronising");
 	Device.PreCache			(30);
 	pApp->LoadEnd			();
 }

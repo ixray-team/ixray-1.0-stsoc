@@ -15,8 +15,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -42,7 +42,7 @@
 				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
-				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerOutput="0"
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
@@ -57,17 +57,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="odbc32.lib odbccp32.lib wininet.lib"
-				OutputFile="$(OutDir)\xrXMLParser.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
 				GenerateMapFile="FALSE"
+				MapFileName=""
 				SubSystem="0"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="$(OutDir)\xrXMLParser.lib"/>
+				ImportLibrary="x:\libraries\$(ProjectName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
@@ -98,8 +97,8 @@
 		</Configuration>
 		<Configuration
 			Name="Mixed|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Mixed"
+			OutputDirectory="x:\binaries\"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -122,7 +121,7 @@
 				EnableFunctionLevelLinking="FALSE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
-				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerOutput="0"
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
@@ -137,14 +136,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="odbc32.lib odbccp32.lib wininet.lib"
-				OutputFile="$(OutDir)\xrXMLParser.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
+				GenerateMapFile="FALSE"
+				MapFileName="$(OutDir)/$(ProjectName).map"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)\xrXMLParser.lib"/>
+				ImportLibrary="x:\libraries\$(ProjectName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
@@ -175,8 +173,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -196,9 +194,9 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
-				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
@@ -211,95 +209,15 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="TRUE"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="odbc32.lib odbccp32.lib wininet.lib"
-				OutputFile="$(OutDir)\xrXMLParser.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				IgnoreAllDefaultLibraries="FALSE"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
-				GenerateMapFile="TRUE"
+				GenerateMapFile="FALSE"
+				MapFileName=""
 				SubSystem="2"
-				ImportLibrary="$(OutDir)\xrXMLParser.lib"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/xrXMLParser.tlb"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="DebugNoExceptions|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="3"
-				AdditionalIncludeDirectories=".."
-				PreprocessorDefinitions="_DEBUG;WIN32;_WINDOWS;XRXMLPARSER_EXPORTS;FORCE_NO_EXCEPTIONS"
-				StringPooling="FALSE"
-				MinimalRebuild="TRUE"
-				ExceptionHandling="FALSE"
-				BasicRuntimeChecks="3"
-				SmallerTypeCheck="TRUE"
-				RuntimeLibrary="3"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
-				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
-				AssemblerListingLocation="DebugNoExceptions\"
-				ObjectFile="DebugNoExceptions\"
-				ProgramDataBaseFileName="$(IntDir)/"
-				WarningLevel="4"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				CallingConvention="2"
-				CompileAs="2"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				IgnoreImportLibrary="TRUE"
-				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="odbc32.lib odbccp32.lib wininet.lib"
-				OutputFile="$(OutDir)\xrXMLParser.dll"
-				LinkIncremental="2"
-				SuppressStartupBanner="TRUE"
-				IgnoreAllDefaultLibraries="FALSE"
-				IgnoreDefaultLibraryNames=""
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
-				GenerateMapFile="TRUE"
-				SubSystem="2"
-				ImportLibrary="$(OutDir)\xrXMLParser.lib"/>
+				ImportLibrary="x:\libraries\$(ProjectName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
@@ -355,12 +273,6 @@
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugNoExceptions|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="stdafx.h">
@@ -397,15 +309,8 @@
 						Name="Debug|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderFile=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderFile=""/>
+							UsePrecompiledHeader="3"
+							PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"/>
 					</FileConfiguration>
 				</File>
 				<File
@@ -415,12 +320,6 @@
 					RelativePath=".\tinyxml.cpp">
 					<FileConfiguration
 						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="3"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="3"/>
@@ -447,27 +346,14 @@
 						Name="Debug|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderFile=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderFile=""/>
+							UsePrecompiledHeader="3"
+							PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"/>
 					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\tinyxmlparser.cpp">
 					<FileConfiguration
 						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="3"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugNoExceptions|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="3"/>

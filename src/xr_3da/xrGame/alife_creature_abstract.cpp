@@ -9,7 +9,10 @@
 #include "stdafx.h"
 #include "xrServer_Objects_ALife_Monsters.h"
 #include "monster_community.h"
-
+#include "Level.h"
+#include "ai_space.h"
+#include "alife_simulator.h"
+#include "alife_time_manager.h"
 void CSE_ALifeCreatureAbstract::on_spawn	()
 {
 	inherited::on_spawn					();
@@ -22,8 +25,11 @@ void CSE_ALifeCreatureAbstract::on_spawn	()
 
 	MONSTER_COMMUNITY					monster_community;
 	monster_community.set				(pSettings->r_string(s_name, "species"));
-	if(monster_community.team() != 255)
+	if (monster_community.team() != 255)
 		s_team							= monster_community.team();
+
+	if (!g_Alive())
+		m_game_death_time				= 0;//alife().time_manager().game_time();
 }
 
 void CSE_ALifeCreatureActor::add_online		(const bool &update_registries)

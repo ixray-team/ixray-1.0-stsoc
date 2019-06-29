@@ -8,6 +8,15 @@
 #define CFS_CompressMark	(1ul << 31ul)
 
 XRCORE_API void VerifyPath	(LPCSTR path);
+
+#ifdef DEBUG
+	XRCORE_API	extern	u32		g_file_mapped_memory;
+	XRCORE_API	extern	u32		g_file_mapped_count;
+	XRCORE_API			void	dump_file_mappings		();
+				extern	void	register_file_mapping	(void *address, const u32 &size, LPCSTR file_name);
+				extern	void	unregister_file_mapping	(void *address, const u32 &size);
+#endif // DEBUG
+
 //------------------------------------------------------------------------------------
 // Write
 //------------------------------------------------------------------------------------
@@ -81,6 +90,7 @@ public:
 	u32				chunk_size	();					// returns size of currently opened chunk, 0 otherwise
 	void			w_compressed(void* ptr, u32 count);
 	void			w_chunk		(u32 type, void* data, u32 size);
+	virtual bool	valid		()									{return true;}
 };
 
 class XRCORE_API CMemoryWriter : public IWriter
@@ -118,53 +128,18 @@ public:
 //------------------------------------------------------------------------------------
 // Read
 //------------------------------------------------------------------------------------
-class XRCORE_API IReader {
-protected:
-	char *			data	;
-	int				Pos		;
-	int				Size	;
-	int				iterpos	;
-
-	IC u32			correction					(u32 p)
-	{
-		if (p%16) {
-			return ((p%16)+1)*16 - p;
-		} return 0;
-	}
-	u32 			advance_term_string			();
+template <typename implementation_type>
+class IReaderBase {
 public:
-	IReader			()
-	{
-		Pos			= 0;
-	}
-	IReader			(void *_data, int _size, int _iterpos=0)
-	{
-		data		= (char *)_data	;
-		Size		= _size			;
-		Pos			= 0				;
-		iterpos		= _iterpos		;
-	};
-	virtual ~IReader()							{};
+	virtual			~IReaderBase()				{}
 
-	IC int			elapsed		()	const		{	return Size-Pos;		};
-	IC BOOL			eof			()	const		{	return elapsed()<=0;	};
-	IC int			tell		()	const		{	return Pos;				};
-	IC void			seek		(int ptr)		{	Pos=ptr; VERIFY((Pos<=Size) && (Pos>=0));};
-	IC int			length		()	const		{	return Size;			};
-	IC void*		pointer		()	const		{	return &(data[Pos]);	};
-	IC void			advance		(int cnt)		{	Pos+=cnt;VERIFY((Pos<=Size) && (Pos>=0));};
+	IC implementation_type&impl	()				{return *(implementation_type*)this;}
+	IC const implementation_type&impl() const	{return *(implementation_type*)this;}
+
+	IC BOOL			eof			()	const		{return impl().elapsed()<=0;	};
 	
-	void			r			(void *p,int cnt);
+	IC void			r			(void *p,int cnt) {impl().r(p,cnt);}
 
-	void			r_string	(char *dest, u32 tgt_sz);
-	void			r_string	(xr_string& dest);
-
-	void			skip_stringZ();
-
-	void			r_stringZ	(char *dest, u32 tgt_sz);
-	void			r_stringZ	(shared_str& dest);
-	void			r_stringZ	(xr_string& dest);
-	
 	IC Fvector		r_vec3		()			{Fvector tmp;r(&tmp,3*sizeof(float));return tmp;	};
 	IC Fvector4		r_vec4		()			{Fvector4 tmp;r(&tmp,4*sizeof(float));return tmp;	};
 	IC u64			r_u64		()			{	u64 tmp;	r(&tmp,sizeof(tmp)); return tmp;	};
@@ -209,14 +184,104 @@ public:
 		A.mul		(s);
 	}
 	// Set file pointer to start of chunk data (0 for root chunk)
-	IC void			rewind		()			{	seek(0); }
+	IC	void		rewind		()			{	impl().seek(0); }
+
+	IC	u32 		find_chunk	(u32 ID, BOOL* bCompressed = 0)	
+	{
+		u32	dwSize,dwType;
+
+		rewind();
+		while (!eof()) {
+			dwType = r_u32();
+			dwSize = r_u32();
+			if ((dwType&(~CFS_CompressMark)) == ID) {
+				
+				VERIFY	((u32)impl().tell() + dwSize <= (u32)impl().length());
+				if (bCompressed) *bCompressed = dwType&CFS_CompressMark;
+				return dwSize;
+			}
+			else	impl().advance(dwSize);
+		}
+		return 0;
+	}
 	
-	// поиск XR Chunk'ов - возврат - размер или 0
-	u32 			find_chunk	(u32 ID, BOOL* bCompressed=0);	
-	BOOL			r_chunk		(u32 ID, void *dest);					// чтение XR Chunk'ов (4b-ID,4b-size,??b-data)
-	BOOL			r_chunk_safe(u32 ID, void *dest, u32 dest_size);	// чтение XR Chunk'ов (4b-ID,4b-size,??b-data)
-	IReader*		open_chunk	(u32 ID);
+	IC	BOOL		r_chunk		(u32 ID, void *dest)	// чтение XR Chunk'ов (4b-ID,4b-size,??b-data)
+	{
+		u32	dwSize = find_chunk(ID);
+		if (dwSize!=0) {
+			r(dest,dwSize);
+			return TRUE;
+		} else return FALSE;
+	}
+	
+	IC	BOOL		r_chunk_safe(u32 ID, void *dest, u32 dest_size)	// чтение XR Chunk'ов (4b-ID,4b-size,??b-data)
+	{
+		u32	dwSize = find_chunk(ID);
+		if (dwSize!=0) {
+			R_ASSERT(dwSize==dest_size);
+			r(dest,dwSize);
+			return TRUE;
+		} else return FALSE;
+	}
+};
+
+class XRCORE_API IReader : public IReaderBase<IReader> {
+protected:
+	char *			data	;
+	int				Pos		;
+	int				Size	;
+	int				iterpos	;
+
+public:
+	IC				IReader			()
+	{
+		Pos			= 0;
+	}
+
+	IC				IReader			(void *_data, int _size, int _iterpos=0)
+	{
+		data		= (char *)_data	;
+		Size		= _size			;
+		Pos			= 0				;
+		iterpos		= _iterpos		;
+	}
+
+protected:
+	IC u32			correction					(u32 p)
+	{
+		if (p%16) {
+			return ((p%16)+1)*16 - p;
+		} return 0;
+	}
+	
+	u32 			advance_term_string			();
+
+public:
+	IC int			elapsed		()	const		{	return Size-Pos;		};
+	IC int			tell		()	const		{	return Pos;				};
+	IC void			seek		(int ptr)		{	Pos=ptr; VERIFY((Pos<=Size) && (Pos>=0));};
+	IC int			length		()	const		{	return Size;			};
+	IC void*		pointer		()	const		{	return &(data[Pos]);	};
+	IC void			advance		(int cnt)		{	Pos+=cnt;VERIFY((Pos<=Size) && (Pos>=0));};
+
+public:
+	void			r			(void *p,int cnt);
+
+	void			r_string	(char *dest, u32 tgt_sz);
+	void			r_string	(xr_string& dest);
+
+	void			skip_stringZ();
+
+	void			r_stringZ	(char *dest, u32 tgt_sz);
+	void			r_stringZ	(shared_str& dest);
+	void			r_stringZ	(xr_string& dest);
+
+public:
 	void			close		();
+
+public:
+	// поиск XR Chunk'ов - возврат - размер или 0
+	IReader*		open_chunk	(u32 ID);
 
 	// iterators
 	IReader*		open_chunk_iterator		(u32& ID, IReader* previous=NULL);	// NULL=first

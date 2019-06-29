@@ -229,6 +229,7 @@ protected:
 	//нахождение большого и мальнекого объекта в зоне
 	shared_str				m_sIdleObjectParticlesSmall;
 	shared_str				m_sIdleObjectParticlesBig;
+	BOOL					m_bIdleObjectParticlesDontStop;
 
 	ref_sound				m_idle_sound;
 	ref_sound				m_awaking_sound;
@@ -366,6 +367,7 @@ protected:
 public:
 	virtual u32				ef_anomaly_type				() const;
 	virtual u32				ef_weapon_type				() const;
+	virtual	bool			register_schedule			() const {return true;}
 
 	// optimization FAST/SLOW mode
 public:						

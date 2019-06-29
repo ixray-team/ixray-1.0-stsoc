@@ -41,7 +41,6 @@ private:
 		flCustomPlacement	=	(1<<2)
 	};
 	Flags8					m_flags;
-//	CUIStatic*				m_background;
 	CUICellItem*			m_selected_item;
 	Ivector2				m_orig_cell_capacity;
 

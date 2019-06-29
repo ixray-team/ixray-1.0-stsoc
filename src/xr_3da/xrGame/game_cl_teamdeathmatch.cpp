@@ -48,13 +48,11 @@ const shared_str game_cl_TeamDeathmatch::GetTeamMenu(s16 team)
 
 game_cl_TeamDeathmatch::game_cl_TeamDeathmatch()
 {
-	pUITeamSelectWnd	= xr_new<CUISpawnWnd>	();
-
 	PresetItemsTeam1.clear();
 	PresetItemsTeam2.clear();
 
 	m_bTeamSelected		= FALSE;
-	m_game_ui			= NULL;
+	m_game_ui			= NULL;	
 
 	m_bShowPlayersNames = false;
 	m_bFriendlyIndicators = false;
@@ -64,6 +62,9 @@ game_cl_TeamDeathmatch::game_cl_TeamDeathmatch()
 }
 void game_cl_TeamDeathmatch::Init ()
 {
+//	pInventoryMenu	= xr_new<CUIInventoryWnd>();
+//	pPdaMenu = xr_new<CUIPdaWnd>();
+//	pMapDesc = xr_new<CUIMapDesc>();
 	//-----------------------------------------------------------
 	LoadTeamData(GetTeamMenu(1));
 	LoadTeamData(GetTeamMenu(2));
@@ -73,7 +74,12 @@ game_cl_TeamDeathmatch::~game_cl_TeamDeathmatch()
 {
 	PresetItemsTeam1.clear();
 	PresetItemsTeam2.clear();
-	xr_delete(pUITeamSelectWnd);
+	
+
+	xr_delete(pCurBuyMenu);
+	xr_delete(pCurSkinMenu);
+
+//	xr_delete(pInventoryMenu);
 }
 
 void				game_cl_TeamDeathmatch::net_import_state		(NET_Packet& P)
@@ -169,20 +175,18 @@ CUIGameCustom* game_cl_TeamDeathmatch::createGameUI()
 	R_ASSERT(m_game_ui);
 	m_game_ui->SetClGame(this);
 	m_game_ui->Init();
-
-
+	
 	//-----------------------------------------------------------
-	pInventoryMenu = xr_new<CUIInventoryWnd>();
+//	pInventoryMenu = xr_new<CUIInventoryWnd>();
 	//-----------------------------------------------------------	
-	pPdaMenu = xr_new<CUIPdaWnd>();
+//	pPdaMenu = xr_new<CUIPdaWnd>();
 	//-----------------------------------------------------------
-	pMapDesc = xr_new<CUIMapDesc>();
+//	pMapDesc = xr_new<CUIMapDesc>();
 	//-----------------------------------------------------------
 	LoadMessagesMenu(MESSAGE_MENUS);
 	//-----------------------------------------------------------
 	return m_game_ui;
 }
-
 
 void game_cl_TeamDeathmatch::GetMapEntities(xr_vector<SZoneMapEntityData>& dst)
 {
@@ -210,23 +214,26 @@ void game_cl_TeamDeathmatch::GetMapEntities(xr_vector<SZoneMapEntityData>& dst)
 void game_cl_TeamDeathmatch::OnMapInfoAccept			()
 {
 	if (CanCallTeamSelectMenu())
-		StartStopMenu(pUITeamSelectWnd, true);
+		StartStopMenu(m_game_ui->m_pUITeamSelectWnd, true);
 };
 
 void game_cl_TeamDeathmatch::OnTeamMenuBack			()
 {
 	if (local_player->testFlag(GAME_PLAYER_FLAG_SPECTATOR))
-        StartStopMenu(pMapDesc, true);
+	{
+		StartStopMenu(m_game_ui->m_pMapDesc, true);
+//        StartStopMenu(pMapDesc, true);
+	}
 };
 
 void game_cl_TeamDeathmatch::OnTeamMenu_Cancel		()
 {
-	StartStopMenu(pUITeamSelectWnd, true);
+	StartStopMenu(m_game_ui->m_pUITeamSelectWnd, true);
 	if (!m_bTeamSelected && !m_bSpectatorSelected)
 	{
-		if (CanCallTeamSelectMenu() && !pUITeamSelectWnd->IsShown())
+		if (CanCallTeamSelectMenu() && !m_game_ui->m_pUITeamSelectWnd->IsShown())
 		{
-			StartStopMenu(pUITeamSelectWnd, true);
+			StartStopMenu(m_game_ui->m_pUITeamSelectWnd, true);
 			return;
 		}
 	}
@@ -236,7 +243,7 @@ void game_cl_TeamDeathmatch::OnTeamMenu_Cancel		()
 void game_cl_TeamDeathmatch::OnSkinMenuBack			()
 {
 	if (CanCallTeamSelectMenu())
-		StartStopMenu(pUITeamSelectWnd, true);
+		StartStopMenu(m_game_ui->m_pUITeamSelectWnd, true);
 };
 
 void game_cl_TeamDeathmatch::OnSpectatorSelect		()
@@ -295,7 +302,6 @@ void game_cl_TeamDeathmatch::SetCurrentBuyMenu	()
 		{
 			pCurBuyMenu = InitBuyMenu(GetBaseCostSect(), 1);
 			LoadTeamDefaultPresetItems(GetTeamMenu(1), pCurBuyMenu, &PresetItemsTeam1);
-
 			pCurPresetItems = &PresetItemsTeam1;
 		}
 		else 
@@ -304,9 +310,10 @@ void game_cl_TeamDeathmatch::SetCurrentBuyMenu	()
 			LoadTeamDefaultPresetItems(GetTeamMenu(2), pCurBuyMenu, &PresetItemsTeam2);
 			pCurPresetItems = &PresetItemsTeam2;
 		};
+		LoadDefItemsForRank(pCurBuyMenu);
 	};
 
-	if (pCurBuyMenu) pCurBuyMenu->SetSkin(local_player->skin);
+//	if (pCurBuyMenu) pCurBuyMenu->SetSkin(local_player->skin);
 	if (!pCurBuyMenu) return;	
 
 	//-----------------------------------
@@ -325,6 +332,8 @@ void game_cl_TeamDeathmatch::SetCurrentSkinMenu	()
 	{
 		new_team		= 2;
 	}
+	if (pCurSkinMenu && pCurSkinMenu->GetTeam() == new_team)
+		return;
 
 	if (pCurSkinMenu && new_team != pCurSkinMenu->GetTeam())
 		if (pCurSkinMenu->IsShown()) StartStopMenu(pCurSkinMenu,true);
@@ -342,7 +351,7 @@ bool game_cl_TeamDeathmatch::CanBeReady				()
 	if (!m_bTeamSelected)
 	{
 		if (CanCallTeamSelectMenu())
-			StartStopMenu(pUITeamSelectWnd,true);
+			StartStopMenu(m_game_ui->m_pUITeamSelectWnd,true);
 		return false;
 	}
 
@@ -374,12 +383,13 @@ void game_cl_TeamDeathmatch::shedule_Update			(u32 dt)
 	CStringTable st;
 	string512	msg;
 
+	if(!m_game_ui && HUD().GetUI() ) m_game_ui = smart_cast<CUIGameTDM*>( HUD().GetUI()->UIGame() );
 	inherited::shedule_Update(dt);
 
-	if(!m_game_ui && HUD().GetUI() ) m_game_ui = smart_cast<CUIGameTDM*>( HUD().GetUI()->UIGame() );
+	if (!m_game_ui) return;
 	//---------------------------------------------------------
-	if (pUITeamSelectWnd && pUITeamSelectWnd->IsShown() && !CanCallTeamSelectMenu())
-		StartStopMenu(pUITeamSelectWnd,true);
+	if (m_game_ui->m_pUITeamSelectWnd && m_game_ui->m_pUITeamSelectWnd->IsShown() && !CanCallTeamSelectMenu())
+		StartStopMenu(m_game_ui->m_pUITeamSelectWnd,true);
 	//---------------------------------------------------------
 	
 	switch (phase)
@@ -414,14 +424,15 @@ void game_cl_TeamDeathmatch::shedule_Update			(u32 dt)
 //						HUD().GetUI()->UIMainIngameWnd->UpdateTeamsScore(teams[0].score, teams[1].score);
 //					}
 //				};
-
+/*
 				if (m_game_ui)
 				{
-					if (pUITeamSelectWnd->IsShown())
+					if (m_game_ui->m_pUITeamSelectWnd->IsShown())
 					{
 //						m_game_ui->SetSpectatorMsgCaption("");
 					}
 				}
+*/
 				//---------------------------------------------------------
 /*				if (local_player->team == 0)
 				{
@@ -463,7 +474,7 @@ bool	game_cl_TeamDeathmatch::OnKeyboardPress			(int key)
 	{
 		if (CanCallTeamSelectMenu())
 		{
-			StartStopMenu(pUITeamSelectWnd,true);
+			StartStopMenu(m_game_ui->m_pUITeamSelectWnd,true);
 		};
 
 		return true;
@@ -503,7 +514,7 @@ void	game_cl_TeamDeathmatch::OnRender				()
 			if (ps == local_player) continue;
 
 			float dup = 0.0f;
-			if (/*m_bFriendlyNames && */m_bShowPlayersNames)
+			if (/*m_bFriendlyNames &&*/ m_bShowPlayersNames)
 			{
 				VERIFY(pObject);
 				CActor* pActor = smart_cast<CActor*>(pObject);
@@ -528,7 +539,8 @@ void	game_cl_TeamDeathmatch::OnRender				()
 
 BOOL game_cl_TeamDeathmatch::CanCallBuyMenu			()
 {
-	if (pUITeamSelectWnd && pUITeamSelectWnd->IsShown())
+	if(!m_game_ui)	return FALSE;
+	if (m_game_ui->m_pUITeamSelectWnd && m_game_ui->m_pUITeamSelectWnd->IsShown())
 		return FALSE;
 	if (!m_bTeamSelected) return FALSE;
 	if (!m_bSkinSelected) return FALSE;
@@ -538,7 +550,8 @@ BOOL game_cl_TeamDeathmatch::CanCallBuyMenu			()
 
 BOOL game_cl_TeamDeathmatch::CanCallSkinMenu			()
 {
-	if (pUITeamSelectWnd && pUITeamSelectWnd->IsShown())
+	if(!m_game_ui)	return FALSE;
+	if (m_game_ui->m_pUITeamSelectWnd && m_game_ui->m_pUITeamSelectWnd->IsShown())
 		return FALSE;
 	if (!m_bTeamSelected) return FALSE;
 
@@ -547,7 +560,8 @@ BOOL game_cl_TeamDeathmatch::CanCallSkinMenu			()
 
 BOOL game_cl_TeamDeathmatch::CanCallInventoryMenu			()
 {
-	if (pUITeamSelectWnd && pUITeamSelectWnd->IsShown())
+	if(!m_game_ui)	return FALSE;
+	if (m_game_ui->m_pUITeamSelectWnd && m_game_ui->m_pUITeamSelectWnd->IsShown())
 		return FALSE;
 
 	return inherited::CanCallInventoryMenu();	
@@ -557,7 +571,7 @@ BOOL game_cl_TeamDeathmatch::CanCallTeamSelectMenu			()
 {
 	if (Phase()!=GAME_PHASE_INPROGRESS) return false;
 	if (!local_player) return false;
-	if (pInventoryMenu && pInventoryMenu->IsShown())
+	if (m_game_ui->m_pInventoryMenu && m_game_ui->m_pInventoryMenu->IsShown())
 	{
 		return FALSE;
 	};
@@ -570,12 +584,12 @@ BOOL game_cl_TeamDeathmatch::CanCallTeamSelectMenu			()
 		return FALSE;
 	};
 
-	pUITeamSelectWnd->SetCurTeam(ModifyTeam(local_player->team));
+	m_game_ui->m_pUITeamSelectWnd->SetCurTeam(ModifyTeam(local_player->team));
 	return TRUE;	
 };
 
 #define FRIEND_LOCATION	"mp_friend_location"
-#define SELF_LOCATION	"mp_self_location"
+
 
 void game_cl_TeamDeathmatch::UpdateMapLocations		()
 {
@@ -592,14 +606,7 @@ void game_cl_TeamDeathmatch::UpdateMapLocations		()
 				Level().MapManager().RemoveMapLocation(FRIEND_LOCATION, id);
 				continue;
 			};
-			if (ps == local_player) 
-			{
-				if (!Level().MapManager().HasMapLocation(SELF_LOCATION, id))
-				{
-					(Level().MapManager().AddMapLocation(SELF_LOCATION, id))->EnablePointer();
-				}
-				continue;
-			};
+			
 			CObject* pObject = Level().Objects.net_Find(id);
 			if (!pObject || pObject->CLS_ID != CLSID_OBJECT_ACTOR) continue;
 			if (IsEnemy(ps)) 

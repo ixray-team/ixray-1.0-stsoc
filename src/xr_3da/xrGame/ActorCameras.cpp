@@ -49,8 +49,8 @@ void CActor::cam_SetLadder()
 }
 void CActor::camUpdateLadder(float dt)
 {
-	VERIFY					(character_physics_support()->movement()->ElevatorState());
-
+	if(!character_physics_support()->movement()->ElevatorState())
+															return;
 	if(cameras[eacFirstEye]->bClampYaw) return;
 	float yaw				= (-XFORM().k.getH());
 

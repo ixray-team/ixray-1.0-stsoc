@@ -36,15 +36,11 @@ bool FreeRoom_inBelt	(TIItemContainer& item_list, PIItem item, int width, int he
 ref_shader&	GetBuyMenuShader();
 //получить shader на иконки инвенторя
 ref_shader& GetEquipmentIconsShader();
-//shader на иконки персонажей
-ref_shader& GetCharIconsShader();
-//shader на иконки карты
-ref_shader& GetMapIconsShader();
 // shader на иконки персонажей в мультиплеере
 ref_shader&	GetMPCharIconsShader();
 //удаляем все шейдеры
 void DestroyShaders();
-
+void CreateShaders();
 
 // Получить значение времени в текстовом виде
 

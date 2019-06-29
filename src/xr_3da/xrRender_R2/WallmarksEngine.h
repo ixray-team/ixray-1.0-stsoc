@@ -51,7 +51,6 @@ private:
 
 	void				skeleton_wm_render		(intrusive_ptr<CSkeletonWallmark>, FVF::LIT* &V);
 
-	void				clear					();
 public:
 						CWallmarksEngine		();
 						~CWallmarksEngine		();
@@ -62,4 +61,6 @@ public:
 
 	// render
 	void				Render					();
+
+	void				clear					();
 };

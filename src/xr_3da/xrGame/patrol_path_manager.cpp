@@ -20,7 +20,7 @@
 #include "game_object_space.h"
 #include "level_graph.h"
 
-#ifdef DEBUG
+#if 1//def DEBUG
 #	include "space_restriction_manager.h"
 
 static void show_restrictions	(LPCSTR restrictions)
@@ -146,8 +146,23 @@ void CPatrolPathManager::select_point(const Fvector &position, u32 &dest_vertex_
 			}
 			default			: NODEFAULT;
 		}
-		VERIFY3				(vertex || show_restrictions(m_object),*m_path_name,*m_game_object->cName());
-		VERIFY4				(ai().level_graph().valid_vertex_id(vertex->data().level_vertex_id()),*m_path_name,*m_game_object->cName(),*vertex->data().name());
+		R_ASSERT2			(
+			vertex || show_restrictions(m_object),
+			make_string(
+				"any vertex in patrol path [%s] in inaccessible for object [%s]",
+				*m_path_name,
+				*m_game_object->cName()
+			)
+		);
+		R_ASSERT2			(
+			ai().level_graph().valid_vertex_id(vertex->data().level_vertex_id()),
+			make_string(
+				"patrol path[%s], point on path [%s],object [%s]",
+				*m_path_name,
+				*vertex->data().name(),
+				*m_game_object->cName()
+			)
+		);
 
 		if (!m_path->vertex(m_prev_point_index))
 			m_prev_point_index	= vertex->vertex_id();

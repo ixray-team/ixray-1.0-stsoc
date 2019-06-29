@@ -9,6 +9,7 @@
 #include "../x_ray.h"
 #include "../device.h"
 #include "../IGame_Persistent.h"
+#include "MainMenu.h"
 
 BOOL CLevel::net_Start	( LPCSTR op_server, LPCSTR op_client )
 {
@@ -75,7 +76,7 @@ bool CLevel::net_start1				()
 	// Start client and server if need it
 	if (m_caServerOptions.size())
 	{
-		pApp->LoadTitle			("SERVER: Starting...");
+		g_pGamePersistent->LoadTitle		("st_server_starting");
 
 		typedef IGame_Persistent::params params;
 		params							&p = g_pGamePersistent->m_game_params;
@@ -85,7 +86,6 @@ bool CLevel::net_start1				()
 		else
 			Server					= xr_new<xrGameSpyServer>();
 		
-
 //		if (!strstr(*m_caServerOptions,"/alife")) 
 		if (xr_strcmp(p.m_alife,"alife"))
 		{
@@ -116,7 +116,13 @@ bool CLevel::net_start2				()
 {
 	if (net_start_result_total && m_caServerOptions.size())
 	{
-		Server->Connect			(m_caServerOptions);	
+		if (!Server->Connect			(m_caServerOptions))
+		{
+			net_start_result_total = false;
+			Msg				("! Failed to start server.");
+//			Console->Execute("main_menu on");
+			return true;
+		}
 		Server->SLS_Default		();
 		m_name					= Server->level_name(m_caServerOptions);
 	}
@@ -154,6 +160,16 @@ bool CLevel::net_start3				()
 			m_caClientOptions = tmp;
 		};
 	};
+	//setting players GameSpy CDKey if it comes from command line
+	if (strstr(m_caClientOptions.c_str(), "/cdkey="))
+	{
+		string64 CDKey;
+		char* start = strstr(m_caClientOptions.c_str(),"/cdkey=") +xr_strlen("/cdkey=");
+		sscanf			(start, "%[^/]",CDKey);
+		string128 cmd;
+		sprintf(cmd, "cdkey %s", _strupr(CDKey));
+		Console->Execute			(cmd);
+	}
 	return true;
 }
 
@@ -188,7 +204,7 @@ bool CLevel::net_start5				()
 	};
 	return true;
 }
-
+#include "hudmanager.h"
 bool CLevel::net_start6				()
 {
 	//init bullet manager
@@ -208,7 +224,17 @@ bool CLevel::net_start6				()
 		Msg				("! Failed to start client. Check the connection or level existance.");
 		DEL_INSTANCE	(g_pGameLevel);
 		Console->Execute("main_menu on");
+
+		if (!psNET_direct_connect) {
+			MainMenu()->SwitchToMultiplayerMenu();
+//			MainMenu()->CheckForErrorDlg();
+		};		
+		return true;
 	}
+
+	if (g_hud)
+		HUD().GetUI()->OnConnected();
+
 	return true;
 }
 
@@ -224,5 +250,6 @@ void CLevel::InitializeClientGame	(NET_Packet& P)
 	game					= smart_cast<game_cl_GameState*> ( NEW_INSTANCE ( clsid ) );
 	game->set_type_name(game_type_name);
 	game->Init();
+	m_bGameConfigStarted	= TRUE;
 }
 

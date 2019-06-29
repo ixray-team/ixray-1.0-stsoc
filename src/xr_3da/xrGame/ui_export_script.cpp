@@ -1,28 +1,19 @@
 #include "stdafx.h"
 
 #include "script_ui_registrator.h"
-//.#include "UI\UIInventoryWnd.h"
-//. #include "UI\UIStatsWnd.h"
 #include "UI\UIMultiTextStatic.h"
-//.#include "UIDMFragList.h"
-//.#include "UIDMPlayerList.h"
+#include "MainMenu.h"
+
 #include "script_space.h"
 using namespace luabind;
+
+CMainMenu*	MainMenu();
 
 #pragma optimize("s",on)
 void UIRegistrator::script_register(lua_State *L)
 {
 	module(L)
 	[
-
-//.		class_<CUIStatsWnd, CUIDialogWnd>("CUIStatsWnd")
-//.		.def("GetFrameRect",  &CUIStatsWnd::GetFrameRect),
-
-//.		class_<CUIDMPlayerList, CUIDMFragList>("CUIDMPlayerList")
-//.		.def(					constructor<>()),
-
-//.		class_<CUIInventoryWnd, CUIDialogWnd>("CUIInventoryWnd")
-//.		.def(					constructor<>()),
 
 		class_<CGameFont>("CGameFont")
 			.enum_("EAligment")
@@ -34,6 +25,22 @@ void UIRegistrator::script_register(lua_State *L)
 
 		class_<CUICaption>("CUICaption")
 			.def("addCustomMessage",	&CUICaption::addCustomMessage)
-			.def("setCaption",			&CUICaption::setCaption)
+			.def("setCaption",			&CUICaption::setCaption),
+
+		class_<Patch_Dawnload_Progress>("Patch_Dawnload_Progress")
+			.def("GetInProgress",	&Patch_Dawnload_Progress::GetInProgress)
+			.def("GetStatus",		&Patch_Dawnload_Progress::GetStatus)
+			.def("GetFlieName",		&Patch_Dawnload_Progress::GetFlieName)
+			.def("GetProgress",		&Patch_Dawnload_Progress::GetProgress),
+
+		class_<CMainMenu>("CMainMenu")
+			.def("GetPatchProgress",		&CMainMenu::GetPatchProgress)
+			.def("CancelDownload",			&CMainMenu::CancelDownload)
+			.def("ValidateCDKey",			&CMainMenu::ValidateCDKey)
+	],
+	module(L,"main_menu")
+	[
+		def("get_main_menu",				&MainMenu)
 	];
+
 }

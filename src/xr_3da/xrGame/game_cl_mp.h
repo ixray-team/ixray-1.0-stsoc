@@ -3,7 +3,7 @@
 #include "game_cl_base.h"
 #include "script_export_space.h"
 #include "game_cl_mp_snd_messages.h"
-#include "../Sound.h"
+#include "../../xrSound/Sound.h"
 #include "ui/UISpeechMenu.h"
 #include "Spectator.h"
 
@@ -146,8 +146,7 @@ protected:
 	CUIVote*						m_pVoteRespondWindow;
 	CUIMessageBoxEx*				m_pMessageBox;
 	BOOL							m_bSpectatorSelected;
-	int								m_iSpawn_Cost;
-
+	
 	virtual void			LoadTeamData			(const shared_str&	TeamName);
 	virtual	void			ChatSayTeam				(const shared_str&	phrase);
 	virtual	void			ChatSayAll				(const shared_str&	phrase);
@@ -157,7 +156,7 @@ protected:
 
 	virtual void			UpdateMapLocations		() {};
 //-----------------------------------------------------------------------------------
-	CUIMessageBoxEx*		pBuySpawnMsgBox;
+//	CUIMessageBoxEx*		pBuySpawnMsgBox;
 //-----------------------------------------------------------------------------------
 	ref_shader				m_EquipmentIconsShader;
 	ref_shader				m_KillEventIconsShader;

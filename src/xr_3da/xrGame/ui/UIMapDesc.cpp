@@ -64,9 +64,7 @@ void CUIMapDesc::Init(){
 	// init map picture
 	CUIXmlInit::InitStatic		(xml_doc,"map_desc:image",			0,	m_pImage);
 
-	string256								gameLtxPath;
-	FS.update_path							(gameLtxPath, CONFIG_PATH, "game.ltx");
-	CInifile gameLtx						(gameLtxPath);
+	CInifile& gameLtx	= *pGameIni;
 
 	if (gameLtx.section_exist(Level().name()),*Level().name()
 		&& gameLtx.line_exist(Level().name(),"texture"))

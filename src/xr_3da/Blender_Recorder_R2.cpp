@@ -103,8 +103,8 @@ u32		CBlender_Compile::r_Sampler		(LPCSTR _name, LPCSTR texture, bool b_ps1x_Pro
 		i_Texture				(dwStage,texture);
 
 		// force ANISO-TF for "s_base"
-		if ((0==xr_strcmp(_name,"s_base")) && (fmin==D3DTEXF_LINEAR))	fmin = D3DTEXF_ANISOTROPIC;
-		if ((0==xr_strcmp(_name,"s_detail")) && (fmin==D3DTEXF_LINEAR))	fmin = D3DTEXF_ANISOTROPIC;
+		if ((0==xr_strcmp(_name,"s_base")) && (fmin==D3DTEXF_LINEAR))	{ fmin = D3DTEXF_ANISOTROPIC; fmag=D3DTEXF_ANISOTROPIC; }
+		if ((0==xr_strcmp(_name,"s_detail")) && (fmin==D3DTEXF_LINEAR))	{ fmin = D3DTEXF_ANISOTROPIC; fmag=D3DTEXF_ANISOTROPIC; }
 
 		// Sampler states
 		i_Address				(dwStage,address);

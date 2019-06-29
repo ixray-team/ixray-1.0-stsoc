@@ -1205,6 +1205,11 @@ void CUIBuyWnd::SetRank(u32 rank)
 	m_bag.SetRank(rank);
 }
 
+u32 CUIBuyWnd::GetRank()
+{
+	return 0;
+}
+
 const u8 CUIBuyWnd::GetItemIndex(u32 slotNum, u32 idx, u8 &sectionNum)
 {
 	CUICellItem *itm			= NULL;
@@ -1558,3 +1563,8 @@ void CUIBuyWnd::ItemToRuck(const shared_str& sectionName, u32 addons)
 
 void CUIBuyWnd::ItemToSlot(const shared_str& sectionName, u32 addons)
 {}
+
+bool	CUIBuyWnd::IsIgnoreMoneyAndRank		()
+{
+	return m_bIgnoreMoneyAndRank;
+}

@@ -69,7 +69,7 @@ public:
 
 	virtual LPCSTR				Name				();
 	virtual LPCSTR				NameShort			();
-	virtual LPCSTR				NameComplex			();
+//.	virtual LPCSTR				NameComplex			();
 	shared_str					ItemDescription		() { return m_Description; }
 	virtual void				GetBriefInfo		(xr_string& str_name, xr_string& icon_sect_name, xr_string& str_count) {};
 	
@@ -89,10 +89,9 @@ public:
 	virtual void				Deactivate			();								// !!! Переопределить. (см. в Inventory.cpp)
 	virtual bool				Action				(s32 cmd, u32 flags) {return false;}	// true если известная команда, иначе false
 
-	// вещь спрятано в инвентаре
 	virtual bool				IsHidden			()	const	{return true;}
-	//вещь убирается в инвентарь
 	virtual bool				IsHiding			()	const	{return false;}
+	virtual bool 				IsShowing			()  const	{return false;}
 
 	virtual void				OnH_B_Chield		();
 	virtual void				OnH_A_Chield		();
@@ -130,6 +129,7 @@ public:
 					
 			int					GetGridWidth		() const ;
 			int					GetGridHeight		() const ;
+			const shared_str&	GetIconName			() const		{return m_icon_name;};
 			int					GetXPos				() const ;
 			int					GetYPos				() const ;
 	//---------------------------------------------------------------------
@@ -166,6 +166,7 @@ protected:
 	ALife::_TIME_ID				m_dwItemIndependencyTime;
 
 	float						m_fControlInertionFactor;
+	shared_str					m_icon_name;
 
 	////////// network //////////////////////////////////////////////////
 public:

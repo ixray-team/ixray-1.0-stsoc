@@ -47,6 +47,10 @@
 #include "../../agent_corpse_manager.h"
 #include "../../CharacterPhysicsSupport.h"
 
+#include "../../stalker_planner.h"
+#include "../../stalker_decision_space.h"
+#include "../../script_game_object.h"
+
 using namespace StalkerSpace;
 
 const float DANGER_DISTANCE				= 3.f;
@@ -92,12 +96,15 @@ float CAI_Stalker::GetWeaponAccuracy	() const
 
 void CAI_Stalker::g_fireParams(const CHudItem* pHudItem, Fvector& P, Fvector& D)
 {
-	VERIFY				(inventory().ActiveItem());
-//	if (!inventory().ActiveItem()) {
-//		P				= Position();
-//		D				= Fvector().set(0.f,0.f,1.f);
-//		return;
-//	}
+//.	VERIFY				(inventory().ActiveItem());
+	if (!inventory().ActiveItem()) {
+#ifdef DEBUG
+		Msg				("! CAI_Stalker::g_fireParams() : VERIFY(inventory().ActiveItem())");
+#endif // DEBUG
+		P				= Position();
+		D				= Fvector().set(0.f,0.f,1.f);
+		return;
+	}
 
 	CWeapon				*weapon = smart_cast<CWeapon*>(inventory().ActiveItem());
 	if (!weapon) {
@@ -286,8 +293,22 @@ void CAI_Stalker::OnItemTake			(CInventoryItem *inventory_item)
 void CAI_Stalker::OnItemDrop			(CInventoryItem *inventory_item)
 {
 	CObjectHandler::OnItemDrop	(inventory_item);
+
 	m_item_actuality			= false;
 	m_sell_info_actuality		= false;
+
+	if (!g_Alive())
+		return;
+
+	if (!critically_wounded())
+		return;
+
+//	VERIFY						(inventory().ActiveItem());
+
+	if (inventory().ActiveItem() && (inventory().ActiveItem() != inventory_item))
+		return;
+
+	brain().CStalkerPlanner::m_storage.set_property(StalkerDecisionSpace::eWorldPropertyCriticallyWounded,false);
 }
 
 void CAI_Stalker::update_best_item_info	()

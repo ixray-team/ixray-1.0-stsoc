@@ -569,7 +569,10 @@ void CMissile::activate_physic_shell()
 	if (!smart_cast<CMissile*>(H_Parent())) {
 		inherited::activate_physic_shell();
 		if(m_pPhysicsShell&&m_pPhysicsShell->isActive()&&!IsGameTypeSingle())
+		{
 				m_pPhysicsShell->add_ObjectContactCallback		(ExitContactCallback);
+				m_pPhysicsShell->set_CallbackData	(smart_cast<CPhysicsShellHolder*>(H_Root()));
+		}
 		return;
 	}
 
@@ -639,7 +642,7 @@ void CMissile::setup_physic_shell	()
 {
 	VERIFY(!m_pPhysicsShell);
 	create_physic_shell();
-	m_pPhysicsShell->Activate	(XFORM(),0,XFORM(),true);
+	m_pPhysicsShell->Activate	(XFORM(),0,XFORM());//,true 
 	CKinematics					*kinematics = smart_cast<CKinematics*>(Visual());
 	VERIFY						(kinematics);
 	kinematics->CalculateBones_Invalidate();

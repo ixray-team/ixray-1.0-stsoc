@@ -13,7 +13,7 @@
 
 CEF_Storage::CEF_Storage()
 {	
-	Memory.mem_fill						(m_fpaBaseFunctions,0,sizeof(CBaseFunction*)*AI_MAX_EVALUATION_FUNCTION_COUNT);
+	ZeroMemory							(m_fpaBaseFunctions,sizeof(m_fpaBaseFunctions));
 	
 	m_fpaBaseFunctions[0]				= m_pfDistance				= xr_new<CDistanceFunction>				(this);
 	m_fpaBaseFunctions[1]				= m_pfGraphPointType0		= xr_new<CGraphPointType0>				(this);

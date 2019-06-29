@@ -15,15 +15,22 @@
 #include "../associative_vector.h"
 #include "restrictions.h"
 
+struct string_lex_less
+{
+	bool operator() (const shared_str& A, const shared_str& B) const
+	{
+		return (xr_strcmp(A,B) < 0);
+	}
+};
 class CItemMgr
 {
 	struct _i{
 		u8			slot_idx;
 		u32			cost[_RANK_COUNT];
 	};
-	typedef associative_vector<shared_str, _i>	COST_MAP;
-	typedef COST_MAP::iterator									COST_MAP_IT;
-	typedef COST_MAP::const_iterator							COST_MAP_CIT;
+	typedef associative_vector<shared_str, _i, string_lex_less>	COST_MAP;
+	typedef COST_MAP::iterator												COST_MAP_IT;
+	typedef COST_MAP::const_iterator										COST_MAP_CIT;
 	COST_MAP				m_items;
 public:
 	void					Load			(const shared_str& sect);

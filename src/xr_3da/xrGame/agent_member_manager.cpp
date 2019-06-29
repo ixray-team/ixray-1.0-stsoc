@@ -15,6 +15,22 @@
 #include "explosive.h"
 #include "sound_player.h"
 
+class CMemberPredicate2 {
+protected:
+	ALife::_OBJECT_ID	m_object_id;
+
+public:
+	IC				CMemberPredicate2	(const ALife::_OBJECT_ID &object_id)
+	{
+		m_object_id		= object_id;
+	}
+
+	IC		bool	operator()			(const CMemberOrder *order) const
+	{
+		return			(order->object().ID() == m_object_id);
+	}
+};
+
 CAgentMemberManager::~CAgentMemberManager		()
 {
 	delete_data					(m_members);
@@ -47,7 +63,8 @@ void CAgentMemberManager::remove				(CEntity *member)
 	if (!stalker)
 		return;
 
-	unregister_in_combat		(stalker);
+	if (registered_in_combat(stalker))
+		unregister_in_combat	(stalker);
 
 	squad_mask_type							m = mask(stalker);
 	object().memory().update_memory_masks	(m);
@@ -86,8 +103,18 @@ void CAgentMemberManager::remove_links			(CObject *object)
 
 void CAgentMemberManager::register_in_combat	(const CAI_Stalker *object)
 {
-	if (!object->group_behaviour())
-		return;
+//	if (!object->group_behaviour())
+//		return;
+
+#if 0//def DEBUG
+	Msg							(
+		"%6d registering stalker %s in combat: 0x%08x -> 0x%08x",
+		Device.dwTimeGlobal,
+		*object->cName(),
+		m_combat_mask,
+		m_combat_mask | mask(object)
+	);
+#endif // DEBUG
 
 	squad_mask_type				m = mask(object);
 	m_actuality					= m_actuality && ((m_combat_mask | m) == m_combat_mask);
@@ -96,10 +123,20 @@ void CAgentMemberManager::register_in_combat	(const CAI_Stalker *object)
 
 void CAgentMemberManager::unregister_in_combat	(const CAI_Stalker *object)
 {
-	if (!object->group_behaviour()) {
-		VERIFY					(!registered_in_combat(object));
-		return;
-	}
+//	if (!object->group_behaviour()) {
+//		VERIFY					(!registered_in_combat(object));
+//		return;
+//	}
+
+#if 0//def DEBUG
+	Msg							(
+		"%6d UNregistering stalker %s in combat: 0x%08x -> 0x%08x",
+		Device.dwTimeGlobal,
+		*object->cName(),
+		m_combat_mask,
+		(m_combat_mask & (squad_mask_type(-1) ^ mask(object)))
+	);
+#endif // DEBUG
 
 	squad_mask_type				m = mask(object);
 	m_actuality					= m_actuality && ((m_combat_mask & (squad_mask_type(-1) ^ m)) == m_combat_mask);
@@ -184,4 +221,20 @@ bool CAgentMemberManager::can_cry_noninfo_phrase() const
 	}
 
 	return								(true);
+}
+
+MemorySpace::squad_mask_type CAgentMemberManager::mask	(const ALife::_OBJECT_ID &object_id) const
+{
+	const_iterator		I = std::find_if(members().begin(),members().end(), CMemberPredicate2(object_id));
+	VERIFY				(I != members().end());
+	return				(MemorySpace::squad_mask_type(1) << (I - members().begin()));
+}
+
+CMemberOrder *CAgentMemberManager::get_member	(const ALife::_OBJECT_ID &object_id)
+{
+	iterator			I = std::find_if(members().begin(),members().end(), CMemberPredicate2(object_id));
+	if (I == members().end())
+		return			(0);
+
+	return				(&**I);
 }

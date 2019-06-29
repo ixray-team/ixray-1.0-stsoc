@@ -30,7 +30,6 @@ CCustomZone::CCustomZone(void)
 	m_fAttenuation				= 1.f;
 	m_dwPeriod					= 1100;
 	m_fEffectiveRadius			= 0.75f;
-//	m_bZoneReady				= false;
 	m_bZoneActive				= false;
 	m_eHitTypeBlowout			= ALife::eHitTypeWound;
 	m_pLocalActor				= NULL;
@@ -54,7 +53,8 @@ CCustomZone::CCustomZone(void)
 	m_ef_weapon_type			= u32(-1);
 	m_owner_id					= u32(-1);
 
-	m_effector					= xr_new<CZoneEffector>();
+	m_effector					= NULL;
+	m_bIdleObjectParticlesDontStop = FALSE;
 }
 
 CCustomZone::~CCustomZone(void) 
@@ -165,11 +165,14 @@ void CCustomZone::Load(LPCSTR section)
 		m_sIdleObjectParticlesBig = pSettings->r_string(section,"idle_big_particles");
 	if(pSettings->line_exist(section,"idle_big_particles")) 
 		m_sIdleObjectParticlesSmall = pSettings->r_string(section,"idle_small_particles");
+	if(pSettings->line_exist(section,"idle_particles_dont_stop"))
+		m_bIdleObjectParticlesDontStop=pSettings->r_bool(section,"idle_particles_dont_stop");
 
 	if(pSettings->line_exist(section,"postprocess")) 
-		m_effector->Load(pSettings->r_string(section,"postprocess"));
-	else
-		xr_delete(m_effector);
+	{
+		m_effector					= xr_new<CZoneEffector>();
+		m_effector->Load			(pSettings->r_string(section,"postprocess"));
+	};
 
 
 
@@ -333,21 +336,21 @@ BOOL CCustomZone::net_Spawn(CSE_Abstract* DC)
 	m_zone_flags.set			(eUseOnOffTime,	(m_TimeToDisable!=0)&&(m_TimeToEnable!=0) );
 
 	//добавить источники света
-	if ( m_zone_flags.test(eIdleLight) ){
+	if ( m_zone_flags.test(eIdleLight) )
+	{
 		m_pIdleLight = ::Render->light_create();
 		m_pIdleLight->set_shadow(true);
 	}
 	else
 		m_pIdleLight = NULL;
 
-	if ( m_zone_flags.test(eBlowoutLight) ) {
+	if ( m_zone_flags.test(eBlowoutLight) ) 
+	{
 		m_pLight = ::Render->light_create();
 		m_pLight->set_shadow(true);
-	}
-	else
+	}else
 		m_pLight = NULL;
 
-	shedule_register			();
 	setEnabled					(TRUE);
 
 	PlayIdleParticles			();
@@ -360,8 +363,6 @@ BOOL CCustomZone::net_Spawn(CSE_Abstract* DC)
 	m_dwLastTimeMoved			= Device.dwTimeGlobal;
 	m_vPrevPos.set				(Position());
 
-
-//.	PrefetchArtefacts			();
 
 	m_fDistanceToCurEntity		= flt_max;
 	m_bBlowoutWindActive		= false;
@@ -568,17 +569,12 @@ void CCustomZone::shedule_Update(u32 dt)
 
 void CCustomZone::CheckForAwaking()
 {
-	//в зону попал объект, разбудить ее
 	if(m_bZoneActive && eZoneStateIdle ==  m_eZoneState)
 		SwitchZoneState(eZoneStateAwaking);
 }
 
 void CCustomZone::feel_touch_new	(CObject* O) 
 {
-	
-#ifdef DEBUG
-	if(bDebug) Msg("%s %s",*O->cName(),"entering a zone.");
-#endif
 	if(smart_cast<CActor*>(O) && O == Level().CurrentEntity())
 					m_pLocalActor	= smart_cast<CActor*>(O);
 
@@ -762,7 +758,6 @@ void CCustomZone::PlayHitParticles(CGameObject* pObject)
 
 	shared_str particle_str = NULL;
 
-	//разные партиклы для объектов разного размера
 	if(pObject->Radius()<SMALL_OBJECT_RADIUS)
 	{
 		if(!m_sHitParticlesSmall) return;
@@ -774,8 +769,8 @@ void CCustomZone::PlayHitParticles(CGameObject* pObject)
 		particle_str = m_sHitParticlesBig;
 	}
 
-	if( particle_str.size() ){
-		// play particles
+	if( particle_str.size() )
+	{
 		CParticlesPlayer* PP = smart_cast<CParticlesPlayer*>(pObject);
 		if (PP){
 			u16 play_bone = PP->GetRandomBone(); 
@@ -787,11 +782,12 @@ void CCustomZone::PlayHitParticles(CGameObject* pObject)
 
 void CCustomZone::PlayEntranceParticles(CGameObject* pObject)
 {
+	if (!IsEnabled())		return;
+
 	m_entrance_sound.play_at_pos(0, pObject->Position());
 
 	shared_str particle_str = NULL;
 
-	//разные партиклы для объектов разного размера
 	if(pObject->Radius()<SMALL_OBJECT_RADIUS)
 	{
 		if(!m_sEntranceParticlesSmall) return;
@@ -829,8 +825,11 @@ void CCustomZone::PlayEntranceParticles(CGameObject* pObject)
 
 			PP->MakeXFORM			(pObject,play_bone,dir,Fvector().set(0,0,0),xform);
 			pParticles->UpdateParent(xform, vel);
-			if (IsEnabled())
+			{
 				pParticles->Play		();
+				//. <-->
+				//. PP->StartParticles (particle_str, play_bone, dir, ID());
+			}
 		}
 	}
 }
@@ -874,6 +873,9 @@ void CCustomZone::PlayObjectIdleParticles(CGameObject* pObject)
 
 	
 	//запустить партиклы на объекте
+	//. new
+	PP->StopParticles (particle_str, BI_NONE, true);
+
 	PP->StartParticles (particle_str, Fvector().set(0,1,0), ID());
 	if (!IsEnabled())
 		PP->StopParticles	(particle_str, BI_NONE, true);
@@ -881,6 +883,10 @@ void CCustomZone::PlayObjectIdleParticles(CGameObject* pObject)
 
 void CCustomZone::StopObjectIdleParticles(CGameObject* pObject)
 {
+	//. new
+	if (m_bIdleObjectParticlesDontStop&&!pObject->cast_actor())
+		return;
+
 	CParticlesPlayer* PP = smart_cast<CParticlesPlayer*>(pObject);
 	if(!PP) return;
 
@@ -902,16 +908,9 @@ void CCustomZone::StopObjectIdleParticles(CGameObject* pObject)
 		particle_str = m_sIdleObjectParticlesBig;
 	}
 
-	//остановить партиклы
 	PP->StopParticles	(particle_str, BI_NONE, true);
 }
 
-
-//void  CCustomZone::Hit(float P, Fvector &dir,
-//					  CObject* who, s16 element,
-//					  Fvector position_in_object_space,
-//					  float impulse,
-//					  ALife::EHitType hit_type)
 void	CCustomZone::Hit					(SHit* pHDS)
 {
 	Fmatrix M;
@@ -969,9 +968,11 @@ void CCustomZone::UpdateBlowoutLight	()
 
 void CCustomZone::AffectObjects()
 {
-	if(m_dwAffectFrameNum == Device.dwFrame) return;
+	if(m_dwAffectFrameNum == Device.dwFrame)	return;
+	m_dwAffectFrameNum	= Device.dwFrame;
 
-	m_dwAffectFrameNum = Device.dwFrame;
+	if(Device.dwPrecacheFrame)					return;
+
 
 	OBJECT_INFO_VEC_IT it;
 	for(it = m_ObjectInfoMap.begin(); m_ObjectInfoMap.end() != it; ++it) 
@@ -1008,13 +1009,11 @@ void CCustomZone::UpdateBlowout()
 		m_dwBlowoutExplosionTime<(u32)m_iStateTime)
 	{
 		AffectObjects();
-
-		//заспавнить артефакт
 		BornArtefact();
 	}
 }
 
-void  CCustomZone::OnMove	()
+void  CCustomZone::OnMove()
 {
 	if(m_dwLastTimeMoved == 0)
 	{
@@ -1023,11 +1022,10 @@ void  CCustomZone::OnMove	()
 	}
 	else
 	{
-		float time_delta = float(Device.dwTimeGlobal - m_dwLastTimeMoved)/1000.f;
-		m_dwLastTimeMoved = Device.dwTimeGlobal;
-		//скорость движения
-		
-		Fvector vel;
+		float time_delta	= float(Device.dwTimeGlobal - m_dwLastTimeMoved)/1000.f;
+		m_dwLastTimeMoved	= Device.dwTimeGlobal;
+
+		Fvector				vel;
 			
 		if(fis_zero(time_delta))
 			vel = zero_vel;
@@ -1056,30 +1054,7 @@ void	CCustomZone::OnEvent (NET_Packet& P, u16 type)
 			{
 				u8				S;
 				P.r_u8			(S);
-#ifdef DEBUG
-				string128 s1,s2;
-				sprintf(s2, " Time = [%u]", Device.dwTimeGlobal);
-
-				switch (S)
-				{
-				case eZoneStateIdle:
-					if(bDebug) Msg("%s %s",*cName(),strconcat(s1,"zone switch to State Idle",s2));
-					break;															
-				case eZoneStateAwaking:
-					if(bDebug) Msg("%s %s",*cName(),strconcat(s1,"zone switch to State Awaking",s2));
-					break;															
-				case eZoneStateBlowout:
-					if(bDebug) Msg("%s %s",*cName(),strconcat(s1,"zone switch to State Blowout",s2));
-					break;															
-				case eZoneStateAccumulate:
-					if(bDebug) Msg("%s %s",*cName(),strconcat(s1,"zone switch to State Accumulate",s2));
-					break;
-				case eZoneStateDisabled:
-					if(bDebug) Msg("%s %s",*cName(),strconcat(s1,"zone switch to State Disabled",s2));
-					break;
-				};
-#endif
-				OnStateSwitch(EZoneState(S));
+				OnStateSwitch	(EZoneState(S));
 				break;
 			}
 		case GE_OWNERSHIP_TAKE : 
@@ -1163,8 +1138,6 @@ bool CCustomZone::Enable()
 {
 	if (IsEnabled()) return false;
 
-//	PlayIdleParticles();
-
 	for(OBJECT_INFO_VEC_IT it = m_ObjectInfoMap.begin(); 
 		m_ObjectInfoMap.end() != it; ++it) 
 	{
@@ -1179,8 +1152,6 @@ bool CCustomZone::Enable()
 bool CCustomZone::Disable()
 {
 	if (!IsEnabled()) return false;
-
-//	StopIdleParticles();
 
 	for(OBJECT_INFO_VEC_IT it = m_ObjectInfoMap.begin(); 
 		m_ObjectInfoMap.end() != it; ++it) 
@@ -1279,15 +1250,15 @@ void CCustomZone::StartWind()
 	if(m_fDistanceToCurEntity>WIND_RADIUS) return;
 
 	m_bBlowoutWindActive = true;
-	m_fStoreWindPower = g_pGamePersistent->Environment.wind_strength_factor;
-	clamp(g_pGamePersistent->Environment.wind_strength_factor, 0.f, 1.f);
+	m_fStoreWindPower = g_pGamePersistent->Environment().wind_strength_factor;
+	clamp(g_pGamePersistent->Environment().wind_strength_factor, 0.f, 1.f);
 }
 
 void CCustomZone::StopWind()
 {
 	if(!m_bBlowoutWindActive) return;
 	m_bBlowoutWindActive = false;
-	g_pGamePersistent->Environment.wind_strength_factor = m_fStoreWindPower;
+	g_pGamePersistent->Environment().wind_strength_factor = m_fStoreWindPower;
 }
 
 void CCustomZone::UpdateWind()
@@ -1302,17 +1273,17 @@ void CCustomZone::UpdateWind()
 
 	if(m_dwBlowoutWindTimePeak > (u32)m_iStateTime)
 	{
-		g_pGamePersistent->Environment.wind_strength_factor = m_fBlowoutWindPowerMax + ( m_fStoreWindPower - m_fBlowoutWindPowerMax)*
+		g_pGamePersistent->Environment().wind_strength_factor = m_fBlowoutWindPowerMax + ( m_fStoreWindPower - m_fBlowoutWindPowerMax)*
 								float(m_dwBlowoutWindTimePeak - (u32)m_iStateTime)/
 								float(m_dwBlowoutWindTimePeak - m_dwBlowoutWindTimeStart);
-		clamp(g_pGamePersistent->Environment.wind_strength_factor, 0.f, 1.f);
+		clamp(g_pGamePersistent->Environment().wind_strength_factor, 0.f, 1.f);
 	}
 	else
 	{
-		g_pGamePersistent->Environment.wind_strength_factor = m_fBlowoutWindPowerMax + (m_fStoreWindPower - m_fBlowoutWindPowerMax)*
+		g_pGamePersistent->Environment().wind_strength_factor = m_fBlowoutWindPowerMax + (m_fStoreWindPower - m_fBlowoutWindPowerMax)*
 			float((u32)m_iStateTime - m_dwBlowoutWindTimePeak)/
 			float(m_dwBlowoutWindTimeEnd - m_dwBlowoutWindTimePeak);
-		clamp(g_pGamePersistent->Environment.wind_strength_factor, 0.f, 1.f);
+		clamp(g_pGamePersistent->Environment().wind_strength_factor, 0.f, 1.f);
 	}
 }
 

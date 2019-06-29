@@ -22,6 +22,9 @@ public:
 	virtual void 		Load		(const char* N, IReader *data,u32 dwFlags);
 	virtual void 		Copy		(IRender_Visual *pFrom);
 	virtual void 		Release		();
+private:
+	FProgressive				(const FProgressive& other);
+	void	operator=			( const FProgressive& other);
 };
 
 #endif

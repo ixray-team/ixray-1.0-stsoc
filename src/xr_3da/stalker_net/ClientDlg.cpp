@@ -128,7 +128,7 @@ BOOL CClientDlg::OnInitDialog()
 	//.......................................................
 	InitializeCriticalSection( &m_pCriticalSection );
 	// Init COM so we can use CoCreateInstance
-	CoInitializeEx( NULL, COINIT_MULTITHREADED );
+	CoInitialize( NULL);//, COINIT_MULTITHREADED );
 	//.......................................................
 	//=========== Game Spy =================================================
 	m_timerID = 0;
@@ -140,7 +140,7 @@ BOOL CClientDlg::OnInitDialog()
 
 
 	GSIACResult result;
-	GSIStartAvailableCheck(GAME_NAME);
+	GSIStartAvailableCheck(GAMESPY_GAMENAME);
 	while((result = GSIAvailableCheckThink()) == GSIACWaiting)
 		msleep(5);
 	if(result != GSIACAvailable)
@@ -149,7 +149,7 @@ BOOL CClientDlg::OnInitDialog()
 		return TRUE;
 	}
 
-	m_serverBrowser = ServerBrowserNew(GAME_NAME, GAME_NAME, SECRET_KEY, 0, MAX_UPDATES, QVERSION_QR2, SBFalse, SBCallback, this);
+	m_serverBrowser = ServerBrowserNew(GAMESPY_GAMENAME, GAMESPY_GAMENAME, SECRET_KEY, 0, MAX_UPDATES, QVERSION_QR2, SBFalse, SBCallback, this);
 	if(!m_serverBrowser)
 	{
 		MessageBox("Unable to create the server browser object");
@@ -426,6 +426,9 @@ void CClientDlg::AddServerToList		(SBServer server)
 	sprintf(NODE->dpSessionName, "%s", SBServerGetStringValue(server, qr2_registered_key_list[MAPNAME_KEY], "Unknown"));
 	
 	NODE->dpServerGameType = GetGameType((char*)SBServerGetStringValue(server, qr2_registered_key_list[GAMETYPE_NAME_KEY], "UNKNOWN"));
+	string1024 xtmp;
+	strcpy(xtmp, (char*)SBServerGetStringValue(server, qr2_registered_key_list[GAMETYPE_KEY], ""));
+
 	NODE->dpServerGameType = GetGameType((byte)SBServerGetIntValue(server, qr2_registered_key_list[GAMETYPE_KEY], 0));
 
 	NODE->dpPassword	= SBServerGetBoolValue(server, qr2_registered_key_list[PASSWORD_KEY], SBFalse);
@@ -570,8 +573,10 @@ void CClientDlg::OnBnClickedJoin()
 	int iPrefetch = 0;
 	int iR2 = 0;
 	int iDistort = 1;
+	char sLogsPath[1024] = "";
 	char Name[1024];
 	char NameAdd[1024];
+	char sCDKeyStr[1024] = "";
 	CStalker_netDlg* pMainDlg = (CStalker_netDlg*) (GetParent()->GetParent());
 	if (pMainDlg)
 	{
@@ -586,6 +591,19 @@ void CClientDlg::OnBnClickedJoin()
 		iPrefetch  = pMainDlg->m_pPrefetch.GetCheck();
 		iR2 = pMainDlg->m_pR2.GetCheck();
 		iDistort = pMainDlg->m_pDistort.GetCheck();
+		if (pMainDlg->m_pLogsPath.GetWindowTextLength() != 0)
+		{
+			char tmp[1024];
+			pMainDlg->m_pLogsPath.GetWindowText(tmp, 1024);
+			sprintf(sLogsPath, "-overlaypath %s ", tmp);
+		}
+		if (pMainDlg->m_pCDKeyBtn.GetWindowTextLength() != 0)
+		{
+			char tmp[1024];
+			pMainDlg->m_pCDKeyBtn.GetWindowText(tmp, 1024);
+			if (0 != xr_strcmp(tmp, "- No CD Key -"))
+				sprintf(sCDKeyStr, "/cdkey=%s", tmp);
+		}
 	};
 
 	//-noprefetch
@@ -610,11 +628,12 @@ void CClientDlg::OnBnClickedJoin()
 		if (nResponse == IDCANCEL) return;
 	};	
 	/* Server(%s/deathmatch)*/ 
-	sprintf(cmdline, "xr_3da.exe -xclsx %s%s%s%s %s -nocache -external -start client(%s%s%s%s)", //server/name
+	sprintf(cmdline, "xr_3da.exe -xclsx %s%s%s%s%s %s -nocache -external -start client(%s%s%s%s%s)", //server/name
 							(iCatchInput == 1) ? "-i " : "",
 							(iPrefetch == 1) ? "" : "-noprefetch ",
 							(iR2 == 1) ? "-r2" : "",
 							(iDistort == 1) ? "" : "-nodistort",
+							(sLogsPath[0] == 0) ? "" : sLogsPath,
 							//-------------------------------------
 							LTX, 
 							//-------------------------------------
@@ -622,7 +641,9 @@ void CClientDlg::OnBnClickedJoin()
 							N.dpHostName,//N.dpServerName,
 							(NameLen) ? NameAdd : "",
 							(N.dpPort!=0) ? PortStr : "",
-							(N.dpPassword != 0) ? PswStr : "");
+							(N.dpPassword != 0) ? PswStr : "",
+							(sCDKeyStr[0]) ? sCDKeyStr : ""
+							);
 
 	OutputDebugString( cmdline );
 	int res = WinExec(cmdline, SW_SHOW);
@@ -1088,7 +1109,7 @@ void CClientDlg::OnBnClickedGSUpdateList()
 	if(internet)
 		error = ServerBrowserUpdate(m_serverBrowser, SBTrue, SBFalse, fields, numFields, (char *)(const char *)"");
 	else
-		error = ServerBrowserLANUpdate(m_serverBrowser, SBTrue, START_PORT, END_PORT);
+		error = ServerBrowserLANUpdate(m_serverBrowser, SBTrue, START_PORT_LAN, END_PORT_LAN);
 
 	if (error != sbe_noerror)
 	{

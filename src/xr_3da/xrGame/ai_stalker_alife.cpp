@@ -228,6 +228,9 @@ void CAI_Stalker::choose_equipment				()
 
 void CAI_Stalker::select_items						()
 {
+	if (!m_can_select_items)
+		return;
+
 	choose_food			();
 	choose_weapon		(ALife::eWeaponPriorityTypeKnife);
 	choose_weapon		(ALife::eWeaponPriorityTypeSecondary);

@@ -392,7 +392,7 @@ void CWeaponMagazined::OnStateSwitch	(u32 S)
 		break;
 	case eMisfire:
 		if(smart_cast<CActor*>(this->H_Parent()) && (Level().CurrentViewEntity()==H_Parent()) )
-			HUD().GetUI()->AddInfoMessage(*CStringTable().translate("gun_jammed"));
+			HUD().GetUI()->AddInfoMessage("gun_jammed");
 		break;
 	case eMagEmpty:
 		switch2_Empty	();
@@ -594,9 +594,43 @@ void CWeaponMagazined::switch2_Idle	()
 	PlayAnimIdle();
 }
 
-
+#ifdef DEBUG
+#include "ai\stalker\ai_stalker.h"
+#include "object_handler_planner.h"
+#endif
 void CWeaponMagazined::switch2_Fire	()
 {
+	CInventoryOwner* io		= smart_cast<CInventoryOwner*>(H_Parent());
+	CInventoryItem* ii		= smart_cast<CInventoryItem*>(this);
+#ifdef DEBUG
+	VERIFY2					(io,make_string("no inventory owner, item %s",*cName()));
+
+	if (ii != io->inventory().ActiveItem())
+		Msg					("! not an active item, item %s, owner %s, active item %s",*cName(),*H_Parent()->cName(),io->inventory().ActiveItem() ? *io->inventory().ActiveItem()->object().cName() : "no_active_item");
+
+	if ( !(io && (ii == io->inventory().ActiveItem())) ) 
+	{
+		CAI_Stalker			*stalker = smart_cast<CAI_Stalker*>(H_Parent());
+		if (stalker) {
+			stalker->planner().show						();
+			stalker->planner().show_current_world_state	();
+			stalker->planner().show_target_world_state	();
+		}
+	}
+#else
+	if (!io)
+		return;
+#endif // DEBUG
+
+	VERIFY2(
+		io && (ii == io->inventory().ActiveItem()),
+		make_string(
+			"item[%s], parent[%s]",
+			*cName(),
+			H_Parent() ? *H_Parent()->cName() : "no_parent"
+		)
+	);
+
 	m_bStopedAfterQueueFired = false;
 	m_bFireSingleShot = true;
 	m_iShotNum = 0;
@@ -633,7 +667,6 @@ void CWeaponMagazined::switch2_Reload()
 	CWeapon::FireEnd();
 
 	PlayReloadSound	();
-	PlaySound		(sndReload,get_LastFP());
 	PlayAnimReload	();
 	m_bPending = true;
 }
@@ -878,8 +911,6 @@ void CWeaponMagazined::InitAddons()
 
 	
 
-	//////////////////////////////////////////////////////////////////////////
-	// √лушитель
 	if(IsSilencerAttached() && SilencerAttachable())
 	{		
 		m_sFlameParticlesCurrent = m_sSilencerFlameParticles;
@@ -888,14 +919,11 @@ void CWeaponMagazined::InitAddons()
 
 
 		//сила выстрела
-//		LoadFireParams	(*cNameSect(), "silencer_");
 		LoadFireParams	(*cNameSect(), "");
 
 		//подсветка от выстрела
 		LoadLights		(*cNameSect(), "silencer_");
-		//  [7/26/2005]
 		ApplySilencerKoeffs();
-		//  [7/26/2005]
 	}
 	else
 	{
@@ -938,7 +966,8 @@ void CWeaponMagazined::ApplySilencerKoeffs	()
 		clamp(CD_k, 0.0f, 1.0f);
 	};
 
-	fHitPower			= fHitPower*BHPk;
+	//fHitPower			= fHitPower*BHPk;
+	fvHitPower			.mul(BHPk);
 	fHitImpulse			*= BSk;
 	m_fStartBulletSpeed *= BSk;
 	fireDispersionBase	*= FDB_k;

@@ -186,6 +186,7 @@ game_GameState::game_GameState()
 	phase				=	GAME_PHASE_NONE;
 	round				=	-1;
 
+	VERIFY						(g_pGameLevel);
 	m_qwStartProcessorTime		= Level().timeServer_Async();
 	m_qwStartGameTime			= g_qwStartGameTime;
 	m_fTimeFactor				= g_fTimeFactor;

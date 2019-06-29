@@ -12,6 +12,8 @@
 #include "ai_space.h"
 #include "../IGame_Persistent.h"
 #include "script_engine.h"
+#include "mainmenu.h"
+#include "object_factory.h"
 
 #pragma warning(push)
 #pragma warning(disable:4995)
@@ -20,11 +22,26 @@
 
 LPCSTR alife_section = "alife";
 
+extern void destroy_lua_wpn_params	();
+
+void restart_all				()
+{
+	if (strstr(Core.Params,"-keep_lua"))
+		return;
+
+	destroy_lua_wpn_params		();
+	MainMenu()->DestroyInternal	(true);
+	xr_delete					(g_object_factory);
+	ai().script_engine().init	();
+}
+
 CALifeSimulator::CALifeSimulator		(xrServer *server, shared_str *command_line) :
 	CALifeUpdateManager			(server,alife_section),
 	CALifeInteractionManager	(server,alife_section),
 	CALifeSimulatorBase			(server,alife_section)
 {
+	restart_all					();
+
 	VERIFY						(!ai().get_alife());
 	ai().set_alife				(this);
 	setup_command_line			(command_line);

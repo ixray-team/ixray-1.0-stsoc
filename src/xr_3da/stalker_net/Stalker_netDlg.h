@@ -44,7 +44,7 @@ public:
 	afx_msg void OnBnClickedButton1();
 	CButton m_pBuild;
 //	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	CCDKeyDlg		*m_pCDKeyDlg;
+	CCDKeyDlg		*m_pCDKeyDlg;	
 protected:
 	virtual void OnCancel();
 	virtual void OnOK();
@@ -56,10 +56,12 @@ protected:
 	void	GetCDKey			(char* CDKeyStr);
 	void	CreateCDKeyEntry	();
 private:
-	CButton m_pCDKeyBtn;
 public:
+	CButton m_pCDKeyBtn;
 //	afx_msg void OnBnClickedBuild2();
 	CButton m_pPrefetch;
 	CButton m_pR2;
 	CButton m_pDistort;
+	CButton m_pLogsPath;
+	afx_msg void OnBnClickedLogsPath();
 };

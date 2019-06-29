@@ -3,6 +3,7 @@
 #include "xrGameSpyServer.h"
 #include "../igame_persistent.h"
 
+#include "GameSpy/GameSpy_Base_Defs.h"
 #include "GameSpy/GameSpy_Available.h"
 
 xrGameSpyServer::xrGameSpyServer()
@@ -11,7 +12,6 @@ xrGameSpyServer::xrGameSpyServer()
 	m_bQR2_Initialized = FALSE;
 	m_bCDKey_Initialized = FALSE;
 	m_bCheckCDKey = false;
-	m_bDedicated = g_pGamePersistent->bDedicatedServer;
 }
 
 xrGameSpyServer::~xrGameSpyServer()
@@ -27,6 +27,8 @@ IClient*		xrGameSpyServer::client_Create		()
 }
 xrGameSpyClientData::xrGameSpyClientData	():xrClientData()
 {
+	m_bCDKeyAuth = false;
+	m_iCDKeyReauthHint = 0;
 }
 void	xrGameSpyClientData::Clear()
 {
@@ -34,12 +36,14 @@ void	xrGameSpyClientData::Clear()
 
 	m_pChallengeString[0] = 0;
 	m_bCDKeyAuth = false;
+	m_iCDKeyReauthHint = 0;
 };
 
 xrGameSpyClientData::~xrGameSpyClientData()
 {
 	m_pChallengeString[0] = 0;
 	m_bCDKeyAuth = false;
+	m_iCDKeyReauthHint = 0;
 }
 //-------------------------------------------------------
 BOOL xrGameSpyServer::Connect(shared_str &session_name)
@@ -67,19 +71,28 @@ BOOL xrGameSpyServer::Connect(shared_str &session_name)
 
 	m_iReportToMasterServer = game->get_option_i		(*session_name,"public",0);
 	m_iMaxPlayers	= game->get_option_i		(*session_name,"maxplayers",32);
-	m_bCheckCDKey = game->get_option_i		(*session_name,"cdkey",0) != 0;
+//	m_bCheckCDKey = game->get_option_i		(*session_name,"cdkey",0) != 0;
+	m_bCheckCDKey = game->get_option_i		(*session_name,"public",0) != 0;
 	//--------------------------------------------//
 	if (game->Type() != GAME_SINGLE) 
 	{
 		//----- Check for Backend Services ---
 		CGameSpy_Available GSA;
-		if (!GSA.CheckAvailableServices()) return FALSE;
+		shared_str result_string;
+		if (!GSA.CheckAvailableServices(result_string))
+		{
+			Msg(*result_string);
+		};
 
 		//------ Init of QR2 SDK -------------
-		QR2_Init();
+		int iGameSpyBasePort = game->get_option_i(*session_name, "portgs", -1);
+		QR2_Init(iGameSpyBasePort);
 
 		//------ Init of CDKey SDK -----------
-		if(m_bCheckCDKey) CDKey_Init();
+#ifndef NDEBUG
+		if(m_bCheckCDKey) 
+#endif
+			CDKey_Init();
 	};
 
 	return res;
@@ -107,27 +120,9 @@ int				xrGameSpyServer::GetPlayersCount()
 	return NumPlayers - 1;
 };
 
-/*
-void			xrGameSpyServer::OnCL_Connected		(IClient* _CL)
-{
-//	Server_Client_Check(_CL); 
-
-	xrGameSpyClientData* CL		= (xrGameSpyClientData*)_CL;
-
-	if (!m_bCDKey_Initialized || CL == GetServer_client()) 
-	{
-		CL->m_bCDKeyAuth = true;
-		inherited::OnCL_Connected(_CL);
-		return;
-	};
-	
-	SendChallengeString_2_Client(_CL);
-};
-*/
-
 bool			xrGameSpyServer::NeedToCheckClient_GameSpy_CDKey	(IClient* CL)
 {
-	if (!m_bCDKey_Initialized)// || CL == GetServer_client())
+	if (!m_bCDKey_Initialized || (CL == GetServerClient() && g_pGamePersistent->bDedicatedServer))
 	{
 		return false;
 	};
@@ -145,7 +140,7 @@ void			xrGameSpyServer::OnCL_Disconnected	(IClient* _CL)
 
 	if (m_bCDKey_Initialized)
 	{
-		Msg("GameSpy::CDKey::Server : Disconnecting Client");
+		Msg("xrGS::CDKey::Server : Disconnecting Client");
 		m_GCDServer.DisconnectUser(int(_CL->ID.value()));
 	};
 
@@ -165,19 +160,21 @@ u32				xrGameSpyServer::OnMessage(NET_Packet& P, ClientID sender)			// Non-Zero 
 		{
 			string128 ResponseStr;
 			P.r_stringZ(ResponseStr);
+			
+			if (!CL->m_bCDKeyAuth)
+			{
 
-			Msg("GameSpy::CDKey::Server : Respond accepted, authenticate client.");
+				Msg("xrGS::CDKey::Server : Respond accepted, Authenticate client.");
+				m_GCDServer.AuthUser(int(CL->ID.value()), *((unsigned int*)(CL->m_cAddress)), CL->m_pChallengeString, ResponseStr, this);
+			}
+			else
+			{
+				Msg("xrGS::CDKey::Server : Respond accepted, ReAuthenticate client.");
+				m_GCDServer.ReAuthUser(int(CL->ID.value()), CL->m_iCDKeyReauthHint, ResponseStr);
+			}
 
-			m_GCDServer.AuthUser(int(CL->ID.value()), 0, CL->m_pChallengeString, ResponseStr, this);
 			return (0);
 		}break;
-		/*
-	case M_CLIENTREADY:
-		{
-			if (CL->m_bCDKeyAuth) break;
-//			SendChallengeString_2_Client(CL);
-		}break;
-		*/
 	}
 
 	return	inherited::OnMessage(P, sender);

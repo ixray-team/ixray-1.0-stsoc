@@ -2,114 +2,130 @@
 #include "UIKeyBinding.h"
 #include "UIXmlInit.h"
 #include "xrUIXmlParser.h"
-#include "UIListItemAdv.h"
 #include "UIEditKeyBind.h"
+#include "UIScrollView.h"
 #include "../xr_level_controller.h"
 #include "../string_table.h"
 
-//extern void GetActionBinding(LPCSTR action, char* dst_buff);
-//extern _keybind  keybind[];
+CUIKeyBinding::CUIKeyBinding()
+{
+	for (int i=0; i<3; i++)
+		AttachChild		(&m_header[i]);
 
-CUIKeyBinding::CUIKeyBinding(){
-	for (int i=0; i<2; i++)
-		AttachChild(&m_header[i]);
-	AttachChild(&m_frame);
-	AttachChild(&m_list);
+	AttachChild			(&m_frame);
 }
 
-void CUIKeyBinding::InitFromXml(CUIXml& xml_doc, LPCSTR path){
+void CUIKeyBinding::InitFromXml(CUIXml& xml_doc, LPCSTR path)
+{
 	CUIXmlInit::InitWindow		(xml_doc, path, 0, this);
-	string256 buf;
-	CUIXmlInit::InitListWnd		(xml_doc, strconcat(buf,path,":list"),		0, &m_list);
+	string256					buf;
+	m_scroll_wnd				= xr_new<CUIScrollView>(); m_scroll_wnd->SetAutoDelete(true); AttachChild(m_scroll_wnd);
+	CUIXmlInit::InitScrollView	(xml_doc, strconcat(buf,path,":scroll_view"),0, m_scroll_wnd);
+
 	CUIXmlInit::InitFrameWindow	(xml_doc, strconcat(buf,path,":frame"),		0, &m_frame);
 	CUIXmlInit::InitLabel		(xml_doc, strconcat(buf,path,":header_1"),	0, &m_header[0]);
 	CUIXmlInit::InitLabel		(xml_doc, strconcat(buf,path,":header_2"),	0, &m_header[1]);
-//	CUIXmlInit::InitLabel		(xml_doc, strconcat(buf,path,":header_3"),	0, &m_header[2]);
+	CUIXmlInit::InitLabel		(xml_doc, strconcat(buf,path,":header_3"),	0, &m_header[2]);
 
-	CGameFont* pFake;
-	CUIXmlInit::InitFont		(xml_doc, strconcat(buf,path,":list:group_name"),0,m_dwGroupColor,pFake);
-	CUIXmlInit::InitFont		(xml_doc, strconcat(buf,path,":list:item_text"),0,m_dwItemColor,pFake);
-
-	FillUpList();
+	FillUpList					(xml_doc, path);
 }
 
-void CUIKeyBinding::FillUpList(){
-	CUIXml xml_doc;
-	CStringTable st;
-	xml_doc.Init(CONFIG_PATH, UI_PATH, "ui_keybinding.xml");
+void CUIKeyBinding::FillUpList(CUIXml& xml_doc_ui, LPCSTR path_ui)
+{
+	string256		buf;
+	CUIXml			xml_doc;
+	CStringTable	st;
+	xml_doc.Init							(CONFIG_PATH, UI_PATH, "ui_keybinding.xml");
 
-	int groupsCount = xml_doc.GetNodesNum("",0,"group");
+	int groupsCount = xml_doc.GetNodesNum	("",0,"group");
 
-	for (int i = 0; i<groupsCount; i++){
+	for (int i = 0; i<groupsCount; i++)
+	{
 		// add group
-		shared_str grp_name = xml_doc.ReadAttrib("group",i,"name");
-		R_ASSERT(xr_strlen(grp_name));
+		shared_str grp_name					= xml_doc.ReadAttrib("group",i,"name");
+		R_ASSERT							(xr_strlen(grp_name));
 
-		CUIListItemAdv*	pItem = xr_new<CUIListItemAdv>();
-		pItem->AddField(*st.translate(grp_name), m_header[0].GetWidth());
-		pItem->SetTextColor(m_dwGroupColor);
-		m_list.AddItem(pItem);
+		CUIStatic* pItem					= xr_new<CUIStatic>();
+		CUIXmlInit::InitStatic				(xml_doc_ui, strconcat(buf,path_ui,":scroll_view:item_group"),	0, pItem);
+		pItem->SetTextST					(grp_name.c_str());
+		m_scroll_wnd->AddWindow				(pItem, true);
 
 		// add group items
-		int commandsCount = xml_doc.GetNodesNum("group",i,"command");
-		XML_NODE* tab_node = xml_doc.NavigateToNode("group",i);
-		xml_doc.SetLocalRoot(tab_node);
+		int commandsCount					= xml_doc.GetNodesNum("group",i,"command");
+		XML_NODE* tab_node					= xml_doc.NavigateToNode("group",i);
+		xml_doc.SetLocalRoot				(tab_node);
 
-		for (int j = 0; j<commandsCount; j++){
+		for (int j = 0; j<commandsCount; j++)
+		{
 			// first field of list item
-			shared_str command_id = xml_doc.ReadAttrib("command",j,"id");
-			pItem = xr_new<CUIListItemAdv>();
-			m_list.AddItem(pItem);
-			pItem->AddField(*st.translate(command_id),m_header[0].GetWidth());
+			shared_str command_id			= xml_doc.ReadAttrib("command",j,"id");
 
-			shared_str exe = xml_doc.ReadAttrib("command",j,"exe");
+			pItem							= xr_new<CUIStatic>();
+			CUIXmlInit::InitStatic			(xml_doc_ui, strconcat(buf,path_ui,":scroll_view:item_key"),	0, pItem);
+			pItem->SetTextST				(command_id.c_str());
+			m_scroll_wnd->AddWindow			(pItem, true);
+
+			shared_str exe					= xml_doc.ReadAttrib("command",j,"exe");
 
 #ifdef DEBUG
-			if (!::IsActionExist(*exe))
+			if ( kNOTBINDED == action_name_to_id(*exe) )
 			{
-				pItem->AddField("not exist. update data",m_header[1].GetWidth());
+				Msg("action [%s] not exist. update data",exe.c_str());
 				continue;
 			}
 #endif
 			
-			CUIEditKeyBind* pEditKB = xr_new<CUIEditKeyBind>();
-			pEditKB->Init(0,0,m_header[1].GetWidth()/2,m_list.GetItemHeight());
-			pEditKB->Register(*exe,"key_binding");
+			float item_width				= m_header[1].GetWidth()-3.0f;
+			float item_pos					= m_header[1].GetWndPos().x;
+			CUIEditKeyBind* pEditKB			= xr_new<CUIEditKeyBind>(true);pEditKB->SetAutoDelete(true);
+			pEditKB->Init					(item_pos, 0, item_width, pItem->GetWndSize().y);
+			pEditKB->Register				(*exe,"key_binding");
+			pItem->AttachChild				(pEditKB);
 
-			pItem->AddWindow(pEditKB);
-			pItem->SetTextColor(m_dwItemColor);
+			item_width						= m_header[2].GetWidth()-3.0f;
+			item_pos						= m_header[2].GetWndPos().x;
+			pEditKB							= xr_new<CUIEditKeyBind>(false);pEditKB->SetAutoDelete(true);
+			pEditKB->Init					(item_pos, 0, item_width, pItem->GetWndSize().y);
+			pEditKB->Register				(*exe,"key_binding");
+			pItem->AttachChild				(pEditKB);
 		}
-		xml_doc.SetLocalRoot(xml_doc.GetRoot());
+		xml_doc.SetLocalRoot				(xml_doc.GetRoot());
 	}
 #ifdef DEBUG
-    CheckStructure(xml_doc);
+    CheckStructure							(xml_doc);
 #endif
 }
 
 #ifdef DEBUG
-void CUIKeyBinding::CheckStructure(CUIXml& xml_doc){
+void CUIKeyBinding::CheckStructure(CUIXml& xml_doc)
+{
 	bool first = true;
-	CUIListItemAdv*	pItem = false;
+	CUIStatic*	pItem = false;
+	
 	for (int i=0; true; i++)
 	{
-		if (keybind[i].name)
+		LPCSTR action_name = actions[i].action_name;
+		if (action_name)
 		{
-			if (IsActionExist(keybind[i].name, xml_doc))
+			if (IsActionExist(action_name, xml_doc))
 				continue;
 			else
 			{
 				if (first)
 				{
-					pItem = xr_new<CUIListItemAdv>();
-					pItem->AddField("NEXT ITEMS NOT DESCRIBED IN COMMAND DESC LIST", m_header[0].GetWidth());
-					pItem->SetTextColor(m_dwGroupColor);
-					m_list.AddItem(pItem);
-					first = false;
+					pItem					= xr_new<CUIStatic>();
+					pItem->SetWndPos		(Fvector2().set(0,0));
+					pItem->SetWndSize		(Fvector2().set(m_scroll_wnd->GetWndSize().x,20.0f));
+					pItem->SetText			("NEXT ITEMS NOT DESCRIBED IN COMMAND DESC LIST");
+					m_scroll_wnd->AttachChild(pItem);
+					first					= false;
 				}
 
-				pItem = xr_new<CUIListItemAdv>();
-				m_list.AddItem(pItem);
-				pItem->AddField(keybind[i].name,m_header[0].GetWidth());
+				pItem						= xr_new<CUIStatic>();
+				pItem->SetWndPos			(Fvector2().set(0,0));
+				pItem->SetWndSize			(Fvector2().set(m_scroll_wnd->GetWndSize().x,20.0f));
+				pItem->SetText				(action_name);
+				m_scroll_wnd->AttachChild	(pItem);
 			}
 		}
 		else
@@ -117,13 +133,10 @@ void CUIKeyBinding::CheckStructure(CUIXml& xml_doc){
 	}
 }
 
-bool CUIKeyBinding::IsActionExist(LPCSTR action, CUIXml& xml_doc){
+bool CUIKeyBinding::IsActionExist(LPCSTR action, CUIXml& xml_doc)
+{
 	bool ret = false;
 	int groupsCount = xml_doc.GetNodesNum("",0,"group");
-	if (0 == xr_strcmp(action,"brutal_porn"))
-	{
-		Msg("hello");
-	}
 
 	for (int i = 0; i<groupsCount; i++){
 		// add group items

@@ -16,21 +16,24 @@ class	ENGINE_API				IParticleCustom;
 struct	ENGINE_API				IRender_Mesh	
 {
 	// format
-	ref_geom					geom;
+	ref_geom					rm_geom;
 
 	// verts
-	IDirect3DVertexBuffer9*		pVertices;
+	IDirect3DVertexBuffer9*		p_rm_Vertices;
 	u32							vBase;
 	u32							vCount;
 
 	// indices
-	IDirect3DIndexBuffer9*		pIndices;
+	IDirect3DIndexBuffer9*		p_rm_Indices;
 	u32							iBase;
 	u32							iCount;
 	u32							dwPrimitives;
 
-	IRender_Mesh()				{ pVertices=0; pIndices=0;						}
-	virtual ~IRender_Mesh()		{ /*_RELEASE(pVertices); _RELEASE(pIndices);*/	}
+	IRender_Mesh				()				{ p_rm_Vertices=0; p_rm_Indices=0;						}
+	virtual ~IRender_Mesh		();
+private:
+	IRender_Mesh				(const IRender_Mesh& other);
+	void	operator=			( const IRender_Mesh& other);
 };
 
 // The class itself

@@ -56,7 +56,28 @@ void CUIInventoryWnd::InitInventory()
 	if(!pInvOwner)				return;
 
 	m_pInv						= &pInvOwner->inventory();
-	
+/*
+	PIItem _itm						= m_pInv->m_slots[PISTOL_SLOT].m_pIItem;
+	VERIFY(_itm);
+
+	{
+		CUICellItem* itm			= create_cell_item(_itm);
+		m_pUIPistolList->SetItem	(itm);
+		ClearAllLists				();
+
+		CUICellItem* itm2			= create_cell_item(_itm);
+		m_pUIPistolList->SetItem	(itm2);
+		ClearAllLists				();
+
+		CUICellItem* itm3			= create_cell_item(_itm);
+		m_pUIPistolList->SetItem	(itm3);
+		ClearAllLists				();
+
+		CUICellItem* itm4			= create_cell_item(_itm);
+		m_pUIPistolList->SetItem	(itm4);
+		ClearAllLists				();
+	}
+*/
 	UIPropertiesBox.Hide		();
 	ClearAllLists				();
 	m_pMouseCapturer			= NULL;
@@ -295,6 +316,9 @@ bool CUIInventoryWnd::OnItemDrop(CUICellItem* itm)
 
 bool CUIInventoryWnd::OnItemDbClick(CUICellItem* itm)
 {
+	if(TryUseItem((PIItem)itm->m_pData))		
+		return true;
+
 	CUIDragDropListEx*	old_owner		= itm->OwnerList();
 	EListType t_old						= GetType(old_owner);
 

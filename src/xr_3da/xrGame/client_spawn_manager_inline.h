@@ -11,3 +11,10 @@
 IC	CClientSpawnManager::CClientSpawnManager	()
 {
 }
+
+#ifdef DEBUG
+IC	const CClientSpawnManager::REQUEST_REGISTRY &CClientSpawnManager::registry	() const
+{
+	return		(m_registry);
+}
+#endif // DEBUG

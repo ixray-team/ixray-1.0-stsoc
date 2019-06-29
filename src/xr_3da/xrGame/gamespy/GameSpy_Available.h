@@ -5,17 +5,19 @@
 class CGameSpy_Available
 {
 private:
-	HMODULE	hGameSpyDLL;
+	HMODULE	m_hGameSpyDLL;
 
-	void	LoadGameSpy();
+	void	LoadGameSpy(HMODULE hGameSpyDLL);
 public:
 	CGameSpy_Available();
+	CGameSpy_Available(HMODULE hGameSpyDLL);
 	~CGameSpy_Available();
 
-	bool	CheckAvailableServices	();
+	bool	CheckAvailableServices	(shared_str& resultstr);
 private:
 	//------------------------------- GameSpy_Available ---------------------------
-	GAMESPY_FN_VAR_DECL(void,	GSIStartAvailableCheck, (const char * gamename));
+//	GAMESPY_FN_VAR_DECL(void,	GSIStartAvailableCheck, (const char * gamename));
+	GAMESPY_FN_VAR_DECL(void,	GSIStartAvailableCheck, ());
 	GAMESPY_FN_VAR_DECL(GSIACResult, GSIAvailableCheckThink, ());
 	GAMESPY_FN_VAR_DECL(void, msleep, (unsigned long msec));
 public:

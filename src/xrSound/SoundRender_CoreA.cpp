@@ -9,6 +9,7 @@ CSoundRender_CoreA*	SoundRenderA= 0;
 CSoundRender_CoreA::CSoundRender_CoreA	():CSoundRender_Core()
 {
 	pDevice						= 0;
+	pDeviceList					= 0;
 	pContext					= 0;
     eaxSet						= 0;
     eaxGet						= 0;
@@ -54,19 +55,13 @@ void CSoundRender_CoreA::_initialize	(u64 window)
 		xr_delete				(pDeviceList);
 		return;
 	}
-	int majorVersion, minorVersion;
-	int defaultIdx					= pDeviceList->GetDefaultDevice();
-	int deviceIdx					= defaultIdx;
-	VERIFY							(defaultIdx>=0 && defaultIdx<pDeviceList->GetNumDevices());
-	const ALDeviceDesc& deviceDesc	= pDeviceList->GetDeviceDesc(deviceIdx);
+	
+	pDeviceList->SelectBestDevice();
 
-	Log("SOUND: OpenAL: All available devices:");
-	for (int i = 0; i < pDeviceList->GetNumDevices(); i++){
-		pDeviceList->GetDeviceVersion(i, &majorVersion, &minorVersion);
-		Msg						("%d. %s, Spec Version %d.%d %s", i + 1,	
-								pDeviceList->GetDeviceName(i), majorVersion, minorVersion,
-								(defaultIdx==i)?"(default)":"");
-	}
+	int defaultIdx					= pDeviceList->GetDefaultDevice();
+	R_ASSERT						(defaultIdx>=0 && defaultIdx<pDeviceList->GetNumDevices());
+	const ALDeviceDesc& deviceDesc	= pDeviceList->GetDeviceDesc(defaultIdx);
+
 
     // OpenAL device
     pDevice						= alcOpenDevice		(deviceDesc.name.c_str());

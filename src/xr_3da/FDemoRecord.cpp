@@ -327,19 +327,21 @@ BOOL CDemoRecord::Process(Fvector &P, Fvector &D, Fvector &N, float& fFov, float
 
 void CDemoRecord::IR_OnKeyboardPress	(int dik)
 {
-	if (dik == DIK_SPACE)	RecordKey();
-	if (dik == DIK_BACK)	MakeCubemap();
-	if (dik == DIK_F11)		MakeLevelMapScreenshot();
-	if (dik == DIK_F12)		MakeScreenshot();
-	if (dik == DIK_ESCAPE)	fLifeTime = -1; //g_pGameLevel->Cameras.RemoveEffector(cefDemo);
-	if (dik == DIK_RETURN){	
-		if (g_pGameLevel->CurrentEntity()){
+	if (dik == DIK_SPACE)	RecordKey				();
+	if (dik == DIK_BACK)	MakeCubemap				();
+	if (dik == DIK_F11)		MakeLevelMapScreenshot	();
+	if (dik == DIK_F12)		MakeScreenshot			();
+	if (dik == DIK_ESCAPE)	fLifeTime				= -1;
+	if (dik == DIK_RETURN)
+	{	
+		if (g_pGameLevel->CurrentEntity())
+		{
 			g_pGameLevel->CurrentEntity()->ForceTransform(m_Camera);
-			//g_pGameLevel->Cameras.RemoveEffector(cefDemo);
 			fLifeTime		= -1; 
 		}
 	}
-	if	(dik == DIK_PAUSE)		Device.Pause(!Device.Pause());
+	if	(dik == DIK_PAUSE)		
+		Device.Pause(!Device.Paused(), TRUE, TRUE, "demo_record");
 }
 
 void CDemoRecord::IR_OnKeyboardHold	(int dik)

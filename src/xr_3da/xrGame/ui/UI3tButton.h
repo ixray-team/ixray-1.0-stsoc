@@ -25,11 +25,6 @@ public:
 	virtual void 	InitTexture					(LPCSTR tex_name);
 	virtual void 	InitTexture					(LPCSTR tex_enabled, LPCSTR tex_disabled, LPCSTR tex_touched, LPCSTR tex_highlighted);	
 
-/*			void 	InitTextureEnabled			(LPCSTR texture);
-			void 	InitTextureDisabled			(LPCSTR texture);
-			void 	InitTextureHighlighted		(LPCSTR texture);
-			void 	InitTextureTouched			(LPCSTR texture);			
-*/
 			void 	SetTextColor				(u32 color);
 			void 	SetTextColorH				(u32 color);
 			void 	SetTextColorD				(u32 color);
@@ -42,6 +37,7 @@ public:
 
 	virtual void 	OnClick						();
 	virtual void 	OnFocusReceive				();
+	virtual void	OnFocusLost					();
 
 	// check button
 	bool			GetCheck					() {return m_eButtonState == BUTTON_PUSHED;}
@@ -53,7 +49,7 @@ public:
 	
 	//virtual void Enable(bool bEnable);	
 	virtual bool 	OnMouse						(float x, float y, EUIMessages mouse_action);
-	virtual bool 	OnMouseDown					(bool left_button = true);
+	virtual bool 	OnMouseDown					(int mouse_btn);
 			void 	SetCheckMode				(bool mode) {m_bCheckMode = mode;}
 
 
@@ -62,9 +58,9 @@ public:
 protected:
 	bool				m_bCheckMode;
 private:	
-			void	PlaySoundH					();
-			void	PlaySoundT					();
+			void		PlaySoundH					();
+			void		PlaySoundT					();
 
-	ref_sound		m_sound_h;
-	ref_sound		m_sound_t;	
+	ref_sound			m_sound_h;
+	ref_sound			m_sound_t;	
 };

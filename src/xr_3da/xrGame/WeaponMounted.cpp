@@ -310,8 +310,10 @@ void CWeaponMounted::OnShot		()
 		fireDispersionBase,
 		m_CurrentAmmo, Owner()->ID(),ID(), SendHitAllowed(Owner()));
 
-	StartShotParticles	();
-	if(m_bShotLight) Light_Start();
+	StartShotParticles			();
+
+	if(m_bLightShotEnabled) 
+		Light_Start			();
 
 	StartFlameParticles();
 	StartSmokeParticles(fire_pos, zero_vel);

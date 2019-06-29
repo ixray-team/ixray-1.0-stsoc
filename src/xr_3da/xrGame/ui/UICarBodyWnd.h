@@ -8,7 +8,7 @@ class CUIDragDropListEx;
 class CUIItemInfo;
 class CUICharacterInfo;
 class CUIPropertiesBox;
-class CUIButton;
+class CUI3tButton;
 class CUICellItem;
 class CInventoryBox;
 class CInventoryOwner;
@@ -66,7 +66,7 @@ protected:
 	CUICharacterInfo*		m_pUICharacterInfoLeft;
 	CUICharacterInfo*		m_pUICharacterInfoRight;
 	CUIPropertiesBox*		m_pUIPropertiesBox;
-	CUIButton*				m_pUITakeAll;
+	CUI3tButton*			m_pUITakeAll;
 
 	CUICellItem*			m_pCurrentCellItem;
 

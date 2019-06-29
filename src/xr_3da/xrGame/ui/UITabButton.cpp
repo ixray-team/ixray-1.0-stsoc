@@ -36,8 +36,8 @@ bool CUITabButton::OnMouse(float x, float y, EUIMessages mouse_action){
 	return CUIWindow::OnMouse(x, y, mouse_action);
 }
 
-bool CUITabButton::OnMouseDown(bool left_button){
-	if (left_button)
+bool CUITabButton::OnMouseDown(int mouse_btn){
+	if (mouse_btn==MOUSE_1)
 	{
 		GetMessageTarget()->SendMessage(this, TAB_CHANGED);		
 		return true;

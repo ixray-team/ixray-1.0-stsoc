@@ -47,6 +47,7 @@ void					CTexture::surface_set	(IDirect3DBaseTexture9* surf)
 {
 	if (surf)			surf->AddRef		();
 	_RELEASE			(pSurface);
+
 	pSurface			= surf;
 }
 
@@ -75,9 +76,19 @@ void CTexture::apply_theora	(u32 dwStage)	{
 		R_ASSERT(D3DRTYPE_TEXTURE == pSurface->GetType());
 		IDirect3DTexture9*	T2D		= (IDirect3DTexture9*)pSurface;
 		D3DLOCKED_RECT		R;
-		R_CHK				(T2D->LockRect(0,&R,NULL,0));
-		R_ASSERT			(R.Pitch == int(pTheora->Width()*4));
-		pTheora->DecompressFrame((u32*)R.pBits);
+		RECT rect;
+		rect.left			= 0;
+		rect.top			= 0;
+		rect.right			= pTheora->Width(true);
+		rect.bottom			= pTheora->Height(true);
+
+		u32 _w				= pTheora->Width(false);
+
+		R_CHK				(T2D->LockRect(0,&R,&rect,0));
+		R_ASSERT			(R.Pitch == int(pTheora->Width(false)*4));
+		int _pos			= 0;
+		pTheora->DecompressFrame((u32*)R.pBits, _w - rect.right, _pos);
+		VERIFY				(u32(_pos) == rect.bottom*_w);
 		R_CHK				(T2D->UnlockRect(0));
 	}
 	CHK_DX(HW.pDevice->SetTexture(dwStage,pSurface));
@@ -178,16 +189,18 @@ void CTexture::Load		()
 			xr_delete(pTheora);
 			FATAL				("Can't open video stream");
 		} else {
-			flags.MemoryUsage	= pTheora->Width()*pTheora->Height()*4;
+			flags.MemoryUsage	= pTheora->Width(true)*pTheora->Height(true)*4;
 			pTheora->Play		(TRUE,Device.dwTimeContinual);
 
 			// Now create texture
 			IDirect3DTexture9*	pTexture = 0;
+			u32 _w = pTheora->Width(false);
+			u32 _h = pTheora->Height(false);
+
 			HRESULT hrr = HW.pDevice->CreateTexture(
-				pTheora->Width(),pTheora->Height(),1,0,D3DFMT_A8R8G8B8,D3DPOOL_MANAGED,
-				&pTexture,NULL
-				);
-			pSurface	= pTexture;
+				_w, _h, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &pTexture, NULL );
+
+			pSurface = pTexture;
 			if (FAILED(hrr))
 			{
 				FATAL		("Invalid video stream");
@@ -225,30 +238,33 @@ void CTexture::Load		()
 
 		}
 	} else
-    if (FS.exist(fn,"$game_textures$",*cName,".seq")){
+    if (FS.exist(fn,"$game_textures$",*cName,".seq"))
+	{
 		// Sequence
 		string256 buffer;
-		destructor<IReader>	fs(FS.r_open(fn));
+		IReader* _fs		= FS.r_open(fn);
 
 		flags.seqCycles	= FALSE;
-		fs().r_string	(buffer,sizeof(buffer));
+		_fs->r_string	(buffer,sizeof(buffer));
 		if (0==stricmp	(buffer,"cycled"))
 		{
 			flags.seqCycles	= TRUE;
-			fs().r_string	(buffer,sizeof(buffer));
+			_fs->r_string	(buffer,sizeof(buffer));
 		}
 		u32 fps	= atoi(buffer);
 		seqMSPF		= 1000/fps;
 
-		while (!fs().eof())
+		while (!_fs->eof())
 		{
-			fs().r_string(buffer,sizeof(buffer));
+			_fs->r_string(buffer,sizeof(buffer));
 			_Trim		(buffer);
-			if (buffer[0])	{
+			if (buffer[0])	
+			{
 				// Load another texture
 				u32	mem  = 0;
 				pSurface = ::Render->texture_load	(buffer,mem);
-				if (pSurface)	{
+				if (pSurface)	
+				{
 					// pSurface->SetPriority	(PRIORITY_LOW);
 					seqDATA.push_back		(pSurface);
 					flags.MemoryUsage		+= mem;
@@ -256,6 +272,7 @@ void CTexture::Load		()
 			}
 		}
 		pSurface	= 0;
+		FS.r_close	(_fs);
 	} else
 	{
 		// Normal texture
@@ -274,14 +291,26 @@ void CTexture::Load		()
 
 void CTexture::Unload	()
 {
-	if (flags.bLoaded)		Msg		("* Unloaded: %s",cName.c_str());
+#ifdef DEBUG
+	string_path				msg_buff;
+	sprintf					(msg_buff,"* Unloading texture [%s] pSurface RefCount=",cName.c_str());
+#endif // DEBUG
+
+//.	if (flags.bLoaded)		Msg		("* Unloaded: %s",cName.c_str());
+	
 	flags.bLoaded			= FALSE;
 	if (!seqDATA.empty())	{
 		for (u32 I=0; I<seqDATA.size(); I++)
-			_RELEASE(seqDATA[I]);
+		{
+			_RELEASE	(seqDATA[I]);
+		}
 		seqDATA.clear();
 		pSurface	= 0;
 	}
+
+#ifdef DEBUG
+	_SHOW_REF		(msg_buff, pSurface);
+#endif // DEBUG
 	_RELEASE		(pSurface);
 
 	xr_delete		(pAVI);

@@ -47,7 +47,7 @@ function se_monster:get_ini()
 		   end
 
 		   if self.min_distance == nil then
-		      local sys = ini_file ("system.ltx")
+		      local sys = system_ini()
 		      if sys ~= nil and sys:line_exist ("alife", "switch_distance") == true then
 		         self.min_distance = sys:r_u32 ("alife", "switch_distance") - 50
 		         if self.min_distance == nil then

@@ -13,7 +13,8 @@
 
 void CUIMpTradeWnd::OnBtnOkClicked(CUIWindow* w, void* d)
 {
-	StorePreset							(_preset_idx_last);
+	CheckDragItemToDestroy				();
+	StorePreset							(_preset_idx_last, true);
 	GetHolder()->StartStopMenu			(this,true);
 	game_cl_Deathmatch * dm				= smart_cast<game_cl_Deathmatch *>(&(Game()));
 	dm->OnBuyMenu_Ok					();
@@ -21,18 +22,31 @@ void CUIMpTradeWnd::OnBtnOkClicked(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::OnBtnCancelClicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	GetHolder()->StartStopMenu			(this,true);
 }
 
 void CUIMpTradeWnd::OnBtnShopBackClicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	m_store_hierarchy->MoveUp			();
 	UpdateShop							();
+}
+
+void CUIMpTradeWnd::TryUsePreset(ETradePreset idx)
+{
+	VERIFY						(IsShown());
+	u32 _cost					= GetPresetCost(idx);
+	bool b_has_enought_money	= _cost<=GetMoneyAmount();
+	if(!b_has_enought_money)	return;
+
+	ApplyPreset					(idx);
 }
 
 #include "../../xr_input.h"
 void CUIMpTradeWnd::OnBtnPreset1Clicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	if(pInput->iGetAsyncKeyState(DIK_LSHIFT))
 	{
 		DumpPreset					(_preset_idx_1);
@@ -44,6 +58,7 @@ void CUIMpTradeWnd::OnBtnPreset1Clicked(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::OnBtnPreset2Clicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	if(pInput->iGetAsyncKeyState(DIK_LSHIFT))
 	{
 		DumpPreset					(_preset_idx_2);
@@ -54,6 +69,7 @@ void CUIMpTradeWnd::OnBtnPreset2Clicked(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::OnBtnPreset3Clicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	if(pInput->iGetAsyncKeyState(DIK_LSHIFT))
 	{
 		DumpPreset					(_preset_idx_3);
@@ -65,6 +81,7 @@ void CUIMpTradeWnd::OnBtnPreset3Clicked(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::OnBtnLastSetClicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	if(pInput->iGetAsyncKeyState(DIK_LSHIFT))
 	{
 		DumpPreset					(_preset_idx_last);
@@ -73,28 +90,47 @@ void CUIMpTradeWnd::OnBtnLastSetClicked(CUIWindow* w, void* d)
 		ApplyPreset					(_preset_idx_last);
 }
 
+void	xr_stdcall	CUIMpTradeWnd::OnBtnPresetDefaultClicked	(CUIWindow* w, void* d)
+{
+	CheckDragItemToDestroy				();
+	{
+		if(pInput->iGetAsyncKeyState(DIK_LSHIFT))
+		{
+			DumpPreset					(_preset_idx_default);
+			return;
+		};
+		ApplyPreset					(_preset_idx_default);
+	}
+}
+
+
 void CUIMpTradeWnd::OnBtnSave1PresetClicked(CUIWindow* w, void* d)
 {
-	StorePreset					(_preset_idx_1);
+	CheckDragItemToDestroy				();
+	StorePreset					(_preset_idx_1, false);
 }
 
 void CUIMpTradeWnd::OnBtnSave2PresetClicked(CUIWindow* w, void* d)
 {
-	StorePreset					(_preset_idx_2);
+	CheckDragItemToDestroy				();
+	StorePreset					(_preset_idx_2, false);
 }
 
 void CUIMpTradeWnd::OnBtnSave3PresetClicked(CUIWindow* w, void* d)
 {
-	StorePreset					(_preset_idx_3);
+	CheckDragItemToDestroy				();
+	StorePreset					(_preset_idx_3, false);
 }
 
 void CUIMpTradeWnd::OnBtnResetClicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	ApplyPreset				(_preset_idx_origin); //origin
 }
 
 void CUIMpTradeWnd::OnRootTabChanged(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	int curr							= m_root_tab_control->GetActiveIndex();
 	m_store_hierarchy->Reset			();
 	m_store_hierarchy->MoveDown			(curr);
@@ -104,6 +140,7 @@ void CUIMpTradeWnd::OnRootTabChanged(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::OnSubLevelBtnClicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	CUITabButtonMP* btn					= smart_cast<CUITabButtonMP*>(w);
 
 	u32 curr							= btn->m_temp_index;
@@ -123,6 +160,7 @@ void CUIMpTradeWnd::UpdateShop()
 		m_root_tab_control->ResetTab	();
 
 	Msg									("current level=[%s]",m_store_hierarchy->CurrentLevel().m_name.c_str());
+	SetCurrentItem						(NULL);
 	if(m_store_hierarchy->CurrentIsRoot())	return;
 
 	if(m_store_hierarchy->CurrentLevel().HasSubLevels())
@@ -180,6 +218,9 @@ void CUIMpTradeWnd::Show()
 	CActor *pActor			= smart_cast<CActor*>(Level().CurrentEntity());
 	if(pActor) 
 		pActor->SetWeaponHideState(INV_STATE_BUY_MENU, true);
+
+	m_static_information->SetText("");
+	m_static_money_change->SetText("");
 }
 
 void CUIMpTradeWnd::Hide()
@@ -189,4 +230,11 @@ void CUIMpTradeWnd::Hide()
 	CActor *pActor			= smart_cast<CActor*>(Level().CurrentEntity());
 	if(pActor)
 		pActor->SetWeaponHideState(INV_STATE_BUY_MENU, false);
+
+	CleanUserItems			();
+}
+
+bool	CUIMpTradeWnd::IsIgnoreMoneyAndRank			()
+{
+	return m_bIgnoreMoneyAndRank;
 }

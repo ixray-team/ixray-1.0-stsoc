@@ -1,39 +1,31 @@
-//////////////////////////////////////////////////////////////////////
-// UIListWnd.cpp: окно со списком
-//////////////////////////////////////////////////////////////////////
-
 #include"stdafx.h"
-#include ".\uilistwnd.h"
-//#include "UIInteractiveListItem.h"
-#include "uiscrollbar.h"
+#include "uilistwnd.h"
+//.#include "uiscrollbar.h"
+#include "UIFrameLineWnd.h"
 
-//////////////////////////////////////////////////////////////////////////
-
-#define				ACTIVE_BACKGROUND			"ui\\ui_pop_up_active_back"
-#define				ACTIVE_BACKGROUND_WIDTH		16
-#define				ACTIVE_BACKGROUND_HEIGHT	16
+//. #define				ACTIVE_BACKGROUND			"ui\\ui_pop_up_active_back"
+//. #define				ACTIVE_BACKGROUND_WIDTH		16
+//. #define				ACTIVE_BACKGROUND_HEIGHT	16
 
 // разделитель для интерактивных строк в листе
 static const char	cSeparatorChar				= '%';
 
-//////////////////////////////////////////////////////////////////////////
-
 CUIListWnd::CUIListWnd()
 {
-	m_bActiveBackgroundEnable	= false;
+	m_ActiveBackgroundFrame		= NULL;
 	m_bListActivity				= true;
 	m_iFocusedItem				= -1;
 	m_iSelectedItem             = -1;
 	m_iFocusedItemGroupID		= -1;
 	m_iSelectedItemGroupID      = -1;
 	m_bShowSelectedItem			= false;
+	m_bActiveBackground			= false;
 	m_dwFontColor				= 0xFFFFFFFF;
 	SetItemHeight				(DEFAULT_ITEM_HEIGHT);
 	m_bVertFlip					= false;
 	m_bUpdateMouseMove			= false;
 	m_bForceFocusedItem			= false;
 	m_iLastUniqueID				= 0;
-	m_bNewRenderMethod			= false;
 	m_bAlwaysShowScroll			= false;
 	m_bAlwaysShowScroll_enable	= false;
 	
@@ -43,14 +35,11 @@ CUIListWnd::CUIListWnd()
 
 CUIListWnd::~CUIListWnd()
 {
-	//очистить список и удалить все элементы
-//	for(LIST_ITEM_LIST_it it=m_ItemList.begin(); m_ItemList.end() != it; ++it)
-//		DetachChild(*it);
-
 	while(!m_ItemList.empty())
 		DetachChild(m_ItemList.front());
 
-	m_ItemList.clear();
+	m_ItemList.clear	();
+	xr_delete			(m_ActiveBackgroundFrame);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -97,13 +86,13 @@ void CUIListWnd::Init(float x, float y, float width, float height, float item_he
 	m_ScrollBar->Show(false);
 	m_ScrollBar->Enable(false);
 
-
+/*
 	m_StaticActiveBackground.Init(ACTIVE_BACKGROUND,"hud\\default", 0,0,alNone);
 	m_StaticActiveBackground.SetTile(iFloor(m_iItemWidth/ACTIVE_BACKGROUND_WIDTH), 
 									 iFloor(m_iItemHeight/ACTIVE_BACKGROUND_HEIGHT),
 									 fmod(m_iItemWidth,float(ACTIVE_BACKGROUND_WIDTH)), 
 									 fmod(m_iItemHeight,float(ACTIVE_BACKGROUND_HEIGHT)));
-
+*/
 	UpdateList();
 }
 //////////////////////////////////////////////////////////////////////////
@@ -122,16 +111,14 @@ void CUIListWnd::SetHeight(float height){
 void CUIListWnd::SetWidth(float width)
 {
 	inherited::SetWidth(width);
+/*
 	m_StaticActiveBackground.SetTile(iFloor(GetWidth()/ACTIVE_BACKGROUND_WIDTH), 
 									 iFloor(m_iItemHeight/ACTIVE_BACKGROUND_HEIGHT),
 									 fmod(GetWidth(),float(ACTIVE_BACKGROUND_WIDTH)), 
 									 fmod(float(m_iItemHeight),float(ACTIVE_BACKGROUND_HEIGHT))
 									 );
+*/
 }
-
-//////////////////////////////////////////////////////////////////////////
-//добавляет элемент созданный извне
-//////////////////////////////////////////////////////////////////////////
 
 void CUIListWnd::RemoveItem(int index)
 {
@@ -206,9 +193,7 @@ void CUIListWnd::RemoveAll()
 		
 	while(!m_ItemList.empty())
 	{
-//		it = m_ItemList.begin();
 		DetachChild(m_ItemList.front());
-//		m_ItemList.erase(it);
 	}
 
 	m_iFirstShownIndex = 0;
@@ -225,11 +210,6 @@ void CUIListWnd::RemoveAll()
 	UpdateScrollBar();
 }
 
-/* new_code_here
-CUIListItem* CUIListWnd::GetClickedItem(){
-	return m_pClickedListItem;
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -239,11 +219,9 @@ void CUIListWnd::UpdateList()
 	
 	//спрятать все элементы до участка 
 	//отображающейся в данный момент
-	for(int i=0; i<_min(m_ItemList.size(),m_iFirstShownIndex);
-					++i, ++it)
+	for(int i=0; i<_min(m_ItemList.size(),m_iFirstShownIndex); ++i, ++it)
 	{
 		(*it)->Show(false);
-//		(*it)->Enable(false);
 	}
 	   
 
@@ -293,12 +271,6 @@ void CUIListWnd::SendMessage(CUIWindow *pWnd, s16 msg, void *pData)
 	{
 		//если сообщение пришло от одного из элементов списка
 
-/*		WINDOW_LIST_it it = std::find(m_ChildWndList.begin(), 
-									  m_ChildWndList.end(), 
-									  pWnd);
-	
-		if( m_ChildWndList.end() != it)
-*/
 		if( IsChild(pWnd) )
 		{
 			CUIListItem* pListItem2;
@@ -374,14 +346,6 @@ void CUIListWnd::SendMessage(CUIWindow *pWnd, s16 msg, void *pData)
 					pListItem2->SendMessage(this, STATIC_FOCUS_LOST, pData);
 				}
 				m_bUpdateMouseMove = true;
-
-				/*for (it = m_ChildWndList.begin(); (it != m_ChildWndList.end()) && (m_iFocusedItem == -1); ++it)
-				{
-					pListItem2 = smart_cast<CUIListItem*>(*it);
-					if (!pListItem2) continue;
-					if (pWnd != pListItem2)
-						pListItem2->OnMouse(cursor_pos.x - pListItem2->GetWndRect().left, cursor_pos.y - pListItem2->GetWndRect().top, MOUSE_MOVE);
-				}*/
 			}
 		}
 	}
@@ -391,11 +355,27 @@ void CUIListWnd::SendMessage(CUIWindow *pWnd, s16 msg, void *pData)
 
 //////////////////////////////////////////////////////////////////////////
 
+void CUIListWnd::DrawActiveBackFrame(const Frect& rect, CUIListItem * itm)
+{
+	Fvector2		_pos;
+	_pos.set		(rect.left, rect.top+(itm->GetIndex()-m_iFirstShownIndex)*GetItemHeight());
+	float _d		= GetItemHeight() - m_ActiveBackgroundFrame->GetHeight();
+	if(_d>0)
+		_pos.y		+= (float)iFloor(_d/2.0f);
+
+	m_ActiveBackgroundFrame->SetWndPos		(_pos);
+	float _w = GetWidth();
+	if( m_ScrollBar->IsShown() )
+		_w		-= m_ScrollBar->GetWidth();
+	m_ActiveBackgroundFrame->SetWidth		(_w);
+	m_ActiveBackgroundFrame->Draw			();
+}
+
 void CUIListWnd::Draw()
 {
 	WINDOW_LIST_it it;
 
-	if(m_iFocusedItem != -1 && m_bActiveBackgroundEnable)
+	if(m_iFocusedItem != -1 && IsActiveBackgroundEnabled() )
 	{
 		Frect rect;
 		GetAbsoluteRect(rect);
@@ -408,9 +388,7 @@ void CUIListWnd::Draw()
 				((pListItem2->GetIndex() >= m_iFirstShownIndex) && 
 				(pListItem2->GetIndex() <= m_iRowNum + m_iFirstShownIndex - 1)))
 			{
-				m_StaticActiveBackground.SetPos(rect.left, rect.top + 
-								(pListItem2->GetIndex() - m_iFirstShownIndex)*GetItemHeight());
-				m_StaticActiveBackground.Render();
+				DrawActiveBackFrame(rect, pListItem2);
 			}
 		}
 	}
@@ -427,9 +405,9 @@ void CUIListWnd::Draw()
 			if (pListItem2->GetIndex() == m_iSelectedItem) 
 			{
 				UI()->PushScissor(rect);
-				m_StaticActiveBackground.SetPos(rect.left, rect.top + 
-					(pListItem2->GetIndex() - m_iFirstShownIndex)*GetItemHeight());
-				m_StaticActiveBackground.Render();
+
+				DrawActiveBackFrame(rect, pListItem2);
+
 				UI()->PopScissor();
 			}
 		}
@@ -438,14 +416,6 @@ void CUIListWnd::Draw()
 	CUIWindow::Draw();
 }
 
-//////////////////////////////////////////////////////////////////////////
-
-int CUIListWnd::GetSize()
-{
-	return (int)m_ItemList.size();
-}
-
-//////////////////////////////////////////////////////////////////////////
 
 void CUIListWnd::SetItemWidth(float iItemWidth)
 {
@@ -503,7 +473,6 @@ bool CUIListWnd::OnMouse(float x, float y, EUIMessages mouse_action)
 {
 	switch(mouse_action){
 	case WINDOW_LBUTTON_DB_CLICK:
-//		mouse_action = WINDOW_LBUTTON_DOWN;
 		break;
 	case WINDOW_MOUSE_WHEEL_DOWN:
 			m_ScrollBar->TryScrollInc	();
@@ -524,26 +493,8 @@ bool CUIListWnd::OnKeyboard	(int dik, EUIMessages keyboard_action)
 }
 //////////////////////////////////////////////////////////////////////////
 
-int CUIListWnd::GetLongestSignWidth()
-{
-	int max_width = m_ItemList.front()->GetSignWidht();
-	
-	LIST_ITEM_LIST_it it=m_ItemList.begin();
-	++it;
-	for(;  m_ItemList.end() != it; ++it)
-	{
-		if((*it)->GetSignWidht()>max_width) max_width = (*it)->GetSignWidht();
-	}
-
-	return max_width;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
 void CUIListWnd::UpdateScrollBar()
 {
-//	m_ScrollBar->UpdateScrollBar();
-	//спрятать скорлинг, если он не нужен
 	if (m_bAlwaysShowScroll_enable)
 	{
 		m_ScrollBar->Show(m_bAlwaysShowScroll);
@@ -593,8 +544,6 @@ void CUIListWnd::ScrollToEnd()
 	UpdateList();
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 void CUIListWnd::ScrollToPos(int position)
 {
 	if (IsScrollBarEnabled())
@@ -607,8 +556,6 @@ void CUIListWnd::ScrollToPos(int position)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 void CUIListWnd::Update()
 {
 	if(m_bUpdateMouseMove)
@@ -618,6 +565,8 @@ void CUIListWnd::Update()
 	}
 
 	inherited::Update();
+	if(m_ActiveBackgroundFrame)
+		m_ActiveBackgroundFrame->Update();
 }
 
 void CUIListWnd::SetFocusedItem(int iNewFocusedItem)
@@ -628,74 +577,6 @@ void CUIListWnd::SetFocusedItem(int iNewFocusedItem)
 	if (m_iFocusedItem >= 0)
 		m_iFocusedItemGroupID = GetItem(m_iFocusedItem)->GetGroupID();
 }
-
-//=============================================================================
-//  Interactive element insertion
-//=============================================================================
-
-//xr_vector<int> CUIListWnd::AddInteractiveItem(const char *str2, const float shift,
-//											  const u32 &MsgColor, CGameFont* pFont, int pushAfter)
-//{
-//	string1024	str = {0};
-//	// скопируем строку для возможности записи
-//	std::strcpy(str, str2);
-//	// Распарсиваем строку, для определения принадлежности типа строки к обычным или
-//	// интерактивным элементам
-//	char				*pSep = str;
-//	int					count = 0;
-//	xr_vector<char *>	vSubItems;
-//	xr_vector<int>		IDs;
-//
-//	vSubItems.clear();
-//
-//	// Считаем количество знаков-разделителей
-//	while (pSep < str + xr_strlen(str) + 1)
-//	{
-//		pSep = std::find(pSep, str + xr_strlen(str) + 1, cSeparatorChar);
-//		if (pSep < str + xr_strlen(str) + 1)
-//		{
-//			++count;
-//			vSubItems.push_back(pSep - count + 1 );
-//			pSep++;
-//		}
-//	}
-//
-//	// Завершить строку нулем
-//	if (count != 0)
-//	{
-//		char *b = std::remove(str, str + xr_strlen(str) + 1, cSeparatorChar);
-//		*b = '\n';
-//	}
-//
-//	// Если нет ни одного знака-разделителя, или их количество нечетно, то считаем, что строка 
-//	// не интерактивна
-//	if (count % 2 == 1 || count == 0)
-//	{
-//		// Возвращаем NULL если строка не интерактивна.
-//		// В этом случае ListWnd должен сам добавить строку обычным способом
-//		CUIString A;
-//		A.SetText(str);
-//		AddParsedItem<CUIListItem>(A, shift, MsgColor, pFont);
-//		return IDs;
-//	}
-//	int k = 0;
-//	while (k < count / 2)
-//	{
-//		IDs.push_back(m_iLastUniqueID++);
-//		++k;
-//	}
-//
-//	// Если строка таки интерактивна, то конструируем интерактивную структуру - член листа
-//	CUIInteractiveListItem *pILItem = xr_new<CUIInteractiveListItem>();
-//	AddItem<CUIListItem>(pILItem, pushAfter);
-//	pILItem->Init(str, vSubItems, IDs, GetItemHeight());
-//	pILItem->SetFont(pFont);
-//	pILItem->SetTextColor(MsgColor);
-//	pILItem->SetMessageTarget(GetMessageTarget());
-//	return IDs;
-//}
-
-//////////////////////////////////////////////////////////////////////////
 
 int CUIListWnd::GetItemPos(CUIListItem *pItem)
 {
@@ -711,56 +592,43 @@ int CUIListWnd::GetItemPos(CUIListItem *pItem)
 
 //////////////////////////////////////////////////////////////////////////
 
-LPSTR CUIListWnd::FindNextWord(LPSTR currPos) const
-{
-	if (!currPos) return NULL;
-	bool delimPass	= false;
-	while (0 != *currPos && (!delimPass || IsEmptyDelimiter(*currPos)))
-	{
-		if (IsEmptyDelimiter(*currPos))
-		{
-			delimPass = true;
-		}
-		currPos++;
-	}
-
-	return 0 == *currPos ? NULL : currPos;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-float CUIListWnd::WordTailSize(LPCSTR currPos, CGameFont *font, int &charsCount) const
-{
-	VERIFY(font);
-	static string256 str;
-	ZeroMemory(str, 256);
-	charsCount = 0;
-	LPCSTR memorizedPos = currPos;
-	while (currPos && 0 != *currPos && 0 == IsEmptyDelimiter(*currPos))
-	{
-		charsCount++;
-		currPos++;
-	}
-
-	clamp(charsCount, 0, 256);
-
-	if (currPos)
-	{
-		strncpy(str, memorizedPos, charsCount);
-		return (font->SizeOf_(str));
-	}
-	else
-		return 0;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-bool CUIListWnd::IsEmptyDelimiter(const char c) const
-{
-	return ' ' == c;
-}
-
 bool CUIListWnd::IsScrollBarEnabled() 
 {
 	return m_ScrollBar->GetEnabled();
+}
+
+void CUIListWnd::EnableActiveBackground(bool enable) 
+{
+	m_bActiveBackground = enable;
+
+	if(enable)
+	{
+		create_active_back();
+	}else
+		destroy_active_back	();
+}
+
+void CUIListWnd::ShowSelectedItem(bool show)			
+{ 
+	m_bShowSelectedItem = show;
+
+	if(show)
+	{
+		create_active_back();
+	}else
+		destroy_active_back	();
+}
+
+void CUIListWnd::create_active_back()
+{
+	if(m_ActiveBackgroundFrame)	return;
+
+	m_ActiveBackgroundFrame = xr_new<CUIFrameLineWnd>();
+	m_ActiveBackgroundFrame->Init("ui_listline",0,0,GetWidth(),18);
+}
+
+void CUIListWnd::destroy_active_back()
+{
+	if(!m_bShowSelectedItem && !m_bActiveBackground)
+		xr_delete(m_ActiveBackgroundFrame);
 }

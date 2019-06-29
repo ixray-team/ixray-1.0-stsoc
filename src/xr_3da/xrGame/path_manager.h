@@ -41,7 +41,6 @@ template <
 #include "path_manager_game.h"
 
 #ifndef AI_COMPILER
-#	include "path_manager_game_vertex_type.h"
 #	include "path_manager_game_vertex.h"
 #endif
 

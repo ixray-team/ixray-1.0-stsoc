@@ -14,11 +14,13 @@ using namespace InventoryUtilities;
 
 const int INDENT = 3;
 
-CUIPdaKillMessage::CUIPdaKillMessage(){
-	AttachChild(&m_victim_name);
-	AttachChild(&m_killer_name);	
-	AttachChild(&m_initiator);
-	AttachChild(&m_ext_info);
+CUIPdaKillMessage::CUIPdaKillMessage()
+{
+	SetTextComplexMode(true);
+	AttachChild(&m_victim_name);m_victim_name.SetTextComplexMode(true);
+	AttachChild(&m_killer_name);m_killer_name.SetTextComplexMode(true);	
+	AttachChild(&m_initiator);m_initiator.SetTextComplexMode(true);
+	AttachChild(&m_ext_info);m_ext_info.SetTextComplexMode(true);
 }
 
 CUIPdaKillMessage::~CUIPdaKillMessage(){
@@ -45,21 +47,23 @@ float CUIPdaKillMessage::InitText(CUIStatic& refStatic, float x, PlayerInfo& inf
 	if ( 0 == xr_strlen(info.m_name))
 		return 0;
 
-	float		y = 0;
-	float		selfHeight = GetHeight();
-	CGameFont*	pFont = GetFont();
+	float y								= 0;
+	float selfHeight					= GetHeight();
+	CGameFont* pFont					= GetFont();
 
-	float width = pFont->SizeOf_/*Rel*/(*info.m_name);
-	float height = pFont->CurrentHeight_();
+	float width							= pFont->SizeOf_(*info.m_name);
+	UI()->ClientToScreenScaledWidth		(width);
+
+	float height						= pFont->CurrentHeight_();
 	y = (selfHeight - height)/2;
 
-	clamp(width, 0.0f, 110.0f);
-	refStatic.Init(x, y, width + 1, height);
-	refStatic.SetElipsis(CUIStatic::eepEnd, 0);
-	refStatic.SetText(*info.m_name);
-	refStatic.SetTextColor(info.m_color);
+	clamp								(width, 0.0f, 110.0f);
+	refStatic.Init						(x, y, width + 1, height);
+	refStatic.SetElipsis				(CUIStatic::eepEnd, 0);
+	refStatic.SetText					(*info.m_name);
+	refStatic.SetTextColor				(info.m_color);
 
-	return width;
+	return		width;
 }
 
 void CUIPdaKillMessage::SetTextColor(u32 color){	

@@ -249,18 +249,18 @@ void CResourceManager::Delete(const Shader* S)
 
 void	CResourceManager::DeferredUpload	()
 {
-	if (!Device.bReady)				return;
+	if (!Device.b_is_Ready)				return;
 	for (map_TextureIt t=m_textures.begin(); t!=m_textures.end(); t++)
 		t->second->Load();
 }
-
+/*
 void	CResourceManager::DeferredUnload	()
 {
-	if (!Device.bReady)				return;
+	if (!Device.b_is_Ready)				return;
 	for (map_TextureIt t=m_textures.begin(); t!=m_textures.end(); t++)
 		t->second->Unload();
 }
-
+*/
 #ifdef _EDITOR
 void	CResourceManager::ED_UpdateTextures(AStringVec* names)
 {

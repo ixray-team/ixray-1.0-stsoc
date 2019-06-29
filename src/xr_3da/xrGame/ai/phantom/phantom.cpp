@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "phantom.h"
-#include "../../NET_utils.h"
+#include "../../../../xrNetServer/net_utils.h"
 #include "../../level.h"
 #include "../../xrServer_Objects_ALife_Monsters.h"
 #include "../../../motion.h"

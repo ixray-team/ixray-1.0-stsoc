@@ -61,9 +61,8 @@ void CLevelFogOfWar::Init	(const shared_str& level)
 
 	m_level_name		= level;
 
-	string256			gameLtxPath;
-	FS.update_path		(gameLtxPath, "$game_config$", "game.ltx");
-	CInifile gameLtx	(gameLtxPath);
+
+	CInifile& gameLtx	= *pGameIni;
 
 	Fvector4 tmp;
 	if( gameLtx.line_exist(m_level_name,"bound_rect") )

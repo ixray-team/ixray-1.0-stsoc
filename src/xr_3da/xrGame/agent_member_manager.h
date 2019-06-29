@@ -39,9 +39,11 @@ public:
 			void					add						(CEntity *member);
 			void					remove					(CEntity *member);
 	IC		CMemberOrder			&member					(const CAI_Stalker *object);
+			CMemberOrder			*get_member				(const ALife::_OBJECT_ID &id);
 	IC		const MEMBER_STORAGE	&members				() const;
 	IC		MEMBER_STORAGE			&members				();
 	IC		squad_mask_type			mask					(const CAI_Stalker *object) const;
+			squad_mask_type			mask					(const ALife::_OBJECT_ID &id) const;
 	IC		bool					group_behaviour			() const;
 	IC		iterator				member					(squad_mask_type mask);
 			void					remove_links			(CObject *object);

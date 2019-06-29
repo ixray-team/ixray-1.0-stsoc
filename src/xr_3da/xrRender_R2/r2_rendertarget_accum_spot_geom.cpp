@@ -93,6 +93,12 @@ void CRenderTarget::accum_spot_geom_create	()
 
 void CRenderTarget::accum_spot_geom_destroy()
 {
+#ifdef DEBUG
+	_SHOW_REF	("g_accum_spot_ib",g_accum_spot_ib);
+#endif // DEBUG
 	_RELEASE	(g_accum_spot_ib);
+#ifdef DEBUG
+	_SHOW_REF	("g_accum_spot_vb",g_accum_spot_vb);
+#endif // DEBUG
 	_RELEASE	(g_accum_spot_vb);
 }

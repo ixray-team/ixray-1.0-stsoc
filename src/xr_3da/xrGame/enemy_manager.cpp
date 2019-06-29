@@ -30,10 +30,6 @@
 #include "agent_manager.h"
 #include "agent_enemy_manager.h"
 
-#ifndef MASTER_GOLD
-#	include "ai_debug.h"
-#endif // MASTER_GOLD
-
 static const u32 ENEMY_INERTIA_TIME_TO_SOMEBODY	= 3000;
 static const u32 ENEMY_INERTIA_TIME_TO_ACTOR	= 0;
 static const u32 ENEMY_INERTIA_TIME_FROM_ACTOR	= 6000;

@@ -26,7 +26,6 @@ using namespace luabind;
 
 typedef xr_vector<std::pair<shared_str,int> >	STORY_PAIRS;
 typedef STORY_PAIRS								SPAWN_STORY_PAIRS;
-extern											LPCSTR GAME_CONFIG;
 LPCSTR											_INVALID_STORY_ID		= "INVALID_STORY_ID";
 LPCSTR											_INVALID_SPAWN_STORY_ID	= "INVALID_SPAWN_STORY_ID";
 STORY_PAIRS										story_ids;
@@ -87,11 +86,7 @@ void generate_story_ids		(
 {
 	result.clear			();
 
-    CInifile				*Ini = 0;
-    string_path				game_ltx;
-    FS.update_path			(game_ltx,"$game_config$",GAME_CONFIG);
-    R_ASSERT3				(FS.exist(game_ltx),"Couldn't find file",game_ltx);
-    Ini						= xr_new<CInifile>(game_ltx);
+    CInifile				*Ini = pGameIni;
     
     LPCSTR					N,V;
 	u32 					k;
@@ -115,7 +110,6 @@ void generate_story_ids		(
 
 	result.push_back		(std::make_pair(INVALID_ID_STRING,INVALID_ID));
 
-    xr_delete				(Ini);
 }
 
 void kill_entity0			(CALifeSimulator *alife, CSE_ALifeMonsterAbstract *monster, const GameGraph::_GRAPH_ID &game_vertex_id)
@@ -301,10 +295,10 @@ KNOWN_INFO_VECTOR *registry						(const CALifeSimulator *self, const ALife::_OBJ
 class CFindByIDPred
 {
 public:
-	CFindByIDPred(INFO_ID element_to_find) {element = element_to_find;}
+	CFindByIDPred(shared_str element_to_find) {element = element_to_find;}
 	bool operator () (const INFO_DATA& data) const {return data.info_id == element;}
 private:
-	INFO_ID element;
+	shared_str element;
 };
 
 bool has_info									(const CALifeSimulator *self, const ALife::_OBJECT_ID &id, LPCSTR info_id)
@@ -376,16 +370,16 @@ void CALifeSimulator::script_register			(lua_State *L)
 	];
 
 	{
-		VERIFY					(story_ids.empty());
-		generate_story_ids		(
-			story_ids,
-			INVALID_STORY_ID,
-			"story_ids",
-			"INVALID_STORY_ID",
-			"Invalid story id description (contains spaces)!",
-			"INVALID_STORY_ID redifinition!",
-			"Duplicated story id description!"
-		);
+		if (story_ids.empty())
+			generate_story_ids	(
+				story_ids,
+				INVALID_STORY_ID,
+				"story_ids",
+				"INVALID_STORY_ID",
+				"Invalid story id description (contains spaces)!",
+				"INVALID_STORY_ID redifinition!",
+				"Duplicated story id description!"
+			);
 
 		luabind::class_<class_exporter<CALifeSimulator> >	instance("story_ids");
 
@@ -398,16 +392,16 @@ void CALifeSimulator::script_register			(lua_State *L)
 	}
 
 	{
-		VERIFY					(spawn_story_ids.empty());
-		generate_story_ids		(
-			spawn_story_ids,
-			INVALID_SPAWN_STORY_ID,
-			"spawn_story_ids",
-			"INVALID_SPAWN_STORY_ID",
-			"Invalid spawn story id description (contains spaces)!",
-			"INVALID_SPAWN_STORY_ID redifinition!",
-			"Duplicated spawn story id description!"
-		);
+		if (spawn_story_ids.empty())
+			generate_story_ids	(
+				spawn_story_ids,
+				INVALID_SPAWN_STORY_ID,
+				"spawn_story_ids",
+				"INVALID_SPAWN_STORY_ID",
+				"Invalid spawn story id description (contains spaces)!",
+				"INVALID_SPAWN_STORY_ID redifinition!",
+				"Duplicated spawn story id description!"
+			);
 
 		luabind::class_<class_exporter<class_exporter<CALifeSimulator> > >	instance("spawn_story_ids");
 

@@ -121,37 +121,6 @@ void CUILine::ProcessNewLines(){
 	}
 }
 
-float CUILine::GetLength(CGameFont* pFont){
-	float length = 0.0f;
-	int size = m_subLines.size();
-	for (int i=0; i< size; i++)
-        length += m_subLines[i].GetLength(pFont);
-
-    return length;	
-}
-
-int CUILine::GetTextLength(){
-	int n = 0;
-	for (u32 i=0; i < m_subLines.size(); i++){
-		n += (int)m_subLines[i].m_text.length();
-	}
-	return n;
-}
-
-float CUILine::GetVisibleLength(CGameFont* pFont){
-	float length = 0.0f;
-	int size = m_subLines.size();
-	for (int i=0; i< size; i++)
-	{
-		if (i == size - 1)
-			length += m_subLines[i].GetVisibleLength(pFont);
-		else
-			length += m_subLines[i].GetLength(pFont);
-	}
-
-	return length;	
-}
-
 void CUILine::Draw(CGameFont* pFont, float x, float y) const{
 	float length = 0;
 	int size = m_subLines.size();
@@ -159,26 +128,10 @@ void CUILine::Draw(CGameFont* pFont, float x, float y) const{
 	for (int i=0; i<size; i++)
 	{
 		m_subLines[i].Draw(pFont, x+length, y);
-		length+=m_subLines[i].GetLength(pFont);
+		float ll = pFont->SizeOf_(m_subLines[i].m_text.c_str()); //. all ok
+		UI()->ClientToScreenScaledWidth(ll);
+		length	+= ll;
 	}
-}
-
-int CUILine::DrawCursor(int pos, CGameFont* pFont, float x, float y, u32 color) const{
-	int size = m_subLines.size();
-	xr_string whole_line;
-	for (int i=0; i<size; i++)
-		whole_line += m_subLines[i].m_text;
-
-	int sz = (int)whole_line.size();
-		
-	if (pos > sz)
-		pos = sz;
-
-	whole_line[pos] = 0;
-	x += pFont->SizeOf_/*Rel*/(whole_line.c_str());
-	DrawCursor(pFont, x, y, color);
-
-	return pos;
 }
 
 int CUILine::GetSize(){
@@ -190,15 +143,6 @@ int CUILine::GetSize(){
 	return sz;
 }
 
-void CUILine::DrawCursor(CGameFont* pFont, float x, float y, u32 color){
-	m_animation.Update();
-	pFont->SetColor(subst_alpha(color, color_get_A(m_animation.GetColor())));
-	Fvector2 pos;
-	pos.set(x, y);
-	UI()->ClientToScreenScaled(pos);
-	pFont->Out(pos.x, pos.y,  "_");
-}
-
 const CUILine* CUILine::GetEmptyLine(){
 	xr_delete(m_tmpLine);
 	m_tmpLine = xr_new<CUILine>();
@@ -206,11 +150,10 @@ const CUILine* CUILine::GetEmptyLine(){
     return m_tmpLine;
 }
 
-const CUILine* CUILine::CutByLength(CGameFont* pFont, float length, BOOL cut_word){
-	R_ASSERT(GetLength(pFont) > 0);
+const CUILine* CUILine::CutByLength(CGameFont* pFont, float length, BOOL cut_word)
+{
+	R_ASSERT(GetSize() > 0);
 	// if first sub line is void then delete it
-//	if (0 == m_subLines[0].GetLength(pFont)) 
-//		m_subLines.erase(m_subLines.begin());
 
 	Position pos;
 	InitPos(pos);
@@ -231,6 +174,7 @@ const CUILine* CUILine::CutByLength(CGameFont* pFont, float length, BOOL cut_wor
 
 
 	float len2w1 = GetLength_inclusiveWord_1(pos, pFont);
+//.	* scale; bacause of our fonts not scaled
 
     if (!pos.word_2.exist())
 	{
@@ -429,8 +373,11 @@ const CUILine* CUILine::CutWord(CGameFont* pFont, float length){
 
 	float len = 0;
 
-	for (u32 i= 0; i<m_subLines[0].m_text.length(); i++){
-		len += pFont->SizeOf_/*Rel*/(m_subLines[0].m_text[i]);
+	for (u32 i= 0; i<m_subLines[0].m_text.length(); i++)
+	{
+		float ll = pFont->SizeOf_(m_subLines[0].m_text[i]);
+		UI()->ClientToScreenScaledWidth(ll);
+		len += ll;
 
 		if (len>length){
 			m_tmpLine->AddSubLine(m_subLines[0].Cut2Pos((i?i:1)-1));
@@ -449,13 +396,19 @@ float  CUILine::GetLength_inclusiveWord_1(Position& pos, CGameFont* pFont) const
 	float len = 0;
 
 	for (u32 i = 0; i < pos.curr_subline; ++i)
-		len += m_subLines[i].GetLength(pFont);
+	{
+		float ll = pFont->SizeOf_(m_subLines[i].m_text.c_str());
+		UI()->ClientToScreenScaledWidth(ll);
+		len	+= ll;
+	}
 
 	xr_string str;
 	str.assign(m_subLines[pos.curr_subline].m_text, 0, pos.word_1.pos + pos.word_1.len);
 
 	
-	len += int(pFont->SizeOf_/*Rel*/(str.c_str()));
+	float ll2 = pFont->SizeOf_(str.c_str());
+	UI()->ClientToScreenScaledWidth(ll2);
+	len += ll2;
 
 	return len;
 }
@@ -471,12 +424,18 @@ float  CUILine::GetLength_inclusiveWord_2(Position& pos, CGameFont* pFont) const
 		last = pos.curr_subline;
 
 	for (int i = 0; i <= last; i++)
-		len += m_subLines[i].GetLength(pFont);
+	{
+		float ll = pFont->SizeOf_(m_subLines[i].m_text.c_str());
+		UI()->ClientToScreenScaledWidth(ll);
+		len += ll;
+	}
 
 	xr_string str;
 	str.assign(m_subLines[last + 1].m_text, 0, pos.word_2.pos + pos.word_2.len);
 
-	len += pFont->SizeOf_/*Rel*/(str.c_str());
+	float ll2	= pFont->SizeOf_(str.c_str());
+	UI()->ClientToScreenScaledWidth(ll2);
+	len			+= ll2;
 
 	return len;
 }

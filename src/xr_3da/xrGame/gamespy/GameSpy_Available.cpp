@@ -4,50 +4,66 @@
 
 CGameSpy_Available::CGameSpy_Available()
 {
-	hGameSpyDLL = NULL;
-
-	LoadGameSpy();
+	m_hGameSpyDLL = NULL;
+	//-----------------------------------------------
+	LPCSTR			g_name	= "xrGameSpy.dll";
+	Log				("Loading DLL:",g_name);
+	m_hGameSpyDLL			= LoadLibrary	(g_name);
+	if (0==m_hGameSpyDLL)	R_CHK			(GetLastError());
+	R_ASSERT2		(m_hGameSpyDLL,"GameSpy DLL raised exception during loading or there is no game DLL at all");
+	//-----------------------------------------------
+	LoadGameSpy(m_hGameSpyDLL );
 };
+
+CGameSpy_Available::CGameSpy_Available(HMODULE hGameSpyDLL)
+{
+	m_hGameSpyDLL = NULL;
+	LoadGameSpy(hGameSpyDLL);
+}
 
 CGameSpy_Available::~CGameSpy_Available()
 {
-	if (hGameSpyDLL)
+	if (m_hGameSpyDLL)
 	{
-		FreeLibrary(hGameSpyDLL);
-		hGameSpyDLL = NULL;
+		FreeLibrary(m_hGameSpyDLL);
+		m_hGameSpyDLL = NULL;
 	}
 };
 
-void	CGameSpy_Available::LoadGameSpy()
+void	CGameSpy_Available::LoadGameSpy(HMODULE hGameSpyDLL)
 {
-	LPCSTR			g_name	= "xrGameSpy.dll";
-	Log				("Loading DLL:",g_name);
-	hGameSpyDLL			= LoadLibrary	(g_name);
-	if (0==hGameSpyDLL)	R_CHK			(GetLastError());
-	R_ASSERT2		(hGameSpyDLL,"GameSpy DLL raised exception during loading or there is no game DLL at all");
-
 	GAMESPY_LOAD_FN(xrGS_GSIStartAvailableCheck);
 	GAMESPY_LOAD_FN(xrGS_GSIAvailableCheckThink);
 	GAMESPY_LOAD_FN(xrGS_msleep);
 	GAMESPY_LOAD_FN(xrGS_GetQueryVersion);
 }
 
-bool	CGameSpy_Available::CheckAvailableServices		()
+bool	CGameSpy_Available::CheckAvailableServices		(shared_str& resultstr)
 {
 	GSIACResult result;
-	xrGS_GSIStartAvailableCheck(GAMESPY_GAMENAME);
+	xrGS_GSIStartAvailableCheck();
 
 	while((result = xrGS_GSIAvailableCheckThink()) == GSIACWaiting)
 		xrGS_msleep(5);
 
 	if(result != GSIACAvailable)
 	{
-		Msg("! The GameSpy backend is not available");
+		switch (result)
+		{
+		case GSIACUnavailable:
+			{
+				resultstr = "! Online Services for STALKER are no longer available.";
+			}break;
+		case GSIACTemporarilyUnavailable:
+			{
+				resultstr = "! Online Services for STALKER are temporarily down for maintenance.";
+			}break;
+		}
 		return false;
 	}
 	else
 	{
-		Msg("- The GameSpy backend is available");
+		resultstr = "Success";
 	};
 	return true;
 };

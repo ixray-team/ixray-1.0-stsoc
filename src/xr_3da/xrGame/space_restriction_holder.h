@@ -40,7 +40,7 @@ private:
 protected:
 			shared_str				normalize_string				(shared_str space_restrictors);
 	IC		void					collect_garbage					();
-	virtual void					on_default_restrictions_changed	(const RestrictionSpace::ERestrictorTypes &restrictor_type, shared_str old_restrictions, shared_str new_restrictions) = 0;
+	virtual void					on_default_restrictions_changed	() = 0;
 			void					clear							();
 
 public:
@@ -48,6 +48,7 @@ public:
 	virtual							~CSpaceRestrictionHolder		();
 			SpaceRestrictionHolder::CBaseRestrictionPtr	restriction	(shared_str space_restrictors);
 			void					register_restrictor				(CSpaceRestrictor *space_restrictor, const RestrictionSpace::ERestrictorTypes &restrictor_type);
+			void					unregister_restrictor			(CSpaceRestrictor *space_restrictor);
 	IC		shared_str				default_out_restrictions		() const;
 	IC		shared_str				default_in_restrictions			() const;
 };

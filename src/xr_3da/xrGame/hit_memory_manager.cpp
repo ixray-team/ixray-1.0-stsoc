@@ -49,6 +49,8 @@ struct CHitObjectPredicate {
 
 CHitMemoryManager::~CHitMemoryManager		()
 {
+	clear_delayed_objects	();
+
 #ifdef USE_SELECTED_HIT
 	xr_delete				(m_selected_hit);
 #endif
@@ -281,6 +283,9 @@ void CHitMemoryManager::save	(NET_Packet &packet) const
 #ifdef USE_FIRST_LEVEL_TIME
 		packet.w_u32			((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_first_level_time) : 0);
 #endif // USE_FIRST_LEVEL_TIME
+		packet.w_vec3			((*I).m_direction);
+		packet.w_u16			((*I).m_bone_index);
+		packet.w_float			((*I).m_amount);
 	}
 }
 
@@ -331,6 +336,10 @@ void CHitMemoryManager::load	(IReader &packet)
 		object.m_first_level_time	= packet.r_u32();
 		object.m_first_level_time	+= Device.dwTimeGlobal;
 #endif // USE_FIRST_LEVEL_TIME
+		packet.r_fvector3			(object.m_direction);
+		object.m_bone_index			= packet.r_u16();
+		object.m_amount				= packet.r_float();
+
 		if (object.m_object) {
 			add						(object);
 			continue;

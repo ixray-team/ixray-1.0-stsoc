@@ -20,6 +20,7 @@ class CGamePersistent:
 	u32					ambient_effect_stop_time;
 
 	CUISequencer*		m_intro;
+	EVENT				eQuickLoad;
 
 	fastdelegate::FastDelegate0<> m_intro_event;
 
@@ -64,6 +65,7 @@ public:
 	virtual bool		OnRenderPPUI_query		();
 	virtual void		OnRenderPPUI_main		();
 	virtual void		OnRenderPPUI_PP			();
+	virtual	void		LoadTitle				(LPCSTR str);
 };
 
 IC CGamePersistent&		GamePersistent()		{ return *((CGamePersistent*) g_pGamePersistent);			}

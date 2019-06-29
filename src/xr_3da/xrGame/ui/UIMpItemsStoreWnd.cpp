@@ -138,12 +138,15 @@ CStoreHierarchy::item* CStoreHierarchy::FindItem(const shared_str& name_sect, CS
 		xr_vector<CStoreHierarchy::item*>::const_iterator	it		= recurse_from->m_childs.begin();
 		xr_vector<CStoreHierarchy::item*>::const_iterator	it_e	= recurse_from->m_childs.end();
 		
-		if(FindItem(name_sect, *it))		return *it;
+		for(;it!=it_e;++it)
+			if(FindItem(name_sect, *it))		return *it;
 	}else
 	{
 		xr_vector<shared_str>::const_iterator it	= recurse_from->m_items_in_group.begin();
 		xr_vector<shared_str>::const_iterator it_e	= recurse_from->m_items_in_group.end();
-		if(*it==name_sect)	return recurse_from;
+		
+		for(;it!=it_e;++it)
+			if(*it==name_sect)	return recurse_from;
 	}
 	return NULL;
 }

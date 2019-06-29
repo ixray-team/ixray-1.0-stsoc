@@ -426,6 +426,7 @@ if(!g_pGamePersistent->bDedicatedServer)
 	CStringTable string_table;
 	m_sCharacterUseAction			= "character_use";
 	m_sDeadCharacterUseAction		= "dead_character_use";
+	m_sDeadCharacterUseOrDragAction	= "dead_character_use_or_drag";
 	m_sCarCharacterUseAction		= "car_character_use";
 	m_sInventoryItemUseAction		= "inventory_item_use";
 	m_sInventoryBoxUseAction		= "inventory_box_use";
@@ -449,6 +450,8 @@ struct playing_pred
 
 void	CActor::Hit							(SHit* pHDS)
 {
+	pHDS->aim_bullet = false;
+
 	SHit HDS = *pHDS;
 	if( HDS.hit_type<ALife::eHitTypeBurn || HDS.hit_type >= ALife::eHitTypeMax )
 	{
@@ -1027,6 +1030,7 @@ void CActor::shedule_Update	(u32 DT)
 	{
 		g_cl_CheckControls		(mstate_wishful,NET_SavedAccel,NET_Jump,dt);
 		{
+			/*
 			if (mstate_real & mcJump)
 			{
 				NET_Packet	P;
@@ -1035,6 +1039,7 @@ void CActor::shedule_Update	(u32 DT)
 				P.w_float(NET_Jump);
 				u_EventSend(P);
 			}
+			*/
 		}
 		g_cl_Orientate			(mstate_real,dt);
 		g_Orientate				(mstate_real,dt);
@@ -1069,7 +1074,9 @@ void CActor::shedule_Update	(u32 DT)
 		mstate_wishful &=~mcRLookout;
 		mstate_wishful &=~mcFwd;
 		mstate_wishful &=~mcBack;
-		mstate_wishful &=~mcCrouch;
+		extern bool g_bAutoClearCrouch;
+		if (g_bAutoClearCrouch)
+			mstate_wishful &=~mcCrouch;
 		//-----------------------------------------------------
 		}
 	}
@@ -1185,12 +1192,18 @@ void CActor::shedule_Update	(u32 DT)
 					m_sDefaultObjAction = m_sCharacterUseAction;
 
 				else if (pEntityAlive && !pEntityAlive->g_Alive())
-					m_sDefaultObjAction = m_sDeadCharacterUseAction;
+				{
+					bool b_allow_drag = !!pSettings->line_exist("ph_capture_visuals",pEntityAlive->cNameVisual());
+				
+					if(b_allow_drag)
+						m_sDefaultObjAction = m_sDeadCharacterUseOrDragAction;
+					else
+						m_sDefaultObjAction = m_sDeadCharacterUseAction;
 
-				else if (m_pVehicleWeLookingAt)
+				}else if (m_pVehicleWeLookingAt)
 					m_sDefaultObjAction = m_sCarCharacterUseAction;
 
-				else if (inventory().m_pTarget)
+				else if (inventory().m_pTarget && inventory().m_pTarget->CanTake() )
 					m_sDefaultObjAction = m_sInventoryItemUseAction;
 //.				else if (m_pInvBoxWeLookingAt)
 //.					m_sDefaultObjAction = m_sInventoryBoxUseAction;
@@ -1250,7 +1263,9 @@ void CActor::g_PerformDrop	( )
 }
 
 
+#ifdef DEBUG
 extern	BOOL	g_ShowAnimationInfo		;
+#endif // DEBUG
 // HUD
 void CActor::OnHUDDraw	(CCustomHUD* /**hud/**/)
 {
@@ -1265,28 +1280,28 @@ void CActor::OnHUDDraw	(CCustomHUD* /**hud/**/)
 	if (Level().CurrentControlEntity() == this && g_ShowAnimationInfo)
 	{
 		string128 buf;
-		HUD().Font().pFontSmall->SetColor	(0xffffffff);
-		HUD().Font().pFontSmall->OutSet		(170,530);
-		HUD().Font().pFontSmall->OutNext	("Position:      [%3.2f, %3.2f, %3.2f]",VPUSH(Position()));
-		HUD().Font().pFontSmall->OutNext	("Velocity:      [%3.2f, %3.2f, %3.2f]",VPUSH(m_PhysicMovementControl->GetVelocity()));
-		HUD().Font().pFontSmall->OutNext	("Vel Magnitude: [%3.2f]",m_PhysicMovementControl->GetVelocityMagnitude());
-		HUD().Font().pFontSmall->OutNext	("Vel Actual:    [%3.2f]",m_PhysicMovementControl->GetVelocityActual());
+		HUD().Font().pFontStat->SetColor	(0xffffffff);
+		HUD().Font().pFontStat->OutSet		(170,530);
+		HUD().Font().pFontStat->OutNext	("Position:      [%3.2f, %3.2f, %3.2f]",VPUSH(Position()));
+		HUD().Font().pFontStat->OutNext	("Velocity:      [%3.2f, %3.2f, %3.2f]",VPUSH(m_PhysicMovementControl->GetVelocity()));
+		HUD().Font().pFontStat->OutNext	("Vel Magnitude: [%3.2f]",m_PhysicMovementControl->GetVelocityMagnitude());
+		HUD().Font().pFontStat->OutNext	("Vel Actual:    [%3.2f]",m_PhysicMovementControl->GetVelocityActual());
 		switch (m_PhysicMovementControl->Environment())
 		{
 		case CPHMovementControl::peOnGround:	strcpy(buf,"ground");			break;
 		case CPHMovementControl::peInAir:		strcpy(buf,"air");				break;
 		case CPHMovementControl::peAtWall:		strcpy(buf,"wall");				break;
 		}
-		HUD().Font().pFontSmall->OutNext	(buf);
+		HUD().Font().pFontStat->OutNext	(buf);
 
 		if (IReceived != 0)
 		{
 			float Size = 0;
-			Size = HUD().Font().pFontSmall->GetSize();
-			HUD().Font().pFontSmall->SetSize(Size*2);
-			HUD().Font().pFontSmall->SetColor	(0xffff0000);
-			HUD().Font().pFontSmall->OutNext ("Input :		[%3.2f]", ICoincidenced/IReceived * 100.0f);
-			HUD().Font().pFontSmall->SetSize(Size);
+			Size = HUD().Font().pFontStat->GetSize();
+			HUD().Font().pFontStat->SetSize(Size*2);
+			HUD().Font().pFontStat->SetColor	(0xffff0000);
+			HUD().Font().pFontStat->OutNext ("Input :		[%3.2f]", ICoincidenced/IReceived * 100.0f);
+			HUD().Font().pFontStat->SetSize(Size);
 		};
 	};
 #endif
@@ -1357,13 +1372,15 @@ void CActor::RenderText				(LPCSTR Text, Fvector dpos, float* pdup, u32 color)
 	Device.mFullTransform.transform(v0r,v0);
 	Device.mFullTransform.transform(v1r,v1);
 	float size = v1r.distance_to(v0r);
-	float OldFontSize = HUD().Font().pFontDI->GetSize		();	
+	CGameFont* pFont = HUD().Font().pFontArial14;
+	if (!pFont) return;
+//	float OldFontSize = pFont->GetHeight	();	
 	float delta_up = 0.0f;
 	if (size < mid_size) delta_up = upsize;
 	else delta_up = upsize*(mid_size/size);
 	dpos.y += delta_up;
 	if (size > mid_size) size = mid_size;
-	float NewFontSize = size/mid_size * fontsize;
+//	float NewFontSize = size/mid_size * fontsize;
 	//------------------------------------------------
 	M.c.y += dpos.y;
 
@@ -1376,12 +1393,12 @@ void CActor::RenderText				(LPCSTR Text, Fvector dpos, float* pdup, u32 color)
 	float x = (1.f + v_res.x)/2.f * (Device.dwWidth);
 	float y = (1.f - v_res.y)/2.f * (Device.dwHeight);
 
-	HUD().Font().pFontDI->SetAligment	(CGameFont::alCenter);
-	HUD().Font().pFontDI->SetColor		(color);
-	HUD().Font().pFontDI->SetSize		(NewFontSize);
-	HUD().Font().pFontDI->Out			(x,y,Text);
+	pFont->SetAligment	(CGameFont::alCenter);
+	pFont->SetColor		(color);
+//	pFont->SetHeight	(NewFontSize);
+	pFont->Out			(x,y,Text);
 	//-------------------------------------------------
-	HUD().Font().pFontDI->SetSize(OldFontSize);
+//	pFont->SetHeight(OldFontSize);
 	*pdup = delta_up;
 };
 
@@ -1741,7 +1758,7 @@ bool CActor::is_on_ground()
 	return (character_physics_support()->movement()->Environment() != CPHMovementControl::peInAir);
 }
 
-CCustomOutfit* CActor::GetOutfit()
+CCustomOutfit* CActor::GetOutfit() const
 {
 	PIItem _of	= inventory().m_slots[OUTFIT_SLOT].m_pIItem;
 	return _of?smart_cast<CCustomOutfit*>(_of):NULL;

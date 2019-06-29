@@ -48,6 +48,7 @@ ULONG			xrIDirect3DCubeTexture9::Release()
 	if (m_refCount < 0)
 	{
 		delete this;
+		return ULONG_Proc(-1);
 	}
 	return ULONG_Proc(m_refCount);
 }

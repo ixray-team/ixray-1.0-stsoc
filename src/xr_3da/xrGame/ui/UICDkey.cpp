@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "UICDkey.h"
 #include "UIColorAnimatorWrapper.h"
+#include "../../xr_IOConsole.h"
+#include "../RegistryFuncs.h"
 
 extern string64	gsCDKey;
 
@@ -10,32 +12,62 @@ CUICDkey::CUICDkey(){
 	SetCurrentValue();
 }
 
-CUICDkey::~CUICDkey(){	
-
-
+void CUICDkey::OnFocusLost()
+{
+	CUIWindow::OnFocusLost();
+	if(m_bInputFocus)
+	{
+		m_bInputFocus = false;
+		m_iKeyPressAndHold = 0;
+		GetMessageTarget()->SendMessage(this,EDIT_TEXT_COMMIT,NULL);
+	}
 }
 
-void CUICDkey::Draw(){
-	Frect			rect;
-	GetAbsoluteRect	(rect);
-	float outX, outY;
+void CUICDkey::Draw()
+{
+	Frect						rect;
+	GetAbsoluteRect				(rect);
+	Fvector2					outXY;
 
-	outY = (m_wndSize.y - m_lines.m_pFont->CurrentHeight_/*Rel*/())/2;
-	outX = 0;
-	m_lines.m_pFont->SetColor(m_lines.GetTextColor());
+	outXY.y						= (m_wndSize.y - m_lines.m_pFont->CurrentHeight_())/2.0f;
+	outXY.x						= 0;
+	m_lines.m_pFont->SetColor	(m_lines.GetTextColor());
 
-	Fvector2 pos;
-	pos.set						(rect.left+outX, rect.top+outY);
+	Fvector2					pos;
+	pos.set						(rect.left+outXY.x, rect.top+outXY.y);
 	UI()->ClientToScreenScaled	(pos);
+
 	if(m_bInputFocus)
 	{		
-		m_lines.m_pFont->Out( pos.x, pos.y, "%s" ,AddHyphens(m_lines.m_text.c_str()) );
-	
-		outY = (m_wndSize.y - m_lines.m_pFont->CurrentHeight_/*Rel*/())/2;
-		outX = m_lines.GetDrawCursorPos();
-		outX += m_lines.m_pFont->SizeOf_/*Rel*/("-")*(_min(iFloor(m_lines.m_iCursorPos/4.0f),3));
+		m_lines.m_pFont->Out	( pos.x, pos.y, "%s" ,AddHyphens(m_lines.m_text.c_str()) );
+		
+		float _h				= m_lines.m_pFont->CurrentHeight_();
+		UI()->ClientToScreenScaledHeight(_h);
+		
+		outXY.y					= rect.top + (m_wndSize.y - _h)/2.0f;
+		
+		float	_w_tmp			=0.0f;
 
-		CUILine::DrawCursor(m_lines.m_pFont, rect.left+outX, rect.top+outY, m_lines.GetTextColor());
+		string256				buff;
+		int i					= m_lines.m_iCursorPos;
+		strncpy					(buff,m_lines.m_text.c_str(),i);
+		buff					[i]=0;
+		_w_tmp					= m_lines.m_pFont->SizeOf_(buff);
+		UI()->ClientToScreenScaledWidth(_w_tmp);
+		outXY.x					= rect.left+_w_tmp;
+		
+		_w_tmp					= m_lines.m_pFont->SizeOf_("-");
+		UI()->ClientToScreenScaledWidth(_w_tmp);
+		
+		if(i>3)
+			outXY.x	+= _w_tmp;
+		if(i>7)
+			outXY.x	+= _w_tmp;
+		if(i>11)
+			outXY.x	+= _w_tmp;
+
+		UI()->ClientToScreenScaled	(outXY);
+		m_lines.m_pFont->Out		(outXY.x, outXY.y, "_");
 	}
 	else
 	{
@@ -45,6 +77,12 @@ void CUICDkey::Draw(){
 		m_lines.m_pFont->Out(pos.x, pos.y, "%s" ,AddHyphens(tmp) );
 	}
 }
+
+const char* CUICDkey::GetText			()
+{
+	return AddHyphens(CUIEditBox::GetText());
+}
+
 
 LPCSTR CUICDkey::AddHyphens(LPCSTR c){
 	static string32 buf;
@@ -91,6 +129,7 @@ void CUICDkey::AddChar(char c){
 
 void CUICDkey::SetCurrentValue(){
 	char CDKeyStr[64];
+	CDKeyStr[0] = 0;
 	GetCDKey(CDKeyStr);
 	m_lines.SetText(DelHyphens(CDKeyStr));
 
@@ -103,20 +142,11 @@ void CUICDkey::SaveValue(){
 //	char NewCDKey[32];
 //	HKEY KeyCDKey = 0;
 
+//	string256 tmp;
 	sprintf(gsCDKey,"%s",AddHyphens(m_lines.GetText()));
-/*
-	long res = RegOpenKeyEx(HKEY_CURRENT_USER, 
-		REGISTRY_CDKEY_STR, 0, KEY_ALL_ACCESS, &KeyCDKey);
+//	sprintf(tmp,"cdkey %s",AddHyphens(m_lines.GetText()));
+//	Console->Execute(tmp);
 
-	if (res == ERROR_SUCCESS && KeyCDKey != 0)
-	{
-		DWORD KeyValueSize = (DWORD) xr_strlen(NewCDKey);
-		DWORD KeyValueType = REG_SZ;
-		res = RegSetValueEx(KeyCDKey, "value", NULL, KeyValueType, (LPBYTE)NewCDKey, KeyValueSize);
-	}
-
-	if (KeyCDKey) RegCloseKey(KeyCDKey);
-*/
 }
 
 bool CUICDkey::IsChanged(){
@@ -126,65 +156,9 @@ bool CUICDkey::IsChanged(){
 }
 
 void CUICDkey::CreateCDKeyEntry(){
-/*
-	HKEY KeyCDKey;
 
-	long res = RegOpenKeyEx(HKEY_CURRENT_USER, 
-		REGISTRY_CDKEY_STR, 0, KEY_ALL_ACCESS, &KeyCDKey);
-
-	switch (res)
-	{
-	case ERROR_FILE_NOT_FOUND:
-		{
-			HKEY hKey;
-			res = RegOpenKeyEx(HKEY_CURRENT_USER, 
-				"", 0, KEY_ALL_ACCESS, &hKey);
-			if (res != ERROR_SUCCESS) return;
-			DWORD xres;
-			res = RegCreateKeyEx(hKey, REGISTRY_CDKEY_STR, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS,
-				NULL, &KeyCDKey, &xres);
-
-			if (hKey) RegCloseKey(hKey);
-		}break;
-	};
-	//-----------------------------------------------------------------------------------
-	if (!KeyCDKey) return;
-	char KeyValue[1024] = "";
-	DWORD KeyValueSize = 1023;
-	DWORD KeyValueType = REG_SZ;
-	res = RegQueryValueEx(KeyCDKey, "value", NULL, &KeyValueType, (LPBYTE)KeyValue, &KeyValueSize);
-
-	switch (res)
-	{
-	case ERROR_FILE_NOT_FOUND:
-		{
-			res = RegSetValueEx(KeyCDKey, "value", NULL, KeyValueType, (LPBYTE)KeyValue, 0);
-		}break;
-	};	
-
-	if (KeyCDKey) RegCloseKey(KeyCDKey);
-*/
 }
 
-void CUICDkey::GetCDKey(char* CDKeyStr){
-	strcpy(CDKeyStr, gsCDKey);
-/*
-	HKEY KeyCDKey = 0;
-	long res = RegOpenKeyEx(HKEY_CURRENT_USER, 
-		REGISTRY_CDKEY_STR, 0, KEY_READ, &KeyCDKey);
-
-	DWORD KeyValueSize = 128;
-	DWORD KeyValueType = REG_SZ;
-	if (res == ERROR_SUCCESS && KeyCDKey != 0)
-	{
-		res = RegQueryValueEx(KeyCDKey, "value", NULL, &KeyValueType, (LPBYTE)CDKeyStr, &KeyValueSize);
-	};
-
-	if (res == ERROR_PATH_NOT_FOUND ||
-		res == ERROR_FILE_NOT_FOUND ||
-		KeyValueSize == 0)
-	{
-		sprintf(CDKeyStr, "" );
-	};
-*/
+void GetCDKey(char* CDKeyStr){
+	ReadRegistry_StrValue(REGISTRY_VALUE_GSCDKEY, CDKeyStr);
 }

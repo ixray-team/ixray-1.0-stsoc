@@ -265,7 +265,6 @@ void CHelicopter::DieHelicopter()
 	if ( state() == CHelicopter::eDead )
 		return;
 	CEntity::Die(NULL);
-//	Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member(this,false);
 
 	m_engineSound.stop				();
 

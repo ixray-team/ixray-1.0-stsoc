@@ -94,30 +94,15 @@ const CUISubLine* CUISubLine::Cut2Pos(int i){
 	return m_pTempLine;
 }
 
-void CUISubLine::FreeBuffer(){
+void CUISubLine::FreeBuffer()
+{
 //	xr_delete(m_pTempLine);
 }
 
 void CUISubLine::Draw(CGameFont* pFont, float x, float y) const{
 	pFont->SetColor(m_color);
-	pFont->SetAligment(CGameFont::alLeft);
 	Fvector2			pos;
 	pos.set				(x, y);
 	UI()->ClientToScreenScaled(pos);
 	pFont->Out			(pos.x, pos.y, "%s", m_text.c_str() );
-}
-
-float CUISubLine::GetLength(CGameFont* pFont) const{
-	return (pFont->SizeOf_/*Rel*/(m_text.c_str()));
-}
-
-float CUISubLine::GetVisibleLength(CGameFont* pFont){
-	int end = (int)m_text.find_last_not_of(' ');
-	bool b = (end!=(int)m_text.size()-1);
-	if(b)
-		m_text[end+1] = 0;	
-	float res = (pFont->SizeOf_/*Rel*/(m_text.c_str()));	
-	if(b)
-		m_text[end+1] = ' ';
-	return res;
 }

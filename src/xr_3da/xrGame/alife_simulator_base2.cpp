@@ -47,9 +47,7 @@ void CALifeSimulatorBase::register_object	(CSE_ALifeDynamicObject *object, bool 
 #endif
 
 		II->children.push_back			(item->base()->ID);
-		CSE_ALifeTraderAbstract			*trader_abstract = smart_cast<CSE_ALifeTraderAbstract*>(II);
-		if (trader_abstract)
-			trader_abstract->attach		(item,true,false);
+		II->attach						(item,true,false);
 	}
 
 	if (can_register_objects())

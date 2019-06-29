@@ -18,7 +18,10 @@ protected:
 	void						attach				();
 	void						dettach				();
 public:
-	OggVorbis_File*				get_data			(){return &ovf;}
+	OggVorbis_File*				get_data			()	{
+		if (!wave)	attach		();
+		return &ovf;
+	}
 public:
 								CSoundRender_Target	(void);
 	virtual 					~CSoundRender_Target(void);

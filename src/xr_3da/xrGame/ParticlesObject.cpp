@@ -64,7 +64,9 @@ void CParticlesObject::Init	(LPCSTR p_name, IRender_Sector* S, BOOL bAutoRemove)
 CParticlesObject::~CParticlesObject()
 {
 	VERIFY					(0==mt_dt);
-	shedule_unregister		();
+
+//	we do not need this since CPS_Instance does it
+//	shedule_unregister		();
 }
 
 void CParticlesObject::UpdateSpatial()

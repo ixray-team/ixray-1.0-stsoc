@@ -50,13 +50,14 @@ void CGameMtlLibrary::Load()
     R_ASSERT			(material_pairs.empty());
     R_ASSERT			(materials.empty());
     		
-	destructor<IReader>	F(FS.r_open(name));
-    IReader& fs			= F();
+	IReader*	F		= FS.r_open(name);
+    IReader& fs			= *F;
 
     R_ASSERT(fs.find_chunk(GAMEMTLS_CHUNK_VERSION));
     u16 version			= fs.r_u16();
     if (GAMEMTL_CURRENT_VERSION!=version){
         Log				("CGameMtlLibrary: invalid version. Library can't load.");
+		FS.r_close		(F);
     	return;
     }
 
@@ -109,6 +110,7 @@ void CGameMtlLibrary::Load()
 		}
 	}
 */
+	FS.r_close		(F);
 }
 
 #ifdef GM_NON_GAME

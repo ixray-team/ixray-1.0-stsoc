@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "seniority_hierarchy_space.h"
+
 class CEntity;
 class CAgentManager;
 class CSquadHierarchyHolder;
@@ -32,8 +34,12 @@ private:
 	typedef GroupHierarchyHolder::HIT_OBJECTS		HIT_OBJECTS;
 	typedef GroupHierarchyHolder::MEMBER_REGISTRY	MEMBER_REGISTRY;
 
+#ifdef SQUAD_HIERARCHY_HOLDER_USE_LEADER
 private:
 	CEntity							*m_leader;
+#endif // SQUAD_HIERARCHY_HOLDER_USE_LEADER
+
+private:
 	CSquadHierarchyHolder			*m_squad;
 	MEMBER_REGISTRY					m_members;
 	VISIBLE_OBJECTS					*m_visible_objects;
@@ -64,10 +70,10 @@ private:
 			void					register_in_agent_manager	(CEntity *member);
 			void					register_in_group_senses	(CEntity *member);
 private:
-			void					unregister_in_group			(CEntity *member, bool member_is_destroying);
-			void					unregister_in_squad			(CEntity *member, bool member_is_destroying);
-			void					unregister_in_agent_manager	(CEntity *member, bool member_is_destroying);
-			void					unregister_in_group_senses	(CEntity *member, bool member_is_destroying);
+			void					unregister_in_group			(CEntity *member);
+			void					unregister_in_squad			(CEntity *member);
+			void					unregister_in_agent_manager	(CEntity *member);
+			void					unregister_in_group_senses	(CEntity *member);
 
 public:
 	IC								CGroupHierarchyHolder		(CSquadHierarchyHolder *squad);
@@ -75,10 +81,14 @@ public:
 	IC		CAgentManager			&agent_manager				() const;
 	IC		const MEMBER_REGISTRY	&members					() const;
 			void					register_member				(CEntity *member);
-			void					unregister_member			(CEntity *member, bool member_is_destroying);
+			void					unregister_member			(CEntity *member);
 	IC		CSquadHierarchyHolder	&squad						() const;
-	IC		CEntity					*leader						() const;
+
+#ifdef SQUAD_HIERARCHY_HOLDER_USE_LEADER
+public:
 			void					update_leader				();
+	IC		CEntity					*leader						() const;
+#endif // SQUAD_HIERARCHY_HOLDER_USE_LEADER
 };
 
 #include "group_hierarchy_holder_inline.h"

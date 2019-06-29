@@ -135,9 +135,6 @@
 	#define MODULE_NAME 	"xrCore.dll"
 #endif
 
-#define COMPANY_NAME 		"GSC Game World"
-#define PRODUCT_NAME 		"STALKER"
-
 
 // Warnings
 #pragma warning (disable : 4251 )		// object needs DLL interface
@@ -262,7 +259,6 @@ class XRCORE_API xrCore
 public:
 	string64	ApplicationName;
 	string_path	ApplicationPath;
-	string_path	ApplicationDataPath;
 	string_path	WorkingPath;
 	string64	UserName;
 	string64	CompName;

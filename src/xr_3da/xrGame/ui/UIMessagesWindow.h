@@ -17,7 +17,6 @@ class CUIGameLog;
 class CUIChatWnd;
 class game_cl_GameState;
 class CUIPdaMsgListItem;
-class CUIListWnd;
 class CUIProgressShape;
 
 class CUIMessagesWindow : public CUIWindow {

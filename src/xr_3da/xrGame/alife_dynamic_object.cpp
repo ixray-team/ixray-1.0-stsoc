@@ -26,6 +26,14 @@ void CSE_ALifeDynamicObject::on_spawn				()
 
 void CSE_ALifeDynamicObject::on_register			()
 {
+	CSE_ALifeObject		*object = this;
+	while (object->ID_Parent != ALife::_OBJECT_ID(-1)) {
+		object			= ai().alife().objects().object(object->ID_Parent);
+		VERIFY			(object);
+	}
+
+	if (!alife().graph().level().object(object->ID,true) && !keep_saved_data_anyway())
+		client_data.clear					();
 }
 
 void CSE_ALifeDynamicObject::on_before_register		()
@@ -56,7 +64,8 @@ void CSE_ALifeDynamicObject::switch_offline			()
 	if (!client_data.empty())
 		Msg						("CSE_ALifeDynamicObject::switch_offline: client_data is cleared for [%d][%s]",ID,name_replace());
 #endif // DEBUG
-	client_data.clear			();
+	if (!keep_saved_data_anyway())
+		client_data.clear		();
 }
 
 void CSE_ALifeDynamicObject::add_online				(const bool &update_registries)
@@ -125,7 +134,8 @@ void CSE_ALifeDynamicObject::try_switch_online		()
 		if (!client_data.empty())
 			Msg					("CSE_ALifeDynamicObject::try_switch_online: client_data is cleared for [%d][%s]",ID,name_replace());
 #endif // DEBUG
-		client_data.clear		();
+		if (!keep_saved_data_anyway())
+			client_data.clear	();
 		return;
 	}
 	
@@ -139,7 +149,8 @@ void CSE_ALifeDynamicObject::try_switch_online		()
 		if (!client_data.empty())
 			Msg					("CSE_ALifeDynamicObject::try_switch_online2: client_data is cleared for [%d][%s]",ID,name_replace());
 #endif // DEBUG
-		client_data.clear		();
+		if (!keep_saved_data_anyway())
+			client_data.clear	();
 		return;
 	}
 
@@ -167,9 +178,6 @@ bool CSE_ALifeDynamicObject::redundant				() const
 	return						(false);
 }
 
-
-
-
 void CSE_InventoryBox::add_online	(const bool &update_registries)
 {
 	CSE_ALifeDynamicObjectVisual		*object = (this);
@@ -189,8 +197,18 @@ void CSE_InventoryBox::add_online	(const bool &update_registries)
 		object->alife().server().entity_Destroy(l_tpAbstract);
 
 #ifdef DEBUG
-		if (psAI_Flags.test(aiALife))
-			Msg					("[LSS] Spawning item [%s][%s][%d]",l_tpALifeInventoryItem->base()->name_replace(),*l_tpALifeInventoryItem->base()->s_name,l_tpALifeDynamicObject->ID);
+//		if (psAI_Flags.test(aiALife))
+//			Msg					("[LSS] Spawning item [%s][%s][%d]",l_tpALifeInventoryItem->base()->name_replace(),*l_tpALifeInventoryItem->base()->s_name,l_tpALifeDynamicObject->ID);
+		Msg						(
+			"[LSS][%d] Going online [%d][%s][%d] with parent [%d][%s] on '%s'",
+			Device.dwFrame,
+			Device.dwTimeGlobal,
+			l_tpALifeInventoryItem->base()->name_replace(),
+			l_tpALifeInventoryItem->base()->ID,
+			ID,
+			name_replace(),
+			"*SERVER*"
+		);
 #endif
 
 		l_tpALifeDynamicObject->o_Position		= object->o_Position;
@@ -215,8 +233,18 @@ void CSE_InventoryBox::add_offline	(const xr_vector<ALife::_OBJECT_ID> &saved_ch
 		CSE_ALifeInventoryItem	*inventory_item = smart_cast<CSE_ALifeInventoryItem*>(child);
 		VERIFY2					(inventory_item,"Non inventory item object has parent?!");
 #ifdef DEBUG
-		if (psAI_Flags.test(aiALife))
-			Msg					("[LSS] Destroying item [%s][%s][%d]",inventory_item->base()->name_replace(),*inventory_item->base()->s_name,inventory_item->base()->ID);
+//		if (psAI_Flags.test(aiALife))
+//			Msg					("[LSS] Destroying item [%s][%s][%d]",inventory_item->base()->name_replace(),*inventory_item->base()->s_name,inventory_item->base()->ID);
+		Msg						(
+			"[LSS][%d] Going offline [%d][%s][%d] with parent [%d][%s] on '%s'",
+			Device.dwFrame,
+			Device.dwTimeGlobal,
+			inventory_item->base()->name_replace(),
+			inventory_item->base()->ID,
+			ID,
+			name_replace(),
+			"*SERVER*"
+		);
 #endif
 		
 		ALife::_OBJECT_ID				item_id = inventory_item->base()->ID;
@@ -233,7 +261,8 @@ void CSE_InventoryBox::add_offline	(const xr_vector<ALife::_OBJECT_ID> &saved_ch
 		if (!client_data.empty())
 			Msg							("CSE_InventoryBox::add_offline: client_data is cleared for [%d][%s]",ID,name_replace());
 #endif // DEBUG
-		child->client_data.clear		();
+		if (!child->keep_saved_data_anyway())
+			child->client_data.clear		();
 		object->alife().graph().add		(child,child->m_tGraphID,false);
 //		object->alife().graph().attach	(*object,inventory_item,child->m_tGraphID,true);
 		alife().graph().remove			(child,child->m_tGraphID);

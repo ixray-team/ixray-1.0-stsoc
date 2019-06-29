@@ -132,7 +132,7 @@ void CSpaceRestrictionHolder::register_restrictor				(CSpaceRestrictor *space_re
 		*temp				= normalize_string(m_temp_string);
 		
 		if (xr_strcmp(*temp,temp1))
-			on_default_restrictions_changed	(restrictor_type,temp1,*temp);
+			on_default_restrictions_changed	();
 	}
 	
 	CSpaceRestrictionShape	*shape = xr_new<CSpaceRestrictionShape>(space_restrictor,restrictor_type != RestrictionSpace::eDefaultRestrictorTypeNone);
@@ -144,6 +144,52 @@ void CSpaceRestrictionHolder::register_restrictor				(CSpaceRestrictor *space_re
 	}
 
 	(*I).second->change_implementation(shape);
+}
+
+bool try_remove_string				(shared_str &search_string, const shared_str &string_to_search)
+{
+	bool					found = false;
+	string256				temp;
+	string4096				temp1;
+	*temp1					= 0;
+	for (int i=0, j=0, n=_GetItemCount(*search_string); i<n; ++i, ++j) {
+		if (xr_strcmp(string_to_search,_GetItem(*search_string,i,temp))) {
+			if (j)
+				strcat		(temp1,",");
+			strcat			(temp1,temp);
+			continue;
+		}
+
+		found				= true;
+		--j;
+	}
+
+	if (!found)
+		return				(false);
+
+	search_string			= temp1;
+	return					(true);
+}
+
+void CSpaceRestrictionHolder::unregister_restrictor			(CSpaceRestrictor *space_restrictor)
+{
+	shared_str				restrictor_id = space_restrictor->cName();
+	RESTRICTIONS::iterator	I = m_restrictions.find(restrictor_id);
+	VERIFY					(I != m_restrictions.end());
+	m_restrictions.erase	(I);
+
+	if (try_remove_string(m_default_out_restrictions,restrictor_id))
+		on_default_restrictions_changed		();
+	else {
+		if (try_remove_string(m_default_in_restrictions,restrictor_id))
+			on_default_restrictions_changed	();
+	}
+
+	CSpaceRestrictionBase	*composition = xr_new<CSpaceRestrictionComposition>(this,restrictor_id);
+	CSpaceRestrictionBridge	*bridge = xr_new<CSpaceRestrictionBridge>(composition);
+	m_restrictions.insert	(std::make_pair(restrictor_id,bridge));
+
+	collect_garbage			();
 }
 
 IC	void CSpaceRestrictionHolder::collect_garbage			()

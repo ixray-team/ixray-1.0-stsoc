@@ -1,11 +1,9 @@
-// Window.h: interface for the CUIWindow class.
-//
-// графический вывод через интерфейс CUIWindowDraw
-//////////////////////////////////////////////////////////////////////
-
 #pragma once
 class CUIWindow;
 
+#define MOUSE_1		0x100
+#define MOUSE_2		0x200
+#define MOUSE_3		0x400
 
 
 struct _12b	{ DWORD _[3]; };
@@ -110,14 +108,14 @@ public:
 	
 
 
-	virtual bool 			OnMouse(float x, float y, EUIMessages mouse_action);
-	virtual void 			OnMouseMove();
-	virtual void 			OnMouseScroll(float iDirection);
-	virtual bool 			OnDbClick();
-	virtual bool 			OnMouseDown(bool left_button = true);
-	virtual void 			OnMouseUp(bool left_button = true);
-	virtual void 			OnFocusReceive();
-	virtual void 			OnFocusLost();
+	virtual bool 			OnMouse				(float x, float y, EUIMessages mouse_action);
+	virtual void 			OnMouseMove			();
+	virtual void 			OnMouseScroll		(float iDirection);
+	virtual bool 			OnDbClick			();
+	virtual bool 			OnMouseDown			(int mouse_btn);
+	virtual void 			OnMouseUp			(int mouse_btn);
+	virtual void 			OnFocusReceive		();
+	virtual void 			OnFocusLost			();
 			bool 			HasChildMouseHandler();
 
 	//захватить/освободить мышь окном

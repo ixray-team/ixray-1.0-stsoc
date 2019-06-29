@@ -6,6 +6,8 @@
 #include "UIDMStatisticWnd.h"
 #include "ui/UISkinSelector.h"
 #include "ui/UIInventoryWnd.h"
+#include "ui/UIPdaWnd.h"
+#include "ui/UIMapDesc.h"
 #include "HUDManager.h"
 #include "level.h"
 #include "game_cl_base.h"
@@ -19,6 +21,8 @@
 #include "ui/UIMoneyIndicator.h"
 #include "ui/UIRankIndicator.h"
 #include "ui/UIVoteStatusWnd.h"
+
+#include "object_broker.h"
 
 #define MSGS_OFFS 510
 
@@ -44,24 +48,24 @@ CUIGameDM::CUIGameDM()
 	m_pStatisticWnds					= xr_new<CUIWindow>();
 
 	m_time_caption = "timelimit";
-	GameCaptions()->addCustomMessage(m_time_caption, DI2PX(0.0f), DI2PY(-0.8f), SZ(0.03f), HUD().Font().pFontDI, CGameFont::alCenter, TIME_MSG_COLOR, "");
+	GameCaptions()->addCustomMessage(m_time_caption, DI2PX(0.0f), DI2PY(-0.8f), SZ(0.03f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, TIME_MSG_COLOR, "");
 	m_spectrmode_caption = "spetatormode";
-	GameCaptions()->addCustomMessage(m_spectrmode_caption, DI2PX(0.0f), DI2PY(-0.9f), SZ(0.03f), HUD().Font().pFontDI, CGameFont::alCenter, SPECTRMODE_MSG_COLOR, "");
+	GameCaptions()->addCustomMessage(m_spectrmode_caption, DI2PX(0.0f), DI2PY(-0.9f), SZ(0.03f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, SPECTRMODE_MSG_COLOR, "");
 	m_spectator_caption = "spectator";
-	GameCaptions()->addCustomMessage(m_spectator_caption, DI2PX(0.0f), DI2PY(0.0f), SZ(0.03f), HUD().Font().pFontDI, CGameFont::alCenter, NORMAL_MSG_COLOR, "");
+	GameCaptions()->addCustomMessage(m_spectator_caption, DI2PX(0.0f), DI2PY(0.0f), SZ(0.03f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, NORMAL_MSG_COLOR, "");
 	m_pressjump_caption = "pressjump";
-	GameCaptions()->addCustomMessage(m_pressjump_caption, DI2PX(0.0f), DI2PY(0.9f), SZ(0.02f), HUD().Font().pFontDI, CGameFont::alCenter, NORMAL_MSG_COLOR, "");
+	GameCaptions()->addCustomMessage(m_pressjump_caption, DI2PX(0.0f), DI2PY(0.9f), SZ(0.02f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, NORMAL_MSG_COLOR, "");
 	m_pressbuy_caption = "pressbuy";
-	GameCaptions()->addCustomMessage(m_pressbuy_caption, DI2PX(0.0f), DI2PY(0.95f), SZ(0.02f), HUD().Font().pFontDI, CGameFont::alCenter, NORMAL_MSG_COLOR, "");
+	GameCaptions()->addCustomMessage(m_pressbuy_caption, DI2PX(0.0f), DI2PY(0.95f), SZ(0.02f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, NORMAL_MSG_COLOR, "");
 	m_round_result_caption =	"round_result";
-	GameCaptions()->addCustomMessage(m_round_result_caption, DI2PX(0.0f), DI2PY(-0.1f), SZ(0.03f), HUD().Font().pFontDI, CGameFont::alCenter, ROUND_RESULT_COLOR, "");
+	GameCaptions()->addCustomMessage(m_round_result_caption, DI2PX(0.0f), DI2PY(-0.1f), SZ(0.03f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, ROUND_RESULT_COLOR, "");
 	m_force_respawn_time_caption =	"force_respawn_time";
-	GameCaptions()->addCustomMessage(m_force_respawn_time_caption, DI2PX(0.0f), DI2PY(-0.9f), SZ(0.02f), HUD().Font().pFontDI, CGameFont::alCenter, NORMAL_MSG_COLOR, "");
+	GameCaptions()->addCustomMessage(m_force_respawn_time_caption, DI2PX(0.0f), DI2PY(-0.9f), SZ(0.02f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, NORMAL_MSG_COLOR, "");
 	m_demo_play_caption =	"demo_play";
-	GameCaptions()->addCustomMessage(m_demo_play_caption, DI2PX(-1.0f), DI2PY(-0.95f), SZ(0.05f), HUD().Font().pFontDI, CGameFont::alLeft, DEMOPLAY_COLOR, "");
+	GameCaptions()->addCustomMessage(m_demo_play_caption, DI2PX(-1.0f), DI2PY(-0.95f), SZ(0.05f), HUD().Font().pFontGraffiti19Russian, CGameFont::alLeft, DEMOPLAY_COLOR, "");
 	
 	m_warm_up_caption =	"warm_up";
-	GameCaptions()->addCustomMessage(m_warm_up_caption, DI2PX(0.0f), DI2PY(-0.75f), SZ(0.05f), HUD().Font().pFontDI, CGameFont::alCenter, WARM_UP_COLOR, "");
+	GameCaptions()->addCustomMessage(m_warm_up_caption, DI2PX(0.0f), DI2PY(-0.75f), SZ(0.05f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, WARM_UP_COLOR, "");
 
 	CUIXml							uiXml;
 	uiXml.Init						(CONFIG_PATH, UI_PATH, "ui_game_dm.xml");
@@ -76,6 +80,11 @@ CUIGameDM::CUIGameDM()
 //.	m_voteStatusWnd->InitFromXML	(uiXml);
 //.	m_voteStatusWnd->Show			(false);
 	m_voteStatusWnd					= NULL;
+
+	m_pInventoryMenu	= xr_new<CUIInventoryWnd>	();
+	m_pPdaMenu			= xr_new<CUIPdaWnd>			();
+	m_pMapDesc			= NULL;//xr_new<CUIMapDesc>		();
+
 }
 //--------------------------------------------------------------------
 void CUIGameDM::SetClGame (game_cl_GameState* g)
@@ -83,6 +92,13 @@ void CUIGameDM::SetClGame (game_cl_GameState* g)
 	inherited::SetClGame(g);
 	m_game = smart_cast<game_cl_Deathmatch*>(g);
 	R_ASSERT(m_game);
+
+	if (m_pMapDesc && m_pMapDesc->IsShown())
+	{
+		HUD().GetUI()->StartStopMenu(m_pMapDesc, true);
+	}
+	delete_data(m_pMapDesc);
+	m_pMapDesc			= xr_new<CUIMapDesc>		();
 }
 
 void	CUIGameDM::Init				()
@@ -147,14 +163,18 @@ CUIGameDM::~CUIGameDM()
 	xr_delete					(m_pRankIndicator);
 	xr_delete					(m_pFragLimitIndicator);
 	xr_delete					(m_voteStatusWnd);
+	//---------------------------------------------------
+	delete_data(m_pInventoryMenu);
+	delete_data(m_pPdaMenu);	
+	delete_data(m_pMapDesc);	
 }
 
 void	CUIGameDM::ReInitShownUI		() 
 {
-	if (m_game && m_game->GetInventoryWnd() && m_game->GetInventoryWnd()->IsShown())
-	{	
-		m_game->GetInventoryWnd()->InitInventory();
-	};
+	if (m_pInventoryMenu && m_pInventoryMenu->IsShown())
+	{
+		m_pInventoryMenu->InitInventory();
+	}
 };
 //--------------------------------------------------------------------
 
@@ -255,7 +275,8 @@ bool		CUIGameDM::IR_OnKeyboardPress		(int dik)
 {
 	if(inherited::IR_OnKeyboardPress(dik)) return true;
 
-	switch (key_binding[dik])
+	EGameActions cmd  = get_binded_action(dik);
+	switch ( cmd )
 	{
 	case kINVENTORY: 
 	case kBUY:
@@ -263,7 +284,7 @@ bool		CUIGameDM::IR_OnKeyboardPress		(int dik)
 	case kTEAM:
 		case kMAP:
 		{
-			return Game().OnKeyboardPress(key_binding[dik]);
+			return Game().OnKeyboardPress( cmd );
 		}break;
 	}
 	return false;
@@ -324,4 +345,11 @@ void CUIGameDM::SetFraglimit(int local_frags, int fraglimit)
 		sprintf(str,"%d", local_frags);
 
 	m_pFragLimitIndicator->SetText(str);
+}
+
+void CUIGameDM::reset_ui				()
+{
+	inherited::reset_ui		();
+	m_pInventoryMenu->Reset	();
+	m_pPdaMenu->Reset		();
 }

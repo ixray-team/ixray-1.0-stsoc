@@ -28,7 +28,7 @@ public:
 	bool					Render					();
 	void					UIOnFrame				();
 
-	void					Load					();
+	void					Load					(CUIGameCustom* pGameUI);
 	void					UnLoad					();
 
 	bool					IR_OnKeyboardHold		(int dik);
@@ -49,5 +49,6 @@ public:
 	bool					CrosshairShown			();
 
 	void					AddInfoMessage			(LPCSTR message);
+	void					OnConnected				();
 };
 

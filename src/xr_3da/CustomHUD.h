@@ -35,4 +35,9 @@ public:
 
 	virtual IC	CUI*		GetUI					()=0;
 	virtual void			OnScreenRatioChanged	()=0;
+	virtual void			OnDisconnected			()=0;
+	virtual void			OnConnected				()=0;
+
 };
+
+extern ENGINE_API CCustomHUD* g_hud;

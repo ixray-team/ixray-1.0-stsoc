@@ -37,7 +37,7 @@ CSE_ALifeTraderAbstract* ch_info_get_from_id (u16 id)
 CUICharacterInfo::CUICharacterInfo()
 :m_ownerID(u16(-1)),pUIBio(NULL)
 {
-	ZeroMemory			(m_icons,eMaxCaption*sizeof(CUIStatic*));
+	ZeroMemory			(m_icons,sizeof(m_icons));
 	m_bForceUpdate		= false;
 }
 
@@ -189,12 +189,9 @@ void CUICharacterInfo::InitCharacter(u16 id)
 		m_icons[eUICommunity]->SetText(str);
 	}
 
-	m_icons[eUIIcon]->SetShader(GetCharIconsShader());
-	m_icons[eUIIcon]->GetUIStaticItem().SetOriginalRect(	float(chInfo.TradeIconX()*ICON_GRID_WIDTH),
-															float(chInfo.TradeIconY()*ICON_GRID_HEIGHT),
-															float(CHAR_ICON_WIDTH*ICON_GRID_WIDTH),
-															float(CHAR_ICON_HEIGHT*ICON_GRID_HEIGHT));
-	m_icons[eUIIcon]->SetStretchTexture						(true);
+	m_texture_name										= chInfo.IconName().c_str();
+	m_icons[eUIIcon]->InitTexture						( m_texture_name.c_str() );
+	m_icons[eUIIcon]->SetStretchTexture					(true);
 
 	// Bio
 	if (pUIBio && pUIBio->IsEnabled())

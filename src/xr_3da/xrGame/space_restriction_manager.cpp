@@ -32,11 +32,28 @@ CSpaceRestrictionManager::~CSpaceRestrictionManager			()
 	delete_data						(m_space_restrictions);
 }
 
+void show_restriction				(const shared_str &restrictions)
+{
+	string256						temp;
+	for (int i=0, n=_GetItemCount(*restrictions); i<n; ++i)
+		Msg							("     %s",_GetItem(*restrictions,i,temp));
+}
+
+typedef intrusive_ptr<CSpaceRestriction,RestrictionSpace::CTimeIntrusiveBase> CRestrictionPtr;
+void show_restriction				(const CRestrictionPtr &restriction)
+{
+	Msg								("out");
+	show_restriction				(restriction->out_restrictions());
+	Msg								("in");
+	show_restriction				(restriction->in_restrictions());
+}
+
 void CSpaceRestrictionManager::clear						()
 {
-	CSpaceRestrictionHolder::clear	();
 	m_clients->clear				();
 	delete_data						(m_space_restrictions);
+
+	CSpaceRestrictionHolder::clear	();
 }
 
 void CSpaceRestrictionManager::remove_border				(ALife::_OBJECT_ID id)
@@ -99,7 +116,7 @@ IC	void CSpaceRestrictionManager::collect_garbage				()
 	}
 }
 
-IC	void CSpaceRestrictionManager::restrict						(ALife::_OBJECT_ID id, shared_str out_restrictors, shared_str in_restrictors)
+void CSpaceRestrictionManager::restrict							(ALife::_OBJECT_ID id, shared_str out_restrictors, shared_str in_restrictors)
 {
 	shared_str									merged_out_restrictions = out_restrictors;
 	shared_str									merged_in_restrictions = in_restrictors;
@@ -118,6 +135,14 @@ IC	void CSpaceRestrictionManager::restrict						(ALife::_OBJECT_ID id, shared_st
 	(*m_clients)[id].m_base_out_restrictions	= out_restrictors;
 	(*m_clients)[id].m_base_in_restrictions		= in_restrictors;
 	
+	collect_garbage								();
+}
+
+void CSpaceRestrictionManager::unrestrict						(ALife::_OBJECT_ID id)
+{
+	CLIENT_RESTRICTIONS::iterator				I = m_clients->find(id);
+	VERIFY										(I != m_clients->end());
+	m_clients->erase							(I);
 	collect_garbage								();
 }
 
@@ -268,10 +293,10 @@ void CSpaceRestrictionManager::change_restrictions			(ALife::_OBJECT_ID id, shar
 	restrict					(id,new_out_restrictions,new_in_restrictions);
 }
 
-void CSpaceRestrictionManager::on_default_restrictions_changed	(const RestrictionSpace::ERestrictorTypes &restrictor_type, shared_str old_restrictions, shared_str new_restrictions)
+void CSpaceRestrictionManager::on_default_restrictions_changed	()
 {
 	CLIENT_RESTRICTIONS::const_iterator	I = m_clients->begin();
 	CLIENT_RESTRICTIONS::const_iterator	E = m_clients->end();
 	for ( ; I != E; ++I)
-		restrict						((*I).first,(*I).second.m_base_out_restrictions,(*I).second.m_base_in_restrictions);
+		restrict				((*I).first,(*I).second.m_base_out_restrictions,(*I).second.m_base_in_restrictions);
 }

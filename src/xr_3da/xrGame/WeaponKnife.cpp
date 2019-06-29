@@ -11,13 +11,13 @@
 #include "gamemtllib.h"
 #include "level_bullet_manager.h"
 #include "ai_sounds.h"
+#include "game_cl_single.h"
 
 #define KNIFE_MATERIAL_NAME "objects\\knife"
 
 CWeaponKnife::CWeaponKnife() : CWeapon("KNIFE") 
 {
 	m_attackStart			= false;
-	m_bShotLight			= false;
 	SetState				( eHidden );
 	SetNextState			( eHidden );
 	knife_material_idx		= (u16)-1;
@@ -71,7 +71,22 @@ void CWeaponKnife::OnStateSwitch	(u32 S)
 		{
 			//-------------------------------------------
 			m_eHitType		= m_eHitType_1;
-			fHitPower		= fHitPower_1;
+			//fHitPower		= fHitPower_1;
+			if (ParentIsActor())
+			{
+				if (GameID() == GAME_SINGLE)
+				{
+					fCurrentHit		= fvHitPower_1[g_SingleGameDifficulty];
+				}
+				else
+				{
+					fCurrentHit		= fvHitPower_1[egdMaster];
+				}
+			}
+			else
+			{
+				fCurrentHit		= fvHitPower_1[egdMaster];
+			}
 			fHitImpulse		= fHitImpulse_1;
 			//-------------------------------------------
 			switch2_Attacking	(S);
@@ -80,7 +95,22 @@ void CWeaponKnife::OnStateSwitch	(u32 S)
 		{
 			//-------------------------------------------
 			m_eHitType		= m_eHitType_2;
-			fHitPower		= fHitPower_2;
+			//fHitPower		= fHitPower_2;
+			if (ParentIsActor())
+			{
+				if (GameID() == GAME_SINGLE)
+				{
+					fCurrentHit		= fvHitPower_2[g_SingleGameDifficulty];
+				}
+				else
+				{
+					fCurrentHit		= fvHitPower_2[egdMaster];
+				}
+			}
+			else
+			{
+				fCurrentHit		= fvHitPower_2[egdMaster];
+			}
 			fHitImpulse		= fHitImpulse_2;
 			//-------------------------------------------
 			switch2_Attacking	(S);
@@ -112,7 +142,7 @@ void CWeaponKnife::KnifeStrike(const Fvector& pos, const Fvector& dir)
 	Level().BulletManager().AddBullet(	pos, 
 										dir, 
 										m_fStartBulletSpeed, 
-										fHitPower, 
+										fCurrentHit, 
 										fHitImpulse, 
 										H_Parent()->ID(), 
 										ID(), 
@@ -236,11 +266,35 @@ void CWeaponKnife::LoadFireParams(LPCSTR section, LPCSTR prefix)
 	inherited::LoadFireParams(section, prefix);
 
 	string256			full_name;
-	fHitPower_1			= fHitPower;
+	string32			buffer;
+	shared_str			s_sHitPower_2;
+	//fHitPower_1		= fHitPower;
+	fvHitPower_1		= fvHitPower;
 	fHitImpulse_1		= fHitImpulse;
 	m_eHitType_1		= ALife::g_tfString2HitType(pSettings->r_string(section, "hit_type"));
-	
-	fHitPower_2			= pSettings->r_float	(section,strconcat(full_name, prefix, "hit_power_2"));
+
+	//fHitPower_2			= pSettings->r_float	(section,strconcat(full_name, prefix, "hit_power_2"));
+	s_sHitPower_2		= pSettings->r_string_wb	(section,strconcat(full_name, prefix, "hit_power_2"));
+	fvHitPower_2[egdMaster]	= (float)atof(_GetItem(*s_sHitPower_2,0,buffer));//первый параметр - это хит для уровня игры мастер
+
+	fvHitPower_2[egdVeteran]	= fvHitPower_2[egdMaster];//изначально параметры для других уровней
+	fvHitPower_2[egdStalker]	= fvHitPower_2[egdMaster];//сложности
+	fvHitPower_2[egdNovice]		= fvHitPower_2[egdMaster];//такие же
+
+	int num_game_diff_param=_GetItemCount(*s_sHitPower_2);//узнаём колличество параметров для хитов
+	if (num_game_diff_param>1)//если задан второй параметр хита
+	{
+		fvHitPower_2[egdVeteran]	= (float)atof(_GetItem(*s_sHitPower_2,1,buffer));//то вычитываем его для уровня ветерана
+	}
+	if (num_game_diff_param>2)//если задан третий параметр хита
+	{
+		fvHitPower_2[egdStalker]	= (float)atof(_GetItem(*s_sHitPower_2,2,buffer));//то вычитываем его для уровня сталкера
+	}
+	if (num_game_diff_param>3)//если задан четвёртый параметр хита
+	{
+		fvHitPower_2[egdNovice]	= (float)atof(_GetItem(*s_sHitPower_2,3,buffer));//то вычитываем его для уровня новичка
+	}
+
 	fHitImpulse_2		= pSettings->r_float	(section,strconcat(full_name, prefix, "hit_impulse_2"));
 	m_eHitType_2		= ALife::g_tfString2HitType(pSettings->r_string(section, "hit_type_2"));
 }

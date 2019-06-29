@@ -87,7 +87,7 @@ protected:
 
 	typedef CBaseLocationSelector<
 				CGameGraph,
-				SVertexType<
+				SGameVertex<
 					float,
 					u32,
 					u32

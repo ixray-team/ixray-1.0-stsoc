@@ -28,9 +28,9 @@ float		ps_r__Tree_w_amp			= 0.005f;
 Fvector		ps_r__Tree_Wave				= {.1f, .01f, .11f};
 float		ps_r__Tree_SBC				= 1.5f	;	// scale bias correct
 
-float		ps_r__WallmarkTTL			= 90.f	;
-float		ps_r__WallmarkSHIFT			= 0.002f;
-float		ps_r__WallmarkSHIFT_V		= 0.005f;
+float		ps_r__WallmarkTTL			= 300.f	;
+float		ps_r__WallmarkSHIFT			= 0.0001f;
+float		ps_r__WallmarkSHIFT_V		= 0.0001f;
 
 float		ps_r__GLOD_ssa_start		= 256.f	;
 float		ps_r__GLOD_ssa_end			=  64.f	;
@@ -40,7 +40,7 @@ float		ps_r__ssaDISCARD			=  3.5f	;					//RO
 float		ps_r__ssaDONTSORT			=  32.f	;					//RO
 float		ps_r__ssaHZBvsTEX			=  96.f	;					//RO
 
-int			ps_r__tf_Anisotropic		= 1		;
+int			ps_r__tf_Anisotropic		= 4		;
 
 // R1
 float		ps_r1_ssaLOD_A				= 64.f	;
@@ -61,7 +61,7 @@ float		ps_r2_ssaLOD_B				= 32.f	;
 float		ps_r2_tf_Mipbias			= 0.0f	;
 
 // R2-specific
-Flags32		ps_r2_ls_flags				= { R2FLAG_SUN | R2FLAG_SUN_IGNORE_PORTALS};	// r2-only
+Flags32		ps_r2_ls_flags				= { R2FLAG_SUN | R2FLAG_SUN_IGNORE_PORTALS | R2FLAG_EXP_DONT_TEST_UNSHADOWED | R2FLAG_USE_NVSTENCIL | R2FLAG_EXP_SPLIT_SCENE};	// r2-only
 float		ps_r2_df_parallax_h			= 0.02f;
 float		ps_r2_df_parallax_range		= 75.f;
 float		ps_r2_tonemap_middlegray	= 0.25f;			// r2-only
@@ -101,10 +101,12 @@ float		ps_r2_sun_lumscale_amb		= 1.0f;
 float		ps_r2_gmaterial				= 0.f;				// 
 float		ps_r2_zfill					= 0.1f;				// .1f
 
-float		ps_r2_dhemi_scale			= 1.5f;				// 1.5f
+float		ps_r2_dhemi_scale			= 1.f;				// 1.5f
 int			ps_r2_dhemi_count			= 5;				// 5
+int			ps_r2_wait_sleep			= 0;
 
 float		ps_r2_lt_smooth				= 1.f;				// 1.f
+float		ps_r2_slight_fade			= 1.f;				// 1.f
 
 
 //- Mad Max
@@ -207,15 +209,15 @@ public:
 
 	virtual void	Execute	(LPCSTR args)	{
 		CCC_Token::Execute	(args);
-		string128		_cfg;
+		string_path		_cfg;
 		string_path		cmd;
 		
 		switch	(*value)	{
-			case 0:		strcpy(_cfg, "rspec_minimum");	break;
-			case 1:		strcpy(_cfg, "rspec_low");		break;
-			case 2:		strcpy(_cfg, "rspec_default");	break;
-			case 3:		strcpy(_cfg, "rspec_high");		break;
-			case 4:		strcpy(_cfg, "rspec_extreme");	break;
+			case 0:		strcpy(_cfg, "rspec_minimum.ltx");	break;
+			case 1:		strcpy(_cfg, "rspec_low.ltx");		break;
+			case 2:		strcpy(_cfg, "rspec_default.ltx");	break;
+			case 3:		strcpy(_cfg, "rspec_high.ltx");		break;
+			case 4:		strcpy(_cfg, "rspec_extreme.ltx");	break;
 		}
 		FS.update_path			(_cfg,"$game_config$",_cfg);
 		strconcat				(cmd,"cfg_load", " ", _cfg);
@@ -240,38 +242,41 @@ void		xrRender_initconsole	()
 
 // Common
 	CMD1(CCC_Screenshot,"screenshot"			);
+#ifdef DEBUG
 	CMD1(CCC_BuildSSA,	"build_ssa"				);
+	CMD4(CCC_Integer,	"r__lsleep_frames",		&ps_r__LightSleepFrames,	4,		30		);
+	CMD4(CCC_Float,		"r__ssa_glod_start",	&ps_r__GLOD_ssa_start,		128,	512		);
+	CMD4(CCC_Float,		"r__ssa_glod_end",		&ps_r__GLOD_ssa_end,		16,		96		);
+	CMD4(CCC_Float,		"r__wallmark_shift_pp",	&ps_r__WallmarkSHIFT,		0.0f,	1.f		);
+	CMD4(CCC_Float,		"r__wallmark_shift_v",	&ps_r__WallmarkSHIFT_V,		0.0f,	1.f		);
+	CMD4(CCC_Float,		"r__wallmark_ttl",		&ps_r__WallmarkTTL,			1.0f,	5.f*60.f);
+#endif // DEBUG
 
 //	CMD4(CCC_Integer,	"r__supersample",		&ps_r__Supersample,			1,		4		);
-	CMD4(CCC_Integer,	"r__lsleep_frames",		&ps_r__LightSleepFrames,	4,		30		);
 
 	CMD1(CCC_ModelPoolStat,"stat_models"		);
 
 	Fvector	tw_min,tw_max;
-	CMD4(CCC_Float,		"r__wallmark_ttl",		&ps_r__WallmarkTTL,			1.0f,	5.f*60.f);
-	CMD4(CCC_Float,		"r__wallmark_shift_pp",	&ps_r__WallmarkSHIFT,		0.0f,	1.f		);
-	CMD4(CCC_Float,		"r__wallmark_shift_v",	&ps_r__WallmarkSHIFT_V,		0.0f,	1.f		);
 	
-	CMD4(CCC_Float,		"r__ssa_glod_start",	&ps_r__GLOD_ssa_start,		128,	512		);
-	CMD4(CCC_Float,		"r__ssa_glod_end",		&ps_r__GLOD_ssa_end,		16,		96		);
 	CMD4(CCC_Float,		"r__geometry_lod",		&ps_r__LOD,					0.1f,	1.2f		);
 //.	CMD4(CCC_Float,		"r__geometry_lod_pow",	&ps_r__LOD_Power,			0,		2		);
 
 //.	CMD4(CCC_Float,		"r__detail_density",	&ps_r__Detail_density,		.05f,	0.99f	);
 	CMD4(CCC_Float,		"r__detail_density",	&ps_r__Detail_density,		.2f,	0.6f	);
 
-//#ifdef DEBUG
+#ifdef DEBUG
 	CMD4(CCC_Float,		"r__detail_l_ambient",	&ps_r__Detail_l_ambient,	.5f,	.95f	);
 	CMD4(CCC_Float,		"r__detail_l_aniso",	&ps_r__Detail_l_aniso,		.1f,	.5f		);
 
-	tw_min.set			(EPS,EPS,EPS);
-	tw_max.set			(2,2,2);
+	CMD4(CCC_Float,		"r__d_tree_w_amp",		&ps_r__Tree_w_amp,			.001f,	1.f		);
 	CMD4(CCC_Float,		"r__d_tree_w_rot",		&ps_r__Tree_w_rot,			.01f,	100.f	);
 	CMD4(CCC_Float,		"r__d_tree_w_speed",	&ps_r__Tree_w_speed,		1.0f,	10.f	);
-	CMD4(CCC_Float,		"r__d_tree_w_amp",		&ps_r__Tree_w_amp,			.001f,	1.f		);
+
+	tw_min.set			(EPS,EPS,EPS);
+	tw_max.set			(2,2,2);
 	CMD4(CCC_Vector3,	"r__d_tree_wave",		&ps_r__Tree_Wave,			tw_min, tw_max	);
-//.	CMD4(CCC_Float,		"r__d_tree_sbc",		&ps_r__Tree_SBC,			0.5f,	2.f		);	// fixed in code. Oles.
-//#endif
+#endif // DEBUG
+
 	CMD2(CCC_tf_Aniso,	"r__tf_aniso",			&ps_r__tf_Anisotropic		); //	{1..16}
 
 	// R1
@@ -309,21 +314,28 @@ void		xrRender_initconsole	()
 	CMD4(CCC_Float,		"r2_ls_dsm_kernel",		&ps_r2_ls_dsm_kernel,		.1f,	3.f		);
 	CMD4(CCC_Float,		"r2_ls_psm_kernel",		&ps_r2_ls_psm_kernel,		.1f,	3.f		);
 	CMD4(CCC_Float,		"r2_ls_ssm_kernel",		&ps_r2_ls_ssm_kernel,		.1f,	3.f		);
-	CMD4(CCC_Float,		"r2_ls_squality",		&ps_r2_ls_squality,			.001f,	3.f		);
+	CMD4(CCC_Float,		"r2_ls_squality",		&ps_r2_ls_squality,			.5f,	1.f		);
 
 	CMD3(CCC_Mask,		"r2_zfill",				&ps_r2_ls_flags,			R2FLAG_ZFILL	);
 	CMD4(CCC_Float,		"r2_zfill_depth",		&ps_r2_zfill,				.001f,	.5f		);
 	CMD3(CCC_Mask,		"r2_allow_r1_lights",	&ps_r2_ls_flags,			R2FLAG_R1LIGHTS	);
+
 	//- Mad Max
 	CMD4(CCC_Float,		"r2_gloss_factor",		&ps_r2_gloss_factor,		.0f,	10.f	);
 	//- Mad Max
 
+#ifdef DEBUG
+	CMD3(CCC_Mask,		"r2_use_nvdbt",			&ps_r2_ls_flags,			R2FLAG_USE_NVDBT);
+	CMD3(CCC_Mask,		"r2_mt",				&ps_r2_ls_flags,			R2FLAG_EXP_MT_CALC);
+#endif // DEBUG
 
 	CMD3(CCC_Mask,		"r2_sun",				&ps_r2_ls_flags,			R2FLAG_SUN		);
 	CMD3(CCC_Mask,		"r2_sun_details",		&ps_r2_ls_flags,			R2FLAG_SUN_DETAILS);
 	CMD3(CCC_Mask,		"r2_sun_focus",			&ps_r2_ls_flags,			R2FLAG_SUN_FOCUS);
 //	CMD3(CCC_Mask,		"r2_sun_static",		&ps_r2_ls_flags,			R2FLAG_SUN_STATIC);
-//	CMD3(CCC_Mask,		"r2_sun_ignore_portals",&ps_r2_ls_flags,			R2FLAG_SUN_IGNORE_PORTALS);
+//	CMD3(CCC_Mask,		"r2_exp_splitscene",	&ps_r2_ls_flags,			R2FLAG_EXP_SPLIT_SCENE);
+//	CMD3(CCC_Mask,		"r2_exp_donttest_uns",	&ps_r2_ls_flags,			R2FLAG_EXP_DONT_TEST_UNSHADOWED);
+	
 	CMD3(CCC_Mask,		"r2_sun_tsm",			&ps_r2_ls_flags,			R2FLAG_SUN_TSM	);
 	CMD4(CCC_Float,		"r2_sun_tsm_proj",		&ps_r2_sun_tsm_projection,	.001f,	0.8f	);
 	CMD4(CCC_Float,		"r2_sun_tsm_bias",		&ps_r2_sun_tsm_bias,		-0.5,	+0.5	);
@@ -347,15 +359,21 @@ void		xrRender_initconsole	()
 	CMD4(CCC_Integer,	"r2_gi_photons",		&ps_r2_GI_photons,			8,		256		);
 	CMD4(CCC_Float,		"r2_gi_refl",			&ps_r2_GI_refl,				EPS_L,	0.99f	);
 
+	CMD4(CCC_Integer,	"r2_wait_sleep",		&ps_r2_wait_sleep,			0,		1		);
+
+#ifdef DEBUG
 	CMD4(CCC_Integer,	"r2_dhemi_count",		&ps_r2_dhemi_count,			4,		25		);
 	CMD4(CCC_Float,		"r2_dhemi_scale",		&ps_r2_dhemi_scale,			.5f,	3.f		);
 	CMD4(CCC_Float,		"r2_dhemi_smooth",		&ps_r2_lt_smooth,			0.f,	10.f	);
+#endif // DEBUG
 
 	CMD4(CCC_Float,		"r2_ls_depth_scale",	&ps_r2_ls_depth_scale,		0.5,	1.5		);
 	CMD4(CCC_Float,		"r2_ls_depth_bias",		&ps_r2_ls_depth_bias,		-0.5,	+0.5	);
 
 	CMD4(CCC_Float,		"r2_parallax_h",		&ps_r2_df_parallax_h,		.0f,	.5f		);
 //	CMD4(CCC_Float,		"r2_parallax_range",	&ps_r2_df_parallax_range,	5.0f,	175.0f	);
+
+	CMD4(CCC_Float,		"r2_slight_fade",		&ps_r2_slight_fade,			.02f,	2.f		);
 
 	tw_min.set			(0,0,0);	tw_max.set	(1,1,1);
 	CMD4(CCC_Vector3,	"r2_aa_break",			&ps_r2_aa_barier,			tw_min, tw_max	);

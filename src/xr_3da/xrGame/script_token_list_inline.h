@@ -22,7 +22,7 @@ IC	void CScriptTokenList::add		(LPCSTR name, int id)
 	temp.id					= id;
 	m_token_list.pop_back	();
 	m_token_list.push_back	(temp);
-	Memory.mem_fill			(&temp,0,sizeof(temp));
+	ZeroMemory				(&temp,sizeof(temp));
 	m_token_list.push_back	(temp);
 }
 
@@ -37,7 +37,7 @@ IC	void CScriptTokenList::clear	()
 {
 	m_token_list.clear		();
 	xr_token				temp;
-	Memory.mem_fill			(&temp,0,sizeof(temp));
+	ZeroMemory				(&temp,sizeof(temp));
 	m_token_list.push_back	(temp);
 }
 

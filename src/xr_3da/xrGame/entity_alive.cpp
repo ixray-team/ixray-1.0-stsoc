@@ -265,7 +265,7 @@ void	CEntityAlive::Hit							(SHit* pHDS)
 	if (HDS.hit_type == ALife::eHitTypeWound_2)
 		HDS.hit_type = ALife::eHitTypeWound;
 	//-------------------------------------------------------------------
-	CDamageManager::HitScale(HDS.boneID, conditions().hit_bone_scale(), conditions().wound_bone_scale());
+	CDamageManager::HitScale(HDS.boneID, conditions().hit_bone_scale(), conditions().wound_bone_scale(),pHDS->aim_bullet);
 
 	//изменить состояние, перед тем как родительский класс обработает хит
 	CWound* pWound = conditions().ConditionHit(&HDS);
@@ -308,8 +308,7 @@ void CEntityAlive::Die	(CObject* who)
 	const CGameObject *who_object = smart_cast<const CGameObject*>(who);
 	callback(GameObject::eDeath)(lua_game_object(), who_object ? who_object->lua_game_object() : 0);
 
-	if (GameID() == GAME_SINGLE) 
-	{
+	if (!getDestroy() && (GameID() == GAME_SINGLE)) {
 		NET_Packet		P;
 		u_EventGen		(P,GE_ASSIGN_KILLER,ID());
 		P.w_u16			(u16(who->ID()));

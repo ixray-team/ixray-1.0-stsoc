@@ -35,7 +35,6 @@ extern int keyname_to_dik(LPCSTR);
 
 #define ARIAL_FONT_NAME			"arial"
 
-#define NORMAL_FONT_NAME		"normal"
 #define MEDIUM_FONT_NAME		"medium"
 #define SMALL_FONT_NAME			"small"
 
@@ -143,9 +142,9 @@ bool CUIXmlInit::InitFrameWindow(CUIXml& xml_doc, LPCSTR path,
 */
 	//инициализировать заголовок окна
 	strconcat(buf,path,":title");
-	if(xml_doc.NavigateToNode(buf,index)) InitStatic(xml_doc, buf, index, &pWnd->UITitleText);
+	if(xml_doc.NavigateToNode(buf,index)) InitStatic(xml_doc, buf, index, pWnd->UITitleText);
 	
-	pWnd->BringToTop	(&pWnd->UITitleText);
+	pWnd->BringToTop	(pWnd->UITitleText);
 
 	return true;
 }
@@ -214,6 +213,10 @@ bool CUIXmlInit::InitStatic(CUIXml& xml_doc, LPCSTR path,
 		pWnd->ClipperOn();
 	else
 		pWnd->ClipperOff();
+
+	bool bComplexMode = xml_doc.ReadAttribInt(path, index, "complex_mode",0)?true:false;
+	if(bComplexMode)
+		pWnd->SetTextComplexMode(bComplexMode);
 	
 	return true;
 }
@@ -255,7 +258,7 @@ bool CUIXmlInit::InitText(CUIXml& xml_doc, LPCSTR path, int index, CUIStatic* pW
 	else if (0 == xr_strcmp(al, "t"))
 		pWnd->SetVTextAlignment(valTop);
 
-	pWnd->SetTextComplexMode(xml_doc.ReadAttribInt(path, index, "complex_mode",1)?true:false);
+	pWnd->SetTextComplexMode(xml_doc.ReadAttribInt(path, index, "complex_mode",0)?true:false);
 
 	// Text coordinates
 	float text_x = xml_doc.ReadAttribFlt(path, index, "x", 0);
@@ -540,14 +543,18 @@ bool CUIXmlInit::InitProgressBar(CUIXml& xml_doc, LPCSTR path,
 	if (!xml_doc.NavigateToNode(buf, index))
 		return false;
 
-	InitStatic(xml_doc, buf, index, &pWnd->m_UIProgressItem);
-
+	InitStatic								(xml_doc, buf, index, &pWnd->m_UIProgressItem);
+	
+	pWnd->m_UIProgressItem.SetWndSize		(pWnd->GetWndSize());
+	
 	// background
-	strconcat(buf,path,":background");
+	strconcat								(buf,path,":background");
+	
 	if (xml_doc.NavigateToNode(buf, index))
 	{
-        InitStatic(xml_doc, buf, index, &pWnd->m_UIBackgroundItem);
-		pWnd->m_bBackgroundPresent = true;
+        InitStatic							(xml_doc, buf, index, &pWnd->m_UIBackgroundItem);
+		pWnd->m_bBackgroundPresent			= true;
+		pWnd->m_UIBackgroundItem.SetWndSize(pWnd->GetWndSize());
 	}
 
 	strconcat(buf,path,":min_color");
@@ -648,11 +655,7 @@ bool CUIXmlInit::InitFont(CUIXml &xml_doc, LPCSTR path, int index, u32 &color, C
 
 	if(*font_name)
 	{
-/*		if(!xr_strcmp(*font_name, HEADER_FONT_NAME))
-		{
-//.			pFnt = UI()->Font()->pFontHeaderRussian;
-		}
-		else*/ if(!xr_strcmp(*font_name, NORMAL_FONT_NAME) || !xr_strcmp(*font_name, GRAFFITI19_FONT_NAME))
+		if(!xr_strcmp(*font_name, GRAFFITI19_FONT_NAME))
 		{
 			pFnt = UI()->Font()->pFontGraffiti19Russian;
 		}
@@ -678,7 +681,7 @@ bool CUIXmlInit::InitFont(CUIXml &xml_doc, LPCSTR path, int index, u32 &color, C
 		}
 		else if(!xr_strcmp(*font_name, SMALL_FONT_NAME))
 		{
-			pFnt = UI()->Font()->pFontSmall;
+			pFnt = UI()->Font()->pFontStat;
 		}
 		else if(!xr_strcmp(*font_name, LETTERICA16_FONT_NAME))
 		{
@@ -1187,7 +1190,6 @@ void CUIXmlInit::InitColorDefs()
 		a		= uiXml.ReadAttribInt("color", i, "a", 255);
 		
 		(*m_pColorDefs)[name] = color_argb(a,r,g,b);
-//		m_pColorDefs->push_back(std::make_pair<shared_str, u32>(name, (a<<24) | (r<<16) | (g<<8) | b));
 	}
 }
 
@@ -1232,11 +1234,12 @@ bool CUIXmlInit::InitScrollView	(CUIXml& xml_doc, const char* path, int index, C
 
 	for (int i = 0; i < tabsCount; ++i)
 	{
-		newStatic = xr_new<CUIStatic>();
-		InitText(xml_doc, "text", i, newStatic);
-		newStatic->SetWidth(pWnd->GetDesiredChildWidth());
-		newStatic->AdjustHeightToText();
-		pWnd->AddWindow(newStatic, true);
+		newStatic						= xr_new<CUIStatic>();
+		InitText						(xml_doc, "text", i, newStatic);
+		newStatic->SetTextComplexMode	(true);
+		newStatic->SetWidth				(pWnd->GetDesiredChildWidth());
+		newStatic->AdjustHeightToText	();
+		pWnd->AddWindow					(newStatic, true);
 	}
 	xml_doc.SetLocalRoot(_stored_root);
 	return								true;
@@ -1304,9 +1307,14 @@ bool CUIXmlInit::InitComboBox(CUIXml& xml_doc, const char* path, int index, CUIC
 	InitWindow					(xml_doc, path, index, pWnd);
 	InitOptionsItem				(xml_doc, path, index, pWnd);
 
+	bool b = (1==xml_doc.ReadAttribInt(path, index, "always_show_scroll",1));
+
+	pWnd->m_list.SetFixedScrollBar(b);
+
 	string512					_path;
 	strconcat					(_path, path, ":list_font");
 	InitFont					(xml_doc, _path, index, color, pFont);
+	pWnd->SetFont				(pFont);
 	pWnd->m_list.SetFont		(pFont);
 	pWnd->m_list.SetTextColor	(color);
 	strconcat					(_path, path, ":list_font_s");	
@@ -1328,7 +1336,7 @@ bool CUIXmlInit::InitComboBox(CUIXml& xml_doc, const char* path, int index, CUIC
 	return true;
 }
 
-u32	CUIXmlInit::GetColor(CUIXml& xml_doc, const char* path, int index, u8 def_clr)
+u32	CUIXmlInit::GetColor(CUIXml& xml_doc, const char* path, int index, u32 def_clr)
 {
 	LPCSTR clr_def = xml_doc.ReadAttrib(path, index, "color", NULL);
 	if(clr_def){

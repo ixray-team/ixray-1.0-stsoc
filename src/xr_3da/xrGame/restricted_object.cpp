@@ -103,6 +103,11 @@ BOOL CRestrictedObject::net_Spawn			(CSE_Abstract* data)
 	return						(TRUE);
 }
 
+void CRestrictedObject::net_Destroy			()
+{
+	Level().space_restriction_manager().unrestrict	(m_object->ID());
+}
+
 u32	CRestrictedObject::accessible_nearest	(const Fvector &position, Fvector &result) const
 {
 	START_PROFILE("Restricted Object/Accessible Nearest");
@@ -331,7 +336,7 @@ void CRestrictedObject::remove_restrictions	(const xr_vector<ALife::_OBJECT_ID> 
 
 void CRestrictedObject::add_restrictions	(const shared_str &out_restrictions, const shared_str &in_restrictions)
 {
-	if (!out_restrictions.size() && in_restrictions.size())
+	if (!out_restrictions.size() && !in_restrictions.size())
 		return;
 
 	START_PROFILE("Restricted Object/Add Restrictions");

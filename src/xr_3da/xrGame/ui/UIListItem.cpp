@@ -47,11 +47,6 @@ void CUIListItem::Init(const char* str, float x, float y, float width, float hei
 }
 
 
-int CUIListItem::GetSignWidht()
-{
-	return (int)GetFont()->SizeOf_(GetText());
-}
-
 bool CUIListItem::IsHighlightText()
 {
 	return CUIButton::IsHighlightText();

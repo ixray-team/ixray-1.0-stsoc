@@ -7,9 +7,7 @@
 #include "../alife_space.h"
 #include "../character_info_defs.h"
 
-//class CInventoryOwner;
 class CUIStatic;
-class CUIListWnd;
 class CCharacterInfo;
 class CUIXml;
 class CUIScrollView;
@@ -43,6 +41,7 @@ protected:
 		eMaxCaption,
 	};
 	CUIStatic*					m_icons[eMaxCaption];
+	shared_str					m_texture_name;
 
 public:
 						CUICharacterInfo();
@@ -56,7 +55,7 @@ public:
 	virtual void		Update					();
 
 	u16					OwnerID					()	const {return m_ownerID;}
-	CUIStatic&	UIIcon()		{VERIFY(m_icons[eUIIcon]);return *m_icons[eUIIcon];}	
-	CUIStatic&	UIName()		{VERIFY(m_icons[eUIName]);return *m_icons[eUIName];}	
-
+	CUIStatic&			UIIcon					()		{VERIFY(m_icons[eUIIcon]);return *m_icons[eUIIcon];}	
+	CUIStatic&			UIName()				{VERIFY(m_icons[eUIName]);return *m_icons[eUIName];}	
+	const shared_str&	IconName				() {return m_texture_name;}
 };

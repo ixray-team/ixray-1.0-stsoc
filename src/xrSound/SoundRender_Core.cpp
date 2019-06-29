@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "xrLevel.h"
+#include "../xr_3da/xrLevel.h"
 #include "soundrender_core.h"
 #include "soundrender_source.h"
 #include "soundrender_emitter.h"
@@ -15,7 +15,7 @@ Flags32	psSoundFlags			= {ss_Hardware | ss_EAX};
 float	psSoundOcclusionScale	= 0.5f;
 float	psSoundCull				= 0.01f;
 float	psSoundRolloff			= 0.75f;
-u32		psSoundFreq				= 0;
+u32		psSoundFreq				= sf_44K;
 u32		psSoundModel			= 0;
 float	psSoundVEffects			= 1.0f;
 float	psSoundVFactor			= 1.0f;
@@ -104,16 +104,15 @@ void CSoundRender_Core::stop_emitters()
 		s_emitters[eit]->stop	(FALSE);
 }
 
-void CSoundRender_Core::pause_emitters(bool val)
+int CSoundRender_Core::pause_emitters(bool val)
 {
 	m_iPauseCounter				+= val?+1:-1;
-	VERIFY(m_iPauseCounter>=0);
-#ifdef DEBUG
-//.	Log("m_iPauseCounter",m_iPauseCounter);
-//.	Log("id",val?m_iPauseCounter:m_iPauseCounter+1);
-#endif // DEBUG
+	VERIFY						(m_iPauseCounter>=0);
+
 	for (u32 it=0; it<s_emitters.size(); it++)
 		((CSoundRender_Emitter*)s_emitters[it])->pause	(val,val?m_iPauseCounter:m_iPauseCounter+1);
+
+	return m_iPauseCounter;
 }
 
 void CSoundRender_Core::env_load	()
@@ -267,6 +266,7 @@ void CSoundRender_Core::set_geometry_env(IReader* I)
 
 void	CSoundRender_Core::verify_refsound		( ref_sound& S)
 {
+/*
 #ifdef	DEBUG
 	int			local_value		= 0;
 	void*		ptr_refsound	= &S;
@@ -279,6 +279,7 @@ void	CSoundRender_Core::verify_refsound		( ref_sound& S)
 		VERIFY2		(0, err_str);
 	}
 #endif
+*/
 }
 
 void	CSoundRender_Core::create				( ref_sound& S, const char* fName, esound_type sound_type, int game_type )

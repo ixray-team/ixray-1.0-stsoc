@@ -44,10 +44,15 @@
 #include "../resourcemanager.h"
 #include "doug_lea_memory_allocator.h"
 #include "cameralook.h"
+#include "RegistryFuncs.h"
+
+#include "GameSpy/GameSpy_Full.h"
+#include "GameSpy/GameSpy_Patching.h"
 
 #ifdef DEBUG
 #	include "PHDebug.h"
 #	include "ui/UIDebugFonts.h" 
+#	include "game_graph.h"
 #endif
 #	include "hudmanager.h"
 
@@ -73,11 +78,10 @@ extern	int		x_m_z;
 extern	BOOL	net_cl_inputguaranteed	;
 extern	BOOL	net_sv_control_hit		;
 extern	int		g_dwInputUpdateDelta	;
+#ifdef DEBUG
 extern	BOOL	g_ShowAnimationInfo		;
 extern	BOOL	g_bCalculatePing		;
-extern	BOOL	g_bBearerCantSprint		;
-extern	BOOL	g_bShildedBases			;
-extern	BOOL	g_bAfReturnPlayersToBases;
+#endif // DEBUG
 extern	BOOL	g_b_COD_PickUpMode		;
 extern	BOOL	g_bShowHitSectors		;
 extern	INT		g_iWeaponRemove			;
@@ -122,6 +126,10 @@ extern	u32		g_sv_ah_dwArtefactRespawnDelta	;
 extern	int		g_sv_ah_dwArtefactsNum			;
 extern	u32		g_sv_ah_dwArtefactStayTime		;
 extern	int		g_sv_ah_iReinforcementTime		;
+extern	BOOL	g_sv_ah_bBearerCantSprint		;
+extern	BOOL	g_sv_ah_bShildedBases			;
+extern	BOOL	g_sv_ah_bAfReturnPlayersToBases ;
+
 //-----------------------------------------------------------
 #ifdef DEBUG
 	extern	BOOL	g_SV_Force_Artefact_Spawn;
@@ -149,29 +157,19 @@ Flags32 g_uCommonFlags;
 enum E_COMMON_FLAGS{
 	flAiUseTorchDynamicLights = 1
 };
-BOOL g_use_scripts_in_goap = 1;
 
 CUIOptConCom g_OptConCom;
 
-static void vminfo (size_t *_free, size_t *reserved, size_t *committed) {
-	MEMORY_BASIC_INFORMATION memory_info;
-	memory_info.BaseAddress = 0;
-	*_free = *reserved = *committed = 0;
-	while (VirtualQuery (memory_info.BaseAddress, &memory_info, sizeof (memory_info))) {
-		switch (memory_info.State) {
-		case MEM_FREE:
-			*_free		+= memory_info.RegionSize;
-			break;
-		case MEM_RESERVE:
-			*reserved	+= memory_info.RegionSize;
-			break;
-		case MEM_COMMIT:
-			*committed += memory_info.RegionSize;
-			break;
-		}
-		memory_info.BaseAddress = (char *) memory_info.BaseAddress + memory_info.RegionSize;
-	}
-}
+#ifndef PURE_ALLOC
+#	ifndef USE_MEMORY_MONITOR
+#		define SEVERAL_ALLOCATORS
+#	endif // USE_MEMORY_MONITOR
+#endif // PURE_ALLOC
+
+#ifdef SEVERAL_ALLOCATORS
+	ENGINE_API 	u32 engine_lua_memory_usage	();
+	extern		u32 game_lua_memory_usage	();
+#endif // SEVERAL_ALLOCATORS
 
 class CCC_MemStats : public IConsole_Command
 {
@@ -179,48 +177,39 @@ public:
 	CCC_MemStats(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = TRUE; };
 	virtual void Execute(LPCSTR args) {
 		Memory.mem_compact		();
-		size_t  w_free, w_reserved, w_committed;
-		vminfo	(&w_free, &w_reserved, &w_committed);
-		u32		_total			= Memory.mem_usage	();
-		u32		_lua			= (u32)dlmallinfo().uordblks;
+		u32		_crt_heap		= mem_usage_impl((HANDLE)_get_heap_handle(),0,0);
+		u32		_process_heap	= mem_usage_impl(GetProcessHeap(),0,0);
+#ifdef SEVERAL_ALLOCATORS
+		u32		_game_lua		= game_lua_memory_usage();
+		u32		_engine_lua		= engine_lua_memory_usage();
 		u32		_render			= ::Render->memory_usage();
-		u32		_eco_strings	= g_pStringContainer->stat_economy			();
-		u32		_eco_smem		= g_pSharedMemoryContainer->stat_economy	();
-		u32	m_base=0,c_base=0,m_lmaps=0,c_lmaps=0;
+#endif // SEVERAL_ALLOCATORS
+		int		_eco_strings	= (int)g_pStringContainer->stat_economy			();
+		int		_eco_smem		= (int)g_pSharedMemoryContainer->stat_economy	();
+		u32		m_base=0,c_base=0,m_lmaps=0,c_lmaps=0;
+		
 		if (Device.Resources)	Device.Resources->_GetMemoryUsage	(m_base,c_base,m_lmaps,c_lmaps);
-		Msg		("* [win32]: free[%d K], reserved[%d K], committed[%d K]",w_free/1024,w_reserved/1024,w_committed/1024);
+		
+		log_vminfo	();
+		
 		Msg		("* [ D3D ]: textures[%d K]", (m_base+m_lmaps)/1024);
-		Msg		("* [x-ray]: total[%d K], lua[%d K], render[%d K]",_total/1024,_lua/1024,_render/1024);
+
+#ifndef SEVERAL_ALLOCATORS
+		Msg		("* [x-ray]: crt heap[%d K], process heap[%d K]",_crt_heap/1024,_process_heap/1024);
+#else // SEVERAL_ALLOCATORS
+		Msg		("* [x-ray]: crt heap[%d K], process heap[%d K], game lua[%d K], engine lua[%d K], render[%d K]",_crt_heap/1024,_process_heap/1024,_game_lua/1024,_engine_lua/1024,_render/1024);
+#endif // SEVERAL_ALLOCATORS
+
 		Msg		("* [x-ray]: economy: strings[%d K], smem[%d K]",_eco_strings/1024,_eco_smem);
+
+#ifdef DEBUG
+		Msg		("* [x-ray]: file mapping: memory[%d K], count[%d]",g_file_mapped_memory/1024,g_file_mapped_count);
+		dump_file_mappings	();
+#endif // DEBUG
 	}
 };
 
 // console commands
-class CCC_Spawn : public IConsole_Command
-{
-public:
-	CCC_Spawn(LPCSTR N) : IConsole_Command(N)  { };
-	virtual void Execute(LPCSTR args) {
-		R_ASSERT(g_pGameLevel);
-
-#ifndef	DEBUG
-		if (GameID() != GAME_SINGLE) 
-		{
-			Msg("For this game type entity-spawning is disabled.");
-			return;
-		};
-#endif
-		char	Name[128];	Name[0]=0;
-		sscanf	(args,"%s", Name);
-		Fvector pos = Actor()->Position();
-		pos.y		+= 2.0f;
-		Level().g_cl_Spawn	(Name,0xff,M_SPAWN_OBJECT_LOCAL, pos);
-	}
-	virtual void	Info	(TInfo& I)		
-	{
-		strcpy(I,"name,team,squad,group"); 
-	}
-};
 class CCC_GameDifficulty : public CCC_Token {
 public:
 	CCC_GameDifficulty(LPCSTR N) : CCC_Token(N,(u32*)&g_SingleGameDifficulty,difficulty_type_token)  {};
@@ -336,9 +325,10 @@ class CCC_Kill : public IConsole_Command {
 public:
 	CCC_Kill(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
 	virtual void Execute(LPCSTR args) {
-		CObject *l_pObj = Level().CurrentEntity();
-		CActor *l_pPlayer = smart_cast<CActor*>(l_pObj);
 		if (GameID() == GAME_SINGLE) return;
+		if (Game().local_player && Game().local_player->testFlag(GAME_PLAYER_FLAG_VERY_VERY_DEAD)) return;
+		CObject *l_pObj = Level().CurrentControlEntity();
+		CActor *l_pPlayer = smart_cast<CActor*>(l_pObj);
 		if(l_pPlayer) {
 			NET_Packet		P;
 			l_pPlayer->u_EventGen		(P,GE_GAME_EVENT,l_pPlayer->ID()	);
@@ -380,6 +370,7 @@ public:
 	}
 };
 
+#ifdef DEBUG
 class CCC_Dbg_NumObjects : public IConsole_Command {
 public:
 	CCC_Dbg_NumObjects(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
@@ -444,6 +435,9 @@ public:
 		strcpy(I,"dbg Num Objects"); 
 	}
 };
+#endif // DEBUG
+
+#ifndef MASTER_GOLD
 class CCC_Money : public IConsole_Command {
 public:
 	CCC_Money(LPCSTR N) : IConsole_Command(N)  { };
@@ -463,9 +457,9 @@ public:
 		strcpy(I,"give money"); 
 	}
 };
+#endif // MASTER_GOLD
 
-#include "game_graph.h"
-
+#ifdef DEBUG
 class CCC_ALifePath : public IConsole_Command {
 public:
 	CCC_ALifePath(LPCSTR N) : IConsole_Command(N)  { };
@@ -493,269 +487,7 @@ public:
 		}
 	}
 };
-
-#ifdef ALIFE_SUPPORT_CONSOLE_COMMANDS
-class CCC_ALifeListAll : public IConsole_Command {
-public:
-	CCC_ALifeListAll(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
-	virtual void Execute(LPCSTR /**args/**/) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (tpGame && tpGame->alife().m_bLoaded) {
-				tpGame->alife().vfListObjects();
-				tpGame->alife().vfListEvents();
-				tpGame->alife().vfListTasks();
-				tpGame->alife().vfListTerrain();
-				tpGame->alife().vfListSpawnPoints();
-			}
-			else
-				Log("!ALife simulation cannot be saved!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeListObjects : public IConsole_Command {
-public:
-	CCC_ALifeListObjects(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
-	virtual void Execute(LPCSTR /**args/**/) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (tpGame && tpGame->alife().m_bLoaded) {
-				tpGame->alife().vfListObjects();
-			}
-			else
-				Log("!ALife simulation cannot be saved!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeListEvents : public IConsole_Command {
-public:
-	CCC_ALifeListEvents(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
-	virtual void Execute(LPCSTR /**args/**/) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (tpGame && tpGame->alife().m_bLoaded) {
-				tpGame->alife().vfListEvents();
-			}
-			else
-				Log("!ALife simulator is not loaded!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeListTasks : public IConsole_Command {
-public:
-	CCC_ALifeListTasks(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
-	virtual void Execute(LPCSTR /**args/**/) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (tpGame && tpGame->alife().m_bLoaded) {
-				tpGame->alife().vfListTasks();
-			}
-			else
-				Log("!ALife simulator is not loaded!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeListTerrain : public IConsole_Command {
-public:
-	CCC_ALifeListTerrain(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
-	virtual void Execute(LPCSTR /**args/**/) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (tpGame && tpGame->alife().m_bLoaded) {
-				tpGame->alife().vfListTerrain();
-			}
-			else
-				Log("!ALife simulator is not loaded!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeListSpawns : public IConsole_Command {
-public:
-	CCC_ALifeListSpawns(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
-	virtual void Execute(LPCSTR /**args/**/) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (tpGame && tpGame->alife().m_bLoaded) {
-				tpGame->alife().vfListSpawnPoints();
-			}
-			else
-				Log("!ALife simulator is not loaded!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeObjectInfo : public IConsole_Command {
-public:
-	CCC_ALifeObjectInfo(LPCSTR N) : IConsole_Command(N)  { };
-	virtual void Execute(LPCSTR args) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (tpGame && tpGame->alife().m_bLoaded) {
-				int id1 = -1;
-				sscanf(args ,"%d",&id1);
-				tpGame->alife().vfObjectInfo(ALife::_OBJECT_ID(id1));
-			}
-			else
-				Log("!ALife simulator is not loaded!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeEventInfo : public IConsole_Command {
-public:
-	CCC_ALifeEventInfo(LPCSTR N) : IConsole_Command(N)  { };
-	virtual void Execute(LPCSTR args) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (tpGame && tpGame->alife().m_bLoaded) {
-				int id1 = -1;
-				sscanf(args ,"%d",&id1);
-				if (id1 >= int(tpGame->alife().m_tEventID))
-					Msg("Invalid event ID! (%d)",id1);
-				else
-					tpGame->alife().vfEventInfo(id1);
-			}
-			else
-				Log("!ALife simulator is not loaded!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeTaskInfo : public IConsole_Command {
-public:
-	CCC_ALifeTaskInfo(LPCSTR N) : IConsole_Command(N)  { };
-	virtual void Execute(LPCSTR args) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (tpGame && tpGame->alife().m_bLoaded) {
-				int id1 = -1;
-				sscanf(args ,"%d",&id1);
-				if (id1 >= int(tpGame->alife().m_tTaskID))
-					Msg("Invalid task ID! (%d)",id1);
-				else
-					tpGame->alife().vfTaskInfo(id1);
-			}
-			else
-				Log("!ALife simulator is not loaded!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeSpawnInfo : public IConsole_Command {
-public:
-	CCC_ALifeSpawnInfo(LPCSTR N) : IConsole_Command(N)  { };
-	virtual void Execute(LPCSTR /**args/**/) {
-		//		if (GameID() == GAME_SINGLE) {
-		//			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-		//			if (tpGame && tpGame->alife().m_bLoaded) {
-		//				u32 id1 = u32(-1);
-		//				sscanf(args ,"%d",&id1);
-		//				if (id1 >= tpGame->alife().m_tpSpawnPoints.size())
-		//					Msg("Invalid task ID! (%d)",id1);
-		//				else {
-		//					ALife::_SPAWN_ID id = ALife::_SPAWN_ID(id1);
-		//					tpGame->alife().vfSpawnPointInfo(id);
-		//				}
-		//			}
-		//			else
-		//				Log("!ALife simulator is not loaded!");
-		//		}
-		//		else
-		//			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeGraphInfo : public IConsole_Command {
-public:
-	CCC_ALifeGraphInfo(LPCSTR N) : IConsole_Command(N)  { };
-	virtual void Execute(LPCSTR args) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (ai().get_level_graph()) {
-				u32 id1 = u32(-1);
-				sscanf(args ,"%d",&id1);
-				if (id1 >= ai().game_graph().header().vertex_count())
-					Msg("Invalid task ID! (%d)",id1);
-				else {
-					GameGraph::_GRAPH_ID id = GameGraph::_GRAPH_ID(id1);
-					tpGame->alife().vfGraphVertexInfo(id);
-				}
-			}
-			else
-				Log("!Game graph is not loaded!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeScheduleMin : public IConsole_Command {
-public:
-	CCC_ALifeScheduleMin(LPCSTR N) : IConsole_Command(N)  { };
-	virtual void Execute(LPCSTR args) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (tpGame && tpGame->alife().m_bLoaded) {
-				int id1 = 0;
-				sscanf(args ,"%d",&id1);
-				if (id1 < 0)
-					Msg("Invalid schedule _min time! (%d)",id1);
-				else
-					tpGame->alife().vfSetScheduleMin(id1);
-			}
-			else
-				Log("!ALife simulator is not loaded!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-
-class CCC_ALifeScheduleMax : public IConsole_Command {
-public:
-	CCC_ALifeScheduleMax(LPCSTR N) : IConsole_Command(N)  { };
-	virtual void Execute(LPCSTR args) {
-		if (GameID() == GAME_SINGLE) {
-			game_sv_Single *tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-			if (tpGame && tpGame->alife().m_bLoaded) {
-				int id1 = 0;
-				sscanf(args ,"%d",&id1);
-				if (id1 < 0)
-					Msg("Invalid schedule max time! (%d)",id1);
-				else
-					tpGame->alife().vfSetScheduleMax(id1);
-			}
-			else
-				Log("!ALife simulator is not loaded!");
-		}
-		else
-			Log("!Not a single player game!");
-	}
-};
-#endif
+#endif // DEBUG
 
 class CCC_ALifeTimeFactor : public IConsole_Command {
 public:
@@ -986,17 +718,6 @@ public:
 	}
 };
 
-class CCC_ALifeReload : public IConsole_Command {
-public:
-	CCC_ALifeReload(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
-	virtual void Execute(LPCSTR /**args/**/) {
-		if (GameID() != GAME_SINGLE) return;
-		NET_Packet			net_packet;
-		net_packet.w_begin	(M_RELOAD_GAME);
-		Level().Send		(net_packet,net_flags(TRUE));
-	}
-};
-
 class CCC_ALifeLoadFrom : public IConsole_Command {
 public:
 	CCC_ALifeLoadFrom(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
@@ -1019,11 +740,11 @@ public:
 			Msg						("! Cannot find saved game %s",saved_game);
 			return;
 		}
-
+/*     moved to level_network_messages.cpp
 		CSavedGameWrapper			wrapper(args);
 		if (wrapper.level_id() == ai().level_graph().level_id()) {
-			if (Device.Pause())
-				Device.Pause		(FALSE);
+			if (Device.Paused())
+				Device.Pause		(FALSE, TRUE, TRUE, "CCC_ALifeLoadFrom");
 
 			Level().remove_objects	();
 
@@ -1033,6 +754,12 @@ public:
 
 			return;
 		}
+*/
+		if(MainMenu()->IsActive())
+			MainMenu()->Activate(false);
+
+		if (Device.Paused())
+			Device.Pause			(FALSE, TRUE, TRUE, "CCC_ALifeLoadFrom");
 
 		NET_Packet					net_packet;
 		net_packet.w_begin			(M_LOAD_GAME);
@@ -1436,7 +1163,7 @@ public:
 		char	weather_name[256] = "";		
 		sscanf	(args,"%s", weather_name);
 		if (!weather_name[0]) return;
-		g_pGamePersistent->Environment.SetWeather(weather_name);		
+		g_pGamePersistent->Environment().SetWeather(weather_name);		
 	};
 
 	virtual void	Info	(TInfo& I)		
@@ -1459,6 +1186,13 @@ public:
 		if (!xr_strcmp(GameType, "tdm")) sprintf(GameType, "teamdeathmatch");
 		if (!xr_strcmp(GameType, "ah")) sprintf(GameType, "artefacthunt");
 		//  [7/5/2005]
+		if (xr_strcmp(GameType, "deathmatch"))
+			if (xr_strcmp(GameType, "teamdeathmatch"))
+				if (xr_strcmp(GameType, "artefacthunt"))
+				{
+					Msg ("! Unknown gametype - %s", GameType);
+					return;
+				};
 
 		NET_Packet P;
 		P.w_begin(M_CHANGE_LEVEL_GAME);
@@ -1754,7 +1488,7 @@ public:
 	}
 };
 
-#ifndef MASTER_GOLD
+#if 1//ndef MASTER_GOLD
 class CCC_Script : public IConsole_Command {
 public:
 	CCC_Script(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
@@ -1806,7 +1540,7 @@ public:
 		}
 	}
 };
-	#endif
+#endif // MASTER_GOLD
 
 #ifdef DEBUG
 
@@ -2054,6 +1788,7 @@ public:
 	  }
 };
 
+#ifdef DEBUG
 class CCC_PHGravity : public IConsole_Command {
 public:
 		CCC_PHGravity(LPCSTR N) :
@@ -2081,7 +1816,7 @@ public:
 	}
 	
 };
-
+#endif // DEBUG
 
 class CCC_PHFps : public IConsole_Command {
 public:
@@ -2127,6 +1862,8 @@ struct CCC_ClearSmartCastStats : public IConsole_Command {
 };
 #endif
 
+#if 1//ndef MASTER_GOLD
+#	include "game_graph.h"
 struct CCC_JumpToLevel : public IConsole_Command {
 	CCC_JumpToLevel(LPCSTR N) : IConsole_Command(N)  {};
 
@@ -2148,6 +1885,8 @@ struct CCC_JumpToLevel : public IConsole_Command {
 		Msg							("! There is no level \"%s\" in the game graph!",level);
 	}
 };
+#endif // MASTER_GOLD
+
 #include "GamePersistent.h"
 
 
@@ -2443,54 +2182,89 @@ public:
 	}
 };
 
+class CCC_GSCheckForUpdates : public IConsole_Command {
+public:
+	CCC_GSCheckForUpdates(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
+	virtual void Execute(LPCSTR arguments)
+	{
+		if (!MainMenu()) return;
+		/*
+		CGameSpy_Available GSA;
+		shared_str result_string;
+		if (!GSA.CheckAvailableServices(result_string))
+		{
+			Msg(*result_string);
+//			return;
+		};
+		CGameSpy_Patching GameSpyPatching;
+		*/
+		bool InformOfNoPatch = true;
+		if (arguments && *arguments) {
+			int bInfo = 1;
+			sscanf	(arguments,"%d", &bInfo);
+			InformOfNoPatch = (bInfo != 0);
+		}
+		
+//		GameSpyPatching.CheckForPatch(InformOfNoPatch);
+		
+		MainMenu()->GetGS()->m_pGS_Patching->CheckForPatch(InformOfNoPatch);
+	}
+};
+
+
+class CCC_GSCDKey: public CCC_String{
+public:
+	CCC_GSCDKey(LPCSTR N, LPSTR V, int _size) : CCC_String(N, V, _size)  { bEmptyArgsHandled = false; };
+	virtual void Execute(LPCSTR arguments)
+	{
+		CCC_String::Execute(arguments);	
+
+		WriteRegistry_StrValue(REGISTRY_VALUE_GSCDKEY, value);
+
+		if (g_pGamePersistent && MainMenu()) MainMenu()->ValidateCDKey();
+	}
+	virtual void	Save	(IWriter *F)	{};
+};
+
 void CCC_RegisterCommands()
 {
 	// options
 	g_OptConCom.Init();
 
-	CMD1(CCC_MemStats,		"stat_memory"		);
+	CMD1(CCC_MemStats,			"stat_memory"			);
 	// game
 	psActorFlags.set(AF_ALWAYSRUN, true);
 	CMD3(CCC_Mask,				"g_always_run",			&psActorFlags,	AF_ALWAYSRUN);
-	CMD3(CCC_Mask,				"g_god",				&psActorFlags,	AF_GODMODE	);
-	CMD1(CCC_Spawn,				"g_spawn"				);
 	CMD1(CCC_GameDifficulty,	"g_game_difficulty"		);
 	CMD1(CCC_Restart,			"g_restart"				);
 
 	CMD1(CCC_RestartFast,		"g_restart_fast"		);
+#ifndef MASTER_GOLD
 	CMD1(CCC_Money,				"g_money"				);
-//	CMD1(CCC_Team,				"g_change_team"			);
+#endif // MASTER_GOLD
+
 	CMD1(CCC_Kill,				"g_kill"				);
 	CMD3(CCC_Mask,				"g_backrun",			&psActorFlags,	AF_RUN_BACKWARD);
 
 	// alife
+#ifdef DEBUG
 	CMD1(CCC_ALifePath,			"al_path"				);		// build path
+#endif // DEBUG
 	CMD1(CCC_ALifeSave,			"save"					);		// save game
-	CMD1(CCC_ALifeReload,		"reload"				);		// reload game
-	CMD1(CCC_ALifeLoadFrom,		"load"				);		// load game from ...
+	CMD1(CCC_ALifeLoadFrom,		"load"					);		// load game from ...
 	CMD1(CCC_FlushLog,			"flush"					);		// flush log
-	CMD1(CCC_ALifeTimeFactor,	"al_time_factor"		);		// set time factor
-	CMD1(CCC_ALifeSwitchDistance,"al_switch_distance"	);		// set switch distance
-	CMD1(CCC_ALifeProcessTime,	"al_process_time"		);		// set process time
+#ifndef MASTER_GOLD
+	CMD1(CCC_ALifeTimeFactor,		"al_time_factor"		);		// set time factor
+	CMD1(CCC_ALifeSwitchDistance,	"al_switch_distance"	);		// set switch distance
+	CMD1(CCC_ALifeProcessTime,		"al_process_time"		);		// set process time
 	CMD1(CCC_ALifeObjectsPerUpdate,	"al_objects_per_update"	);		// set process time
-	CMD1(CCC_ALifeSwitchFactor,	"al_switch_factor"		);		// set switch factor
-	CMD1(CCC_JumpToLevel,		"jump_to_level"			);
-#ifdef ALIFE_SUPPORT_CONSOLE_COMMANDS
-	CMD1(CCC_ALifeScheduleMin,	"al_schedule_min"		);		// set min schedule
-	CMD1(CCC_ALifeScheduleMax,	"al_schedule_max"		);		// set max schedule
-	CMD1(CCC_ALifeListAll,		"al_la"					);		// list all (objects, events and tasks)
-	CMD1(CCC_ALifeListObjects,	"al_lo"					);		// list objects
-	CMD1(CCC_ALifeListEvents,	"al_le"					);		// list events
-	CMD1(CCC_ALifeListTasks,	"al_lt"					);		// list tasks
-	CMD1(CCC_ALifeListTerrain,	"al_lr"					);		// list terrain
-	CMD1(CCC_ALifeListSpawns,	"al_ls"					);		// list spawnpoints
-	CMD1(CCC_ALifeObjectInfo,	"al_io"					);		// object info
-	CMD1(CCC_ALifeEventInfo,	"al_ie"					);		// event info
-	CMD1(CCC_ALifeTaskInfo,		"al_it"					);		// task info
-	CMD1(CCC_ALifeSpawnInfo,	"al_is"					);		// spawn-point info
-	CMD1(CCC_ALifeGraphInfo,	"al_ig"					);		// graph-point info
-#endif
-
+	CMD1(CCC_ALifeSwitchFactor,		"al_switch_factor"		);		// set switch factor
+#endif // MASTER_GOLD
+#ifndef MASTER_GOLD
+	CMD3(CCC_Mask,				"hud_weapon",			&psHUD_Flags,	HUD_WEAPON);
+	CMD3(CCC_Mask,				"hud_info",				&psHUD_Flags,	HUD_INFO);
+	CMD3(CCC_Mask,				"hud_draw",				&psHUD_Flags,	HUD_DRAW);
+#endif // MASTER_GOLD
 	// hud
 	psHUD_Flags.set(HUD_CROSSHAIR,		true);
 	psHUD_Flags.set(HUD_WEAPON,			true);
@@ -2499,16 +2273,16 @@ void CCC_RegisterCommands()
 
 	CMD3(CCC_Mask,				"hud_crosshair",		&psHUD_Flags,	HUD_CROSSHAIR);
 	CMD3(CCC_Mask,				"hud_crosshair_dist",	&psHUD_Flags,	HUD_CROSSHAIR_DIST);
-	CMD3(CCC_Mask,				"hud_weapon",			&psHUD_Flags,	HUD_WEAPON);
-	CMD3(CCC_Mask,				"hud_info",				&psHUD_Flags,	HUD_INFO);
-	CMD3(CCC_Mask,				"hud_draw",				&psHUD_Flags,	HUD_DRAW);
 
+#ifdef DEBUG
 	CMD2(CCC_Float,				"hud_fov",				&psHUD_FOV);
+#endif // DEBUG
 
 	// Demo
-	CMD1(CCC_DemoRecord,		"demo_record"			);
 	CMD1(CCC_DemoPlay,			"demo_play"				);
 
+#ifndef MASTER_GOLD
+	CMD1(CCC_DemoRecord,		"demo_record"			);
 	// ai
 	CMD3(CCC_Mask,				"mt_ai_vision",			&g_mt_config,	mtAiVision);
 	CMD3(CCC_Mask,				"mt_level_path",		&g_mt_config,	mtLevelPath);
@@ -2519,8 +2293,10 @@ void CCC_RegisterCommands()
 	CMD3(CCC_Mask,				"mt_script_gc",			&g_mt_config,	mtLUA_GC);
 	CMD3(CCC_Mask,				"mt_level_sounds",		&g_mt_config,	mtLevelSounds);
 	CMD3(CCC_Mask,				"mt_alife",				&g_mt_config,	mtALife);
-	CMD4(CCC_Integer,			"lua_gcstep",			&psLUA_GCSTEP,	1, 1000);
+#endif // MASTER_GOLD
+
 #ifdef DEBUG
+	CMD4(CCC_Integer,			"lua_gcstep",			&psLUA_GCSTEP,	1, 1000);
 	CMD3(CCC_Mask,				"ai_debug",				&psAI_Flags,	aiDebug);
 	CMD3(CCC_Mask,				"ai_dbg_brain",			&psAI_Flags,	aiBrain);
 	CMD3(CCC_Mask,				"ai_dbg_motion",		&psAI_Flags,	aiMotion);
@@ -2584,20 +2360,21 @@ void CCC_RegisterCommands()
 	
 #ifndef MASTER_GOLD
 	CMD3(CCC_Mask,				"ai_ignore_actor",		&psAI_Flags,	aiIgnoreActor);
-
-	CMD1(CCC_Script,			"run_script");
-	CMD1(CCC_ScriptCommand,		"run_string");
-#endif
+#endif // MASTER_GOLD
 
 	// Physics
 	CMD1(CCC_PHFps,				"ph_frequency"																					);
-	CMD4(CCC_Integer,			"ph_tri_clear_disable_count",	&ph_tri_clear_disable_count	,			0,		255				);
-	CMD1(CCC_PHGravity,			"ph_gravity"																					);
 	CMD1(CCC_PHIterations,		"ph_iterations"																					);
+
+#ifdef DEBUG
+	CMD1(CCC_PHGravity,			"ph_gravity"																					);
 	CMD4(CCC_FloatBlock,		"ph_timefactor",				&phTimefactor				,			0.0001f	,1000.f			);
 	CMD4(CCC_FloatBlock,		"ph_break_common_factor",		&phBreakCommonFactor		,			0.f		,1000000000.f	);
 	CMD4(CCC_FloatBlock,		"ph_rigid_break_weapon_factor",	&phRigidBreakWeaponFactor	,			0.f		,1000000000.f	);
+	CMD4(CCC_Integer,			"ph_tri_clear_disable_count",	&ph_tri_clear_disable_count	,			0,		255				);
 	CMD4(CCC_FloatBlock,		"ph_tri_query_ex_aabb_rate",	&ph_tri_query_ex_aabb_rate	,			1.01f	,3.f			);
+#endif // DEBUG
+
 	//CMD4(CCC_FloatBlock,		"snd_collide_max_volume",		&collide_volume_max			,			1.f		,5000.f			);
 	//CMD4(CCC_FloatBlock,		"snd_collide_min_volume",		&collide_volume_min 		,			0.f		,5000.f			);
 	// Mad Max
@@ -2612,22 +2389,30 @@ void CCC_RegisterCommands()
 //	CMD4(CCC_Integer,				"net_cl_inputguaranteed",	&net_cl_inputguaranteed,	0, 1)	;
 //	CMD4(CCC_Net_CL_InputUpdateRate,"net_cl_inputupdaterate",	&net_cl_inputupdaterate,	1, 100)	;
 
+#ifndef MASTER_GOLD
+	CMD1(CCC_JumpToLevel,	"jump_to_level"		);
+	CMD3(CCC_Mask,			"g_god",			&psActorFlags,	AF_GODMODE	);
+	CMD3(CCC_Mask,			"g_unlimitedammo",	&psActorFlags,	AF_UNLIMITEDAMMO);
+	CMD1(CCC_Script,		"run_script");
+	CMD1(CCC_ScriptCommand,	"run_string");
+#endif // MASTER_GOLD
 
-	CMD3(CCC_Mask,		"g_unlimitedammo",			&psActorFlags,	AF_UNLIMITEDAMMO);
-	CMD3(CCC_Mask,		"g_autopickup",				&psActorFlags,	AF_AUTOPICKUP);
+	CMD3(CCC_Mask,		"g_autopickup",			&psActorFlags,	AF_AUTOPICKUP);
 
 
 	// Network
-	CMD4(CCC_Integer,	"net_cl_update_rate",	&psNET_ClientUpdate,0,		100				);
+	CMD4(CCC_Integer,	"net_cl_update_rate",	&psNET_ClientUpdate,1,		100				);
 	CMD4(CCC_Integer,	"net_cl_pending_lim",	&psNET_ClientPending,0,		10				);
-	CMD4(CCC_Integer,	"net_sv_update_rate",	&psNET_ServerUpdate,0,		100				);
+	CMD4(CCC_Integer,	"net_sv_update_rate",	&psNET_ServerUpdate,1,		100				);
 	CMD4(CCC_Integer,	"net_sv_pending_lim",	&psNET_ServerPending,0,		10				);
 //	CMD3(CCC_String,	"net_name",				psNET_Name,			32						);
-	CMD3(CCC_Mask,		"net_dump_size",		&psNET_Flags,		NETFLAG_DBG_DUMPSIZE	);
 	CMD3(CCC_Mask,		"net_sv_log_data",		&psNET_Flags,		NETFLAG_LOG_SV_PACKETS	);
 	CMD3(CCC_Mask,		"net_cl_log_data",		&psNET_Flags,		NETFLAG_LOG_CL_PACKETS	);
+#ifdef DEBUG
+	CMD3(CCC_Mask,		"net_dump_size",		&psNET_Flags,		NETFLAG_DBG_DUMPSIZE	);
 	CMD1(CCC_Dbg_NumObjects,	"net_dbg_objects"				);
-	CMD3(CCC_String,	"cdkey",				gsCDKey,			sizeof(gsCDKey)			);
+#endif // DEBUG
+	CMD3(CCC_GSCDKey,	"cdkey",				gsCDKey,			sizeof(gsCDKey)			);
 
 	CMD4(CCC_Integer,	"g_eventdelay",			&g_dwEventDelay,	0,	1000);
 
@@ -2716,25 +2501,25 @@ void CCC_RegisterCommands()
 	CMD1(CCC_Vote_Yes,		"cl_voteyes"				);
 	CMD1(CCC_Vote_No,		"cl_voteno"				);
 
+#ifdef DEBUG
 	CMD4(CCC_Integer,		"cl_calculateping",		&g_bCalculatePing,	0, 1)	;
-
 	CMD4(CCC_Integer,		"dbg_show_ani_info",	&g_ShowAnimationInfo,	0, 1)	;
+#endif // DEBUG
+
 	CMD3(CCC_Mask,			"cl_dynamiccrosshair",	&psHUD_Flags,	HUD_CROSSHAIR_DYNAMIC);
 
 	CMD1(CCC_MainMenu,		"main_menu"				);
 
+#ifndef MASTER_GOLD
 	CMD1(CCC_StartTimeSingle,	"start_time_single");
 	CMD4(CCC_TimeFactorSingle,	"time_factor_single", &g_fTimeFactor, 0.f,flt_max);
+#endif // MASTER_GOLD
+
 	CMD1(CCC_StartTimeEnvironment,	"sv_setenvtime");
 
 	CMD1(CCC_SetWeather,	"sv_setweather"			);
 
-	CMD4(CCC_Integer,		"sv_bearercantsprint",	&g_bBearerCantSprint,	0, 1)	;
-	CMD4(CCC_Integer,		"sv_shieldedbases",		&g_bShildedBases,		0, 1)	;
-	CMD4(CCC_Integer,		"sv_returnplayers",		&g_bAfReturnPlayersToBases,		0, 1)	;
-
 	CMD4(CCC_Integer,		"cl_cod_pickup_mode",	&g_b_COD_PickUpMode,	0, 1)	;
-	CMD4(CCC_Integer,		"cl_show_hit_sectors",	&g_bShowHitSectors,	0, 1)	;
 
 	CMD4(CCC_Integer,		"sv_remove_weapon",		&g_iWeaponRemove, -1, 1);
 	CMD4(CCC_Integer,		"sv_remove_corpse",		&g_iCorpseRemove, -1, 1);
@@ -2743,11 +2528,15 @@ void CCC_RegisterCommands()
 	CMD4(CCC_Integer,		"sv_statistic_collect", &g_bCollectStatisticData, 0, 1);
 	CMD1(CCC_SaveStatistic,	"sv_statistic_save");
 	CMD4(CCC_Integer,		"sv_statistic_save_auto", &g_bStatisticSaveAuto, 0, 1);
-	CMD4(CCC_Integer,		"dbg_dump_physics_step", &g_bDebugDumpPhysicsStep, 0, 1);
+#ifndef MASTER_GOLD
 	CMD4(CCC_AuthCheck,		"sv_no_auth_check",		&g_SV_Disable_Auth_Check, 0, 1);
+#endif // MASTER_GOLD
+
 	CMD1(CCC_Name,			"name");
 	
 #ifdef DEBUG
+	CMD4(CCC_Integer,		"dbg_dump_physics_step", &g_bDebugDumpPhysicsStep, 0, 1);
+
 	extern	INT	g_Dump_Update_Write;
 	extern	INT	g_Dump_Update_Read;
 	CMD4(CCC_Integer,	"net_dbg_dump_update_write",	&g_Dump_Update_Write, 0, 1);
@@ -2757,10 +2546,11 @@ void CCC_RegisterCommands()
 #endif
 
 	CMD1(CCC_ReturnToBase,	"sv_return_to_base");
-	CMD4(CCC_Integer,	"cl_leave_tdemo",		&g_bLeaveTDemo, 0, 1);
 	CMD1(CCC_GetServerAddress,	"get_server_address");		
 
 #ifdef DEBUG
+	CMD4(CCC_Integer,	"cl_leave_tdemo",		&g_bLeaveTDemo, 0, 1);
+
 	extern	INT	g_sv_Skip_Winner_Waiting;
 	CMD4(CCC_Integer,	"sv_skip_winner_waiting",		&g_sv_Skip_Winner_Waiting, 0, 1);
 
@@ -2783,12 +2573,11 @@ void CCC_RegisterCommands()
 	g_uCommonFlags.set(flAiUseTorchDynamicLights, TRUE);
 
 	CMD3(CCC_Mask,		"ai_use_torch_dynamic_lights",	&g_uCommonFlags, flAiUseTorchDynamicLights);
-	CMD4(CCC_Integer,	"use_scripts_in_goap",			&g_use_scripts_in_goap, 0, 1);
-	CMD4(CCC_Integer,	"show_wnd_rect",				&g_show_wnd_rect, 0, 1);
-	CMD4(CCC_Integer,	"show_wnd_rect_all",			&g_show_wnd_rect2, 0, 1);
 
 	CMD1(CCC_SwapTeams,	"g_swapteams"				);
 #ifdef DEBUG
+	CMD4(CCC_Integer,	"show_wnd_rect",				&g_show_wnd_rect, 0, 1);
+	CMD4(CCC_Integer,	"show_wnd_rect_all",			&g_show_wnd_rect2, 0, 1);
 	CMD1(CCC_Crash,		"crash"						);
 #endif // DEBUG
 	//-------------------------------------------------------------------------------------------------
@@ -2814,7 +2603,10 @@ void CCC_RegisterCommands()
 	CMD4(CCC_SV_Integer,"sv_anomalies_length"		,	(int*)&g_sv_dm_dwAnomalySetLengthTime,	0, 180); //min
 	CMD4(CCC_SV_Integer,"sv_pda_hunt"				,	(int*)&g_sv_dm_bPDAHunt				,	0, 1);
 	CMD4(CCC_SV_Integer,"sv_warm_up"				,	(int*)&g_sv_dm_dwWarmUp_MaxTime		,	0, 3600); //sec
+
+#ifndef NDEBUG
 	CMD4(CCC_SV_Integer,"sv_ignore_money_on_buy"	,	(int*)&g_sv_dm_bDMIgnore_Money_OnBuy,	0, 1);
+#endif	
 
 	CMD4(CCC_SV_Integer,"sv_auto_team_balance"		,	(int*)&g_sv_tdm_bAutoTeamBalance	,	0,1);
 	CMD4(CCC_SV_Integer,"sv_auto_team_swap"			,	(int*)&g_sv_tdm_bAutoTeamSwap		,	0,1);
@@ -2826,12 +2618,20 @@ void CCC_RegisterCommands()
 	CMD4(CCC_SV_Integer,"sv_artefacts_count"		,	(int*)&g_sv_ah_dwArtefactsNum			, 1,100);
 	CMD4(CCC_SV_Integer,"sv_artefact_stay_time"		,	(int*)&g_sv_ah_dwArtefactStayTime		, 0,180);	//min
 	CMD4(CCC_SV_Integer,"sv_reinforcement_time"		,	(int*)&g_sv_ah_iReinforcementTime		, -1,3600); //sec
+	CMD4(CCC_SV_Integer,"sv_bearercantsprint"		,	(int*)&g_sv_ah_bBearerCantSprint				, 0, 1)	;
+	CMD4(CCC_SV_Integer,"sv_shieldedbases"			,	(int*)&g_sv_ah_bShildedBases					, 0, 1)	;
+	CMD4(CCC_SV_Integer,"sv_returnplayers"			,	(int*)&g_sv_ah_bAfReturnPlayersToBases		, 0, 1)	;
 
+
+#ifndef MASTER_GOLD
 	CMD4(CCC_Vector3,		"psp_cam_offset",				&CCameraLook2::m_cam_offset, Fvector().set(-1000,-1000,-1000),Fvector().set(1000,1000,1000));
+#endif // MASTER_GOLD
 
 #ifdef DEBUG
 	extern	u32	g_dwDemoDeltaFrame;
 	CMD4(CCC_SV_Integer,"demo_delta_frame"	,	(int*)&g_dwDemoDeltaFrame	,	0,100);
-#endif // DEBUG
 	CMD1(CCC_DumpObjects,							"dump_all_objects");
+#endif // DEBUG
+
+	CMD1(CCC_GSCheckForUpdates, "check_for_updates");
 }

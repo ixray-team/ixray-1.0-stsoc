@@ -159,15 +159,14 @@ protected:
 
 	//потеря здоровья от последнего хита
 	float				m_fHealthLost;
-	//кто нанес последний хит
-	CObject*			m_pWho;
-	u16					m_iWhoID;
 
 
 	//для отслеживания времени 
 	u64					m_iLastTimeCalled;
 	float				m_fDeltaTime;
-	bool				m_bTimeValid;
+	//кто нанес последний хит
+	CObject*			m_pWho;
+	u16					m_iWhoID;
 
 	//для передачи параметров из DamageManager
 	float				m_fHitBoneScale;
@@ -175,6 +174,7 @@ protected:
 
 	float				m_limping_threshold;
 
+	bool				m_bTimeValid;
 	bool				m_bCanBeHarmed;
 
 public:

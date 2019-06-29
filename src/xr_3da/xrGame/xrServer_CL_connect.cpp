@@ -82,16 +82,14 @@ void xrServer::OnCL_Connected		(IClient* _CL)
 	game->ProcessDelayedEvent		();
 }
 
-void	xrServer::SendConnectResult(IClient* CL, u8 res, char* ResultStr)
+void	xrServer::SendConnectResult(IClient* CL, u8 res, u8 res1, char* ResultStr)
 {
 	NET_Packet	P;
 	P.w_begin	(M_CLIENT_CONNECT_RESULT);
 	P.w_u8		(res);
+	P.w_u8		(res1);
 	P.w_stringZ	(ResultStr);
-//	string128 tmp;
-//	strcpy(tmp, *(Level().Server->level_name(Level().m_caServerOptions)));
-//	P.w_stringZ(*(Level().Server->level_name(Level().m_caServerOptions)));
-//	P.w_stringZ	(game->type_name() );
+
 	if (SV_Client && SV_Client == CL)
 		P.w_u8(1);
 	else
@@ -135,14 +133,16 @@ void xrServer::OnBuildVersionRespond				(IClient* CL, NET_Packet& P)
 	P.r_begin(Type);
 	u64 _our		=	FS.auth_get			();
 	u64 _him		=	P.r_u64	();
+#ifdef DEBUG
 	Msg("_our - %d", _our);
 	Msg("_him - %d", _him);
-	if (_our != _him)	SendConnectResult	(CL, 0, "Data verification failed. Cheater?");
+#endif // DEBUG
+	if (_our != _him)	SendConnectResult	(CL, 0, 0, "Data verification failed. Cheater?");
 	else				Check_BuildVersion_Success (CL);
 };
 
 void xrServer::Check_BuildVersion_Success			(IClient* CL)
 {
 	CL->flags.bVerified = TRUE;
-	SendConnectResult(CL, 1, "All Ok");
+	SendConnectResult(CL, 1, 0, "All Ok");
 };

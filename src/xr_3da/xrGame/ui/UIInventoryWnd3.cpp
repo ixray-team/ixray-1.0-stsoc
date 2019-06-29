@@ -24,18 +24,16 @@ void	CUIInventoryWnd::Activate_Artefact()
 	SendEvent_ActivateArtefact				(CurrentIItem());
 };
 
-void CUIInventoryWnd::EatCurrentItem()
+void CUIInventoryWnd::EatItem(PIItem itm)
 {
+	SetCurrentItem							(NULL);
+	if(!itm->Useful())						return;
 	CActor *pActor							= smart_cast<CActor*>(Level().CurrentEntity());
 	if(!pActor)								return;
 
-	SendEvent_Item_Eat						(CurrentIItem());
 
-	if(!CurrentIItem()->Useful())
-	{
-		R_ASSERT(0);
-		SetCurrentItem						(NULL);
-	}
+	SendEvent_Item_Eat						(itm);
+
 	PlaySnd									(eInvItemUse);
 }
 
@@ -60,27 +58,33 @@ void CUIInventoryWnd::ActivatePropertiesBox()
 	CGrenadeLauncher*	pGrenadeLauncher	= smart_cast<CGrenadeLauncher*>	(CurrentIItem());
 	CBottleItem*		pBottleItem			= smart_cast<CBottleItem*>		(CurrentIItem());
     
+	bool	b_show			= false;
 
 
 	if(!pOutfit && CurrentIItem()->GetSlot()!=NO_ACTIVE_SLOT && !m_pInv->m_slots[CurrentIItem()->GetSlot()].m_bPersistent && m_pInv->CanPutInSlot(CurrentIItem()))
 	{
 		UIPropertiesBox.AddItem("st_move_to_slot",  NULL, INVENTORY_TO_SLOT_ACTION);
+		b_show			= true;
 	}
 	if(CurrentIItem()->Belt() && m_pInv->CanPutInBelt(CurrentIItem()))
 	{
 		UIPropertiesBox.AddItem("st_move_on_belt",  NULL, INVENTORY_TO_BELT_ACTION);
+		b_show			= true;
 	}
-	if(CurrentIItem()->Ruck() && m_pInv->CanPutInRuck(CurrentIItem()) && !m_pInv->m_slots[CurrentIItem()->GetSlot()].m_bPersistent)
+
+	if(CurrentIItem()->Ruck() && m_pInv->CanPutInRuck(CurrentIItem()) && (CurrentIItem()->GetSlot()==u32(-1) || !m_pInv->m_slots[CurrentIItem()->GetSlot()].m_bPersistent) )
 	{
 		if(!pOutfit)
 			UIPropertiesBox.AddItem("st_move_to_bag",  NULL, INVENTORY_TO_BAG_ACTION);
 		else
 			UIPropertiesBox.AddItem("st_undress_outfit",  NULL, INVENTORY_TO_BAG_ACTION);
 		bAlreadyDressed = true;
+		b_show			= true;
 	}
 	if(pOutfit  && !bAlreadyDressed )
 	{
 		UIPropertiesBox.AddItem("st_dress_outfit",  NULL, INVENTORY_TO_SLOT_ACTION);
+		b_show			= true;
 	}
 	
 	//отсоединение аддонов от вещи
@@ -89,14 +93,17 @@ void CUIInventoryWnd::ActivatePropertiesBox()
 		if(pWeapon->GrenadeLauncherAttachable() && pWeapon->IsGrenadeLauncherAttached())
 		{
 			UIPropertiesBox.AddItem("st_detach_gl",  NULL, INVENTORY_DETACH_GRENADE_LAUNCHER_ADDON);
+		b_show			= true;
 		}
 		if(pWeapon->ScopeAttachable() && pWeapon->IsScopeAttached())
 		{
 			UIPropertiesBox.AddItem("st_detach_scope",  NULL, INVENTORY_DETACH_SCOPE_ADDON);
+		b_show			= true;
 		}
 		if(pWeapon->SilencerAttachable() && pWeapon->IsSilencerAttached())
 		{
 			UIPropertiesBox.AddItem("st_detach_silencer",  NULL, INVENTORY_DETACH_SILENCER_ADDON);
+		b_show			= true;
 		}
 		if(smart_cast<CWeaponMagazined*>(pWeapon) && IsGameTypeSingle())
 		{
@@ -116,13 +123,11 @@ void CUIInventoryWnd::ActivatePropertiesBox()
 				}
 			}
 
-			if(b)
+			if(b){
 				UIPropertiesBox.AddItem("st_unload_magazine",  NULL, INVENTORY_UNLOAD_MAGAZINE);
-
-
+				b_show			= true;
+			}
 		}
-
-
 	}
 	
 	//присоединение аддонов к активному слоту (2 или 3)
@@ -132,13 +137,15 @@ void CUIInventoryWnd::ActivatePropertiesBox()
 		   m_pInv->m_slots[PISTOL_SLOT].m_pIItem->CanAttach(pScope))
 		 {
 			PIItem tgt = m_pInv->m_slots[PISTOL_SLOT].m_pIItem;
-			 UIPropertiesBox.AddItem("st_attach_scope_to_pistol",  (void*)tgt, INVENTORY_ATTACH_ADDON);
+			UIPropertiesBox.AddItem("st_attach_scope_to_pistol",  (void*)tgt, INVENTORY_ATTACH_ADDON);
+			b_show			= true;
 		 }
 		 if(m_pInv->m_slots[RIFLE_SLOT].m_pIItem != NULL &&
 			m_pInv->m_slots[RIFLE_SLOT].m_pIItem->CanAttach(pScope))
 		 {
 			PIItem tgt = m_pInv->m_slots[RIFLE_SLOT].m_pIItem;
-			 UIPropertiesBox.AddItem("st_attach_scope_to_rifle",  (void*)tgt, INVENTORY_ATTACH_ADDON);
+			UIPropertiesBox.AddItem("st_attach_scope_to_rifle",  (void*)tgt, INVENTORY_ATTACH_ADDON);
+			b_show			= true;
 		 }
 	}
 	else if(pSilencer)
@@ -147,13 +154,15 @@ void CUIInventoryWnd::ActivatePropertiesBox()
 		   m_pInv->m_slots[PISTOL_SLOT].m_pIItem->CanAttach(pSilencer))
 		 {
 			PIItem tgt = m_pInv->m_slots[PISTOL_SLOT].m_pIItem;
-			 UIPropertiesBox.AddItem("st_attach_silencer_to_pistol",  (void*)tgt, INVENTORY_ATTACH_ADDON);
+			UIPropertiesBox.AddItem("st_attach_silencer_to_pistol",  (void*)tgt, INVENTORY_ATTACH_ADDON);
+			b_show			= true;
 		 }
 		 if(m_pInv->m_slots[RIFLE_SLOT].m_pIItem != NULL &&
 			m_pInv->m_slots[RIFLE_SLOT].m_pIItem->CanAttach(pSilencer))
 		 {
 			PIItem tgt = m_pInv->m_slots[RIFLE_SLOT].m_pIItem;
-			 UIPropertiesBox.AddItem("st_attach_silencer_to_rifle",  (void*)tgt, INVENTORY_ATTACH_ADDON);
+			UIPropertiesBox.AddItem("st_attach_silencer_to_rifle",  (void*)tgt, INVENTORY_ATTACH_ADDON);
+			b_show			= true;
 		 }
 	}
 	else if(pGrenadeLauncher)
@@ -162,7 +171,8 @@ void CUIInventoryWnd::ActivatePropertiesBox()
 			m_pInv->m_slots[RIFLE_SLOT].m_pIItem->CanAttach(pGrenadeLauncher))
 		 {
 			PIItem tgt = m_pInv->m_slots[RIFLE_SLOT].m_pIItem;
-			 UIPropertiesBox.AddItem("st_attach_gl_to_rifle",  (void*)tgt, INVENTORY_ATTACH_ADDON);
+			UIPropertiesBox.AddItem("st_attach_gl_to_rifle",  (void*)tgt, INVENTORY_ATTACH_ADDON);
+			b_show			= true;
 		 }
 
 	}
@@ -180,31 +190,34 @@ void CUIInventoryWnd::ActivatePropertiesBox()
 			_action					= "st_eat";
 	}
 
-	if(_action)
+	if(_action){
 		UIPropertiesBox.AddItem(_action,  NULL, INVENTORY_EAT_ACTION);
-
+		b_show			= true;
+	}
 //.	if(pArtefact&&pArtefact->CanBeActivated())
 //.		UIPropertiesBox.AddItem("st_activate_artefact",  NULL, INVENTORY_ACTIVATE_ARTEFACT_ACTION);
 
 	if(!CurrentIItem()->IsQuestItem()){
 		UIPropertiesBox.AddItem("st_drop", NULL, INVENTORY_DROP_ACTION);
+		b_show			= true;
 
 		if(CurrentItem()->ChildsCount())
 			UIPropertiesBox.AddItem("st_drop_all", (void*)33, INVENTORY_DROP_ACTION);
 	}
 
+	if(b_show)
+	{
+		UIPropertiesBox.AutoUpdateSize	();
+		UIPropertiesBox.BringAllToTop	();
 
-	UIPropertiesBox.AutoUpdateSize	();
-	UIPropertiesBox.BringAllToTop	();
-
-	Fvector2						cursor_pos;
-	Frect							vis_rect;
-
-	GetAbsoluteRect					(vis_rect);
-	GetUICursor()->GetPos			(cursor_pos.x, cursor_pos.y);
-	cursor_pos.sub					(vis_rect.lt);
-	UIPropertiesBox.Show			(vis_rect, cursor_pos);
-	PlaySnd							(eInvProperties);
+		Fvector2						cursor_pos;
+		Frect							vis_rect;
+		GetAbsoluteRect					(vis_rect);
+		GetUICursor()->GetPos			(cursor_pos.x, cursor_pos.y);
+		cursor_pos.sub					(vis_rect.lt);
+		UIPropertiesBox.Show			(vis_rect, cursor_pos);
+		PlaySnd							(eInvProperties);
+	}
 }
 
 void CUIInventoryWnd::ProcessPropertiesBoxClicked	()
@@ -230,7 +243,7 @@ void CUIInventoryWnd::ProcessPropertiesBoxClicked	()
 				DropCurrentItem(b_all);
 			}break;
 		case INVENTORY_EAT_ACTION:
-			EatCurrentItem();
+			EatItem(CurrentIItem());
 			break;
 		case INVENTORY_ATTACH_ADDON:
 			AttachAddon((PIItem)(UIPropertiesBox.GetClickedItem()->GetData()));
@@ -264,15 +277,26 @@ void CUIInventoryWnd::ProcessPropertiesBoxClicked	()
 	}
 }
 
-void CUIInventoryWnd::TryUseItem(PIItem itm)
+bool CUIInventoryWnd::TryUseItem(PIItem itm)
 {
+	CBottleItem*		pBottleItem			= smart_cast<CBottleItem*>		(itm);
+	CMedkit*			pMedkit				= smart_cast<CMedkit*>			(itm);
+	CAntirad*			pAntirad			= smart_cast<CAntirad*>			(itm);
+	CEatableItem*		pEatableItem		= smart_cast<CEatableItem*>		(itm);
+
+	if(pMedkit || pAntirad || pEatableItem || pBottleItem)
+	{
+		EatItem(itm);
+		return true;
+	}
+	return false;
 }
 
 bool CUIInventoryWnd::DropItem(PIItem itm, CUIDragDropListEx* lst)
 {
 	if(lst==m_pUIOutfitList)
 	{
-		EatCurrentItem		();
+		EatItem				(CurrentIItem());
 		return				true;
 	}
 	CUICellItem*	_citem	= lst->ItemsCount() ? lst->GetItemIdx(0) : NULL;

@@ -82,9 +82,6 @@ void CStalkerCombatPlanner::setup				(CAI_Stalker *object, CPropertyStorage *sto
 
 void CStalkerCombatPlanner::execute				()
 {
-	if (first_time())
-		object().agent_manager().member().register_in_combat(m_object);
-
 	inherited::execute		();
 }
 
@@ -129,23 +126,29 @@ void CStalkerCombatPlanner::initialize			()
 	m_last_level_time		= 0;
 	m_last_wounded			= false;
 
-	if (object().memory().enemy().selected()) {
-		if (!m_loaded) {
-			CVisualMemoryManager	*visual_memory_manager = object().memory().enemy().selected()->visual_memory();
-			VERIFY					(visual_memory_manager);
-			CScriptActionPlanner::m_storage.set_property(eWorldPropertyUseSuddenness,	!visual_memory_manager->visible_now(&object()));
-		}
+	if (!m_loaded && object().memory().enemy().selected()) {
+		CVisualMemoryManager*visual_memory_manager = object().memory().enemy().selected()->visual_memory();
+		VERIFY				(visual_memory_manager);
+		CScriptActionPlanner::m_storage.set_property(eWorldPropertyUseSuddenness,	!visual_memory_manager->visible_now(&object()));
 	}
 
 	m_loaded				= false;
 
-	if (object().agent_manager().member().members().size() > 1)
-		CScriptActionPlanner::m_storage.set_property	(eWorldPropertyUseSuddenness,	false);
+	if (!object().agent_manager().member().combat_members().empty())
+		CScriptActionPlanner::m_storage.set_property		(eWorldPropertyUseSuddenness,	false);
 
-	if (m_object->memory().visual().visible_now(m_object->memory().enemy().selected()) && m_object->memory().enemy().selected()->human_being() && object().agent_manager().member().can_cry_noninfo_phrase()) {
-		if (!CScriptActionPlanner::m_storage.property(eWorldPropertyUseSuddenness))
-			object().sound().play						(eStalkerSoundAlarm);
+//  this is possible when i enter combat when it is wait after combat stage
+//	VERIFY					(object().memory().enemy().selected());
+
+	if (m_object->memory().visual().visible_now(m_object->memory().enemy().selected())) {
+		if (m_object->memory().enemy().selected()->human_being())
+			if (object().agent_manager().member().can_cry_noninfo_phrase())
+				if (object().agent_manager().member().members().size() > 1)
+					if (!CScriptActionPlanner::m_storage.property(eWorldPropertyUseSuddenness))
+						object().sound().play	(eStalkerSoundAlarm);
 	}
+
+	object().agent_manager().member().register_in_combat	(m_object);
 }
 
 void CStalkerCombatPlanner::finalize			()
@@ -156,7 +159,8 @@ void CStalkerCombatPlanner::finalize			()
 		return;
 
 	object().memory().danger().time_line					(Device.dwTimeGlobal + 3000);
-	object().agent_manager().member().unregister_in_combat	(m_object);
+	if (object().agent_manager().member().registered_in_combat(m_object))
+		object().agent_manager().member().unregister_in_combat	(m_object);
 
 	object().m_clutched_hammer_enabled						= false;
 
@@ -223,6 +227,12 @@ void CStalkerCombatPlanner::add_actions			()
 	add_condition			(action,eWorldPropertyEnemyWounded,		false);
 	add_condition			(action,eWorldPropertyPlayerOnThePath,	false);
 	add_effect				(action,eWorldPropertyReadyToKill,		true);
+
+	add_effect				(action,eWorldPropertyInCover,			false);
+	add_effect				(action,eWorldPropertyLookedOut,		false);
+	add_effect				(action,eWorldPropertyPositionHolded,	false);
+	add_effect				(action,eWorldPropertyEnemyDetoured,	false);
+
 	add_operator			(eWorldOperatorGetReadyToKill,			action);
 
 	action					= xr_new<CStalkerActionGetReadyToKill>	(false,m_object,"get_ready_to_detour");
@@ -247,6 +257,11 @@ void CStalkerCombatPlanner::add_actions			()
 	add_condition			(action,eWorldPropertyPanic,			false);
 	add_condition			(action,eWorldPropertyEnemyWounded,		false);
 	add_effect				(action,eWorldPropertyPureEnemy,		false);
+
+	add_effect				(action,eWorldPropertyLookedOut,		false);
+	add_effect				(action,eWorldPropertyPositionHolded,	false);
+	add_effect				(action,eWorldPropertyEnemyDetoured,	false);
+
 	add_operator			(eWorldOperatorKillEnemy,				action);
 
 	action					= xr_new<CStalkerActionTakeCover>		(m_object,"take_cover");
@@ -260,6 +275,11 @@ void CStalkerCombatPlanner::add_actions			()
 	add_condition			(action,eWorldPropertyEnemyWounded,		false);
 	add_condition			(action,eWorldPropertyPlayerOnThePath,	false);
 	add_effect				(action,eWorldPropertyInCover,			true);
+	
+	add_effect				(action,eWorldPropertyLookedOut,		false);
+	add_effect				(action,eWorldPropertyPositionHolded,	false);
+	add_effect				(action,eWorldPropertyEnemyDetoured,	false);
+
 	add_operator			(eWorldOperatorTakeCover,				action);
 
 	action					= xr_new<CStalkerActionLookOut>			(m_object,"look_out");
@@ -372,12 +392,19 @@ void CStalkerCombatPlanner::add_actions			()
 	add_condition			(action,eWorldPropertyCriticallyWounded,false);
 	add_condition			(action,eWorldPropertyDangerGrenade,	true);
 	add_effect				(action,eWorldPropertyEnemy,			false);
+	
+	add_effect				(action,eWorldPropertyInCover,			false);
+	add_effect				(action,eWorldPropertyLookedOut,		false);
+	add_effect				(action,eWorldPropertyPositionHolded,	false);
+	add_effect				(action,eWorldPropertyEnemyDetoured,	false);
+
 	add_operator			(eWorldOperatorHideFromGrenade,			action);
 
 	action					= xr_new<CStalkerActionSuddenAttack>	(m_object,"sudden attack");
 	add_condition			(action,eWorldPropertyCriticallyWounded,false);
 	add_condition			(action,eWorldPropertyDangerGrenade,	false);
 	add_condition			(action,eWorldPropertyUseSuddenness,	true);
+	add_condition			(action,eWorldPropertyEnemyWounded,		false);
 	add_effect				(action,eWorldPropertyEnemy,			false);
 	add_operator			(eWorldOperatorSuddenAttack,			action);
 
@@ -387,7 +414,14 @@ void CStalkerCombatPlanner::add_actions			()
 	add_condition			(action,eWorldPropertySeeEnemy,			true);
 	add_condition			(action,eWorldPropertyPanic,			false);
 	add_condition			(action,eWorldPropertyPlayerOnThePath,	true);
+	add_condition			(action,eWorldPropertyEnemyWounded,		false);
 	add_effect				(action,eWorldPropertyEnemy,			false);
+
+	add_effect				(action,eWorldPropertyInCover,			false);
+	add_effect				(action,eWorldPropertyLookedOut,		false);
+	add_effect				(action,eWorldPropertyPositionHolded,	false);
+	add_effect				(action,eWorldPropertyEnemyDetoured,	false);
+
 	add_operator			(eWorldOperatorKillEnemyIfPlayerOnThePath,	action);
 
 	CStalkerKillWoundedPlanner	*planner = xr_new<CStalkerKillWoundedPlanner>	(m_object,"kill wounded enemy");

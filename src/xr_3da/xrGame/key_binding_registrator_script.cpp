@@ -7,7 +7,7 @@
 using namespace luabind;
 
 int dik_to_bind(int dik){
-	return key_binding[dik];
+	return get_binded_action(dik);
 }
 
 #pragma optimize("s",on)
@@ -17,7 +17,7 @@ void key_binding_registrator::script_register(lua_State *L)
 	[
 		def("dik_to_bind",		&dik_to_bind),
 
-		class_<enum_exporter<EKeyBinding> >("key_bindings")
+		class_<enum_exporter<EGameActions> >("key_bindings")
 			.enum_("commands")
 			[
 				value("kFWD",						int(kFWD)),
@@ -32,6 +32,7 @@ void key_binding_registrator::script_register(lua_State *L)
 				value("kDOWN",						int(kDOWN)),
 				value("kJUMP",						int(kJUMP)),
 				value("kCROUCH",					int(kCROUCH)),
+				value("kCROUCH_TOGGLE",				int(kCROUCH_TOGGLE)),
 				value("kACCEL",						int(kACCEL)),
 				value("kCAM_1",						int(kCAM_1)),
 				value("kCAM_2",						int(kCAM_2)),
@@ -63,22 +64,7 @@ void key_binding_registrator::script_register(lua_State *L)
 				value("kINVENTORY",					int(kINVENTORY)),
 				value("kBUY",						int(kBUY)),
 				value("kSKIN",						int(kSKIN)),
-				value("kTEAM",						int(kTEAM)),
-				value("kEXT_1",						int(kEXT_1)),
-				value("kEXT_2",						int(kEXT_2)),
-				value("kEXT_3",						int(kEXT_3)),
-				value("kEXT_4",						int(kEXT_4)),
-				value("kEXT_5",						int(kEXT_5)),
-				value("kEXT_6",						int(kEXT_6)),
-				value("kEXT_7",						int(kEXT_7)),
-				value("kEXT_8",						int(kEXT_8)),
-				value("kEXT_9",						int(kEXT_9)),
-				value("kEXT_10",					int(kEXT_10)),
-				value("kEXT_11",					int(kEXT_11)),
-				value("kEXT_12",					int(kEXT_12)),
-				value("kEXT_13",					int(kEXT_13)),
-				value("kEXT_14",					int(kEXT_14)),
-				value("kEXT_15",					int(kEXT_15))
+				value("kTEAM",						int(kTEAM))
 			],
 		class_<key_binding_registrator >("DIK_keys")
 			.enum_("dik_keys")

@@ -34,6 +34,10 @@ protected:
 	CRestrictedObject	*m_object;
 
 protected:
+	_vertex_id_type		m_failed_start_vertex_id;
+	_vertex_id_type		m_failed_dest_vertex_id;
+
+protected:
 	IC	_vertex_id_type	intermediate_vertex_id		() const;
 
 	IC			void	build_path					(const _vertex_id_type start_vertex_id, const _vertex_id_type dest_vertex_id);

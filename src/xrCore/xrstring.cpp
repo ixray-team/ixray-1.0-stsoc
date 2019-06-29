@@ -50,9 +50,9 @@ str_value*	str_container::dock		(str_c value)
 //		DUMP_PHASE;
 
 		result					= (str_value*)Memory.mem_alloc(HEADER+s_len_with_zero
-#ifdef DEBUG_MEMORY_MANAGER
+#ifdef DEBUG_MEMORY_NAME
 			, "storage: sstring"
-#endif // DEBUG_MEMORY_MANAGER
+#endif // DEBUG_MEMORY_NAME
 			);
 
 //		DUMP_PHASE;
@@ -122,15 +122,18 @@ u32			str_container::stat_economy		()
 	cs.Enter	();
 	cdb::iterator	it		= container.begin	();
 	cdb::iterator	end		= container.end		();
-	s32				counter	= 0;
+	int				counter	= 0;
+	counter			-= sizeof(*this);
+	counter			-= sizeof(cdb::allocator_type);
+	const int		node_size = 20;
 	for (; it!=end; it++)	{
-		counter		+=		(*it)->dwReference * (*it)->dwLength;
-		counter		-=		(*it)->dwLength;
-		counter		-=		HEADER;
+		counter		-= HEADER;
+		counter		-= node_size;
+		counter		+= int((int((*it)->dwReference) - 1)*int((*it)->dwLength + 1));
 	}
-	cs.Leave	();
+	cs.Leave		();
 
-	return		u32(counter);
+	return			u32(counter);
 }
 
 str_container::~str_container		()

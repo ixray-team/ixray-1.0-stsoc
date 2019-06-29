@@ -24,8 +24,8 @@ protected:
 	enum{
 		_item_start						= 0,
 		_item_burn_immunity				= _item_start,
-		_item_shock_immunity,
 		_item_strike_immunity,
+		_item_shock_immunity,
 		_item_wound_immunity,		
 		_item_radiation_immunity,
 		_item_telepatic_immunity,

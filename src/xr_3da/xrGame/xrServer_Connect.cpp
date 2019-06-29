@@ -5,6 +5,9 @@
 #include "game_sv_teamdeathmatch.h"
 #include "game_sv_artefacthunt.h"
 #include "xrMessages.h"
+#include "game_cl_artefacthunt.h"
+#include "game_cl_single.h"
+
 
 BOOL xrServer::Connect(shared_str &session_name)
 {
@@ -28,8 +31,7 @@ BOOL xrServer::Connect(shared_str &session_name)
 	game					= NULL;
 
 	CLASS_ID clsid			= game_GameState::getCLASS_ID(type,true);
-	game					= smart_cast<game_sv_GameState*> ( NEW_INSTANCE ( clsid ) );
-
+	game					= smart_cast<game_sv_GameState*> (NEW_INSTANCE(clsid));
 
 	// Options
 	if (0==game)			return FALSE;
@@ -38,10 +40,11 @@ BOOL xrServer::Connect(shared_str &session_name)
 #ifdef DEBUG
 	Msg("* Created server_game %s",game->type_name());
 #endif
+
 	game->Create			(session_name);
 	csPlayers.Leave			();
 	
-	return					IPureServer::Connect(*session_name);
+	return IPureServer::Connect(*session_name);
 }
 
 
@@ -63,7 +66,10 @@ void xrServer::AttachNewClient			(IClient* CL)
 	csPlayers.Enter			();
 	net_Players.push_back	(CL);
 	csPlayers.Leave			();
-	
+
+	if(psNET_direct_connect)
+		SV_Client			= CL;
+
 	// config client
 	SendTo_LL				(CL->ID,&msgConfig,sizeof(msgConfig));
 	Server_Client_Check		(CL); 

@@ -3,14 +3,13 @@
 #include "../HUDManager.h"
 #include "UITextureMaster.h"
 #include "UIXmlInit.h"
+#include "UIStatic.h"
 
 CUIFrameWindow::CUIFrameWindow()
 {
-	AttachChild(&UITitleText);
-}
-
-CUIFrameWindow::~CUIFrameWindow()
-{
+	UITitleText					= xr_new<CUIStatic>();
+	UITitleText->SetAutoDelete	(true);
+	AttachChild					(UITitleText);
 }
 
 void CUIFrameWindow::Init(LPCSTR base_name, float x, float y, float width, float height)
@@ -23,7 +22,7 @@ void CUIFrameWindow::Init(float x, float y, float width, float height)
 {
 	CUIWindow::Init		(x,y,width,height);
 	m_UIWndFrame.Init	(x,y,width,height);
-	UITitleText.Init	(0,0, width, 50);
+	UITitleText->Init	(0,0, width, 50);
 }
 
 void CUIFrameWindow::Init(LPCSTR base_name, Frect* pRect)
@@ -44,15 +43,10 @@ void CUIFrameWindow::Draw()
 	{
 		Frect			rect;
 		GetAbsoluteRect	(rect);
-		Fvector2 v;
-
-		v.x = rect.x1;
-		v.y = rect.y1;
+		Fvector2 v		= rect.lt;
 		m_UIWndFrame.SetWndPos(v);
-
 		m_UIWndFrame.Draw();
 	}
-
 	inherited::Draw();
 }
 
@@ -105,15 +99,15 @@ void CUIFrameWindow::FrameClip(const Frect parentAbsR)
 		|| min(ourAbsR.top, parentAbsR.bottom) == parentAbsR.bottom
 		|| max(ourAbsR.bottom, parentAbsR.top) == parentAbsR.top)
 	{
-		m_UIWndFrame.frame[CUIFrameRect::fmRT].SetTile(0, 0, 0, 0);
-		m_UIWndFrame.frame[CUIFrameRect::fmR].SetTile(0, 0, 0, 0);
-		m_UIWndFrame.frame[CUIFrameRect::fmRB].SetTile(0, 0, 0, 0);
-		m_UIWndFrame.frame[CUIFrameRect::fmB].SetTile(0, 0, 0, 0);
-		m_UIWndFrame.frame[CUIFrameRect::fmLB].SetTile(0, 0, 0, 0);
-		m_UIWndFrame.frame[CUIFrameRect::fmL].SetTile(0, 0, 0, 0);
-		m_UIWndFrame.frame[CUIFrameRect::fmLT].SetTile(0, 0, 0, 0);
-		m_UIWndFrame.frame[CUIFrameRect::fmT].SetTile(0, 0, 0, 0);
-		m_UIWndFrame.frame[CUIFrameRect::fmBK].SetTile(0, 0, 0, 0);
+		m_UIWndFrame.frame[CUIFrameRect::fmRT].SetTile		(0, 0, 0, 0);
+		m_UIWndFrame.frame[CUIFrameRect::fmR].SetTile		(0, 0, 0, 0);
+		m_UIWndFrame.frame[CUIFrameRect::fmRB].SetTile		(0, 0, 0, 0);
+		m_UIWndFrame.frame[CUIFrameRect::fmB].SetTile		(0, 0, 0, 0);
+		m_UIWndFrame.frame[CUIFrameRect::fmLB].SetTile		(0, 0, 0, 0);
+		m_UIWndFrame.frame[CUIFrameRect::fmL].SetTile		(0, 0, 0, 0);
+		m_UIWndFrame.frame[CUIFrameRect::fmLT].SetTile		(0, 0, 0, 0);
+		m_UIWndFrame.frame[CUIFrameRect::fmT].SetTile		(0, 0, 0, 0);
+		m_UIWndFrame.frame[CUIFrameRect::fmBK].SetTile		(0, 0, 0, 0);
 		return;
 	}
 

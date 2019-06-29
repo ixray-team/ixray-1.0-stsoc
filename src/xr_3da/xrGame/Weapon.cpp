@@ -334,6 +334,7 @@ void CWeapon::Load		(LPCSTR section)
 
 	fireDispersionConditionFactor = pSettings->r_float(section,"fire_dispersion_condition_factor"); 
 	misfireProbability			  = pSettings->r_float(section,"misfire_probability"); 
+	misfireConditionK			  = READ_IF_EXISTS(pSettings, r_float, section, "misfire_condition_k",	1.0f);
 	conditionDecreasePerShot	  = pSettings->r_float(section,"condition_shot_dec"); 
 		
 	vLoadedFirePoint	= pSettings->r_fvector3		(section,"fire_point"		);
@@ -474,8 +475,6 @@ BOOL CWeapon::net_Spawn		(CSE_Abstract* DC)
 			m_magazine.push_back(m_DefaultCartridge);
 	}
 
-	
-//	Light_Create		();
 
 	UpdateAddonsVisibility();
 	InitAddons();
@@ -484,9 +483,7 @@ BOOL CWeapon::net_Spawn		(CSE_Abstract* DC)
 	m_dwWeaponIndependencyTime = 0;
 
 	VERIFY((u32)iAmmoElapsed == m_magazine.size());
-	//  [10/5/2005]
-	m_bAmmoWasSpawned = false;
-	//  [10/5/2005]
+	m_bAmmoWasSpawned		= false;
 
 	return bResult;
 }
@@ -959,7 +956,7 @@ float CWeapon::GetConditionMisfireProbability() const
 {
 	if( GetCondition()>0.95f ) return 0.0f;
 
-	float mis = misfireProbability+powf(1.f-GetCondition(), 3.f);
+	float mis = misfireProbability+powf(1.f-GetCondition(), 3.f)*misfireConditionK;
 	clamp(mis,0.0f,0.99f);
 	return mis;
 }
@@ -1068,8 +1065,11 @@ void CWeapon::UpdateHUDAddonsVisibility()
 	}
 	if(m_eScopeStatus==CSE_ALifeItemWeapon::eAddonDisabled && bone_id!=BI_NONE && 
 		pHudVisual->LL_GetBoneVisible(bone_id) )
-
 		pHudVisual->LL_SetBoneVisible			(bone_id,FALSE,TRUE);
+	else
+	if(m_eScopeStatus==CSE_ALifeItemWeapon::eAddonPermanent && bone_id!=BI_NONE && 
+		!pHudVisual->LL_GetBoneVisible(bone_id) )
+		pHudVisual->LL_SetBoneVisible			(bone_id,TRUE,TRUE);
 
 
 	bone_id = pHudVisual->LL_BoneID(wpn_silencer);
@@ -1087,8 +1087,11 @@ void CWeapon::UpdateHUDAddonsVisibility()
 	}
 	if(m_eSilencerStatus==CSE_ALifeItemWeapon::eAddonDisabled && bone_id!=BI_NONE && 
 		pHudVisual->LL_GetBoneVisible(bone_id) )
-
 		pHudVisual->LL_SetBoneVisible			(bone_id,FALSE,TRUE);
+	else
+	if(m_eSilencerStatus==CSE_ALifeItemWeapon::eAddonPermanent && bone_id!=BI_NONE && 
+		!pHudVisual->LL_GetBoneVisible(bone_id) )
+		pHudVisual->LL_SetBoneVisible			(bone_id,TRUE,TRUE);
 
 
 	bone_id = pHudVisual->LL_BoneID(wpn_grenade_launcher);
@@ -1109,8 +1112,11 @@ void CWeapon::UpdateHUDAddonsVisibility()
 	}
 	if(m_eGrenadeLauncherStatus==CSE_ALifeItemWeapon::eAddonDisabled && bone_id!=BI_NONE && 
 		pHudVisual->LL_GetBoneVisible(bone_id) )
-
 		pHudVisual->LL_SetBoneVisible			(bone_id,FALSE,TRUE);
+	else
+	if(m_eGrenadeLauncherStatus==CSE_ALifeItemWeapon::eAddonPermanent && bone_id!=BI_NONE && 
+		!pHudVisual->LL_GetBoneVisible(bone_id) )
+		pHudVisual->LL_SetBoneVisible			(bone_id,TRUE,TRUE);
 
 
 }
@@ -1558,5 +1564,19 @@ bool CWeapon::show_indicators()
 
 float CWeapon::GetConditionToShow	() const
 {
-	return	(powf(GetCondition(),4.0f));
+	return	(GetCondition());//powf(GetCondition(),4.0f));
+}
+
+BOOL CWeapon::ParentMayHaveAimBullet	()
+{
+	CObject* O=H_Parent();
+	CEntityAlive* EA=smart_cast<CEntityAlive*>(O);
+	return EA->cast_actor()!=0;
+}
+
+BOOL CWeapon::ParentIsActor	()
+{
+	CObject* O=H_Parent();
+	CEntityAlive* EA=smart_cast<CEntityAlive*>(O);
+	return EA->cast_actor()!=0;
 }

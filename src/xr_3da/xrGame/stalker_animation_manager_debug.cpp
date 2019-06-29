@@ -155,9 +155,14 @@ void show_blends			()
 
 void show_animation_stats	()
 {
+#ifdef DEBUG
+	if (g_animation_stats.empty())
+		return;
+
 	show_animations				();
 	Msg							("--------------------------------------------------");
 	show_blends					();
+#endif
 }
 
 void add_animation			(const shared_str &animation_id, const shared_str &animation_set_id, const shared_str &visual_id, bool just_started)

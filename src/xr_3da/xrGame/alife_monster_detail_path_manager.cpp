@@ -29,7 +29,6 @@ CALifeMonsterDetailPathManager::CALifeMonsterDetailPathManager	(object_type *obj
 	m_destination.m_level_vertex_id	= this->object().m_tNodeID;
 	m_destination.m_position		= this->object().o_Position;
 	m_walked_distance				= 0.f;
-	speed							(this->object().m_fGoingSpeed);
 }
 
 void CALifeMonsterDetailPathManager::target					(const GameGraph::_GRAPH_ID &game_vertex_id, const u32 &level_vertex_id, const Fvector &position)
@@ -111,13 +110,14 @@ void CALifeMonsterDetailPathManager::actualize				()
 
 	typedef GraphEngineSpace::CGameVertexParams	CGameVertexParams;
 	CGameVertexParams				temp = CGameVertexParams(object().m_tpaTerrain);
-	bool							failed = !ai().graph_engine().search	(
-		ai().game_graph(),
-		object().m_tGraphID,
-		m_destination.m_game_vertex_id,
-		&m_path,
-		temp
-	);
+	bool							failed = 
+		!ai().graph_engine().search	(
+			ai().game_graph(),
+			object().m_tGraphID,
+			m_destination.m_game_vertex_id,
+			&m_path,
+			temp
+		);
 
 #ifdef DEBUG
 	if (failed) {
@@ -149,11 +149,16 @@ void CALifeMonsterDetailPathManager::actualize				()
 	if (failed)
 		return;
 
-	if (m_path.size() == 1)
+	VERIFY							(!m_path.empty());
+
+	if (m_path.size() == 1) {
+		VERIFY						(m_path.back() == object().m_tGraphID);
 		return;
+	}
 
 	m_walked_distance				= 0.f;
 	std::reverse					(m_path.begin(),m_path.end());
+	VERIFY							(m_path.back() == object().m_tGraphID);
 }
 
 void CALifeMonsterDetailPathManager::update					(const ALife::_TIME_ID &time_delta)
@@ -173,6 +178,14 @@ void CALifeMonsterDetailPathManager::update					(const ALife::_TIME_ID &time_del
 	}
 
 	follow_path						(time_delta);
+}
+
+void CALifeMonsterDetailPathManager::setup_current_speed		()
+{
+	if (ai().game_graph().vertex(object().m_tGraphID)->level_id() == ai().level_graph().level_id())
+		speed						(object().m_fCurrentLevelGoingSpeed);
+	else
+		speed						(object().m_fGoingSpeed);
 }
 
 void CALifeMonsterDetailPathManager::follow_path				(const ALife::_TIME_ID &time_delta)
@@ -196,8 +209,11 @@ void CALifeMonsterDetailPathManager::follow_path				(const ALife::_TIME_ID &time
 		return;
 	}
 
-	float							update_distance = ((float(time_delta)/1000.f)/ai().alife().time_manager().normal_time_factor())*speed();
+	float							last_time_delta = float(time_delta)/1000.f;
 	for ( ; m_path.size() > 1;) {
+		setup_current_speed			();
+		float						update_distance = (last_time_delta/ai().alife().time_manager().normal_time_factor())*speed();
+
 		float						distance_between = ai().game_graph().distance(object().m_tGraphID,(GameGraph::_GRAPH_ID)m_path[m_path.size() - 2]);
 		if (distance_between > (update_distance + m_walked_distance)) {
 			m_walked_distance		+= update_distance;
@@ -209,10 +225,13 @@ void CALifeMonsterDetailPathManager::follow_path				(const ALife::_TIME_ID &time
 			return;
 		}
 
-		update_distance				+= m_walked_distance;
-		update_distance				-= distance_between;
-		m_walked_distance			= 0.f;
-		m_path.pop_back				();
+		update_distance					+= m_walked_distance;
+		update_distance					-= distance_between;
+		
+		last_time_delta					= update_distance*ai().alife().time_manager().normal_time_factor()/speed();
+
+		m_walked_distance				= 0.f;
+		m_path.pop_back					();
 //		Msg									("%6d %s changes graph point from %d to %d",Device.dwTimeGlobal,object().name_replace(),object().m_tGraphID,(GameGraph::_GRAPH_ID)m_path.back());
 		object().alife().graph().change		(&object(),object().m_tGraphID,(GameGraph::_GRAPH_ID)m_path.back());
 		VERIFY								(m_path.back() == object().m_tGraphID);
@@ -223,6 +242,7 @@ void CALifeMonsterDetailPathManager::follow_path				(const ALife::_TIME_ID &time
 
 void CALifeMonsterDetailPathManager::on_switch_online	()
 {
+	m_path.clear					();
 }
 
 void CALifeMonsterDetailPathManager::on_switch_offline	()

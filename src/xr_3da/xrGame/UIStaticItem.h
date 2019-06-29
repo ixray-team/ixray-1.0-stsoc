@@ -1,16 +1,16 @@
-#ifndef __XR_UISTATICITEM_H__
-#define __XR_UISTATICITEM_H__
 #pragma once
 
 #include "ui/uiabstract.h"
 #include "uicustomitem.h"
 
+void		CreateUIGeom		();
+ref_geom	GetUIGeom			();
+void		DestroyUIGeom		();
+
 class CUIStaticItem: public IUISimpleTextureControl, public CUICustomItem
 {
 	ref_shader		hShader;
-//	ref_geom		hGeom_list;	
-	ref_geom		hGeom_fan;	
-
+//	ref_geom		hGeom_fan;	
 	Fvector2		iPos;
 	u32				dwColor;
 	int				iTileX;
@@ -29,8 +29,6 @@ public:
 					CUIStaticItem	();
 	virtual			~CUIStaticItem	();
 
-	ref_geom		GetGeom			()													{return hGeom_fan;}
-	//IUISimpleTextureControl
 			void	SetAlphaRef		(int val)											{alpha_ref=val;};
 	virtual void	CreateShader	(const char* tex, const char* sh = "hud\\default");
 	virtual void	SetShader		(const ref_shader& sh);
@@ -44,8 +42,8 @@ public:
 	
 	
 	
-	void			Render			(const ref_shader& sh=ref_shader(0));
-	void			Render			(float angle, const ref_shader& sh=ref_shader(0));
+	void			Render			();
+	void			Render			(float angle);
 
 	IC void			SetTile			(int tile_x, int tile_y, float rem_x, float rem_y){iTileX=tile_x;iTileY=tile_y;iRemX=rem_x;iRemY=rem_y;}
 	IC void			SetPos			(float left, float top)			{iPos.set(left,top);}
@@ -63,6 +61,4 @@ public:
 };
 
 extern ENGINE_API BOOL g_bRendering; 
-
-#endif //__XR_UISTATICITEM_H__
 

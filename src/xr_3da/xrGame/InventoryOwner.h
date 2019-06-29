@@ -26,6 +26,7 @@ class CSpecificCharacter;
 class CTradeParameters;
 class CPurchaseList;
 class CWeapon;
+class CCustomOutfit;
 
 class CInventoryOwner : public CAttachmentOwner {							
 public:
@@ -56,7 +57,6 @@ public:
 
 
 	CPda* GetPDA		() const;
-	bool IsActivePDA	() const;
 
 
 	// инвентарь
@@ -107,14 +107,14 @@ protected:
 	// сюжетная информация
 public:
 	//персонаж получил новую порцию информации
-	virtual bool OnReceiveInfo	(INFO_ID info_id) const;
+	virtual bool OnReceiveInfo	(shared_str info_id) const;
 	//убрать информацию
-	virtual void OnDisableInfo	(INFO_ID info_id) const;
+	virtual void OnDisableInfo	(shared_str info_id) const;
 	//передать/удалить информацию через сервер
-	virtual void TransferInfo	(INFO_ID info_id, bool add_info) const;
+	virtual void TransferInfo	(shared_str info_id, bool add_info) const;
 	//есть ли информация у персонажа
-	virtual bool				HasInfo		(INFO_ID info_id) const;
-	virtual bool				GetInfo		(INFO_ID info_id, INFO_DATA&) const;
+	virtual bool				HasInfo		(shared_str info_id) const;
+	virtual bool				GetInfo		(shared_str info_id, INFO_DATA&) const;
 
 	#ifdef DEBUG
 	void CInventoryOwner::DumpInfo() const;
@@ -133,6 +133,7 @@ public:
 	//максимальный переносимы вес
 	virtual float MaxCarryWeight			() const;
 
+	virtual CCustomOutfit*			GetOutfit()	const {return NULL;};
 
 	//////////////////////////////////////////////////////////////////////////
 	//игровые характеристики персонажа
@@ -196,6 +197,7 @@ public:
 private:
 	CTradeParameters			*m_trade_parameters;
 	CPurchaseList				*m_purchase_list;
+	BOOL						m_need_osoznanie_mode;
 
 public:
 	IC		CTradeParameters	&trade_parameters		() const;
@@ -209,6 +211,7 @@ public:
 	virtual	bool				use_default_throw_force	();
 	virtual	float				missile_throw_force		(); 
 	virtual	bool				use_throw_randomness	();
+	virtual bool				NeedOsoznanieMode		() {return m_need_osoznanie_mode!=FALSE;}
 };
 
 #include "inventory_owner_inline.h"

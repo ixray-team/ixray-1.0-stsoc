@@ -430,7 +430,7 @@ LPCSTR CScriptGameObject::ProfileName			()
 		return NULL;
 	}
 	
-	PROFILE_ID profile_id =  pInventoryOwner->CharacterInfo().Profile();
+	shared_str profile_id =  pInventoryOwner->CharacterInfo().Profile();
 	if(!profile_id || !profile_id.size() )
 		return NULL;
 	else
@@ -495,16 +495,6 @@ int CScriptGameObject::CharacterReputation			()
 	return pInventoryOwner->Reputation();
 }
 
-void CScriptGameObject::SetCharacterReputation		(int char_rep)
-{
-	CInventoryOwner* pInventoryOwner = smart_cast<CInventoryOwner*>(&object());
-
-	if (!pInventoryOwner) {
-		ai().script_engine().script_log		(ScriptStorage::eLuaMessageTypeError,"SetCharacterReputation available only for InventoryOwner");
-		return ;
-	}
-	pInventoryOwner->SetReputation(char_rep);
-}
 
 void CScriptGameObject::ChangeCharacterReputation		(int char_rep)
 {
@@ -661,6 +651,13 @@ void CScriptGameObject::add_restrictions		(LPCSTR out, LPCSTR in)
 
 //	construct_restriction_vector			(out,temp0);
 //	construct_restriction_vector			(in,temp1);
+
+//	if (!xr_strcmp(monster->cName(),"mil_freedom_stalker0004")) {
+//		int i = 0;
+//		if (!xr_strcmp(in,"mil_freedom_wall_restrictor")) {
+//			int j = 0;
+//		}
+//	}
 	
 	monster->movement().restrictions().add_restrictions(out,in);
 }

@@ -10,7 +10,7 @@
 
 #include "script_export_macroses.h"
 #include "xrEProps.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include "ai_space.h"
 #include "script_engine.h"
 
@@ -44,11 +44,11 @@ class CALifeSmartTerrainTask;
 
 #define INHERIT_ALIFE \
 	INHERIT_ABSTRACT\
-	DEFINE_LUA_WRAPPER_CONST_METHOD_0	(used_ai_locations,	bool)\
-	DEFINE_LUA_WRAPPER_CONST_METHOD_0	(can_save,			bool)\
-	DEFINE_LUA_WRAPPER_CONST_METHOD_0	(can_switch_online,	bool)\
-	DEFINE_LUA_WRAPPER_CONST_METHOD_0	(can_switch_offline,bool)\
-	DEFINE_LUA_WRAPPER_CONST_METHOD_0	(interactive,		bool)
+	DEFINE_LUA_WRAPPER_CONST_METHOD_0	(used_ai_locations,		bool)\
+	DEFINE_LUA_WRAPPER_CONST_METHOD_0	(can_save,				bool)\
+	DEFINE_LUA_WRAPPER_CONST_METHOD_0	(can_switch_online,		bool)\
+	DEFINE_LUA_WRAPPER_CONST_METHOD_0	(can_switch_offline,	bool)\
+	DEFINE_LUA_WRAPPER_CONST_METHOD_0	(interactive,			bool)
 
 #ifdef XRGAME_EXPORTS
 #	define INHERIT_DYNAMIC_ALIFE \
@@ -56,7 +56,8 @@ class CALifeSmartTerrainTask;
 	DEFINE_LUA_WRAPPER_METHOD_V0		(on_spawn)\
 	DEFINE_LUA_WRAPPER_METHOD_V0		(on_before_register)\
 	DEFINE_LUA_WRAPPER_METHOD_V0		(on_register)\
-	DEFINE_LUA_WRAPPER_METHOD_V0		(on_unregister)
+	DEFINE_LUA_WRAPPER_METHOD_V0		(on_unregister)\
+	DEFINE_LUA_WRAPPER_CONST_METHOD_0	(keep_saved_data_anyway,bool)
 #else
 #	define INHERIT_DYNAMIC_ALIFE \
 	INHERIT_ALIFE
@@ -205,7 +206,8 @@ struct CWrapperAbstractItem : public T, public luabind::wrap_base {
 	DEFINE_LUABIND_VIRTUAL_FUNCTION(a,b,on_spawn			) \
 	DEFINE_LUABIND_VIRTUAL_FUNCTION(a,b,on_before_register	) \
 	DEFINE_LUABIND_VIRTUAL_FUNCTION(a,b,on_register			) \
-	DEFINE_LUABIND_VIRTUAL_FUNCTION(a,b,on_unregister		)
+	DEFINE_LUABIND_VIRTUAL_FUNCTION(a,b,on_unregister		) \
+	DEFINE_LUABIND_VIRTUAL_FUNCTION(a,b,keep_saved_data_anyway)
 #else
 #	define luabind_virtual_dynamic_alife(a,b)
 #endif

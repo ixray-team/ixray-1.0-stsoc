@@ -56,7 +56,7 @@ CCharacterInfo::~CCharacterInfo()
 }
 
 
-void CCharacterInfo::Load(PROFILE_ID id)
+void CCharacterInfo::Load(shared_str id)
 {
 	m_ProfileId = id;
 	inherited_shared::load_shared(m_ProfileId, NULL);
@@ -64,7 +64,7 @@ void CCharacterInfo::Load(PROFILE_ID id)
 
 #ifdef XRGAME_EXPORTS
 
-void CCharacterInfo::InitSpecificCharacter (SPECIFIC_CHARACTER_ID new_id)
+void CCharacterInfo::InitSpecificCharacter (shared_str new_id)
 {
 	R_ASSERT(new_id.size());
 	m_SpecificCharacterId = new_id;
@@ -85,29 +85,24 @@ void CCharacterInfo::InitSpecificCharacter (SPECIFIC_CHARACTER_ID new_id)
 
 void CCharacterInfo::load_shared	(LPCSTR)
 {
-	CUIXml uiXml;
-	const id_to_index::ITEM_DATA& item_data = *id_to_index::GetById(m_ProfileId);
+	const ITEM_DATA& item_data = *id_to_index::GetById(m_ProfileId);
 
-	string128 xml_file_full;
-	strconcat(xml_file_full, *shared_str(item_data.file_name), ".xml");
+	CUIXml*		pXML		= item_data._xml;
+	pXML->SetLocalRoot		(pXML->GetRoot());
 
-	bool xml_result = uiXml.Init(CONFIG_PATH, GAME_PATH, xml_file_full);
-	R_ASSERT3(xml_result, "xml file not found", xml_file_full);
-
-	//loading from XML
-	XML_NODE* item_node = uiXml.NavigateToNode(id_to_index::tag_name, item_data.pos_in_file);
+	XML_NODE* item_node = pXML->NavigateToNode(id_to_index::tag_name, item_data.pos_in_file);
 	R_ASSERT3(item_node, "profile id=", *item_data.id);
 
-	uiXml.SetLocalRoot(item_node);
+	pXML->SetLocalRoot(item_node);
 
 
 
-	LPCSTR spec_char = uiXml.Read("specific_character", 0, NULL);
+	LPCSTR spec_char = pXML->Read("specific_character", 0, NULL);
 	if(!spec_char)
 	{
 		data()->m_CharacterId	= NULL;
 		
-		LPCSTR char_class			= uiXml.Read	("class",		0,	NULL);
+		LPCSTR char_class			= pXML->Read	("class",		0,	NULL);
 
 		if(char_class)
 		{
@@ -119,8 +114,8 @@ void CCharacterInfo::load_shared	(LPCSTR)
 		else
 			data()->m_Class				= NO_CHARACTER_CLASS;
 			
-		data()->m_Rank = uiXml.ReadInt			("rank",		0,	NO_RANK);
-		data()->m_Reputation = uiXml.ReadInt	("reputation",	0,	NO_REPUTATION);
+		data()->m_Rank = pXML->ReadInt			("rank",		0,	NO_RANK);
+		data()->m_Reputation = pXML->ReadInt	("reputation",	0,	NO_REPUTATION);
 	}
 	else
 		data()->m_CharacterId = spec_char;
@@ -137,7 +132,7 @@ void CCharacterInfo::Init	(CSE_ALifeTraderAbstract* trader)
 }
 
 
-PROFILE_ID CCharacterInfo::Profile()			const
+shared_str CCharacterInfo::Profile()			const
 {
 	return m_ProfileId;
 }
@@ -164,21 +159,17 @@ void CCharacterInfo::SetReputation (CHARACTER_REPUTATION_VALUE reputation)
 }
 
 
-int	 CCharacterInfo::TradeIconX() const
+const shared_str& CCharacterInfo::IconName() const
 {
 	R_ASSERT(m_SpecificCharacterId.size());
-	return m_SpecificCharacter.TradeIconX();
-}
-int	 CCharacterInfo::TradeIconY() const
-{
-	R_ASSERT(m_SpecificCharacterId.size());
-	return m_SpecificCharacter.TradeIconY();
+	return m_SpecificCharacter.IconName();
 }
 
 shared_str	CCharacterInfo::StartDialog	()	const
 {
 	return m_StartDialog;
 }
+
 const DIALOG_ID_VECTOR&	CCharacterInfo::ActorDialogs	()	const
 {
 	R_ASSERT(m_SpecificCharacterId.size());

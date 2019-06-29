@@ -58,7 +58,7 @@ void CUIProgressShape::Draw()
 		m_pTexture->DrawText		();
 
 	ref_shader sh					= m_pTexture->GetShader();
-	ref_geom	gm					= m_pTexture->GetGeom();
+	ref_geom	gm					= GetUIGeom();
 	RCache.set_Shader				(sh);
 	CTexture* T						= RCache.get_ActiveTexture(0);
 	Fvector2						tsize;
@@ -72,11 +72,7 @@ void CUIProgressShape::Draw()
 	m_pTexture->GetAbsoluteRect		(pos_rect);
 	UI()->ClientToScreenScaled		(pos_rect.lt, pos_rect.x1, pos_rect.y1);
 	UI()->ClientToScreenScaled		(pos_rect.rb, pos_rect.x2, pos_rect.y2);
-/*	pos_rect.x1						*= UI()->GetScaleX();
-	pos_rect.y1						*= UI()->GetScaleY();
-	pos_rect.x2						*= UI()->GetScaleX();
-	pos_rect.y2						*= UI()->GetScaleY();
-*/
+
 	Fvector2						center_pos;
 	pos_rect.getcenter				(center_pos);
 

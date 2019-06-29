@@ -1,15 +1,5 @@
-//=============================================================================
-//  Filename:   UIFrameLineWnd.cpp
-//	Created by Roman E. Marchenko, vortex@gsc-game.kiev.ua
-//	Copyright 2004. GSC Game World
-//	---------------------------------------------------------------------------
-//  Обертка над UIFrameLine классом
-//=============================================================================
-
 #include "stdafx.h"
 #include "UIFrameLineWnd.h"
-
-//////////////////////////////////////////////////////////////////////////
 
 CUIFrameLineWnd::CUIFrameLineWnd()
 	:	bHorizontal(true),

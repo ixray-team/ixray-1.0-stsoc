@@ -80,7 +80,7 @@ public:
 	static bool	InitComboBox			(CUIXml& xml_doc, const char* path, int index, CUIComboBox* pWnd);
 	static bool	InitTrackBar			(CUIXml& xml_doc, const char* path, int index, CUITrackBar* pWnd);
 	static Frect GetFRect				(CUIXml& xml_doc, const char* path, int index);
-	static u32	GetColor				(CUIXml& xml_doc, const char* path, int index, u8 def_clr);
+	static u32	GetColor				(CUIXml& xml_doc, const char* path, int index, u32 def_clr);
 public:
 
 	// Функция чтения алайна из xml файла и применения его к координатам.

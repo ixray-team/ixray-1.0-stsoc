@@ -4,9 +4,11 @@
 #include "UICellItem.h"
 #include "../weaponmagazinedwgrenade.h"
 #include "../../xr_input.h"
+#include "UIMpItemsStoreWnd.h"
 
 void CUIMpTradeWnd::OnBtnPistolAmmoClicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	CUIDragDropListEx*	res		= m_list[e_pistol];
 	CUICellItem* ci				= (res->ItemsCount())?res->GetItemIdx(0):NULL;
 	if(!ci)	
@@ -18,7 +20,11 @@ void CUIMpTradeWnd::OnBtnPistolAmmoClicked(CUIWindow* w, void* d)
 
 	u32 ammo_idx				= (pInput->iGetAsyncKeyState(DIK_LSHIFT))?1:0;
 	
+	if(wpn->m_ammoTypes.size() < ammo_idx+1)	return;
 	const shared_str& ammo_name	= wpn->m_ammoTypes[ammo_idx];
+
+	if ( NULL==m_store_hierarchy->FindItem(ammo_name) )
+		return;
 
 	SBuyItemInfo* pitem			= CreateItem		(ammo_name, SBuyItemInfo::e_undefined, false);
 	bool b_res					= TryToBuyItem		(pitem, bf_normal, NULL );
@@ -28,6 +34,7 @@ void CUIMpTradeWnd::OnBtnPistolAmmoClicked(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::OnBtnPistolSilencerClicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	CUIDragDropListEx*	res			= m_list[e_pistol];
 	CUICellItem* ci					= (res->ItemsCount())?res->GetItemIdx(0):NULL;
 	if(!ci)	
@@ -41,6 +48,9 @@ void CUIMpTradeWnd::OnBtnPistolSilencerClicked(CUIWindow* w, void* d)
 	if(CanAttachAddon(pitem, at_silencer))
 	{//attach
 		shared_str addon_name		= GetAddonNameSect(pitem,at_silencer);
+
+		if ( NULL==m_store_hierarchy->FindItem(addon_name) )
+			return;
 						
 		SBuyItemInfo* addon_item	= CreateItem(addon_name, SBuyItemInfo::e_undefined, false);
 		bool b_res_addon			= TryToBuyItem(addon_item, bf_normal, pitem );
@@ -51,6 +61,7 @@ void CUIMpTradeWnd::OnBtnPistolSilencerClicked(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::OnBtnRifleAmmoClicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	CUIDragDropListEx*	res		= m_list[e_rifle];
 	CUICellItem* ci				= (res->ItemsCount())?res->GetItemIdx(0):NULL;
 	if(!ci)	
@@ -62,7 +73,12 @@ void CUIMpTradeWnd::OnBtnRifleAmmoClicked(CUIWindow* w, void* d)
 
 	u32 ammo_idx				= (pInput->iGetAsyncKeyState(DIK_LSHIFT))?1:0;
 	
+	if(wpn->m_ammoTypes.size() < ammo_idx+1)	return;
+
 	const shared_str& ammo_name	= wpn->m_ammoTypes[ammo_idx];
+
+	if ( NULL==m_store_hierarchy->FindItem(ammo_name) )
+		return;
 
 	SBuyItemInfo* pitem			= CreateItem		(ammo_name, SBuyItemInfo::e_undefined, false);
 	bool b_res					= TryToBuyItem		(pitem, bf_normal, NULL);
@@ -72,6 +88,7 @@ void CUIMpTradeWnd::OnBtnRifleAmmoClicked(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::OnBtnRifleSilencerClicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	CUIDragDropListEx*	res			= m_list[e_rifle];
 	CUICellItem* ci					= (res->ItemsCount())?res->GetItemIdx(0):NULL;
 	if(!ci)	
@@ -85,6 +102,9 @@ void CUIMpTradeWnd::OnBtnRifleSilencerClicked(CUIWindow* w, void* d)
 	if(CanAttachAddon(pitem, at_silencer))
 	{//attach
 		shared_str addon_name		= GetAddonNameSect(pitem,at_silencer);
+
+		if ( NULL==m_store_hierarchy->FindItem(addon_name) )
+			return;
 						
 		SBuyItemInfo* addon_item	= CreateItem(addon_name, SBuyItemInfo::e_undefined, false);
 		bool b_res_addon			= TryToBuyItem(addon_item, bf_normal, pitem );
@@ -95,6 +115,7 @@ void CUIMpTradeWnd::OnBtnRifleSilencerClicked(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::OnBtnRifleScopeClicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	CUIDragDropListEx*	res			= m_list[e_rifle];
 	CUICellItem* ci					= (res->ItemsCount())?res->GetItemIdx(0):NULL;
 	if(!ci)	
@@ -108,6 +129,9 @@ void CUIMpTradeWnd::OnBtnRifleScopeClicked(CUIWindow* w, void* d)
 	if(CanAttachAddon(pitem, at_scope))
 	{//attach
 		shared_str addon_name		= GetAddonNameSect(pitem,at_scope);
+
+		if ( NULL==m_store_hierarchy->FindItem(addon_name) )
+			return;
 						
 		SBuyItemInfo* addon_item	= CreateItem(addon_name, SBuyItemInfo::e_undefined, false);
 		bool b_res_addon			= TryToBuyItem(addon_item, bf_normal, pitem );
@@ -118,6 +142,7 @@ void CUIMpTradeWnd::OnBtnRifleScopeClicked(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::OnBtnRifleGLClicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	CUIDragDropListEx*	res			= m_list[e_rifle];
 	CUICellItem* ci					= (res->ItemsCount())?res->GetItemIdx(0):NULL;
 	if(!ci)	
@@ -131,6 +156,9 @@ void CUIMpTradeWnd::OnBtnRifleGLClicked(CUIWindow* w, void* d)
 	if(CanAttachAddon(pitem, at_glauncher))
 	{//attach
 		shared_str addon_name		= GetAddonNameSect(pitem,at_glauncher);
+
+		if ( NULL==m_store_hierarchy->FindItem(addon_name) )
+			return;
 						
 		SBuyItemInfo* addon_item	= CreateItem(addon_name, SBuyItemInfo::e_undefined, false);
 		bool b_res_addon			= TryToBuyItem(addon_item, bf_normal, pitem );
@@ -141,6 +169,7 @@ void CUIMpTradeWnd::OnBtnRifleGLClicked(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::OnBtnRifleAmmo2Clicked(CUIWindow* w, void* d)
 {
+	CheckDragItemToDestroy				();
 	CUIDragDropListEx*	res		= m_list[e_rifle];
 	CUICellItem* ci				= (res->ItemsCount())?res->GetItemIdx(0):NULL;
 	if(!ci)	
@@ -154,6 +183,9 @@ void CUIMpTradeWnd::OnBtnRifleAmmo2Clicked(CUIWindow* w, void* d)
 	u32 ammo_idx				= 0;
 	
 	const shared_str& ammo_name	= wpn->m_ammoTypes2[ammo_idx];
+
+	if ( NULL==m_store_hierarchy->FindItem(ammo_name) )
+		return;
 
 	SBuyItemInfo* pitem			= CreateItem		(ammo_name, SBuyItemInfo::e_undefined, false);
 	bool b_res					= TryToBuyItem		(pitem, bf_normal, NULL);

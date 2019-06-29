@@ -184,36 +184,32 @@ void CPhraseDialog::Load(shared_str dialog_id)
 
 void CPhraseDialog::load_shared	(LPCSTR)
 {
-//	const id_to_index::ITEM_DATA& item_data = *id_to_index::GetByIndex(m_DialogIndex);
-	const id_to_index::ITEM_DATA& item_data = *id_to_index::GetById(m_DialogId);
+	const ITEM_DATA& item_data = *id_to_index::GetById(m_DialogId);
 
-	string128 xml_file_full;
-	strconcat(xml_file_full, *shared_str(item_data.file_name), ".xml");
-
-	bool xml_result = uiXml.Init(CONFIG_PATH, GAME_PATH, xml_file_full);
-	THROW3(xml_result, "xml file not found", xml_file_full);
+	CUIXml*		pXML		= item_data._xml;
+	pXML->SetLocalRoot		(pXML->GetRoot());
 
 	//loading from XML
-	XML_NODE* dialog_node = uiXml.NavigateToNode(id_to_index::tag_name, item_data.pos_in_file);
+	XML_NODE* dialog_node = pXML->NavigateToNode(id_to_index::tag_name, item_data.pos_in_file);
 	THROW3(dialog_node, "dialog id=", *item_data.id);
 
-	uiXml.SetLocalRoot(dialog_node);
+	pXML->SetLocalRoot(dialog_node);
 
 
-	SetPriority	( uiXml.ReadAttribInt(dialog_node, "priority", 0) );
+	SetPriority	( pXML->ReadAttribInt(dialog_node, "priority", 0) );
 
 	//заголовок 
-	SetCaption	( uiXml.Read(dialog_node, "caption", 0, NULL) );
+	SetCaption	( pXML->Read(dialog_node, "caption", 0, NULL) );
 
 	//предикаты начала диалога
-	data()->m_PhraseScript.Load(&uiXml, dialog_node);
+	data()->m_PhraseScript.Load(pXML, dialog_node);
 
 	//заполнить граф диалога фразами
 	data()->m_PhraseGraph.clear();
 
-	phrase_list_node = uiXml.NavigateToNode(dialog_node, "phrase_list", 0);
+	XML_NODE* phrase_list_node = pXML->NavigateToNode(dialog_node, "phrase_list", 0);
 	if(NULL == phrase_list_node){
-		LPCSTR func = uiXml.Read(dialog_node, "init_func", 0, "");
+		LPCSTR func = pXML->Read(dialog_node, "init_func", 0, "");
 
 		luabind::functor<void>	lua_function;
 		bool functor_exists = ai().script_engine().functor(func ,lua_function);
@@ -222,19 +218,20 @@ void CPhraseDialog::load_shared	(LPCSTR)
 		return;
 	}
 
-	int phrase_num = uiXml.GetNodesNum(phrase_list_node, "phrase");
+	int phrase_num = pXML->GetNodesNum(phrase_list_node, "phrase");
 	THROW3(phrase_num, "dialog %s has no phrases at all", *item_data.id);
 
-	uiXml.SetLocalRoot(phrase_list_node);
+	pXML->SetLocalRoot(phrase_list_node);
 
-	LPCSTR wrong_phrase_id = uiXml.CheckUniqueAttrib(phrase_list_node, "phrase", "id");
+#ifdef DEBUG // debug & mixed
+	LPCSTR wrong_phrase_id = pXML->CheckUniqueAttrib(phrase_list_node, "phrase", "id");
 	THROW3(wrong_phrase_id == NULL, *item_data.id, wrong_phrase_id);
-	
+#endif	
 
 	//ищем стартовую фразу
-	XML_NODE* phrase_node = uiXml.NavigateToNodeWithAttribute("phrase", "id", "0");
-	THROW(phrase_node);
-	AddPhrase(phrase_node, 0, -1);
+	XML_NODE* phrase_node	= pXML->NavigateToNodeWithAttribute("phrase", "id", "0");
+	THROW					(phrase_node);
+	AddPhrase				(pXML, phrase_node, 0, -1);
 }
 
 void CPhraseDialog::SetCaption	(LPCSTR str)
@@ -267,26 +264,26 @@ CPhrase* CPhraseDialog::AddPhrase	(LPCSTR text, int phrase_id, int prev_phrase_i
 	return phrase;
 }
 
-void CPhraseDialog::AddPhrase	(XML_NODE* phrase_node, int phrase_id, int prev_phrase_id)
+void CPhraseDialog::AddPhrase	(CUIXml* pXml, XML_NODE* phrase_node, int phrase_id, int prev_phrase_id)
 {
 
-	LPCSTR sText		= uiXml.Read		(phrase_node, "text", 0, "");
-	int		gw			= uiXml.ReadInt		(phrase_node, "goodwill", 0, -10000);
+	LPCSTR sText		= pXml->Read		(phrase_node, "text", 0, "");
+	int		gw			= pXml->ReadInt		(phrase_node, "goodwill", 0, -10000);
 	CPhrase* ph			= AddPhrase			(sText, phrase_id, prev_phrase_id, gw);
 	if(!ph)				return;
 
-	ph->m_PhraseScript.Load					(&uiXml, phrase_node);
+	ph->m_PhraseScript.Load					(pXml, phrase_node);
 
 	//фразы которые собеседник может говорить после этой
-	int next_num = uiXml.GetNodesNum(phrase_node, "next");
+	int next_num = pXml->GetNodesNum(phrase_node, "next");
 	for(int i=0; i<next_num; i++)
 	{
-		LPCSTR next_phrase_id_str			= uiXml.Read(phrase_node, "next", i, "");
-		XML_NODE* next_phrase_node			= uiXml.NavigateToNodeWithAttribute("phrase", "id", next_phrase_id_str);
-		THROW(next_phrase_node);
-		int next_phrase_id					= atoi(next_phrase_id_str);
+		LPCSTR next_phrase_id_str		= pXml->Read(phrase_node, "next", i, "");
+		XML_NODE* next_phrase_node		= pXml->NavigateToNodeWithAttribute("phrase", "id", next_phrase_id_str);
+		R_ASSERT2						(next_phrase_node, next_phrase_id_str );
+		int next_phrase_id				= atoi(next_phrase_id_str);
 
-		AddPhrase							(next_phrase_node, next_phrase_id, phrase_id);
+		AddPhrase						(pXml, next_phrase_node, next_phrase_id, phrase_id);
 	}
 }
 

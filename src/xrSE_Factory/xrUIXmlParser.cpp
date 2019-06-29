@@ -1,8 +1,11 @@
 #include "stdafx.h"
+
 #include "xrUIXmlParser.h"
 
 #ifdef XRGAME_EXPORTS
 	#include "../ui_base.h"
+#else
+
 #endif
 
 shared_str CUIXml::correct_file_name	(LPCSTR path, LPCSTR fn)

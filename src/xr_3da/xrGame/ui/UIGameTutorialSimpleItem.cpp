@@ -61,9 +61,11 @@ void CUISequenceSimpleItem::Load(CUIXml* xml, int idx)
 	strcpy					(m_pda_section, xml->Read("pda_section",0,"")	);
 
 	LPCSTR str				= xml->Read				("pause_state",0,"ignore");
-
 	m_flags.set										(etiNeedPauseOn, 0==_stricmp(str, "on"));
 	m_flags.set										(etiNeedPauseOff, 0==_stricmp(str, "off"));
+
+	LPCSTR str2				= xml->Read				("pause_sound",0,"ignore");
+	m_flags.set										(etiNeedPauseSound, 0==_stricmp(str2, "on"));
 
 	str						= xml->Read				("guard_key",0,NULL		);
 	m_continue_dik_guard	= -1;
@@ -72,12 +74,8 @@ void CUISequenceSimpleItem::Load(CUIXml* xml, int idx)
 		str					= NULL;
 	}
 	if(str){
-		for(int i=0; keybind[i].name; ++i) {
-			if(0==_stricmp(keybind[i].name,str)){
-				m_continue_dik_guard = keybind[i].DIK;
-				break;
-			}
-		}
+		EGameActions cmd		= action_name_to_id	(str);
+		m_continue_dik_guard	= get_action_dik	(cmd);
 	}
 
 	m_flags.set						(etiCanBeStopped,	(m_continue_dik_guard==-1));
@@ -108,6 +106,7 @@ void CUISequenceSimpleItem::Load(CUIXml* xml, int idx)
 		_si->m_length				= xml->ReadAttribFlt("auto_static",i,"length_sec",0);
 		_si->m_visible				= false;
 		_si->m_wnd					= smart_cast<CUIStatic*>(find_child_window(m_UIWindow, sname)); VERIFY(_si->m_wnd);
+		_si->m_wnd->SetTextComplexMode(true);
 		_si->m_wnd->Show			(false);
 
 		xml->SetLocalRoot			(_sr);
@@ -142,30 +141,37 @@ void CUISequenceSimpleItem::Update			()
 	
 	if (g_pGameLevel){
 	CUIGameSP* ui_game_sp	= smart_cast<CUIGameSP*>(HUD().GetUI()->UIGame());
-	if(!m_pda_section || 0 == xr_strlen(m_pda_section) )
-		if ( ui_game_sp->PdaMenu->IsShown()			||
-			ui_game_sp->InventoryMenu->IsShown()	||
-			ui_game_sp->TalkMenu->IsShown()			||
-			ui_game_sp->UICarBodyMenu->IsShown()	||
-			ui_game_sp->UIChangeLevelWnd->IsShown()			)
-			m_UIWindow->Show						(false);
-		else
-			m_UIWindow->Show						(true);
+
+	if(ui_game_sp)
+	{
+		if(!m_pda_section || 0 == xr_strlen(m_pda_section) )
+			if ( ui_game_sp->PdaMenu->IsShown()			||
+				ui_game_sp->InventoryMenu->IsShown()	||
+				ui_game_sp->TalkMenu->IsShown()			||
+				ui_game_sp->UICarBodyMenu->IsShown()	||
+				ui_game_sp->UIChangeLevelWnd->IsShown()			)
+				m_UIWindow->Show						(false);
+			else
+				m_UIWindow->Show						(true);
+		}
 	}
 }
 
 void CUISequenceSimpleItem::Start()
 {
 	inherited::Start				();
-	m_flags.set					(etiStoredPauseState, Device.Pause());
+	m_flags.set						(etiStoredPauseState, Device.Paused());
 	
 	if(m_flags.test(etiNeedPauseOn) && !m_flags.test(etiStoredPauseState)){
-		Device.Pause			(TRUE);
+		Device.Pause			(TRUE, TRUE, FALSE, "simpleitem_start");
 		bShowPauseString		= FALSE;
 	}
 
 	if(m_flags.test(etiNeedPauseOff) && m_flags.test(etiStoredPauseState))
-		Device.Pause			(FALSE);
+		Device.Pause			(FALSE, TRUE, FALSE, "simpleitem_start");
+
+	if(m_flags.test(etiNeedPauseSound))
+		Device.Pause			(TRUE, FALSE, TRUE, "simpleitem_start");
 
 	GetUICursor()->SetPos		(m_desired_cursor_pos.x, m_desired_cursor_pos.y);
 	m_time_start				= float(Device.dwTimeContinual)/1000.0f;
@@ -200,9 +206,12 @@ void CUISequenceSimpleItem::Start()
 				bShowPda = true;
 			}
 		}
+		if(ui_game_sp)
+		{
 		if( (!ui_game_sp->PdaMenu->IsShown() && bShowPda) || 
 			(ui_game_sp->PdaMenu->IsShown() && !bShowPda))
 			HUD().GetUI()->StartStopMenu			(ui_game_sp->PdaMenu,true);
+		}
 	}
 }
 
@@ -215,14 +224,17 @@ bool CUISequenceSimpleItem::Stop			(bool bForce)
 	m_sound.stop				();
 
 	if(m_flags.test(etiNeedPauseOn) && !m_flags.test(etiStoredPauseState))
-		Device.Pause			(FALSE);
+		Device.Pause			(FALSE, TRUE, FALSE, "simpleitem_stop");
 
 	if(m_flags.test(etiNeedPauseOff) && m_flags.test(etiStoredPauseState))
-		Device.Pause			(TRUE);
+		Device.Pause			(TRUE, TRUE, FALSE, "simpleitem_stop");
+
+	if(m_flags.test(etiNeedPauseSound))
+		Device.Pause			(FALSE, FALSE, TRUE, "simpleitem_stop");
 
 	if (g_pGameLevel){
 		CUIGameSP* ui_game_sp	= smart_cast<CUIGameSP*>(HUD().GetUI()->UIGame());
-		if( ui_game_sp->PdaMenu->IsShown() ) 
+		if( ui_game_sp && ui_game_sp->PdaMenu->IsShown() ) 
 			HUD().GetUI()->StartStopMenu			(ui_game_sp->PdaMenu, true);
 	}
 	inherited::Stop				();
@@ -236,7 +248,7 @@ void CUISequenceSimpleItem::OnKeyboardPress	(int dik)
 		VERIFY		(m_continue_dik_guard!=-1);
 		if(m_continue_dik_guard==-1)m_flags.set(etiCanBeStopped, TRUE); //not binded action :(
 
-		if(m_continue_dik_guard==9999 || key_binding[dik] == m_continue_dik_guard)
+		if(m_continue_dik_guard==9999 || dik == m_continue_dik_guard)
 			m_flags.set(etiCanBeStopped, TRUE); //match key
 
 	}

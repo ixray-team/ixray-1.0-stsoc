@@ -49,11 +49,8 @@ CUITalkWnd::~CUITalkWnd()
 
 void CUITalkWnd::Init()
 {
-	inherited::Init(CUIXmlInit::ApplyAlignX(0, alCenter),
-					CUIXmlInit::ApplyAlignY(0, alCenter),
-					UI_BASE_WIDTH, UI_BASE_HEIGHT);
+	inherited::Init(0, 0, UI_BASE_WIDTH, UI_BASE_HEIGHT);
 
-	/////////////////////////
 	//Меню разговора
 	UITalkDialogWnd = xr_new<CUITalkDialogWnd>();UITalkDialogWnd->SetAutoDelete(true);
 	AttachChild(UITalkDialogWnd);
@@ -80,9 +77,9 @@ void CUITalkWnd::InitTalkDialog()
 	m_pOthersDialogManager = smart_cast<CPhraseDialogManager*>(m_pOthersInvOwner);
 
 	//имена собеседников
-	UITalkDialogWnd->UICharacterInfoLeft.InitCharacter(m_pOurInvOwner->object_id());
-	UITalkDialogWnd->UICharacterInfoRight.InitCharacter(m_pOthersInvOwner->object_id());
-	UITalkDialogWnd->UIDialogFrame.UITitleText.SetText(m_pOthersInvOwner->Name());
+	UITalkDialogWnd->UICharacterInfoLeft.InitCharacter		(m_pOurInvOwner->object_id());
+	UITalkDialogWnd->UICharacterInfoRight.InitCharacter		(m_pOthersInvOwner->object_id());
+	UITalkDialogWnd->UIDialogFrame.UITitleText.SetText	(m_pOthersInvOwner->Name());
 	UITalkDialogWnd->UIOurPhrasesFrame.UITitleText.SetText(m_pOurInvOwner->Name());
 	
 	//очистить лог сообщений
@@ -92,11 +89,11 @@ void CUITalkWnd::InitTalkDialog()
 	NeedUpdateQuestions						();
 	Update									();
 
+	UITalkDialogWnd->SetOsoznanieMode		(m_pOthersInvOwner->NeedOsoznanieMode());
 	UITalkDialogWnd->Show					();
+
 	UITradeWnd->Hide							();
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 void CUITalkWnd::InitOthersStartDialog()
 {
@@ -125,7 +122,6 @@ void CUITalkWnd::NeedUpdateQuestions()
 void CUITalkWnd::UpdateQuestions()
 {
 	UITalkDialogWnd->ClearQuestions();
-	R_ASSERT2(m_pOurInvOwner->GetPDA(), "PDA for character does not init yet");
 
 	//если нет активного диалога, то
 	//режима выбора темы
@@ -216,14 +212,14 @@ void UpdateCameraDirection(CGameObject* pTo)
 void CUITalkWnd::Update()
 {
 	//остановить разговор, если нужно
-	if (m_pActor && !m_pActor->IsTalking() )
+	if (g_actor && m_pActor && !m_pActor->IsTalking() )
 	{
 		Game().StartStopMenu(this,true);
 	}else{
 		CGameObject* pOurGO = smart_cast<CGameObject*>(m_pOurInvOwner);
 		CGameObject* pOtherGO = smart_cast<CGameObject*>(m_pOthersInvOwner);
-		
-		if(NULL==pOurGO || NULL==pOtherGO || pOurGO->Position().distance_to(pOtherGO->Position())>3.0f )
+	
+		if(NULL==pOurGO || NULL==pOtherGO || ((pOurGO->Position().distance_to(pOtherGO->Position())>3.0f)&&!m_pOthersInvOwner->NeedOsoznanieMode()) )
 			Game().StartStopMenu(this,true);
 	}
 
@@ -368,13 +364,26 @@ void CUITalkWnd::SwitchToTrade()
 bool CUITalkWnd::IR_OnKeyboardPress(int dik)
 {
 //.	StopSnd						();
-	int cmd = key_binding[dik];
+	EGameActions cmd = get_binded_action(dik);
 	if(cmd==kUSE)
 	{
+		if (m_pOthersInvOwner&&m_pOthersInvOwner->NeedOsoznanieMode())
+		{
+			return true;
+		}
 		GetHolder()->StartStopMenu(this, true);
 		return true;
 	}
 	return inherited::IR_OnKeyboardPress(dik);
+}
+
+bool CUITalkWnd::OnKeyboard(int dik, EUIMessages keyboard_action)
+{
+	if (m_pOthersInvOwner&&m_pOthersInvOwner->NeedOsoznanieMode())
+	{
+		return true;
+	}
+	return inherited::OnKeyboard(dik,keyboard_action);
 }
 
 void CUITalkWnd::PlaySnd(LPCSTR text)

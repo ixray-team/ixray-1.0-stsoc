@@ -15,7 +15,7 @@
 #include "xrMessages.h"
 #include "ui/UIInventoryUtilities.h"
 #include "xr_time.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include "UI/UIGameTutorial.h"
 #include "string_table.h"
 #include "object_broker.h"
@@ -43,6 +43,11 @@ void start_tutorial(LPCSTR name)
 LPCSTR translate_string(LPCSTR str)
 {
 	return *CStringTable().translate(str);
+}
+
+bool has_active_tutotial()
+{
+	return (g_tutorial!=NULL);
 }
 
 #pragma optimize("s",on)
@@ -113,6 +118,7 @@ void game_sv_GameState::script_register(lua_State *L)
 	.def("getRPcount",			&game_sv_GameState::getRPcount),
 
 	def("start_tutorial",		&start_tutorial),
+	def("has_active_tutorial",	&has_active_tutotial),
 	def("translate_string",		&translate_string)
 
 	];

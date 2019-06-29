@@ -137,9 +137,9 @@ void CSoundRender_Source::load(LPCSTR name)
 	LoadWave			(fn);		//.R_ASSERT(wave);
 	SoundRender->cache.cat_create	(CAT, dwBytesTotal);
 
-	if (dwTimeTotal<100)					{
-		Msg	("! WARNING: Invalid wave length (must be at least 100ms), file: %s",fn);
-	}
+//	if (dwTimeTotal<100)					{
+//		Msg	("! WARNING: Invalid wave length (must be at least 100ms), file: %s",fn);
+//	}
 }
 
 void CSoundRender_Source::unload()

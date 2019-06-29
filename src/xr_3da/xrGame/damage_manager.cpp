@@ -87,7 +87,14 @@ void CDamageManager::load_section(LPCSTR section,CInifile* ini)
 			bone_instance.set_param	(0,(float)atof(_GetItem(*(*i).second,0,buffer)));
 			bone_instance.set_param	(1,(float)atoi(_GetItem(*(*i).second,1,buffer)));
 			bone_instance.set_param	(2,(float)atof(_GetItem(*(*i).second,2,buffer)));
-			bone_instance.set_param	(3,(float)atoi(_GetItem(*(*i).second,3,buffer)));
+			if (_GetItemCount(*(*i).second) < 4)
+			{
+				bone_instance.set_param	(3,(float)atof(_GetItem(*(*i).second,0,buffer)));
+			}
+			else
+			{
+				bone_instance.set_param	(3,(float)atof(_GetItem(*(*i).second,3,buffer)));
+			}
 			if(0==bone && (fis_zero(bone_instance.get_param(0)) || fis_zero(bone_instance.get_param(2)) ) ){
 				string256 error_str;
 				sprintf(error_str,"hit_scale and wound_scale for root bone cannot be zero. see section [%s]",section);
@@ -98,7 +105,7 @@ void CDamageManager::load_section(LPCSTR section,CInifile* ini)
 }
 
 
-void  CDamageManager::HitScale			(const int element, float& hit_scale, float& wound_scale)
+void  CDamageManager::HitScale			(const int element, float& hit_scale, float& wound_scale, bool aim_bullet)
 {
 	if(BI_NONE == u16(element))
 	{
@@ -110,7 +117,15 @@ void  CDamageManager::HitScale			(const int element, float& hit_scale, float& wo
 
 	CKinematics* V		= smart_cast<CKinematics*>(m_object->Visual());			VERIFY(V);
 	// get hit scale
-	float scale			= V->LL_GetBoneInstance(u16(element)).get_param(0);
+	float scale;			
+	if (aim_bullet)
+	{
+		scale			= V->LL_GetBoneInstance(u16(element)).get_param(3);
+	}
+	else
+	{
+		scale			= V->LL_GetBoneInstance(u16(element)).get_param(0);
+	}
 	hit_scale			= scale;
 	
 	// get wound scale

@@ -60,7 +60,7 @@ void	game_cl_GameState::net_import_GameTime		(NET_Packet& P)
 	u64 OldTime = Level().GetEnvironmentGameTime();
 	Level().SetEnvironmentGameTimeFactor	(GameEnvironmentTime,EnvironmentTimeFactor);
 	if (OldTime > GameEnvironmentTime)
-		GamePersistent().Environment.Invalidate();
+		GamePersistent().Environment().Invalidate();
 }
 
 void	game_cl_GameState::net_import_state	(NET_Packet& P)
@@ -336,12 +336,12 @@ void	game_cl_GameState::sv_EventSend(NET_Packet& P)
 
 bool game_cl_GameState::IR_OnKeyboardPress		(int dik)
 {
-	return OnKeyboardPress(key_binding[dik]);
+	return OnKeyboardPress( get_binded_action(dik) );
 }
 
 bool game_cl_GameState::IR_OnKeyboardRelease	(int dik)
 {
-	return OnKeyboardRelease(key_binding[dik]);
+	return OnKeyboardRelease( get_binded_action(dik) );
 }
 
 bool game_cl_GameState::IR_OnMouseMove			(int dx, int dy)
@@ -408,5 +408,13 @@ void game_cl_GameState::set_type_name(LPCSTR s)
 };
 void game_cl_GameState::reset_ui()
 {
-	m_game_ui_custom->reset_ui();
+	if(!m_game_ui_custom)
+		m_game_ui_custom = HUD().GetUI()->UIGame();
+
+	m_game_ui_custom->reset_ui					();
+
+	HUD().GetUI()->UIMainIngameWnd->reset_ui	();
+
+	if (HUD().GetUI()->MainInputReceiver())
+		HUD().GetUI()->StartStopMenu			(HUD().GetUI()->MainInputReceiver(),true);
 }

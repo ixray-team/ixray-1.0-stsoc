@@ -41,7 +41,7 @@ void	CSoundRender_Target::start			(CSoundRender_Emitter* E)
 	// 5. Deferred-play-signal (emitter-exist, rendering-false)
 	pEmitter		= E;
 	rendering		= FALSE;
-	attach			();
+	//attach		();
 }
 
 void	CSoundRender_Target::render			()
@@ -86,14 +86,15 @@ void	CSoundRender_Target::attach()
 	ov_callbacks ovc= {ov_read_func,ov_seek_func,ov_close_func,ov_tell_func};
 	wave			= FS.r_open		(pEmitter->source->pname.c_str()); 
 	R_ASSERT3		(wave&&wave->length(),"Can't open wave file:",pEmitter->source->pname.c_str());
-	ov_open_callbacks(wave,&ovf,NULL,0,ovc);
+ 	ov_open_callbacks(wave,&ovf,NULL,0,ovc);
 	VERIFY			(0!=wave);
 }
 
 void	CSoundRender_Target::dettach()
 {
-	VERIFY			(0!=wave);
-	ov_clear		(&ovf);
-	FS.r_close		(wave);
+	if (wave)		{
+		ov_clear		(&ovf);
+		FS.r_close		(wave);
+	}
 }
 

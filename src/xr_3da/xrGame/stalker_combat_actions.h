@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "stalker_base_action.h"
+#include "stalker_combat_action_base.h"
 #include "random32.h"
 
 class CCoverPoint;
@@ -17,25 +17,6 @@ namespace MonsterSpace {
 	enum EBodyState;
 	enum EMovementType;
 }
-
-//////////////////////////////////////////////////////////////////////////
-// CStalkerActionCombatBase
-//////////////////////////////////////////////////////////////////////////
-
-class CStalkerActionCombatBase : public CStalkerActionBase {
-protected:
-	typedef CStalkerActionBase inherited;
-
-public:
-						CStalkerActionCombatBase	(CAI_Stalker *object, LPCSTR action_name = "");
-	virtual void		initialize					();
-	virtual void		finalize					();
-			void		select_queue_params			(const float &distance, u32 &min_queue_size, u32 &max_queue_size, u32 &min_queue_interval, u32 &max_queue_interval) const;
-			bool		fire_make_sense				() const;
-			void		fire						();
-			void		aim_ready					();
-			void		aim_ready_force_full		();
-};
 
 //////////////////////////////////////////////////////////////////////////
 // CStalkerActionGetItemToKill

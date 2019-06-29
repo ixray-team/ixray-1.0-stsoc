@@ -13,7 +13,7 @@
 #undef   STATIC_CHECK
 #include <typelist.h>
 
-// #define PURE_DYNAMIC_CAST
+//#define PURE_DYNAMIC_CAST
 #define PURE_DYNAMIC_CAST_COMPATIBILITY_CHECK
 
 #ifdef PURE_DYNAMIC_CAST

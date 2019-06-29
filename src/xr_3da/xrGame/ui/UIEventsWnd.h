@@ -7,7 +7,6 @@ class CUIFrameWindow;
 class CUIFrameLineWnd;
 class CUIAnimatedStatic;
 class CUIMapWnd;
-class CUIListWnd;
 class CUI3tButton;
 class CUITabControl;
 class CGameTask;

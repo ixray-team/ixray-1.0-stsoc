@@ -53,19 +53,14 @@ void CUIMessagesWindow::Init(float x, float y, float width, float height){
 	if ( IsGameTypeSingle() )
 	{
 		CUIXmlInit::InitScrollView(xml, "sp_log_list", 0, m_pGameLog);
-		
-		//CUIXmlInit::InitFont(xml, "sp_log_list:font", 0, color, pFont);
-		//m_pGameLog->SetTextAtrib(pFont, color);
-
-//		m_ListPos2 = CUIXmlInit::GetFRect(xml, "sp_log_list2", 0);
 	}
 	else
 	{
-		m_pChatLog = xr_new<CUIGameLog>(); m_pChatLog->SetAutoDelete(true);
-		m_pChatLog->Show(true);
-		AttachChild(m_pChatLog);
-		m_pChatWnd = xr_new<CUIChatWnd>(m_pChatLog); m_pChatWnd->SetAutoDelete(true);
-		AttachChild(m_pChatWnd);
+		m_pChatLog			= xr_new<CUIGameLog>(); m_pChatLog->SetAutoDelete(true);
+		m_pChatLog->Show	(true);
+		AttachChild			(m_pChatLog);
+		m_pChatWnd			= xr_new<CUIChatWnd>(m_pChatLog); m_pChatWnd->SetAutoDelete(true);
+		AttachChild			(m_pChatWnd);
 
 		CUIXmlInit::InitScrollView(xml, "mp_log_list", 0, m_pGameLog);
 		CUIXmlInit::InitFont(xml, "mp_log_list:font", 0, color, pFont);
@@ -75,19 +70,19 @@ void CUIMessagesWindow::Init(float x, float y, float width, float height){
 		CUIXmlInit::InitFont(xml, "chat_log_list:font", 0, color, pFont);
 		m_pChatLog->SetTextAtrib(pFont, color);
 		
-		m_pChatWnd->Init(xml);
+		m_pChatWnd->Init	(xml);
 	}	
 
 }
 
 void CUIMessagesWindow::AddIconedPdaMessage(LPCSTR textureName, Frect originalRect, LPCSTR message, int iDelay){
 	
-	CUIPdaMsgListItem *pItem = m_pGameLog->AddPdaMessage(message, float(iDelay));
+	CUIPdaMsgListItem *pItem			= m_pGameLog->AddPdaMessage(message, float(iDelay));
+	pItem->SetTextComplexMode			(true);
 	pItem->UIIcon.InitTexture			(textureName);
 	pItem->UIIcon.SetOriginalRect		(originalRect.left, originalRect.top, originalRect.right, originalRect.bottom);
-//.	pItem->UIMsgText.SetWidth(m_pGameLog->GetDesiredChildWidth() - pItem->UIIcon.GetWidth());
-	pItem->UIMsgText.SetWndPos(pItem->UIIcon.GetWidth(), pItem->UIMsgText.GetWndPos().y);
-	pItem->UIMsgText.AdjustHeightToText();
+	pItem->UIMsgText.SetWndPos			(pItem->UIIcon.GetWidth(), pItem->UIMsgText.GetWndPos().y);
+	pItem->UIMsgText.AdjustHeightToText	();
 
 	if (pItem->UIIcon.GetHeight() > pItem->UIMsgText.GetHeight())
 		pItem->SetHeight(pItem->UIIcon.GetHeight());
@@ -96,31 +91,17 @@ void CUIMessagesWindow::AddIconedPdaMessage(LPCSTR textureName, Frect originalRe
 	m_pGameLog->SendMessage(pItem,CHILD_CHANGED_SIZE);
 }
 
-void CUIMessagesWindow::AddChatMessage(shared_str msg, shared_str author){
+void CUIMessagesWindow::AddChatMessage(shared_str msg, shared_str author)
+{
 	 m_pChatLog->AddChatMessage(*msg, *author);
 }
 
-void CUIMessagesWindow::SetChatOwner(game_cl_GameState* owner){
+void CUIMessagesWindow::SetChatOwner(game_cl_GameState* owner)
+{
 	if (m_pChatWnd)
 		m_pChatWnd->SetOwner(owner);
-	else
-		R_ASSERT2(false, "Can't set owner to NULL object");
 }
 
-//void CUIMessagesWindow::DrawPdaMessages(){
-//	Frect tmp = m_pGameLog->GetWndRect		();
-//	m_pGameLog->SetWndPos					(m_ListPos2.x1, m_ListPos2.y1);
-//	m_pGameLog->SetWidth					(m_ListPos2.width());
-//	m_pGameLog->SetHeight					(m_ListPos2.height());
-//	m_pGameLog->ForceUpdate					();
-//	m_pGameLog->Update();
-//	m_pGameLog->Draw						();
-//
-//	m_pGameLog->SetWndPos					(tmp.x1, tmp.y1);
-//	m_pGameLog->SetWidth					(tmp.width());
-//	m_pGameLog->SetHeight					(tmp.height());
-//	m_pGameLog->ForceUpdate					();
-//}
 void CUIMessagesWindow::Update()
 {
 	CUIWindow::Update();

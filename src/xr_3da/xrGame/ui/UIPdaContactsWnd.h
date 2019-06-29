@@ -8,7 +8,6 @@ class CUIFrameWindow;
 class CUIFrameLineWnd;
 class CUIStatic;
 class CUIAnimatedStatic;
-class CUIListWnd;
 class CUIScrollView;
 class CPda;
 
@@ -55,5 +54,5 @@ public:
 								CUIPdaContactItem		(CUIPdaContactsWnd* cw)		{m_cw = cw;}
 	virtual						~CUIPdaContactItem		();
 	virtual void				SetSelected				(bool b);
-	virtual bool				OnMouseDown				(bool left_button = true);
+	virtual bool				OnMouseDown				(int mouse_btn);
 };

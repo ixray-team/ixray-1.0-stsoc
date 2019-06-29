@@ -27,10 +27,14 @@
 #include "actor.h"
 #include "actor_memory.h"
 #include "stalker_movement_manager.h"
+#include "agent_manager.h"
+#include "agent_enemy_manager.h"
 
 using namespace StalkerDecisionSpace;
 
 typedef CStalkerPropertyEvaluator::_value_type _value_type;
+
+const float wounded_enemy_reached_distance = 3.f;
 
 //////////////////////////////////////////////////////////////////////////
 // CStalkerPropertyEvaluatorALife
@@ -321,7 +325,11 @@ _value_type CStalkerPropertyEvaluatorEnemyReached::evaluate	()
 	if (!enemy)
 		return					(false);
 
-	return						((object().Position().distance_to_sqr(enemy->Position()) <= _sqr(3.f)));
+	ALife::_OBJECT_ID			processor_id = object().agent_manager().enemy().wounded_processor(enemy);
+	if (processor_id != object().ID())
+		return					(false);
+
+	return						((object().Position().distance_to_sqr(enemy->Position()) <= _sqr(wounded_enemy_reached_distance)));
 }
 
 //////////////////////////////////////////////////////////////////////////

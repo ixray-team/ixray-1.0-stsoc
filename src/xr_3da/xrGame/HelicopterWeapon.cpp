@@ -2,8 +2,8 @@
 #include "helicopter.h"
 #include "ExplosiveRocket.h"
 #include "xrMessages.h"
-#include "net_utils.h"
-#include "../skeletoncustom.h"
+#include "../../xrNetServer/net_utils.h"
+#include "..\skeletoncustom.h"
 #include "Level.h"
 
 void  
@@ -100,7 +100,8 @@ void CHelicopter::OnShot		()
 	FireBullet(fire_pos, fire_dir, fireDispersionBase, m_CurrentAmmo, ID(), ID(), OnServer());
 
 	StartShotParticles	();
-	if(m_bShotLight) Light_Start();
+	if(m_bLightShotEnabled) 
+		Light_Start			();
 
 
 	StartFlameParticles		();

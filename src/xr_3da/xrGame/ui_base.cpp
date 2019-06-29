@@ -6,7 +6,7 @@
 
 CUICursor*	GetUICursor		()	{return UI()->GetUICursor();};
 ui_core*	UI				()	{return GamePersistent().m_pUI_core;};
-
+extern ENGINE_API Fvector2		g_current_font_scale;
 
 void S2DVert::rotate_pt(const Fvector2& pivot, float cosA, float sinA)
 {
@@ -117,6 +117,18 @@ void ui_core::ClientToScreenScaled(Fvector2& src_and_dest)
 	src_and_dest.set(ClientToScreenScaledX(src_and_dest.x),	ClientToScreenScaledY(src_and_dest.y));
 }
 
+void ui_core::ClientToScreenScaledWidth(float& src_and_dest)
+{
+//.	src_and_dest		= ClientToScreenScaledX(src_and_dest);
+	src_and_dest		/= m_current_scale->x;
+}
+
+void ui_core::ClientToScreenScaledHeight(float& src_and_dest)
+{
+//.	src_and_dest		= ClientToScreenScaledY(src_and_dest);
+	src_and_dest		/= m_current_scale->y;
+}
+
 Frect ui_core::ScreenRect()
 {
 	static Frect R={0.0f, 0.0f, UI_BASE_WIDTH, UI_BASE_HEIGHT};
@@ -125,7 +137,7 @@ Frect ui_core::ScreenRect()
 
 void ui_core::PushScissor(const Frect& r_tgt, bool overlapped)
 {
-//	return;
+//.	return;
 	Frect r_top			= ScreenRect();
 	Frect result		= r_tgt;
 	if (!m_Scissors.empty()&&!overlapped){
@@ -134,7 +146,12 @@ void ui_core::PushScissor(const Frect& r_tgt, bool overlapped)
 	if (!result.intersection(r_top,r_tgt))
 			result.set	(0.0f,0.0f,0.0f,0.0f);
 
-	VERIFY(result.x1>=0&&result.y1>=0&&result.x2<=UI_BASE_WIDTH&&result.y2<=UI_BASE_HEIGHT);
+	if (!(result.x1>=0&&result.y1>=0&&result.x2<=UI_BASE_WIDTH&&result.y2<=UI_BASE_HEIGHT) )
+	{
+		Msg("! r_tgt [%.3f][%.3f][%.3f][%.3f]", r_tgt.x1, r_tgt.y1, r_tgt.x2, r_tgt.y2);
+		Msg("! result [%.3f][%.3f][%.3f][%.3f]", result.x1, result.y1, result.x2, result.y2);
+		VERIFY(result.x1>=0&&result.y1>=0&&result.x2<=UI_BASE_WIDTH&&result.y2<=UI_BASE_HEIGHT);
+	}
 	m_Scissors.push		(result);
 
 	result.lt.x 		= ClientToScreenScaledX(result.lt.x);
@@ -152,7 +169,7 @@ void ui_core::PushScissor(const Frect& r_tgt, bool overlapped)
 
 void ui_core::PopScissor()
 {
-//	return;
+//.	return;
 	VERIFY(!m_Scissors.empty());
 	m_Scissors.pop		();
 	
@@ -175,9 +192,12 @@ ui_core::ui_core()
 	m_pUICursor					= xr_new<CUICursor>();
 	m_pFontManager				= xr_new<CFontManager>();
 	m_bPostprocess				= false;
-	m_current_scale				= &m_scale_;
-
+	
 	OnDeviceReset				();
+
+	m_current_scale				= &m_scale_;
+//.	g_current_font_scale		= m_scale_;
+	g_current_font_scale.set	(1.0f,1.0f);
 }
 
 ui_core::~ui_core()
@@ -197,13 +217,20 @@ void ui_core::pp_start()
 												float(::Render->getTarget()->get_height())
 												));
 
-	m_current_scale		= &m_pp_scale_;
+	m_current_scale			= &m_pp_scale_;
+//.	g_current_font_scale	= m_pp_scale_;
+	
+	g_current_font_scale.set(	float(::Render->getTarget()->get_width())/float(Device.dwWidth),	
+								float(::Render->getTarget()->get_height())/float(Device.dwHeight) );
+
 }
 
 void ui_core::pp_stop()
 {
-	m_bPostprocess		= false;
-	m_current_scale		= &m_scale_;
+	m_bPostprocess			= false;
+	m_current_scale			= &m_scale_;
+//.	g_current_font_scale	= m_scale_;
+	g_current_font_scale.set	(1.0f,1.0f);
 }
 
 void ui_core::RenderFont()

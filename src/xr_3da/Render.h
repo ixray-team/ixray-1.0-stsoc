@@ -199,6 +199,7 @@ public:
 	virtual void					add_Visual				(IRender_Visual*	V	)					= 0;	// add visual leaf	(no culling performed at all)
 	virtual void					add_Geometry			(IRender_Visual*	V	)					= 0;	// add visual(s)	(all culling performed)
 	virtual void					add_StaticWallmark		(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V)=0;
+	virtual void					clear_static_wallmarks	()=0;
 	virtual void					add_SkeletonWallmark	(intrusive_ptr<CSkeletonWallmark> wm)						= 0;
 	virtual void					add_SkeletonWallmark	(const Fmatrix* xf, CKinematics* obj, ref_shader& sh, const Fvector& start, const Fvector& dir, float size)=0;
 

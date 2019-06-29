@@ -16,7 +16,7 @@
 
 CDemoPlay::CDemoPlay(const char *name, float ms, u32 cycles, float life_time) : CEffectorCam(cefDemo,life_time/*,FALSE*/)
 {
-	Msg					("! Playing demo: %s",name);
+	Msg					("*** Playing demo: %s",name);
 	Console->Execute	("hud_weapon 0");
 	if(g_bBenchmark)	Console->Execute	("hud_draw 0");
 
@@ -79,6 +79,8 @@ void CDemoPlay::stat_Start	()
 	fStartTime				= 0;
 }
 
+extern string512		g_sBenchmarkName;
+
 void CDemoPlay::stat_Stop	()
 {
 	if (!stat_started)		return;
@@ -106,12 +108,16 @@ void CDemoPlay::stat_Stop	()
 
 	Msg("* [DEMO] FPS: average[%f], min[%f], max[%f], middle[%f]",rfps_average,rfps_min,rfps_max,rfps_middlepoint);
 
-	if(g_bBenchmark)		{
+	if(g_bBenchmark){
 		string_path			fname;
-		pcstr	param		= strstr(Core.Params,"-benchmark ");
-		if (0==param)		strcpy	(fname,"benchmark.result");
-		else				sscanf	(param+xr_strlen("-benchmark "),"%s",fname);
-		FS.update_path		(fname,"$server_root$",fname);
+
+		if(xr_strlen(g_sBenchmarkName))
+			sprintf	(fname,"%s.result",g_sBenchmarkName);
+		else
+			strcpy	(fname,"benchmark.result");
+
+
+		FS.update_path		(fname,"$app_data_root$",fname);
 		CInifile			res		(fname,FALSE,FALSE,TRUE);
 		res.w_float			("general","renderer",	float(::Render->get_generation())/10.f,	"dx-level required"		);
 		res.w_float			("general","min",		rfps_min,								"absolute minimum"		);

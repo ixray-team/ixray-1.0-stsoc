@@ -178,6 +178,24 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 
 	if (character_physics_support()->movement()->Environment()==CPHMovementControl::peOnGround || character_physics_support()->movement()->Environment()==CPHMovementControl::peAtWall )
 	{
+		// crouch
+		if ((0==(mstate_real&mcCrouch))&&(mstate_wf&mcCrouch))
+		{
+			if(mstate_real&mcClimb)
+			{
+				mstate_wf&=~mcCrouch;
+			}
+			else
+			{
+				character_physics_support()->movement()->EnableCharacter();
+				bool Crouched = false;
+				if (isActorAccelerated(mstate_wf, IsZoomAimingMode()))
+					Crouched = character_physics_support()->movement()->ActivateBoxDynamic(1);
+				else
+					Crouched = character_physics_support()->movement()->ActivateBoxDynamic(2);
+				if (Crouched) mstate_real			|=	mcCrouch;
+			}
+		}
 		// jump
 		m_fJumpTime				-=	dt;
 
@@ -199,24 +217,7 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 		if(m_bJumpKeyPressed)
 		Jump				= m_fJumpSpeed;
 		*/
-		// crouch
-		if ((0==(mstate_real&mcCrouch))&&(mstate_wf&mcCrouch))
-		{
-			if(mstate_real&mcClimb)
-			{
-				mstate_wf&=~mcCrouch;
-			}
-			else
-			{
-				character_physics_support()->movement()->EnableCharacter();
-				bool Crouched = false;
-				if (isActorAccelerated(mstate_wf, IsZoomAimingMode()))
-					Crouched = character_physics_support()->movement()->ActivateBoxDynamic(1);
-				else
-					Crouched = character_physics_support()->movement()->ActivateBoxDynamic(2);
-				if (Crouched) mstate_real			|=	mcCrouch;
-			}
-		}
+
 
 		// mask input into "real" state
 		u32 move	= mcAnyMove|mcAccel;
@@ -543,35 +544,26 @@ bool	CActor::CanJump				()
 {
 	bool can_Jump = /*!IsLimping() &&*/
 		!character_physics_support()->movement()->PHCapture() &&((mstate_real&mcJump)==0) && (m_fJumpTime<=0.f) 
-		&& !m_bJumpKeyPressed &&!m_bZoomAimingMode;
+		&& !m_bJumpKeyPressed &&!m_bZoomAimingMode;// && ((mstate_real&mcCrouch)==0);
 
 	return can_Jump;
 }
-
-#define CANT_WALK			"cant_walk"
-#define CANT_WALK_WEIGHT	"cant_walk_weight"
-#define SHOW_CANT_WALK_TIME 14.f
 
 bool	CActor::CanMove				()
 {
 	if( conditions().IsCantWalk() )
 	{
-		static float m_fSignTime = 0.f;
-
-		if(mstate_wishful&mcAnyMove && Device.fTimeGlobal - m_fSignTime > SHOW_CANT_WALK_TIME)
+		if(mstate_wishful&mcAnyMove)
 		{
-			HUD().GetUI()->AddInfoMessage(*CStringTable().translate(CANT_WALK));
-			m_fSignTime = Device.fTimeGlobal;
+			HUD().GetUI()->AddInfoMessage("cant_walk");
 		}
 		return false;
 	}else
-	if( conditions().IsCantWalkWeight() ){
-		static float m_fSignTime2 = 0.f;
-
-		if(mstate_wishful&mcAnyMove && Device.fTimeGlobal - m_fSignTime2 > SHOW_CANT_WALK_TIME)
+	if( conditions().IsCantWalkWeight() )
+	{
+		if(mstate_wishful&mcAnyMove)
 		{
-			HUD().GetUI()->AddInfoMessage(*CStringTable().translate(CANT_WALK_WEIGHT));
-			m_fSignTime2 = Device.fTimeGlobal;
+			HUD().GetUI()->AddInfoMessage("cant_walk_weight");
 		}
 		return false;
 	

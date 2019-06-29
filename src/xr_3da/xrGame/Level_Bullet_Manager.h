@@ -19,7 +19,8 @@ struct SBullet
 			u16			allow_tracer	: 1	;
 			u16			allow_ricochet	: 1	;			//разрешить рикошет
 			u16			allow_sendhit	: 1	;			//statistics
-			u16			skipped_frame	: 1	;			//пропуск первой отрисовки 
+			u16			skipped_frame	: 1	;			//пропуск первой отрисовки
+			u16			aim_bullet		: 1 ;			//прицеленная пуля( вылетевшая первой после длительного молчания оружия (1-3 сек.))
 		};
 		u16				_storage			;
 	}				flags				;
@@ -183,7 +184,7 @@ public:
 												float starting_speed, float power, float impulse, 
 												u16	sender_id, u16 sendersweapon_id,
 												ALife::EHitType e_hit_type, float maximum_distance, 
-												const CCartridge& cartridge, bool SendHit);
+												const CCartridge& cartridge, bool SendHit,bool AimBullet=false);
 
 	void					CommitEvents		();	// @ the start of frame
 	void					CommitRenderSet		();	// @ the end of frame

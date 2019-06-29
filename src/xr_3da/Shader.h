@@ -24,6 +24,7 @@ class	ENGINE_API				IBlender;
 
 //////////////////////////////////////////////////////////////////////////
 struct	ENGINE_API		STextureList	: public xr_resource_flagged, public xr_vector<std::pair<u32,ref_texture> >	{
+	typedef xr_vector<std::pair<u32,ref_texture> > inherited_vec;
 						~STextureList	();
 
 						IC BOOL		equal (const STextureList& base) const
@@ -35,6 +36,8 @@ struct	ENGINE_API		STextureList	: public xr_resource_flagged, public xr_vector<s
 							}
 							return TRUE;
 						}
+	virtual		void	clear();
+	virtual		void	clear_not_free();
 };
 typedef	resptr_core<STextureList,resptr_base<STextureList> >								ref_texture_list;
 //////////////////////////////////////////////////////////////////////////

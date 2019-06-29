@@ -4,27 +4,26 @@
 
 class CUIStatic;
 class CUI3tButton;
-//class CUIXml;
 class CUIListBox;
 class CUIFrameWindow;
 
 
 
-class CUIVote : public CUIDialogWnd {
+class CUIVote : public CUIDialogWnd 
+{
 public:
 	using CUIDialogWnd::Init;
 
-	CUIVote();
-			void Init();
-	virtual void Update();
-	virtual void SendMessage(CUIWindow* pWnd, s16 msg, void* pData = 0);
-			void OnBtnYes();
-			void OnBtnNo();
-			void OnBtnCancel();
-			void SetVoting(LPCSTR txt);
+					CUIVote		();
+			void 	Init		();
+	virtual void 	Update		();
+	virtual void 	SendMessage	(CUIWindow* pWnd, s16 msg, void* pData = 0);
+			void 	OnBtnYes	();
+			void 	OnBtnNo		();
+			void 	OnBtnCancel	();
+			void 	SetVoting	(LPCSTR txt);
 protected:
 	CUIStatic*		bkgrnd;
-//	CUIStatic*		header;
 	CUIStatic*		msg_back;
 	CUIStatic*		msg;
 	CUIStatic*		cap[3];

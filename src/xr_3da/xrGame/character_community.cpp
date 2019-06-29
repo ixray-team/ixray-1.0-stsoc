@@ -6,11 +6,6 @@
 #include "stdafx.h"
 #include "character_community.h"
 
-#define GAME_RELATIONS_SECT "game_relations"
-#define GAME_COMMUNITIES	"communities"
-#define COMMUNITIES_TABLE	"communities_relations"
-#define SYMPATHY_TABLE_SECT "communities_sympathy"
-
 //////////////////////////////////////////////////////////////////////////
 COMMUNITY_DATA::COMMUNITY_DATA (CHARACTER_COMMUNITY_INDEX idx, CHARACTER_COMMUNITY_ID idn, LPCSTR team_str)
 {
@@ -52,11 +47,11 @@ u8							 CHARACTER_COMMUNITY::team			() const
 
 void CHARACTER_COMMUNITY::InitIdToIndex	()
 {
-	section_name = GAME_RELATIONS_SECT;
-	line_name = GAME_COMMUNITIES;
+	section_name = "game_relations";
+	line_name = "communities";
 
-	m_relation_table.set_table_params(COMMUNITIES_TABLE);
-	m_sympathy_table.set_table_params(SYMPATHY_TABLE_SECT, 1);
+	m_relation_table.set_table_params("communities_relations");
+	m_sympathy_table.set_table_params("communities_sympathy", 1);
 }
 
 

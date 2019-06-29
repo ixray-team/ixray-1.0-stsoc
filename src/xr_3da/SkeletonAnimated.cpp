@@ -322,12 +322,7 @@ void CKinematicsAnimated::UpdateTracks	()
 			B.dwFrame		=	Device.dwFrame;
 
 			if (B.playing) {
-				if(B.timeCurrent > 10000 || B.speed > 10000)
-					Msg("--Atc %f %f",B.timeCurrent,B.speed);
 				B.timeCurrent += dt*B.speed; // stop@end - time is not going 
-				if(B.timeCurrent > 10000)
-					Msg("--Btc %f %f",B.timeCurrent,B.speed);
-
 			}
 			switch (B.blend) 
 			{
@@ -542,11 +537,15 @@ void CKinematicsAnimated::Load(const char* N, IReader *data, u32 dwFlags)
 #endif
                 }
             }
-            IReader* MS		= FS.r_open(fn);
             // Check compatibility
-            m_Motions.push_back(SMotionsSlot());
-            m_Motions.back().motions.create(nm,MS,bones);
-            MS->close		();
+            m_Motions.push_back				(SMotionsSlot());
+            if( !g_pMotionsContainer->has(nm) ) //optimize fs operations
+			{
+				IReader* MS						= FS.r_open(fn);
+				m_Motions.back().motions.create	(nm,MS,bones);
+				FS.r_close						(MS);
+			}
+			m_Motions.back().motions.create	(nm,NULL,bones);
     	}
     }else{
 		string_path	nm;

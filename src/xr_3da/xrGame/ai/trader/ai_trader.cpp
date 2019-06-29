@@ -389,3 +389,16 @@ void CAI_Trader::dialog_sound_stop()
 	animation().external_sound_stop();
 }
 
+#include "../../script_space.h"
+
+using namespace luabind;
+
+#pragma optimize("s",on)
+void CAI_Trader::script_register(lua_State *L)
+{
+	module(L)
+	[
+		class_<CAI_Trader,CGameObject>("CAI_Trader")
+			.def(constructor<>())
+	];
+}

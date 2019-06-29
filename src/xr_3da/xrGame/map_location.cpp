@@ -62,82 +62,81 @@ void CMapLocation::destroy()
 	delete_data(m_mini_map_spot_border);
 }
 
-CUIXml	g_uiSpotXml;
-bool	g_uiSpotXmlInited = false;
+CUIXml*	g_uiSpotXml=NULL;
 void CMapLocation::LoadSpot(LPCSTR type, bool bReload)
 {
-	if(!g_uiSpotXmlInited){
-		bool xml_result			= g_uiSpotXml.Init(CONFIG_PATH, UI_PATH, "map_spots.xml");
+	if(!g_uiSpotXml){
+		g_uiSpotXml				= xr_new<CUIXml>();
+		bool xml_result			= g_uiSpotXml->Init(CONFIG_PATH, UI_PATH, "map_spots.xml");
 		R_ASSERT3(xml_result, "xml file not found", "map_spots.xml");
-		g_uiSpotXmlInited = true;
 	}
 
 	XML_NODE* node = NULL;
 	string512 path_base, path;
 //	strconcat(path_base,"map_spots:",type);
 	strcpy(path_base,type);
-	R_ASSERT3(g_uiSpotXml.NavigateToNode(path_base,0), "XML node not found in file map_spots.xml", path_base);
-	LPCSTR s = g_uiSpotXml.ReadAttrib(path_base, 0, "hint", "no hint");
+	R_ASSERT3(g_uiSpotXml->NavigateToNode(path_base,0), "XML node not found in file map_spots.xml", path_base);
+	LPCSTR s = g_uiSpotXml->ReadAttrib(path_base, 0, "hint", "no hint");
 	SetHint(s);
 	
-	s = g_uiSpotXml.ReadAttrib(path_base, 0, "store", NULL);
+	s = g_uiSpotXml->ReadAttrib(path_base, 0, "store", NULL);
 	if(s)
 		m_flags.set( eSerailizable, TRUE);
 
-	s = g_uiSpotXml.ReadAttrib(path_base, 0, "no_offline", NULL);
+	s = g_uiSpotXml->ReadAttrib(path_base, 0, "no_offline", NULL);
 	if(s)
 		m_flags.set( eHideInOffline, TRUE);
 
-	m_ttl = g_uiSpotXml.ReadAttribInt(path_base, 0, "ttl", 0);
+	m_ttl = g_uiSpotXml->ReadAttribInt(path_base, 0, "ttl", 0);
 	if(m_ttl>0){
 		m_flags.set( eTTL, TRUE);
 		m_actual_time = Device.dwTimeGlobal+m_ttl*1000;
 	}
 
-	s = g_uiSpotXml.ReadAttrib(path_base, 0, "pos_to_actor", NULL);
+	s = g_uiSpotXml->ReadAttrib(path_base, 0, "pos_to_actor", NULL);
 	if(s)
 		m_flags.set( ePosToActor, TRUE);
 
 
 	strconcat(path,path_base,":level_map");
-	node = g_uiSpotXml.NavigateToNode(path,0);
+	node = g_uiSpotXml->NavigateToNode(path,0);
 	if(node){
-		LPCSTR str = g_uiSpotXml.ReadAttrib(path, 0, "spot", "");
+		LPCSTR str = g_uiSpotXml->ReadAttrib(path, 0, "spot", "");
 		if( xr_strlen(str) ){
 			if(!bReload)
 				m_level_spot = xr_new<CMapSpot>(this);
-			m_level_spot->Load(&g_uiSpotXml,str);
+			m_level_spot->Load(g_uiSpotXml,str);
 		}else{
 			VERIFY( !(bReload&&m_level_spot) );
 		}
 
-		str = g_uiSpotXml.ReadAttrib(path, 0, "pointer", "");
+		str = g_uiSpotXml->ReadAttrib(path, 0, "pointer", "");
 		if( xr_strlen(str) ){
 			if(!bReload)
 				m_level_spot_pointer = xr_new<CMapSpotPointer>(this);
-			m_level_spot_pointer->Load(&g_uiSpotXml,str);
+			m_level_spot_pointer->Load(g_uiSpotXml,str);
 		}else{
 			VERIFY( !(bReload&&m_level_spot_pointer) );
 		}
 	};
 
 	strconcat(path,path_base,":mini_map");
-	node = g_uiSpotXml.NavigateToNode(path,0);
+	node = g_uiSpotXml->NavigateToNode(path,0);
 	if(node){
-		LPCSTR str = g_uiSpotXml.ReadAttrib(path, 0, "spot", "");
+		LPCSTR str = g_uiSpotXml->ReadAttrib(path, 0, "spot", "");
 		if( xr_strlen(str) ){
 			if(!bReload)
 				m_minimap_spot = xr_new<CMiniMapSpot>(this);
-			m_minimap_spot->Load(&g_uiSpotXml,str);
+			m_minimap_spot->Load(g_uiSpotXml,str);
 		}else{
 			VERIFY( !(bReload&&m_minimap_spot) );
 		}
 
-		str = g_uiSpotXml.ReadAttrib(path, 0, "pointer", "");
+		str = g_uiSpotXml->ReadAttrib(path, 0, "pointer", "");
 		if( xr_strlen(str) ){
 			if(!bReload)
 				m_minimap_spot_pointer = xr_new<CMapSpotPointer>(this);
-			m_minimap_spot_pointer->Load(&g_uiSpotXml,str);
+			m_minimap_spot_pointer->Load(g_uiSpotXml,str);
 		}else{
 			VERIFY( !(bReload&&m_minimap_spot_pointer) );
 		}
@@ -162,6 +161,7 @@ Fvector2 CMapLocation::Position()
 	}
 
 	CObject* pObject =  Level().Objects.net_Find(m_objectID);
+//	Msg("CMapLocation::Position()[%d]", m_objectID);
 	if(!pObject){
 		if(ai().get_alife())		
 		{
@@ -226,7 +226,7 @@ shared_str CMapLocation::LevelName()
 	{
 		CSE_Abstract* E = ai().alife().objects().object(m_objectID,true);
 		if(!E){
-			Msg("! Critical: SMapLocation binded to non-existent object id=%d",m_objectID);
+			Msg("- Critical: SMapLocation binded to non-existent object id=%d",m_objectID);
 			return "ERROR";
 		}
 		
@@ -309,7 +309,7 @@ void CMapLocation::UpdateSpot(CUICustomMap* map, CMapSpot* sp )
 			obj = ai().alife().objects().object(m_objectID,true);
 			if(!obj)
 			{
-				Msg("! Critical: CMapLocation::UpdateSpot binded to non-existent object id=%d",m_objectID);
+				Msg("- Critical: CMapLocation::UpdateSpot binded to non-existent object id=%d",m_objectID);
 				return;
 			}
 		}
@@ -531,13 +531,13 @@ CMapSpot* CMapLocation::GetSpotBorder(CMapSpot* sp)
 	if(sp==m_level_spot){
 		if(NULL==m_level_map_spot_border){
 			m_level_map_spot_border	= xr_new<CMapSpot>(this);
-			m_level_map_spot_border->Load(&g_uiSpotXml,"level_map_spot_border");
+			m_level_map_spot_border->Load(g_uiSpotXml,"level_map_spot_border");
 		}return m_level_map_spot_border;
 	}else
 		if(sp==m_minimap_spot){
 		if(NULL==m_mini_map_spot_border){
 			m_mini_map_spot_border	= xr_new<CMapSpot>(this);
-			m_mini_map_spot_border->Load(&g_uiSpotXml,"mini_map_spot_border");
+			m_mini_map_spot_border->Load(g_uiSpotXml,"mini_map_spot_border");
 		}return m_mini_map_spot_border;
 	}
 	return NULL;

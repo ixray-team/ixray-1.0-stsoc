@@ -10,6 +10,8 @@ enum ETradePreset{	_preset_idx_last =0,
 					_preset_idx_2, 
 					_preset_idx_3, 
 					_preset_idx_origin, 
+					_preset_idx_temp, 
+					_preset_idx_default, 
 					_preset_count};
 
 struct _preset_item
@@ -54,17 +56,22 @@ public:
 	virtual bool 				CanBuyAllItems				()																=0;
 	virtual void 				ResetItems					()																=0;
 	virtual void				SetRank						(u32 rank)														=0;
+	virtual u32					GetRank						()																=0;
 	virtual void				ItemToBelt					(const shared_str& sectionName)									=0;
 	virtual void				ItemToRuck					(const shared_str& sectionName, u8 addons)						=0;
 	virtual void				ItemToSlot					(const shared_str& sectionName, u8 addons)						=0;
 	virtual void				SetupPlayerItemsBegin		(){};
 	virtual void				SetupPlayerItemsEnd			(){};
+	virtual void				SetupDefaultItemsBegin		(){};
+	virtual void				SetupDefaultItemsEnd		(){};
 	virtual const preset_items&	GetPreset					(ETradePreset idx)												=0;
-
-	virtual	void				ApplyPreset					(ETradePreset idx)												=0;
-	virtual	void				StorePreset					(ETradePreset idx)												=0;
+	virtual u32					GetPresetCost				(ETradePreset idx)												=0;
+	virtual void				ClearPreset					(ETradePreset idx)												=0;
+	virtual void				TryUsePreset				(ETradePreset idx)												=0;
 
 	virtual void				Show						()																=0;
 	virtual void				Hide						()																=0;
+
+	virtual bool				IsIgnoreMoneyAndRank		()																=0;
 
 };

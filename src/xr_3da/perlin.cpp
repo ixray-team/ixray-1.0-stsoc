@@ -86,6 +86,27 @@ float CPerlinNoise1D::Get(float v)
 	return result;
 }
 
+float CPerlinNoise1D::GetContinious(float v)
+{
+	float t_v=v;
+	if (mPrevContiniousTime!=0.0f)
+	{
+		v-=mPrevContiniousTime;
+	}
+	mPrevContiniousTime=t_v;
+	float result	= 0.0f;
+	float amp		= mAmplitude;
+	v				*=mFrequency;
+	for(int i=0; i<mOctaves; i++){
+		float		octave_time=mTimes[i];
+		mTimes[i]	=octave_time+v;
+		result		+= noise(octave_time+v)*amp;
+		v			*= 2.0f;
+		amp			*= 0.5f;
+	}
+	return result;
+}
+
 //-------------------------------------------------------------------------------------------------
 // CPerlinNoise2D
 //-------------------------------------------------------------------------------------------------

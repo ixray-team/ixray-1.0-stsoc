@@ -50,8 +50,6 @@ private:
 	void				static_wm_destroy		(static_wallmark*	W	);
 
 	void				skeleton_wm_render		(intrusive_ptr<CSkeletonWallmark>, FVF::LIT* &V);
-
-	void				clear					();
 public:
 						CWallmarksEngine		();
 						~CWallmarksEngine		();
@@ -62,4 +60,6 @@ public:
 
 	// render
 	void				Render					();
+
+	void				clear					();
 };

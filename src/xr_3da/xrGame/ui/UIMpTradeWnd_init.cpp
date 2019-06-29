@@ -26,6 +26,7 @@ CUIMpTradeWnd::CUIMpTradeWnd()
 {
 	m_money								= 0;
 	g_mp_restrictions.InitGroups		();
+	m_bIgnoreMoneyAndRank				= false;
 }
 
 CUIMpTradeWnd::~CUIMpTradeWnd()
@@ -77,6 +78,7 @@ void CUIMpTradeWnd::Init(const shared_str& sectionName, const shared_str& sectio
 	m_btns_preset[1]					= xr_new<CUI3tButton>();AttachChild(m_btns_preset[1]	);		m_btns_preset[1]->SetAutoDelete	(true);
 	m_btns_preset[2]					= xr_new<CUI3tButton>();AttachChild(m_btns_preset[2]	);		m_btns_preset[2]->SetAutoDelete	(true);
 	m_btns_preset[3]					= xr_new<CUI3tButton>();AttachChild(m_btns_preset[3]	);		m_btns_preset[3]->SetAutoDelete	(true);
+	m_btns_preset[4]					= xr_new<CUI3tButton>();AttachChild(m_btns_preset[4]	);		m_btns_preset[4]->SetAutoDelete	(true);
 	m_btns_save_preset[0]				= xr_new<CUI3tButton>();AttachChild(m_btns_save_preset[0]);		m_btns_save_preset[0]->SetAutoDelete(true);
 	m_btns_save_preset[1]				= xr_new<CUI3tButton>();AttachChild(m_btns_save_preset[1]);		m_btns_save_preset[1]->SetAutoDelete(true);
 	m_btns_save_preset[2]				= xr_new<CUI3tButton>();AttachChild(m_btns_save_preset[2]);		m_btns_save_preset[2]->SetAutoDelete(true);
@@ -99,6 +101,7 @@ void CUIMpTradeWnd::Init(const shared_str& sectionName, const shared_str& sectio
 	CUIXmlInit::Init3tButton			(xml_doc, "btn_preset_2",		0, m_btns_preset[2]		);
 	CUIXmlInit::Init3tButton			(xml_doc, "btn_preset_3",		0, m_btns_preset[3]		);
 	CUIXmlInit::Init3tButton			(xml_doc, "btn_last_set",		0, m_btns_preset[0]		);
+	CUIXmlInit::Init3tButton			(xml_doc, "btn_preset_def",		0, m_btns_preset[4]		);
 	CUIXmlInit::Init3tButton			(xml_doc, "btn_save_preset_1",	0, m_btns_save_preset[0]);
 	CUIXmlInit::Init3tButton			(xml_doc, "btn_save_preset_2",	0, m_btns_save_preset[1]);
 	CUIXmlInit::Init3tButton			(xml_doc, "btn_save_preset_3",	0, m_btns_save_preset[2]);
@@ -144,6 +147,7 @@ void CUIMpTradeWnd::Init(const shared_str& sectionName, const shared_str& sectio
 	AddCallback							("btn_preset_1",	BUTTON_CLICKED,		CUIWndCallback::void_function	(this,	&CUIMpTradeWnd::OnBtnPreset1Clicked		));
 	AddCallback							("btn_preset_2",	BUTTON_CLICKED,		CUIWndCallback::void_function	(this,	&CUIMpTradeWnd::OnBtnPreset2Clicked		));
 	AddCallback							("btn_preset_3",	BUTTON_CLICKED,		CUIWndCallback::void_function	(this,	&CUIMpTradeWnd::OnBtnPreset3Clicked		));
+	AddCallback							("btn_preset_def",	BUTTON_CLICKED,		CUIWndCallback::void_function	(this,	&CUIMpTradeWnd::OnBtnPresetDefaultClicked	));
 	AddCallback							("btn_last_set",	BUTTON_CLICKED,		CUIWndCallback::void_function	(this,	&CUIMpTradeWnd::OnBtnLastSetClicked		));
 	AddCallback							("btn_save_preset_1",BUTTON_CLICKED,		CUIWndCallback::void_function	(this,	&CUIMpTradeWnd::OnBtnSave1PresetClicked	));
 	AddCallback							("btn_save_preset_2",BUTTON_CLICKED,		CUIWndCallback::void_function	(this,	&CUIMpTradeWnd::OnBtnSave2PresetClicked	));
@@ -175,6 +179,9 @@ void CUIMpTradeWnd::Init(const shared_str& sectionName, const shared_str& sectio
 	m_static_player_money				= xr_new<CUIStatic>(); AttachChild(m_static_player_money); m_static_player_money->SetAutoDelete(true);
 	CUIXmlInit::InitStatic				(xml_doc, "static_player_money",					0, m_static_player_money);
 
+	m_static_curr_items_money			= xr_new<CUIStatic>(); AttachChild(m_static_curr_items_money); m_static_curr_items_money->SetAutoDelete(true);
+	CUIXmlInit::InitStatic				(xml_doc, "static_curr_items_money",					0, m_static_curr_items_money);
+	
 // preset money indicators
 	m_static_preset_money[0]			= xr_new<CUIStatic>(); AttachChild(m_static_preset_money[0]); m_static_preset_money[0]->SetAutoDelete(true);
 	CUIXmlInit::InitStatic				(xml_doc, "static_preset_money_last",					0, m_static_preset_money[0]);
@@ -184,7 +191,16 @@ void CUIMpTradeWnd::Init(const shared_str& sectionName, const shared_str& sectio
 	CUIXmlInit::InitStatic				(xml_doc, "static_preset_money_2",					0, m_static_preset_money[2]);
 	m_static_preset_money[3]			= xr_new<CUIStatic>(); AttachChild(m_static_preset_money[3]); m_static_preset_money[3]->SetAutoDelete(true);
 	CUIXmlInit::InitStatic				(xml_doc, "static_preset_money_3",					0, m_static_preset_money[3]);
+	m_static_preset_money[4]			= xr_new<CUIStatic>(); AttachChild(m_static_preset_money[4]); m_static_preset_money[4]->SetAutoDelete(true);
+	CUIXmlInit::InitStatic				(xml_doc, "static_preset_money_def",					0, m_static_preset_money[4]);
 // preset money indicators
+
+	m_item_color_restr_rank					= CUIXmlInit::GetColor	(xml_doc, "item_color_restr_rank",	0, color_rgba(255,255,255,255));
+	m_item_color_restr_money				= CUIXmlInit::GetColor	(xml_doc, "item_color_restr_money",	0, color_rgba(255,255,255,255));
+	m_item_color_normal						= CUIXmlInit::GetColor	(xml_doc, "item_color_normal",		0, color_rgba(255,255,255,255));
+	
+	m_text_color_money_positive				= CUIXmlInit::GetColor	(xml_doc, "money_color_positive",	0, color_rgba(255,255,255,255));
+	m_text_color_money_negative				= CUIXmlInit::GetColor	(xml_doc, "money_color_negative",	0, color_rgba(255,255,255,255));
 
 	m_static_player_rank				= xr_new<CUIStatic>(); AttachChild(m_static_player_rank); m_static_player_rank->SetAutoDelete(true);
 	CUIXmlInit::InitStatic				(xml_doc, "static_player_rank",					0, m_static_player_rank);
@@ -194,6 +210,10 @@ void CUIMpTradeWnd::Init(const shared_str& sectionName, const shared_str& sectio
 
 	m_static_information				= xr_new<CUIStatic>(); AttachChild(m_static_information); m_static_information->SetAutoDelete(true);
 	CUIXmlInit::InitStatic				(xml_doc, "static_info",					0, m_static_information);
+
+	m_static_money_change				= xr_new<CUIStatic>(); AttachChild(m_static_money_change); m_static_money_change->SetAutoDelete(true);
+	CUIXmlInit::InitStatic				(xml_doc, "static_money_change",					0, m_static_money_change);
+	
 	m_item_info							= xr_new<CUIItemInfo>();
 	AttachChild							(m_item_info); m_item_info->SetAutoDelete(true);
 	m_item_info->Init					(0, 0, 100, 100, "buy_menu_item.xml");

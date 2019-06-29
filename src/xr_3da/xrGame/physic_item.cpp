@@ -85,7 +85,7 @@ BOOL CPhysicItem::net_Spawn			(CSE_Abstract* DC)
 	if (0xffff == abstract->ID_Parent)
 	{
 		if(!PPhysicsShell())setup_physic_shell	();
-		else processing_deactivate();//.
+		//else processing_deactivate();//.
 	}
 
 	setVisible				(TRUE);

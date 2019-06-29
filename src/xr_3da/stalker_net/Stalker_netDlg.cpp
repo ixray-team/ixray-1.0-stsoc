@@ -23,7 +23,7 @@ CStalker_netDlg::CStalker_netDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(ICON_ID/*IDR_MAINFRAME*/);
 	m_pServerDlg = NULL;
 	m_pClientDlg = NULL;
-	m_pCDKeyDlg = NULL;
+	m_pCDKeyDlg = NULL;	
 }
 
 void CStalker_netDlg::DoDataExchange(CDataExchange* pDX)
@@ -37,6 +37,7 @@ void CStalker_netDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_NOPREFETCH, m_pPrefetch);
 	DDX_Control(pDX, IDC_R2, m_pR2);
 	DDX_Control(pDX, IDC_DISTORT, m_pDistort);
+	DDX_Control(pDX, IDC_LOGSPATH, m_pLogsPath);
 }
 
 BEGIN_MESSAGE_MAP(CStalker_netDlg, CDialog)
@@ -48,6 +49,7 @@ BEGIN_MESSAGE_MAP(CStalker_netDlg, CDialog)
 //ON_WM_KEYDOWN()
 ON_WM_CLOSE()
 //ON_BN_CLICKED(IDC_BUILD2, OnBnClickedBuild2)
+ON_BN_CLICKED(IDC_LOGSPATH, OnBnClickedLogsPath)
 END_MESSAGE_MAP()
 
 
@@ -114,8 +116,10 @@ BOOL CStalker_netDlg::OnInitDialog()
 	tcItem.pszText = _T("Server");
 	m_pTabCtrl.InsertItem(0, &tcItem);
 
+#ifndef NDEBUG
 	tcItem.pszText = _T("Client");
 	m_pTabCtrl.InsertItem(1, &tcItem);
+#endif
 
 	m_pTabCtrl.SetCurSel(0);
 	//---------------------------------------
@@ -164,6 +168,8 @@ BOOL CStalker_netDlg::OnInitDialog()
 	char CDKeyStr[1024];
 	GetCDKey(CDKeyStr);
 	m_pCDKeyBtn.SetWindowText(CDKeyStr);
+
+	m_pLogsPath.SetWindowText("");
 	//-----------------------------------------------
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -265,18 +271,22 @@ void CStalker_netDlg::OnClose()
 	m_bCloseAllowed = true;
 	CDialog::OnClose();
 }
+#define REGISTRY_BASE	HKEY_LOCAL_MACHINE
+#define REGISTRY_PATH	"Software\\GSC Game World\\STALKER-SHOC\\"
+#define REGISTRY_VALUE_GSCDKEY	"InstallCDKEY"
+#define REGISTRY_VALUE_VERSION	"InstallVers"
 
 void	CStalker_netDlg::GetCDKey(char* CDKeyStr)
 {
 	HKEY KeyCDKey = 0;
-	long res = RegOpenKeyEx(HKEY_CURRENT_USER, 
-		REGISTRY_CDKEY_STR, 0, KEY_READ, &KeyCDKey);
+	long res = RegOpenKeyEx(REGISTRY_BASE, 
+		REGISTRY_PATH, 0, KEY_READ, &KeyCDKey);
 
 	DWORD KeyValueSize = 128;
 	DWORD KeyValueType = REG_SZ;
 	if (res == ERROR_SUCCESS && KeyCDKey != 0)
 	{
-		res = RegQueryValueEx(KeyCDKey, "value", NULL, &KeyValueType, (LPBYTE)CDKeyStr, &KeyValueSize);
+		res = RegQueryValueEx(KeyCDKey, REGISTRY_VALUE_GSCDKEY, NULL, &KeyValueType, (LPBYTE)CDKeyStr, &KeyValueSize);
 	};
 
 	if (res == ERROR_PATH_NOT_FOUND ||
@@ -289,9 +299,11 @@ void	CStalker_netDlg::GetCDKey(char* CDKeyStr)
 
 void	CStalker_netDlg::CreateCDKeyEntry()
 {
+	return;
+
 	HKEY KeyCDKey;
 
-	long res = RegOpenKeyEx(HKEY_CURRENT_USER, 
+	long res = RegOpenKeyEx(REGISTRY_BASE, 
 		REGISTRY_CDKEY_STR, 0, KEY_ALL_ACCESS, &KeyCDKey);
 
 	switch (res)
@@ -299,11 +311,11 @@ void	CStalker_netDlg::CreateCDKeyEntry()
 	case ERROR_FILE_NOT_FOUND:
 		{
 			HKEY hKey;
-			res = RegOpenKeyEx(HKEY_CURRENT_USER, 
-				"", 0, KEY_ALL_ACCESS, &hKey);
+			res = RegOpenKeyEx(REGISTRY_BASE, 
+				REGISTRY_PATH, 0, KEY_ALL_ACCESS, &hKey);
 			if (res != ERROR_SUCCESS) return;
 			DWORD xres;
-			res = RegCreateKeyEx(hKey, REGISTRY_CDKEY_STR, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS,
+			res = RegCreateKeyEx(hKey, REGISTRY_PATH, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS,
 				NULL, &KeyCDKey, &xres);
 
 			if (hKey) RegCloseKey(hKey);
@@ -314,13 +326,13 @@ void	CStalker_netDlg::CreateCDKeyEntry()
 	char KeyValue[1024] = "";
 	DWORD KeyValueSize = 1023;
 	DWORD KeyValueType = REG_SZ;
-	res = RegQueryValueEx(KeyCDKey, "value", NULL, &KeyValueType, (LPBYTE)KeyValue, &KeyValueSize);
+	res = RegQueryValueEx(KeyCDKey, REGISTRY_VALUE_GSCDKEY, NULL, &KeyValueType, (LPBYTE)KeyValue, &KeyValueSize);
 
 	switch (res)
 	{
 	case ERROR_FILE_NOT_FOUND:
 		{
-			res = RegSetValueEx(KeyCDKey, "value", NULL, KeyValueType, (LPBYTE)KeyValue, 0);
+			res = RegSetValueEx(KeyCDKey, REGISTRY_VALUE_GSCDKEY, NULL, KeyValueType, (LPBYTE)KeyValue, 0);
 		}break;
 	};	
 
@@ -338,13 +350,13 @@ void	CStalker_netDlg::CallToEnterCDKey()
 		HKEY KeyCDKey = 0;
 
 		long res = RegOpenKeyEx(HKEY_CURRENT_USER, 
-			REGISTRY_CDKEY_STR, 0, KEY_ALL_ACCESS, &KeyCDKey);
+			REGISTRY_PATH, 0, KEY_ALL_ACCESS, &KeyCDKey);
 
 		if (res == ERROR_SUCCESS && KeyCDKey != 0)
 		{
 			DWORD KeyValueSize = (DWORD) xr_strlen(NewCDKey);
 			DWORD KeyValueType = REG_SZ;
-			res = RegSetValueEx(KeyCDKey, "value", NULL, KeyValueType, (LPBYTE)NewCDKey, KeyValueSize);
+			res = RegSetValueEx(KeyCDKey, REGISTRY_VALUE_GSCDKEY, NULL, KeyValueType, (LPBYTE)NewCDKey, KeyValueSize);
 		}
 
 		if (KeyCDKey) RegCloseKey(KeyCDKey);
@@ -362,3 +374,26 @@ void	CStalker_netDlg::CallToEnterCDKey()
 //{
 //	// TODO: Add your control notification handler code here
 //}
+
+void CStalker_netDlg::OnBnClickedLogsPath()
+{
+	char NewPath[MAX_PATH] = "";
+	m_pLogsPath.GetWindowText(NewPath, MAX_PATH);
+	/*
+	ITEMIDLIST InitialDir;
+	ULONG tmp;
+	SHParseDisplayName(NewPath, NULL, &InitialDir, 0, &tmp);
+*/
+	CoInitialize( NULL);//, COINIT_APARTMENTTHREADED );
+	BROWSEINFO BIS; ZeroMemory(&BIS, sizeof(BIS));
+	BIS.hwndOwner = NULL;
+	BIS.pszDisplayName = NewPath;
+	BIS.lpszTitle = "Select root folder to store logs";
+	BIS.ulFlags = 0;
+
+	LPITEMIDLIST res = SHBrowseForFolder(&BIS);
+	if (res == NULL) return;	
+	if (!SHGetPathFromIDList(res, NewPath)) return;
+	strcat(NewPath, "\\");
+	m_pLogsPath.SetWindowText(NewPath);
+}

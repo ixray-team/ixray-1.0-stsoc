@@ -9,7 +9,7 @@ class XRCORE_API				pauseMngr
 	xr_vector<CTimer_paused*>	m_timers;
 	BOOL						m_paused;
 public:
-			pauseMngr			():m_paused(FALSE){}
+			pauseMngr			();
 	BOOL	Paused				(){return m_paused;};
 	void	Pause				(BOOL b);
 	void	Register			(CTimer_paused* t);

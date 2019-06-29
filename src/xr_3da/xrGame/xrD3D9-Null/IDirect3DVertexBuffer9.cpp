@@ -52,6 +52,7 @@ ULONG			xrIDirect3DVertexBuffer9::Release()
 	{
 		delete[]	m_pBuffer;
 		delete this;
+		return ULONG_Proc(-1);
 	}
 	return ULONG_Proc(m_refCount);
 }

@@ -2,12 +2,12 @@
 #include "alife_space.h"
 #include "hit.h"
 #include "ode_include.h"
-#include "../bone.h"
-#include "NET_utils.h"
+#include "..\bone.h"
+#include "../../xrNetServer/net_utils.h"
 #include "xrMessages.h"
 #include "Level.h"
 
-SHit::SHit(float aPower,Fvector &adir,CObject *awho, u16 aelement, Fvector ap_in_bone_space, float aimpulse,  ALife::EHitType ahit_type, float aAP)
+SHit::SHit(float aPower,Fvector &adir,CObject *awho, u16 aelement, Fvector ap_in_bone_space, float aimpulse,  ALife::EHitType ahit_type, float aAP, bool AimBullet)
 {
 		power					=aPower									;
 		dir						.set(adir)								;
@@ -22,8 +22,9 @@ SHit::SHit(float aPower,Fvector &adir,CObject *awho, u16 aelement, Fvector ap_in
 		hit_type				=ahit_type								;
 		ap						= aAP									;
 		PACKET_TYPE				= 0										;
-		BulletID				= 0;
-		SenderID				= 0;
+		BulletID				= 0										;
+		SenderID				= 0										;
+		aim_bullet				= AimBullet								;
 }
 
 SHit::SHit()
@@ -51,6 +52,7 @@ void SHit::invalidate()
 	ap						= 0.0f;	
 	BulletID				= 0;
 	SenderID				= 0;
+	aim_bullet				= false									;
 }
 
 bool SHit::is_valide() const
@@ -85,6 +87,7 @@ void SHit::Read_Packet_Cont		(NET_Packet	Packet)
 	Packet.r_u16			(boneID);
 	Packet.r_vec3			(p_in_bone_space);
 	Packet.r_float			(impulse);
+	aim_bullet				= Packet.r_u16()!=0;
 	hit_type				= (ALife::EHitType)Packet.r_u16();	//hit type
 
 	if (hit_type == ALife::eHitTypeFireWound)
@@ -107,6 +110,7 @@ void SHit::Write_Packet_Cont		(NET_Packet	&Packet)
 	Packet.w_u16		(boneID);
 	Packet.w_vec3		(p_in_bone_space);
 	Packet.w_float		(impulse);
+	Packet.w_u16		(aim_bullet!=0);
 	Packet.w_u16		(u16(hit_type&0xffff));	
 	if (hit_type == ALife::eHitTypeFireWound)
 	{

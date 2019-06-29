@@ -32,7 +32,7 @@ public:
 	adopt_sampler&			_clamp			()						{ if (C) C->i_Address	(stage,D3DTADDRESS_CLAMP);									return *this;	}
 	adopt_sampler&			_wrap			()						{ if (C) C->i_Address	(stage,D3DTADDRESS_WRAP);									return *this;	}
 	adopt_sampler&			_mirror			()						{ if (C) C->i_Address	(stage,D3DTADDRESS_MIRROR);									return *this;	}
-	adopt_sampler&			_f_anisotropic	()						{ if (C) C->i_Filter	(stage,D3DTEXF_ANISOTROPIC,D3DTEXF_LINEAR,D3DTEXF_LINEAR);	return *this;	}
+	adopt_sampler&			_f_anisotropic	()						{ if (C) C->i_Filter	(stage,D3DTEXF_ANISOTROPIC,D3DTEXF_LINEAR,D3DTEXF_ANISOTROPIC);	return *this;	}
 	adopt_sampler&			_f_trilinear	()						{ if (C) C->i_Filter	(stage,D3DTEXF_LINEAR,D3DTEXF_LINEAR,D3DTEXF_LINEAR);		return *this;	}
 	adopt_sampler&			_f_bilinear		()						{ if (C) C->i_Filter	(stage,D3DTEXF_LINEAR,D3DTEXF_POINT, D3DTEXF_LINEAR);		return *this;	}
 	adopt_sampler&			_f_linear		()						{ if (C) C->i_Filter	(stage,D3DTEXF_LINEAR,D3DTEXF_NONE,  D3DTEXF_LINEAR);		return *this;	}
@@ -84,10 +84,51 @@ void LuaError(lua_State* L)
 	Debug.fatal(DEBUG_INFO,"LUA error: %s",lua_tostring(L,-1));
 }
 
+#ifndef PURE_ALLOC
+#	ifndef USE_MEMORY_MONITOR
+#		define USE_DL_ALLOCATOR
+#	endif // USE_MEMORY_MONITOR
+#endif // PURE_ALLOC
+
+#ifndef USE_DL_ALLOCATOR
+	static void *lua_alloc_xr	(void *ud, void *ptr, size_t osize, size_t nsize) {
+	(void)ud;
+	(void)osize;
+	if (nsize == 0) {
+		xr_free	(ptr);
+		return	NULL;
+	}
+	else
+#	ifdef DEBUG_MEMORY_NAME
+		return Memory.mem_realloc		(ptr, nsize, "LUA:Render");
+#	else // DEBUG_MEMORY_MANAGER
+		return Memory.mem_realloc		(ptr, nsize);
+#	endif // DEBUG_MEMORY_MANAGER
+	}
+#else // USE_DL_ALLOCATOR
+#	include "doug_lea_memory_allocator.h"
+
+	static void *lua_alloc_dl	(void *ud, void *ptr, size_t osize, size_t nsize) {
+	(void)ud;
+	(void)osize;
+	if (nsize == 0)	{	dlfree			(ptr);	 return	NULL;  }
+	else				return dlrealloc	(ptr, nsize);
+	}
+
+	ENGINE_API u32 engine_lua_memory_usage	()
+	{
+		return			((u32)dlmallinfo().uordblks);
+	}
+#endif // USE_DL_ALLOCATOR
+
 // export
 void	CResourceManager::LS_Load			()
 {
-	LSVM			= lua_open();
+#ifndef USE_DL_ALLOCATOR
+	LSVM			= lua_newstate(lua_alloc_xr, NULL);
+#else // USE_XR_ALLOCAOR
+	LSVM			= lua_newstate(lua_alloc_dl, NULL);
+#endif // USE_XR_ALLOCAOR
 	if (!LSVM)		{
 		Msg			("! ERROR : Cannot initialize LUA VM!");
 		return;
@@ -99,8 +140,7 @@ void	CResourceManager::LS_Load			()
 	luaopen_string	(LSVM);
 	luaopen_math	(LSVM);
 #ifdef USE_JIT
-	luaopen_jit				(LSVM);
-	luaJIT_setmode			(LSVM,LUAJIT_MODE_ENGINE,LUAJIT_MODE_OFF);
+	luaopen_jit		(LSVM);
 #endif
 
 	luabind::open						(LSVM);

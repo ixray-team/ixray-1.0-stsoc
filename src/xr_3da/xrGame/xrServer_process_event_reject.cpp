@@ -28,7 +28,7 @@ bool xrServer::Process_event_reject	(NET_Packet& P, ClientID sender, u32 time, u
 
 	// Rebuild parentness
 	if (0xffff == e_entity->ID_Parent) {
-		Msg				("! ERROR: can't detach independant object. entity[%s:%d], parent[%s:%d], section[%s]",
+		Msg				("~ ERROR: can't detach independant object. entity[%s:%d], parent[%s:%d], section[%s]",
 			e_entity->name_replace(),id_entity,e_parent->name_replace(),id_parent, *e_entity->s_name);
 		return			(false);
 	}

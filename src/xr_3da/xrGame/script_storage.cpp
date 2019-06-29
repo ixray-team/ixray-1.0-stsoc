@@ -54,9 +54,13 @@ LPCSTR	file_header = 0;
 #	include "script_debugger.h"
 #endif
 
-//#define USE_XR_ALLOCATOR
+#ifndef PURE_ALLOC
+#	ifndef USE_MEMORY_MONITOR
+#		define USE_DL_ALLOCATOR
+#	endif // USE_MEMORY_MONITOR
+#endif // PURE_ALLOC
 
-#ifdef USE_XR_ALLOCATOR
+#ifndef USE_DL_ALLOCATOR
 static void *lua_alloc_xr	(void *ud, void *ptr, size_t osize, size_t nsize) {
   (void)ud;
   (void)osize;
@@ -65,20 +69,25 @@ static void *lua_alloc_xr	(void *ud, void *ptr, size_t osize, size_t nsize) {
     return	NULL;
   }
   else
-#ifdef DEBUG_MEMORY_MANAGER
+#ifdef DEBUG_MEMORY_NAME
     return Memory.mem_realloc		(ptr, nsize, "LUA");
 #else // DEBUG_MEMORY_MANAGER
     return Memory.mem_realloc		(ptr, nsize);
 #endif // DEBUG_MEMORY_MANAGER
 }
-#else // USE_XR_ALLOCATOR
+#else // USE_DL_ALLOCATOR
 static void *lua_alloc_dl	(void *ud, void *ptr, size_t osize, size_t nsize) {
   (void)ud;
   (void)osize;
   if (nsize == 0)	{	dlfree			(ptr);	 return	NULL;  }
   else				return dlrealloc	(ptr, nsize);
 }
-#endif // USE_XR_ALLOCATOR
+
+u32 game_lua_memory_usage	()
+{
+	return					((u32)dlmallinfo().uordblks);
+}
+#endif // USE_DL_ALLOCATOR
 
 CScriptStorage::CScriptStorage		()
 {
@@ -89,12 +98,24 @@ CScriptStorage::CScriptStorage		()
 #endif // DEBUG
 	
 	m_virtual_machine		= 0;
+}
 
-#ifdef USE_XR_ALLOCATOR
+CScriptStorage::~CScriptStorage		()
+{
+	if (m_virtual_machine)
+		lua_close			(m_virtual_machine);
+}
+
+void CScriptStorage::reinit	()
+{
+	if (m_virtual_machine)
+		lua_close			(m_virtual_machine);
+
+#ifndef USE_DL_ALLOCATOR
 	m_virtual_machine		= lua_newstate(lua_alloc_xr, NULL);
-#else // USE_XR_ALLOCATOR
+#else // USE_DL_ALLOCATOR
 	m_virtual_machine		= lua_newstate(lua_alloc_dl, NULL);
-#endif // USE_XR_ALLOCATOR
+#endif // USE_DL_ALLOCATOR
 
 	if (!m_virtual_machine) {
 		Msg					("! ERROR : Cannot initialize script virtual machine!");
@@ -117,7 +138,7 @@ CScriptStorage::CScriptStorage		()
 //		luaopen_coco		(lua());
 //		luaJIT_setmode		(lua(),2,LUAJIT_MODE_DEBUG);
 	}
-		else {
+	else {
 		luaopen_jit			(lua());
 		luaopen_coco		(lua());
 	}
@@ -129,13 +150,7 @@ CScriptStorage::CScriptStorage		()
 		file_header			= file_header_old;
 }
 
-CScriptStorage::~CScriptStorage		()
-{
-	if (m_virtual_machine)
-		lua_close			(m_virtual_machine);
-}
-
-int CScriptStorage::vscript_log			(ScriptStorage::ELuaMessageType tLuaMessageType, LPCSTR caFormat, va_list marker)
+int CScriptStorage::vscript_log		(ScriptStorage::ELuaMessageType tLuaMessageType, LPCSTR caFormat, va_list marker)
 {
 #ifndef NO_XRGAME_SCRIPT_ENGINE
 #	ifdef DEBUG

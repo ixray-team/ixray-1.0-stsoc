@@ -10,6 +10,7 @@ public:
 	CUIMessageBoxEx();
 	virtual ~CUIMessageBoxEx();
 			void SetText(LPCSTR text);
+			LPCSTR GetText ();
 	virtual void Init(LPCSTR xml_template);
 	virtual void SendMessage(CUIWindow* pWnd, s16 msg, void* pData = NULL);
 

@@ -1,8 +1,3 @@
-//////////////////////////////////////////////////////////////////////
-// UIPdaListItem.cpp: элемент окна списка в PDA
-// для отображения информации о контакте PDA
-//////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
 
 #include "UIPdaListItem.h"
@@ -18,6 +13,7 @@
 #include "UIFrameWindow.h"
 #include "..\InventoryOwner.h"
 #include "UICharacterInfo.h"
+#include "UIStatic.h"
 
 #define			PDA_CONTACT_CHAR		"pda_character.xml"
 

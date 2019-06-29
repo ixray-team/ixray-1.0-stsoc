@@ -176,9 +176,17 @@ namespace CDB
 		void			clear			()	{ verts.clear(); faces.clear();	}
 	};
 
+	struct non_copyable {
+						non_copyable	() {}
+	private:
+						non_copyable	(const non_copyable &) {}
+						non_copyable	&operator=		(const non_copyable &) {}
+	};
+
+#pragma warning(push)
+#pragma warning(disable:4275)
 	const u32 clpMX = 24, clpMY=16, clpMZ=24;
-	class XRCDB_API CollectorPacked
-	{
+	class XRCDB_API CollectorPacked : public non_copyable {
 		typedef xr_vector<u32>		DWORDList;
 		typedef DWORDList::iterator	DWORDIt;
 
@@ -191,7 +199,12 @@ namespace CDB
 
 		u32					VPack		( const Fvector& V);
 	public:
-		CollectorPacked		(const Fbox &bb, int apx_vertices=5000, int apx_faces=5000);
+		CollectorPacked	(const Fbox &bb, int apx_vertices=5000, int apx_faces=5000);
+
+		//		__declspec(noinline) CollectorPacked &operator=	(const CollectorPacked &object)
+		//		{
+		//			verts
+		//		}
 
 		void				add_face	( const Fvector& v0, const Fvector& v1, const Fvector& v2, u16 material, u16 sector );
 		void				add_face_D	( const Fvector& v0, const Fvector& v1, const Fvector& v2, u32 dummy );
@@ -202,6 +215,7 @@ namespace CDB
 		size_t				getTS()		{ return faces.size();		}
 		void				clear();
 	};
+#pragma warning(pop)
 };
 
 #pragma pack(pop)

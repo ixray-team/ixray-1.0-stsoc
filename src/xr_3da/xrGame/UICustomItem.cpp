@@ -74,8 +74,9 @@ void CUICustomItem::Render(FVF::TL*& Pointer, const Fvector2& pos, u32 color)
 }
 //--------------------------------------------------------------------
 
-void CUICustomItem::Render(FVF::TL*& Pointer, const Fvector2& pos, u32 color, float angle)
+void CUICustomItem::Render(FVF::TL*& Pointer, const Fvector2& pos_ns, u32 color, float angle)
 {
+//.	angle = -0.3f;
 	CTexture* T		= RCache.get_ActiveTexture(0);
 	Fvector2		ts;
 	Fvector2		hp;
@@ -89,8 +90,11 @@ void CUICustomItem::Render(FVF::TL*& Pointer, const Fvector2& pos, u32 color, fl
 		uFlags		|= flValidOriginalRect;
 	}
 
-	Fvector2		pivot,offset,SZ;
-	UI()->ClientToScreenScaled			(SZ, iVisRect.x2, iVisRect.y2);
+	Fvector2							pivot,offset,SZ;
+	SZ.set								(iVisRect.rb);
+
+//	UI()->ClientToScreenScaled			(SZ, iVisRect.x2, iVisRect.y2);
+
 	float cosA							= _cos(angle);
 	float sinA							= _sin(angle);
 
@@ -98,8 +102,10 @@ void CUICustomItem::Render(FVF::TL*& Pointer, const Fvector2& pos, u32 color, fl
 	if(!(uFlags&flValidHeadingPivot))	pivot.set(iVisRect.x2/2.f, iVisRect.y2/2.f);
 	else								pivot.set(iHeadingPivot.x, iHeadingPivot.y);
 
-	UI()->ClientToScreenScaled			(pivot, pivot.x, pivot.y);
-	offset.set							(pos.x,pos.y);
+//.	UI()->ClientToScreenScaled			(pivot, pivot.x, pivot.y);
+	pivot.set							(pivot);
+	offset.set							(pos_ns);
+
 	Fvector2							LTt,RBt;
 	LTt.set								(iOriginalRect.x1/ts.x+hp.x, iOriginalRect.y1/ts.y+hp.y);
 	RBt.set								(iOriginalRect.x2/ts.x+hp.x, iOriginalRect.y2/ts.y+hp.y);
@@ -129,7 +135,11 @@ void CUICustomItem::Render(FVF::TL*& Pointer, const Fvector2& pos, u32 color, fl
 	sPoly2D* R		= UI()->ScreenFrustum().ClipPoly(S,D);
 	if (R&&R->size())
 		for (u32 k=0; k<R->size(); k++,Pointer++)
-			Pointer->set	((*R)[k].pt.x, (*R)[k].pt.y,	color, (*R)[k].uv.x, (*R)[k].uv.y); 
+		{
+			Fvector2 _pt;
+			UI()->ClientToScreenScaled			(_pt, (*R)[k].pt.x, (*R)[k].pt.y);
+			Pointer->set						(_pt.x, _pt.y,	color, (*R)[k].uv.x, (*R)[k].uv.y); 
+		}
 }
 
 Frect CUICustomItem::GetOriginalRectScaled()

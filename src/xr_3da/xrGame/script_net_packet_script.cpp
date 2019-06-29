@@ -9,7 +9,7 @@
 #include "stdafx.h"
 #include "script_net_packet.h"
 #include "script_space.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include <luabind/operator.hpp>
 //#include <luabind/adopt_policy.hpp>
 #include <luabind/out_value_policy.hpp>

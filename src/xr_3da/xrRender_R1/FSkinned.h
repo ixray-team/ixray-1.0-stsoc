@@ -35,6 +35,8 @@ private:
 	typedef Fvisual			inherited1;
 	typedef CSkeletonX_ext	inherited2;
 public:
+							CSkeletonX_ST	()	{}
+	virtual					~CSkeletonX_ST	()	{}
 	virtual void			Render			(float LOD);
 	virtual void			Load			(const char* N, IReader *data, u32 dwFlags);
 	virtual void			Copy			(IRender_Visual *pFrom);
@@ -42,6 +44,9 @@ public:
 	virtual void			AfterLoad		(CKinematics* parent, u16 child_idx);
 	virtual BOOL			PickBone		(Fvector& normal, float& dist, const Fvector& start, const Fvector& dir, u16 bone_id);
 	virtual void			FillVertices	(const Fmatrix& view, CSkeletonWallmark& wm, const Fvector& normal, float size, u16 bone_id);
+private:
+	CSkeletonX_ST				(const CSkeletonX_ST& other);
+	void	operator=			( const CSkeletonX_ST& other);
 };
 
 class CSkeletonX_PM			: public FProgressive, public CSkeletonX_ext
@@ -50,6 +55,8 @@ private:
 	typedef FProgressive	inherited1;
 	typedef CSkeletonX_ext	inherited2;
 public:
+							CSkeletonX_PM	()	{}
+	virtual					~CSkeletonX_PM	()	{}
 	virtual void			Render			(float LOD);
 	virtual void			Load			(const char* N, IReader *data, u32 dwFlags);
 	virtual void			Copy			(IRender_Visual *pFrom);
@@ -57,6 +64,9 @@ public:
 	virtual void			AfterLoad		(CKinematics* parent, u16 child_idx);
 	virtual BOOL			PickBone		(Fvector& normal, float& dist, const Fvector& start, const Fvector& dir, u16 bone_id);
 	virtual void			FillVertices	(const Fmatrix& view, CSkeletonWallmark& wm, const Fvector& normal, float size, u16 bone_id);
+private:
+	CSkeletonX_PM				(const CSkeletonX_PM& other);
+	void	operator=			( const CSkeletonX_PM& other);
 };
 
 #endif // FSkinnedH

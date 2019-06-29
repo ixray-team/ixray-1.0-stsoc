@@ -39,6 +39,7 @@ public:
 	virtual bool StopAnyMove					(){return true;}
 	virtual bool NeedCursor						()const {return true;}
 	virtual bool WorkInPause					()const {return m_bWorkInPause;}
+	virtual bool Dispatch						(int cmd, int param)				{return true;}
 };
 
 #endif // _UI_DIALOG_WND_H_

@@ -2,7 +2,7 @@
 
 #include "game_sv_mp.h"
 #include "inventory_space.h"
-#include "client_id.h"
+#include "../../xrNetServer/client_id.h"
 #include "Hit.h"
 
 class	game_sv_Deathmatch			: public game_sv_mp

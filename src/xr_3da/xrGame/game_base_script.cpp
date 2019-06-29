@@ -2,7 +2,7 @@
 #include "game_base.h"
 #include "script_space.h"
 #include "xrServer_script_macroses.h"
-#include "client_id.h"
+#include "../../xrNetServer/client_id.h"
 
 using namespace luabind;
 

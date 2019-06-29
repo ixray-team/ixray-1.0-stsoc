@@ -13,7 +13,7 @@
 #include "xrmessages.h"
 #include "physicsshellholder.h"
 #include "explosive.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include "PHWorld.h"
 #include "CharacterPhysicsSupport.h"
 extern CPHWorld*	ph_world;

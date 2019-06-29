@@ -2,7 +2,9 @@
 
 #include	"fixedmap.h"
 
-#define USE_DOUG_LEA_ALLOCATOR_FOR_RENDER
+#ifndef USE_MEMORY_MONITOR
+#	define USE_DOUG_LEA_ALLOCATOR_FOR_RENDER
+#endif // USE_MEMORY_MONITOR
 
 #ifdef USE_DOUG_LEA_ALLOCATOR_FOR_RENDER
 #	include	"doug_lea_memory_allocator.h"

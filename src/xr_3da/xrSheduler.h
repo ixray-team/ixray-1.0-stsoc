@@ -9,6 +9,7 @@ private:
 	{
 		u32			dwTimeForExecute;
 		u32			dwTimeOfLastExecute;
+		shared_str	scheduled_name;
 		ISheduled*	Object;
 		u32			dwPadding;				// for align-issues
 
@@ -26,6 +27,7 @@ private:
 	xr_vector<Item>			Items			;
 	xr_vector<Item>			ItemsProcessed	;
 	xr_vector<ItemReg>		Registration	;
+	bool					m_processing_now;
 
 	IC void			Push	(Item& I);
 	IC void			Pop		();
@@ -33,9 +35,8 @@ private:
 	{
 		return Items.front();
 	}
-
 	void			internal_Register		(ISheduled* A, BOOL RT=FALSE		);
-	void			internal_Unregister		(ISheduled* A, BOOL RT				);
+	bool			internal_Unregister		(ISheduled* A, BOOL RT, bool warn_on_not_found = true);
 	void			internal_Registration	();
 public:
 	u64				cycles_start;
@@ -45,6 +46,9 @@ public:
 	void			Process		();
 	void			Update		();
 
+#ifdef DEBUG
+	bool			Registered	(ISheduled *object) const;
+#endif // DEBUG
 	void			Register	(ISheduled* A, BOOL RT=FALSE		);
 	void			Unregister	(ISheduled* A						);
 	void			EnsureOrder	(ISheduled* Before, ISheduled* After);

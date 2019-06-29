@@ -228,7 +228,7 @@ void NET_Compressor::Initialize	(NET_Compressor_FREQ& compress, NET_Compressor_F
 u16 NET_Compressor::Compress	(BYTE* dest, BYTE* src, u32 count)
 {
 	VERIFY			(dest && src && count);
-	CopyMemory	(dest,src,count);
+	CopyMemory		(dest,src,count);
 	return u16		(count);
 
 	/*
@@ -258,7 +258,7 @@ u16 NET_Compressor::Compress	(BYTE* dest, BYTE* src, u32 count)
 u16 NET_Compressor::Decompress	(BYTE* dest, BYTE* src, u32 count)
 {
 	VERIFY			(dest && src && count);
-	CopyMemory	(dest,src,count);
+	CopyMemory		(dest,src,count);
 	return			u16(count);
 
 	/*

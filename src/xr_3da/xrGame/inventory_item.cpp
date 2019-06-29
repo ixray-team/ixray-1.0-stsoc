@@ -111,7 +111,7 @@ void CInventoryItem::Load(LPCSTR section)
 	m_name				= CStringTable().translate( pSettings->r_string(section, "inv_name") );
 	m_nameShort			= CStringTable().translate( pSettings->r_string(section, "inv_name_short"));
 
-	NameComplex			();
+//.	NameComplex			();
 	m_weight			= pSettings->r_float(section, "inv_weight");
 	R_ASSERT			(m_weight>=0.f);
 
@@ -136,8 +136,10 @@ void CInventoryItem::Load(LPCSTR section)
 	//время убирания объекта с уровня
 	m_dwItemRemoveTime			= READ_IF_EXISTS(pSettings, r_u32, section,"item_remove_time",			ITEM_REMOVE_TIME);
 
-	m_flags.set(FAllowSprint,	READ_IF_EXISTS	(pSettings, r_bool, section,"sprint_allowed",			TRUE));
+	m_flags.set					(FAllowSprint,READ_IF_EXISTS	(pSettings, r_bool, section,"sprint_allowed",			TRUE));
 	m_fControlInertionFactor	= READ_IF_EXISTS(pSettings, r_float,section,"control_inertion_factor",	1.0f);
+	m_icon_name					= READ_IF_EXISTS(pSettings, r_string,section,"icon_name",				NULL);
+
 }
 
 
@@ -167,7 +169,7 @@ const char* CInventoryItem::NameShort()
 {
 	return *m_nameShort;
 }
-
+/*
 LPCSTR CInventoryItem::NameComplex() 
 {
 	const char *l_name = Name();
@@ -187,7 +189,7 @@ LPCSTR CInventoryItem::NameComplex()
 
 	return *m_nameComplex;
 }
-
+*/
 bool CInventoryItem::Useful() const
 {
 	return CanTake();

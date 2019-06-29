@@ -76,29 +76,34 @@ _out         main                ( _input I )
 		// color 		= light.rgb + spec;
 
         // here should be distance fog
-        float3        pos                        = P.xyz;
-        float          distance        = length        (pos);
-        float         fog                 = saturate        (distance*fog_params.w + fog_params.x)        ;        //
-                        color                = lerp                (color,fog_color,fog)                  ;        //
-        half        skyblend        = fog*fog                                                ;
+        float3        	pos        		= P.xyz;
+        float         	distance		= length		(pos);
+        float         	fog				= saturate		(distance*fog_params.w + fog_params.x); //
+                      	color			= lerp     		(color,fog_color,fog);        			//
+        half        	skyblend		= saturate		(fog*fog);
 
 #ifdef         DBG_TMAPPING
-        color                        = D.xyz;
+        color                        	= D.xyz;
 #endif
 
         // final tone-mapping
 #ifdef        USE_VTF
-        half          tm_scale        = I.tc0.w;                // interpolated from VS
+        half          	tm_scale        = I.tc0.w;                // interpolated from VS
 #else
-        half         tm_scale         = tex2D        (s_tonemap,I.tc0).x;
+        half         	tm_scale        = tex2D        (s_tonemap,I.tc0).x;
 #endif
 
 #ifdef        USE_SUPER_SPECULAR
-        color        = spec                - hspecular;
+        color        	= spec          - hspecular	;
 #endif
 
-        _out        o;
-        tonemap        (o.low, o.high, color, tm_scale );
-                        o.low.a                = skyblend        ;
-          return         o;
+        _out        	o;
+        tonemap        	(o.low, o.high, color, tm_scale )	;
+                        o.low.a         = skyblend	;
+						o.high.a		= skyblend	;
+
+//		o.low	= skyblend;
+//		o.hight	= 0;
+
+		return        	o;
 }

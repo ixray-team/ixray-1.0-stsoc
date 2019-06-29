@@ -11,20 +11,30 @@
 #include "ai_space.h"
 #include "script_engine.h"
 #include "stalker_animation_data_storage.h"
+#include "client_spawn_manager.h"
+#include "seniority_hierarchy_holder.h"
 
-const int NET_ObjectsPerPacketInSave	= NET_PacketSizeLimit/2000;
+const int max_objects_size			= 2*1024;
+const int max_objects_size_in_save	= 6*1024;
+
 extern bool	g_b_ClearGameCaptions;
 
 void CLevel::remove_objects	()
 {
+	Memory.dbg_check();
 	BOOL						b_stored = psDeviceFlags.test(rsDisableObjectsAsCrows);
 
-	if (OnServer())
+	Game().reset_ui				();
+
+	if (OnServer()) {
+		VERIFY					(Server);
 		Server->SLS_Clear		();
+	}
 	
 	if (OnClient())
 		ClearAllObjects			();
 
+	snd_Events.clear			();
 	for (int i=0; i<6; ++i) {
 		psNET_Flags.set			(NETFLAG_MINIMIZEUPDATES,FALSE);
 		// ugly hack for checks that update is twice on frame
@@ -36,18 +46,40 @@ void CLevel::remove_objects	()
 		Objects.Update			(true);
 	}
 
+//	Memory.dbg_check();
+
 	BulletManager().Clear		();
 	ph_commander().clear		();
 	ph_commander_scripts().clear();
+
+//	Memory.dbg_check();
+
 	space_restriction_manager().clear	();
+
+//	Memory.dbg_check();
 
 	psDeviceFlags.set			(rsDisableObjectsAsCrows, b_stored);
 	g_b_ClearGameCaptions		= true;
-	Game().reset_ui				();
+
+//	Memory.dbg_check();
 
 	ai().script_engine().collect_all_garbage	();
 	stalker_animation_data_storage().clear		();
+	
+	VERIFY										(Render);
 	Render->models_Clear						(FALSE);
+	Render->clear_static_wallmarks				();
+
+#ifdef DEBUG
+	if (!client_spawn_manager().registry().empty())
+		client_spawn_manager().dump				();
+#endif // DEBUG
+	VERIFY										(client_spawn_manager().registry().empty());
+	client_spawn_manager().clear				();
+
+	xr_delete									(m_seniority_hierarchy_holder);
+	m_seniority_hierarchy_holder				= xr_new<CSeniorityHierarchyHolder>();
+//	Memory.dbg_check();
 }
 
 #ifdef DEBUG
@@ -75,19 +107,25 @@ void CLevel::net_Stop		()
 #endif // DEBUG
 }
 
-BOOL	g_bCalculatePing = FALSE;
+#ifdef DEBUG
+	BOOL	g_bCalculatePing = FALSE;
+#endif // DEBUG
+
 void CLevel::ClientSend	()
 {
 	if (GameID() == GAME_SINGLE || OnClient())
 	{
-		if (!net_HasBandwidth()) return;
+		if ( !net_HasBandwidth() ) return;
 	};
-	if (g_bCalculatePing) SendPingMessage();
+#ifdef DEBUG
+	if (g_bCalculatePing)
+		SendPingMessage();
+#endif // DEBUG
 
 	NET_Packet				P;
 	u32						start	= 0;
 	//----------- for E3 -----------------------------
-	if (IsDemoSave()) 
+//	if () 
 	{
 //		if (!(Game().local_player) || Game().local_player->testFlag(GAME_PLAYER_FLAG_VERY_VERY_DEAD)) return;
 		if (CurrentControlEntity()) 
@@ -107,7 +145,7 @@ void CLevel::ClientSend	()
 				{
 					if (OnServer())
 					{
-						if (net_IsSyncronised()) 
+						if (net_IsSyncronised() && IsDemoSave()) 
 						{
 							DemoCS.Enter();
 							Demo_StoreData(P.B.data, P.B.count, DATA_CLIENT_PACKET);
@@ -116,22 +154,29 @@ void CLevel::ClientSend	()
 					}
 					else
 						Send	(P, net_flags(FALSE));
-				}
-				if (OnClient()) return;
+				}				
 			}			
 		}		
 	};
+	if (OnClient()) return;
 	//-------------------------------------------------
-	while (1)				{
+	while (1)
+	{
 		P.w_begin						(M_UPDATE);
-		start	= Objects.net_Export	(&P, start, NET_ObjectsPerPacket);
-		if (P.B.count>2)				Send	(P, net_flags(FALSE));
-		else							break	;
+		start	= Objects.net_Export	(&P, start, max_objects_size);
+
+		if (P.B.count>2)
+		{
+			Device.Statistic->TEST3.Begin();
+				Send	(P, net_flags(FALSE));
+			Device.Statistic->TEST3.End();
+		}else
+			break;
 	}
-	//-------------------------------------------------
+
 }
 
-u32	CLevel::Objects_net_Save	(NET_Packet* _Packet, u32 start, u32 count)
+u32	CLevel::Objects_net_Save	(NET_Packet* _Packet, u32 start, u32 max_object_size)
 {
 	NET_Packet& Packet	= *_Packet;
 	u32			position;
@@ -153,7 +198,10 @@ u32	CLevel::Objects_net_Save	(NET_Packet* _Packet, u32 start, u32 count)
 			}
 #endif
 			Packet.w_chunk_close16	(position);
-			if (0==(--count))		break;
+//			if (0==(--count))		
+//				break;
+			if (max_object_size > (NET_PacketSizeLimit - Packet.w_tell()))
+				break;
 		}
 	}
 	return	++start;
@@ -167,7 +215,7 @@ void CLevel::ClientSave	()
 	for (;;) {
 		P.w_begin	(M_SAVE_PACKET);
 		
-		start		= Objects_net_Save(&P, start, NET_ObjectsPerPacketInSave);
+		start		= Objects_net_Save(&P, start, max_objects_size_in_save);
 
 		if (P.B.count>2)
 			Send	(P, net_flags(FALSE));
@@ -183,9 +231,16 @@ void CLevel::Send		(NET_Packet& P, u32 dwFlags, u32 dwTimeout)
 {
 	if (IsDemoPlay() && m_bDemoStarted) return;
 	// optimize the case when server located in our memory
-	if (Server && game_configured && OnServer()){
+	if(psNET_direct_connect){
+		ClientID	_clid;
+		_clid.set	(1);
+		Server->OnMessage	(P,	_clid );
+	}else
+	if (Server && game_configured && OnServer() )
+	{
 		Server->OnMessage	(P,Game().local_svdpnid	);
-	}else											IPureClient::Send	(P,dwFlags,dwTimeout	);
+	}else											
+		IPureClient::Send	(P,dwFlags,dwTimeout	);
 
 	if (g_pGameLevel && Level().game && GameID() != GAME_SINGLE && !g_SV_Disable_Auth_Check)		{
 		// anti-cheat
@@ -198,9 +253,9 @@ void CLevel::net_Update	()
 {
 	if(game_configured){
 		// If we have enought bandwidth - replicate client data on to server
-		Device.Statistic->netClient.Begin	();
-		ClientSend							();
-		Device.Statistic->netClient.End		();
+		Device.Statistic->netClient2.Begin	();
+		ClientSend					();
+		Device.Statistic->netClient2.End		();
 	}
 	// If server - perform server-update
 	if (Server && OnServer())	{
@@ -214,7 +269,7 @@ struct _NetworkProcessor	: public pureFrame
 {
 	virtual void OnFrame	( )
 	{
-		if (g_pGameLevel)	g_pGameLevel->net_Update();
+		if (g_pGameLevel && !Device.Paused() )	g_pGameLevel->net_Update();
 	}
 }	NET_processor;
 
@@ -227,6 +282,7 @@ BOOL			CLevel::Connect2Server				(LPCSTR options)
 	m_bConnectResult			= true	;
 	if (!Connect(options))		return	FALSE;
 	//---------------------------------------------------------------------------
+	if(psNET_direct_connect) m_bConnectResultReceived = true;
 	while	(!m_bConnectResultReceived)		{ 
 		ClientReceive	();
 		Sleep			(5); 
@@ -241,7 +297,11 @@ BOOL			CLevel::Connect2Server				(LPCSTR options)
 		return FALSE		;
 	};
 
-	net_Syncronize	();
+	
+	if(psNET_direct_connect)
+		net_Syncronised = TRUE;
+	else
+		net_Syncronize	();
 
 	while (!net_IsSyncronised()) {
 	};
@@ -258,7 +318,6 @@ void			CLevel::OnBuildVersionChallenge		()
 	NET_Packet P;
 	P.w_begin				(M_CL_AUTH);
 	u64 auth = FS.auth_get();
-	Msg			("auth - %d", auth);
 	P.w_u64					(auth);
 	Send					(P);
 };
@@ -268,9 +327,32 @@ void			CLevel::OnConnectResult				(NET_Packet*	P)
 	// multiple results can be sent during connection they should be "AND-ed"
 	m_bConnectResultReceived	= true;
 	u8	result					= P->r_u8();
-	if (!result)				m_bConnectResult	= false			;	// and
-	string128 ResultStr			;
+	u8  res1					= P->r_u8();
+	string128 ResultStr			;	
 	P->r_stringZ(ResultStr)		;
+	if (!result)				
+	{
+		m_bConnectResult	= false			;	
+		switch (res1)
+		{
+		case 0:		//Standart error
+			{
+				if (!xr_strcmp(ResultStr, "Data verification failed. Cheater?"))
+					MainMenu()->SetErrorDialog(CMainMenu::ErrDifferentVersion);
+			}break;
+		case 1:		//GameSpy CDKey
+			{
+				if (!xr_strcmp(ResultStr, "Invalid CD Key"))
+					MainMenu()->SetErrorDialog(CMainMenu::ErrCDKeyInvalid);//, ResultStr);
+				if (!xr_strcmp(ResultStr, "CD Key in use"))
+					MainMenu()->SetErrorDialog(CMainMenu::ErrCDKeyInUse);//, ResultStr);
+				if (!xr_strcmp(ResultStr, "Your CD Key is disabled. Contact customer service."))
+					MainMenu()->SetErrorDialog(CMainMenu::ErrCDKeyDisabled);//, ResultStr);
+			}break;		
+		}
+	};	
+	m_sConnectResult			= ResultStr;
+	
 	if (IsDemoSave())
 	{
 //		P->r_stringZ(m_sDemoHeader.LevelName);
@@ -290,7 +372,6 @@ void			CLevel::OnConnectResult				(NET_Packet*	P)
 		};
 		//-----------------------------------------
 	};	
-	m_sConnectResult			= ResultStr;
 };
 
 void			CLevel::SendPingMessage				()
@@ -365,25 +446,29 @@ void			CLevel::ClearAllObjects				()
 void				CLevel::OnInvalidHost			()
 {
 	IPureClient::OnInvalidHost();
-	MainMenu()->OnInvalidHost();
+	if (MainMenu()->GetErrorDialogType() == CMainMenu::ErrNoError)
+		MainMenu()->SetErrorDialog(CMainMenu::ErrInvalidHost);
 };
 
 void				CLevel::OnInvalidPassword		()
 {
 	IPureClient::OnInvalidPassword();
-	MainMenu()->OnInvalidPass();
+	MainMenu()->SetErrorDialog(CMainMenu::ErrInvalidPassword);
 };
 
 void				CLevel::OnSessionFull			()
 {
 	IPureClient::OnSessionFull();
-	MainMenu()->OnSessionFull();
+	if (MainMenu()->GetErrorDialogType() == CMainMenu::ErrNoError)
+		MainMenu()->SetErrorDialog(CMainMenu::ErrSessionFull);
 }
 
 void				CLevel::OnConnectRejected		()
 {
 	IPureClient::OnConnectRejected();
-	MainMenu()->OnServerReject();
+
+//	if (MainMenu()->GetErrorDialogType() != CMainMenu::ErrNoError)
+//		MainMenu()->SetErrorDialog(CMainMenu::ErrServerReject);
 };
 
 void				CLevel::net_OnChangeSelfName			(NET_Packet* P)

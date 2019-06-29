@@ -46,28 +46,55 @@ bool CUIMpTradeWnd::OnKeyboard(int dik, EUIMessages keyboard_action)
 void CUIMpTradeWnd::Update()
 {
 	inherited::Update			();
-	UpdateMomeyIndicator		();
+	UpdateMoneyIndicator		();
 }
 
-void CUIMpTradeWnd::UpdateMomeyIndicator()
+void CUIMpTradeWnd::UpdateMoneyIndicator()
 {
-	string128						buff;
-	sprintf							(buff, "%d", m_money);
-	m_static_player_money->SetText	(buff);
-	//update preset money
-	
-	for(u32 i=_preset_idx_last; i<=_preset_idx_3; ++i)
+	if(m_bIgnoreMoneyAndRank)
 	{
-		CUIStatic* st				= m_static_preset_money[i];
-		u32	_cost					= GetPresetCost((ETradePreset)i);
-		sprintf						(buff, "%d", _cost);
-		st->SetText					(buff);
-		bool b_has_enought_money	= _cost<=GetMoneyAmount();
-		u32 clr						= (b_has_enought_money)?color_rgba(231,153,22,255):color_rgba(255,0,0,255);
-		st->SetTextColor			(clr);
-		const preset_items&		v	=  GetPreset((ETradePreset)i);
-		m_btns_preset[i]->Enable	(b_has_enought_money && v.size()!=0);
+		m_static_player_money->SetText	("---");
+	}else
+	{
+		u32 _cost						= 0;
+		string128						buff;
+		sprintf							(buff, "%d", m_money);
+		m_static_player_money->SetText	(buff);
+		//update preset money
+		for(u32 i=_preset_idx_last; i<=_preset_idx_3; ++i)
+		{
+			CUIStatic* st				= m_static_preset_money[i];
+			_cost						= GetPresetCost((ETradePreset)i);
+			sprintf						(buff, "%d", _cost);
+			st->SetText					(buff);
+			bool b_has_enought_money	= _cost<=GetMoneyAmount();
+			u32 clr						= (b_has_enought_money)?m_text_color_money_positive:m_text_color_money_negative;
+			st->SetTextColor			(clr);
+			const preset_items&		v	=  GetPreset((ETradePreset)i);
+			m_btns_preset[i]->Enable	(b_has_enought_money && v.size()!=0);
+		}
 	}
+
+	if( !(Device.dwFrame%30) )
+	{
+		u32 _cost						= 0;
+		string128						buff;
+		StorePreset						(_preset_idx_temp, true);
+		_cost							= GetPresetCost(_preset_idx_temp);
+		sprintf							(buff, "%d", _cost);
+		m_static_curr_items_money->SetText(buff);
+	}
+}
+
+void CUIMpTradeWnd::SetMoneyChangeString(int diff)
+{
+	string128								buff;
+	sprintf									(buff, "%+d RU", diff);
+	m_static_money_change->SetText			(buff);
+	u32 clr									= (diff>0)?m_text_color_money_positive:m_text_color_money_negative;
+	m_static_money_change->SetTextColor		(clr);
+	m_static_money_change->ResetClrAnimation();
+//	Msg										("Money change:%s", buff);
 }
 
 void CUIMpTradeWnd::SetInfoString(LPCSTR str)
@@ -171,7 +198,8 @@ bool CUIMpTradeWnd::OnItemDrop(CUICellItem* itm)
 
 	if(_new_owner_type==dd_shop)
 	{
-		bool res		= TryToSellItem			(iinfo, true);
+		SBuyItemInfo*	tmp_iinfo = NULL;
+		bool res		= TryToSellItem			(iinfo, true, tmp_iinfo);
 		VERIFY			(res);
 		return			true;
 	}
@@ -215,8 +243,10 @@ bool CUIMpTradeWnd::OnItemDbClick(CUICellItem* itm)
 
 		case dd_own_bag:
 		case dd_own_slot:
-			TryToSellItem			(iinfo, true);
-			break;
+			{
+				SBuyItemInfo*			tmp_iinfo	= NULL;
+				TryToSellItem			(iinfo, true, tmp_iinfo);
+			}break;
 		default:					NODEFAULT;
 	};
 
@@ -260,6 +290,12 @@ CUIDragDropListEx*	CUIMpTradeWnd::GetMatchedListForItem(const shared_str& sect_n
 		CInventoryItem* ii = (CInventoryItem*)ci->m_pData;
 
 		if(!ii->IsNecessaryItem(sect_name))
+			return				m_list[e_player_bag];
+	}
+
+	if(list_idx==e_pistol || list_idx==e_rifle || list_idx==e_outfit || list_idx==e_outfit)
+	{
+		if (m_list[list_idx]->ItemsCount() )
 			return				m_list[e_player_bag];
 	}
 	return						res;
@@ -317,7 +353,15 @@ void CUIMpTradeWnd::ClearRealRepresentationFlags()
 {}
 
 void CUIMpTradeWnd::IgnoreMoneyAndRank(bool ignore)
-{}
+{
+	m_bIgnoreMoneyAndRank	= ignore;
+	
+	if(m_bIgnoreMoneyAndRank)
+	{
+		SetMoneyAmount		(1);
+		SetRank				(0);
+	}
+}
 
 void CUIMpTradeWnd::IgnoreMoney(bool ignore)
 {}
@@ -361,6 +405,7 @@ void CUIMpTradeWnd::SetSkin(u8 SkinID)
 
 void CUIMpTradeWnd::SetRank(u32 rank)
 {
+	if(m_bIgnoreMoneyAndRank)	rank = _RANK_COUNT-1;
 	g_mp_restrictions.SetRank(rank);
 
 	string64			tex_name;
@@ -371,18 +416,29 @@ void CUIMpTradeWnd::SetRank(u32 rank)
 			
 	m_static_player_rank->InitTexture(tex_name);
 	m_static_player_rank->TextureOn();
+	
+	if(m_bIgnoreMoneyAndRank)
+		m_static_player_rank->TextureOff();
 }
 
+u32	CUIMpTradeWnd::GetRank						()
+{
+	return g_mp_restrictions.GetRank();
+};
 
 void CUIMpTradeWnd::SetMoneyAmount(u32 money)
 {
 	VERIFY			(money>=0);
 	m_money			= money;
+	if(m_bIgnoreMoneyAndRank)
+		m_money		= u32(-1);
 }
 
 void CUIMpTradeWnd::ResetItems()
 {
+	Msg("--ResetItems");
 	ResetToOrigin						();
+	CleanUserItems						();
 	m_store_hierarchy->Reset			();
 	UpdateShop							();
 	SetCurrentItem						(NULL);

@@ -30,6 +30,11 @@ bool r_bool(IReader *self)
 	return			(!!self->r_u8());
 }
 
+void r_fvector3(IReader *self, Fvector *arg0)
+{
+	self->r_fvector3(*arg0);
+}
+
 #pragma optimize("s",on)
 void CScriptReader::script_register(lua_State *L)
 {
@@ -38,7 +43,7 @@ void CScriptReader::script_register(lua_State *L)
 		class_<IReader>("reader")
 			.def("r_seek",			&IReader::seek			)
 			.def("r_tell",			&IReader::tell			)
-			.def("r_vec3",			&IReader::r_fvector3	)
+			.def("r_vec3",			&::r_fvector3			)
 			.def("r_float",			(void (IReader::*)(float&))(&IReader::r_float		))
 			.def("r_u64",			(void (IReader::*)(u64&	))(&IReader::r_u64		))
 			.def("r_s64",			(void (IReader::*)(s64&	))(&IReader::r_s64		))

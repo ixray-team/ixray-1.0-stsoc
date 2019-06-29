@@ -79,7 +79,6 @@
 #	include "UI/UIPropertiesBox.h"
 #	include "UI/UITabControl.h"
 #	include "UI/UIListWnd.h"
-#   include "UI/UIListWndEx.h"
 #   include "UI/UIComboBox.h"
 #	include "ui/UIOptionsManagerScript.h"
 #	include "ui/UIMapInfo.h"
@@ -158,4 +157,7 @@
 #	include "mincer.h"
 #	include "mosquitobald.h"
 #	include "HairsZone.h"
+#	include "ai/trader/ai_trader.h"
+#	include "space_restrictor.h"
+#	include "physicobject.h"
 #endif

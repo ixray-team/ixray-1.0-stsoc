@@ -16,7 +16,16 @@ ISheduled::ISheduled	()
 extern		BOOL		g_bSheduleInProgress;
 ISheduled::~ISheduled	()
 {
-//	VERIFY3	(!g_bSheduleInProgress,"Can't physically destroy object while still sheduling",shedule_Name().c_str());
+	VERIFY2				(
+		!Engine.Sheduler.Registered(this),
+		make_string("0x%08x : %s",this,*shedule_Name())
+	);
+
+	// sad, but true
+	// we need this to become MASTER_GOLD
+#ifndef DEBUG
+	Engine.Sheduler.Unregister				(this);
+#endif // DEBUG
 }
 
 void	ISheduled::shedule_register			()

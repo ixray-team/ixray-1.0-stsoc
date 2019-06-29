@@ -1,9 +1,10 @@
 #pragma once
 
 #include "GameSpy_FuncDefs.h"
-#include "GameSpy_QR2.h"
+//#include "GameSpy_QR2.h"
 
 class CServerList;
+class CGameSpy_QR2;
 
 struct GameInfo	{
 	shared_str	InfoName;
@@ -33,6 +34,7 @@ struct ServerInfo{
 	string128	m_ServerName;
 	string128	m_SessionName;
 	string128	m_ServerGameType;
+	string128	m_ServerVersion;
 	u8			m_GameType;
 
 	s16						m_ServerNumPlayers;
@@ -63,27 +65,37 @@ struct ServerInfo{
 class CGameSpy_Browser
 {
 private:
-	string16	m_SecretKey;
+//	string16	m_SecretKey;
 
-	HMODULE	hGameSpyDLL;
-
-	void	LoadGameSpy();
-
+	HMODULE	m_hGameSpyDLL;
 	void*	m_pGSBrowser;
+	CGameSpy_QR2*	m_pQR2;
+	CServerList*	m_pServerList;
+
+	void	InitInternalData(HMODULE hGameSpyDLL);
+	void	LoadGameSpy(HMODULE hGameSpyDLL);
 	
 	void	ReadServerInfo	(ServerInfo* pServerInfo, void* pServer);
 
-	CGameSpy_QR2	m_QR2;
 
-	CServerList*		m_pServerList;
+	bool	m_bAbleToConnectToMasterServer;
+	bool	m_bTryingToConnectToMasterServer;
+	bool	m_bShowCMSErr;
+
+	xrCriticalSection			m_refresh_lock		;
 
 public:
 	CGameSpy_Browser();
+	CGameSpy_Browser(HMODULE hGameSpyDLL);
 	~CGameSpy_Browser();
 
 	bool			Init(CServerList* pServerList);
-	void			RefreshList_Full(bool Local);
+	void			Clear();
+
+	void			RefreshList_Full(bool Local, const char* FilterStr = "");
 	void			RefreshQuick(int Index);
+	bool			HasAllKeys			(int Index);
+	bool			CheckDirectConnection(int Index);
 	
 	void CallBack_OnUpdateCompleted		();
 
@@ -94,18 +106,26 @@ public:
 	void			Update();	
 
 	void			UpdateServerList	();
+	void			SortBrowserByPing	();
 
-private:
+	void			RefreshListInternet (const char* FilterStr);
+
+private:	
 	//------------------------------- GameSpy_ServerBrowser -----------------------
-	GAMESPY_FN_VAR_DECL(void*, ServerBrowserNew, (const char *queryForGamename, const char *queryFromGamename, const char *queryFromKey, int queryFromVersion, int maxConcUpdates, int queryVersion, SBBool bLAN_Only, fnSBCallback callback, void *instance));
+//	GAMESPY_FN_VAR_DECL(void*, ServerBrowserNew, (const char *queryForGamename, const char *queryFromGamename, const char *queryFromKey, int queryFromVersion, int maxConcUpdates, int queryVersion, SBBool bLAN_Only, fnSBCallback callback, void *instance));
+	GAMESPY_FN_VAR_DECL(void*, ServerBrowserNew, (SBBool bLAN_Only, fnSBCallback callback, void *instance));
 	GAMESPY_FN_VAR_DECL(void, ServerBrowserFree, (void* sb));
 	GAMESPY_FN_VAR_DECL(void, ServerBrowserClear, (void* sb));
 	
 	GAMESPY_FN_VAR_DECL(SBError, ServerBrowserThink, (void* sb));
 	GAMESPY_FN_VAR_DECL(SBState, ServerBrowserState, (void* sb));
 	GAMESPY_FN_VAR_DECL(void, ServerBrowserHalt, (void* sb));
-	GAMESPY_FN_VAR_DECL(SBError, ServerBrowserUpdate, (void* sb, SBBool async, SBBool disconnectOnComplete, const unsigned char *basicFields, int numBasicFields, const char *serverFilter));
-	GAMESPY_FN_VAR_DECL(SBError, ServerBrowserLANUpdate, (void* sb, SBBool async, unsigned short startSearchPort, unsigned short endSearchPort));
+//	GAMESPY_FN_VAR_DECL(SBError, ServerBrowserUpdate, (void* sb, SBBool async, SBBool disconnectOnComplete, const unsigned char *basicFields, int numBasicFields, const char *serverFilter));
+	GAMESPY_FN_VAR_DECL(SBError, ServerBrowserUpdate, (void* sb, SBBool async, SBBool disconnectOnComplete, const char *serverFilter));
+
+//	GAMESPY_FN_VAR_DECL(SBError, ServerBrowserLANUpdate, (void* sb, SBBool async, unsigned short startSearchPort, unsigned short endSearchPort));
+	GAMESPY_FN_VAR_DECL(SBError, ServerBrowserLANUpdate, (void* sb, SBBool async));
+
 	GAMESPY_FN_VAR_DECL(int, ServerBrowserCount, (void* sb));
 	GAMESPY_FN_VAR_DECL(void*, ServerBrowserGetServer, (void* sb, int index));
 	GAMESPY_FN_VAR_DECL(void*, ServerBrowserGetServerByIP, (void* sb, const char* ip, unsigned short port));
@@ -132,6 +152,14 @@ private:
 	GAMESPY_FN_VAR_DECL(void, ServerBrowserRemoveIP, (void* sb, const char *ip, unsigned short port));
 	GAMESPY_FN_VAR_DECL(void, ServerBrowserRemoveServer, (void* sb, void* server));
 
+	GAMESPY_FN_VAR_DECL(SBBool, SBServerGetConnectionInfo, (void* sb, void* server, int PortToConnectTo, char *ipstring));
+	GAMESPY_FN_VAR_DECL(SBBool, SBServerDirectConnect, (void* server));
+	GAMESPY_FN_VAR_DECL(void,  ServerBrowserSort, (void* sb, SBBool ascending, const char *sortkey, SBCompareMode comparemode));
+
+	GAMESPY_FN_VAR_DECL(SBBool, SBServerHasFullKeys, (void* server));
+	GAMESPY_FN_VAR_DECL(void, GetGameID,	(int* GameID, int verID));
+
+	GAMESPY_FN_VAR_DECL(const char*, ServerBrowserErrorDesc, (void* sb, SBError errror));
 };
 
 

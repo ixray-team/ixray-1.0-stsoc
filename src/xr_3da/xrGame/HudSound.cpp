@@ -98,7 +98,7 @@ void HUD_SOUND::PlaySound	(	HUD_SOUND&		hud_snd,
 	hud_snd.m_activeSnd->snd.play_at_pos	(const_cast<CObject*>(parent),
 									flags&sm_2D?Fvector().set(0,0,0):position,
 									flags,
-									0.f/*hud_snd.m_activeSnd->delay*/);
+									/*0.f*/hud_snd.m_activeSnd->delay);
 	hud_snd.m_activeSnd->snd.set_volume		(hud_snd.m_activeSnd->volume);
 }
 

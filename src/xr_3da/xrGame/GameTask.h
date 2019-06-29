@@ -50,7 +50,7 @@ public:
 	SGameTaskObjective		(CGameTask* parent, int idx);
 	SGameTaskObjective		();
 	shared_str				description;
-	ARTICLE_ID				article_id;
+	shared_str				article_id;
 	shared_str				map_hint;
 	shared_str				map_location;
 	u16						object_id;
@@ -109,7 +109,8 @@ public:
 							CGameTask				();
 
 	bool					HasLinkedMapLocations	();
-	
+	bool					HasInProgressObjective	();
+
 	SGameTaskObjective&		Objective				(int objectice_id)	{return m_Objectives[objectice_id];};
 
 	TASK_ID					m_ID;

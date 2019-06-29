@@ -5,7 +5,9 @@
 #include "NET_Log.h"
 static	INetLog* pSvNetLog = NULL; 
 
-#define		BASE_PORT		5445
+#define BASE_PORT_LAN_SV		5445
+#define BASE_PORT		0
+#define END_PORT		65535
 
 void	dump_URL	(LPCSTR p, IDirectPlay8Address* A);
 
@@ -15,6 +17,41 @@ LPCSTR nameTraffic	= "traffic.net";
 XRNETSERVER_API int		psNET_ServerUpdate	= 30;		// FPS
 XRNETSERVER_API int		psNET_ServerPending	= 2;
 
+void gen_auth_code()
+{
+
+#pragma todo("container is created in stack!")
+		xr_vector<xr_string>	ignore, test	;
+
+		LPCSTR pth				= FS.get_path("$app_data_root$")->m_Path;
+		ignore.push_back		(xr_string(pth));
+		ignore.push_back		(xr_string("gamedata\\config\\localization.ltx"));
+		ignore.push_back		(xr_string("gamedata\\config\\misc\\items.ltx"));
+		ignore.push_back		(xr_string("gamedata\\config\\text"));
+		ignore.push_back		(xr_string("game_tutorials.xml"));
+
+		test.push_back			(xr_string("gamedata\\config"));
+		test.push_back			(xr_string("gamedata\\scripts"));
+
+		test.push_back			(xr_string("xrd3d9-null.dll"));
+		test.push_back			(xr_string("ode.dll"));
+		test.push_back			(xr_string("ogg.dll"));
+		test.push_back			(xr_string("xrcdb.dll"));
+//		test.push_back			(xr_string("xrcore.dll"));
+		test.push_back			(xr_string("xrcpu_pipe.dll"));
+		test.push_back			(xr_string("xrgame.dll"));
+		test.push_back			(xr_string("xrgamespy.dll"));
+		test.push_back			(xr_string("xrlua.dll"));
+		test.push_back			(xr_string("xrnetserver.dll"));
+		test.push_back			(xr_string("xrparticles.dll"));
+		test.push_back			(xr_string("xrrender_r1.dll"));
+		test.push_back			(xr_string("xrrender_r2.dll"));
+		test.push_back			(xr_string("xrsound.dll"));
+		test.push_back			(xr_string("xrxmlparser.dll"));
+//		test.push_back			(xr_string("xr_3da.exe"));
+
+		FS.auth_generate		(ignore,test);
+}
 
 void IClientStatistic::Update(DPN_CONNECTION_INFO& CI)
 {
@@ -49,18 +86,20 @@ static HRESULT WINAPI Handler (PVOID pvUserContext, DWORD dwMessageType, PVOID p
 	return C->net_Handler	(dwMessageType,pMessage);
 }
 
-IPureServer::IPureServer	(CTimer* timer)
+IPureServer::IPureServer	(CTimer* timer, BOOL	Dedicated)
+	:	m_bDedicated(Dedicated)
 #ifdef PROFILE_CRITICAL_SECTIONS
-	:csPlayers(MUTEX_PROFILE_ID(IPureServer::csPlayers))
+	,csPlayers(MUTEX_PROFILE_ID(IPureServer::csPlayers))
 	,csMessage(MUTEX_PROFILE_ID(IPureServer::csMessage))
 #endif // PROFILE_CRITICAL_SECTIONS
 {
 	device_timer			= timer;
 	stats.clear				();
 	stats.dwSendTime		= TimeGlobal(device_timer);
-	SV_Client = NULL;
-
-	pSvNetLog = NULL;//xr_new<INetLog>("logs\\net_sv_log.log", TimeGlobal(device_timer));
+	SV_Client				= NULL;
+	NET						= NULL;
+	net_Address_device		= NULL;
+	pSvNetLog				= NULL;//xr_new<INetLog>("logs\\net_sv_log.log", TimeGlobal(device_timer));
 }
 
 IPureServer::~IPureServer	()
@@ -70,6 +109,8 @@ IPureServer::~IPureServer	()
 	SV_Client = NULL;
 
 	xr_delete(pSvNetLog); pSvNetLog = NULL;
+
+	psNET_direct_connect = FALSE;
 }
 
 void IPureServer::pCompress	(NET_Packet& D, NET_Packet& S)
@@ -112,9 +153,9 @@ void IPureServer::config_Load()
 
 	IReader*		F	= FS.r_open(pth);
 	if (F && F->length()) {
-		F->r	(&traffic_in,sizeof(traffic_in));
-		F->r	(&traffic_out,sizeof(traffic_out));
-		F->close();
+		F->r					(&traffic_in,sizeof(traffic_in));
+		F->r					(&traffic_out,sizeof(traffic_out));
+		FS.r_close				(F);
 		traffic_in.Normalize	();
 		traffic_out.Normalize	();
 	} else {
@@ -155,6 +196,15 @@ void IPureServer::Reparse	()
 
 BOOL IPureServer::Connect(LPCSTR options)
 {
+	connect_options			= options;
+	psNET_direct_connect = FALSE;
+
+	if(strstr(options, "/single") && !strstr(Core.Params, "-no_direct_connect" ))
+		psNET_direct_connect	=	TRUE;
+	else{
+		gen_auth_code	();
+	}
+
 	// Parse options
 	string4096				session_name;
 	string4096				session_options = "";
@@ -182,8 +232,28 @@ BOOL IPureServer::Connect(LPCSTR options)
 			strncpy(tmpStr, sMaxPlayers, 63);
 		dwMaxPlayers = atol(tmpStr);
 	}
+	if (dwMaxPlayers > 32 || dwMaxPlayers<1) dwMaxPlayers = 32;
 	Msg("MaxPlayers = %d", dwMaxPlayers);
 
+	//-------------------------------------------------------------------
+	BOOL bPortWasSet = FALSE;
+	u32 dwServerPort = BASE_PORT_LAN_SV;
+	if (strstr(options, "portsv="))
+	{
+		char* ServerPort = strstr(options, "portsv=") + 7;
+		string64 tmpStr = "";
+		if (strchr(ServerPort, '/')) 
+			strncpy(tmpStr, ServerPort, strchr(ServerPort, '/') - ServerPort);
+		else
+			strncpy(tmpStr, ServerPort, 63);
+		dwServerPort = atol(tmpStr);
+		clamp(dwServerPort, u32(BASE_PORT), u32(END_PORT));
+		bPortWasSet = TRUE; //this is not casual game
+	}
+	//-------------------------------------------------------------------
+
+if(!psNET_direct_connect)
+{
 	//---------------------------
 #ifdef DEBUG
 	string1024 tmp;
@@ -244,7 +314,7 @@ BOOL IPureServer::Connect(LPCSTR options)
     dpAppDesc.dwFlags			= DPNSESSION_CLIENT_SERVER | DPNSESSION_NODPNSVR;
     dpAppDesc.guidApplication	= NET_GUID;
     dpAppDesc.pwszSessionName	= SessionNameUNICODE;
-	dpAppDesc.dwMaxPlayers		= (dwMaxPlayers == 0) ? 0 : (dwMaxPlayers+1);
+	dpAppDesc.dwMaxPlayers		= (m_bDedicated) ? (dwMaxPlayers+2) : (dwMaxPlayers+1);
 	dpAppDesc.pvApplicationReservedData	= session_options;
 	dpAppDesc.dwApplicationReservedDataSize = xr_strlen(session_options)+1;
 
@@ -261,10 +331,13 @@ BOOL IPureServer::Connect(LPCSTR options)
 	CHK_DX(CoCreateInstance	(CLSID_DirectPlay8Address,NULL, CLSCTX_INPROC_SERVER, IID_IDirectPlay8Address,(LPVOID*) &net_Address_device )); 
 	CHK_DX(net_Address_device->SetSP		(bSimulator? &CLSID_NETWORKSIMULATOR_DP8SP_TCPIP : &CLSID_DP8SP_TCPIP ));
 	
+	DWORD dwTraversalMode = DPNA_TRAVERSALMODE_NONE;
+	CHK_DX(net_Address_device->AddComponent(DPNA_KEY_TRAVERSALMODE, &dwTraversalMode, sizeof(dwTraversalMode), DPNA_DATATYPE_DWORD));
+
 	HRESULT HostSuccess = S_FALSE;
 	// We are now ready to host the app and will try different ports
-	psNET_Port = BASE_PORT;
-	while (HostSuccess != S_OK && psNET_Port <=BASE_PORT + 100)
+	psNET_Port = dwServerPort;//BASE_PORT;
+	while (HostSuccess != S_OK && psNET_Port <=END_PORT)
 	{
 		CHK_DX(net_Address_device->AddComponent	(DPNA_KEY_PORT, &psNET_Port, sizeof(psNET_Port), DPNA_DATATYPE_DWORD ));
 
@@ -278,18 +351,31 @@ BOOL IPureServer::Connect(LPCSTR options)
 		if (HostSuccess != S_OK)
 		{
 //			xr_string res = Debug.error2string(HostSuccess);
+				if (bPortWasSet) 
+				{
+					Msg("! IPureServer : port %d is BUSY!", psNET_Port);
+					return FALSE;
+				}
 #ifdef DEBUG
-				Msg("! IPureServer : port %d is BUSY!", psNET_Port);
+				else
+					Msg("! IPureServer : port %d is BUSY!", psNET_Port);
 #endif	
 				psNET_Port++;
-		};
+		}
+		else
+		{
+			Msg("- IPureServer : created on port %d!", psNET_Port);
+		}
 	};
 	
 	CHK_DX(HostSuccess);
-	
+
+}	//psNET_direct_connect
+
 	config_Load		();
 
-	BannedList_Load	();
+	if(!psNET_direct_connect)
+		BannedList_Load	();
 
 	return	TRUE;
 }
@@ -298,7 +384,8 @@ void IPureServer::Disconnect	()
 {
 	config_Save		();
 
-	BannedList_Save	();
+	if (!psNET_direct_connect)
+		BannedList_Save	();
 
     if( NET )	NET->Close(0);
 	
@@ -538,6 +625,14 @@ BOOL IPureServer::HasBandwidth			(IClient* C)
 {
 	u32	dwTime			= TimeGlobal(device_timer);
 	u32	dwInterval		= 0;
+
+	if(psNET_direct_connect)
+	{
+		UpdateClientStatistic	(C);
+		C->dwTime_LastUpdate	= dwTime;
+		dwInterval				= 1000;
+		return					TRUE;
+	}
 	
 	if (psNET_ServerUpdate != 0) dwInterval = 1000/psNET_ServerUpdate; 
 	if	(psNET_Flags.test(NETFLAG_MINIMIZEUPDATES))	dwInterval	= 1000;	// approx 2 times per second
@@ -567,12 +662,15 @@ BOOL IPureServer::HasBandwidth			(IClient* C)
 void	IPureServer::UpdateClientStatistic		(IClient* C)
 {
 	// Query network statistic for this client
-	DPN_CONNECTION_INFO	CI;
-	ZeroMemory			(&CI,sizeof(CI));
-	CI.dwSize			= sizeof(CI);
-	HRESULT hr					= NET->GetConnectionInfo(C->ID.value(),&CI,0);
-	if (FAILED(hr))		return;
-	C->stats.Update		(CI);
+	DPN_CONNECTION_INFO			CI;
+	ZeroMemory					(&CI,sizeof(CI));
+	CI.dwSize					= sizeof(CI);
+	if(!psNET_direct_connect)
+	{
+		HRESULT hr					= NET->GetConnectionInfo(C->ID.value(),&CI,0);
+		if (FAILED(hr))				return;
+	}
+	C->stats.Update				(CI);
 }
 
 void	IPureServer::ClearStatistic	()

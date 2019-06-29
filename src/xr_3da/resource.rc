@@ -13,82 +13,6 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
-#ifdef _WIN32
-LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
-#pragma code_page(1251)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_VERIFY DIALOG  0, 0, 265, 175
-STYLE DS_ABSALIGN | DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | 
-    DS_NOFAILCREATE | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
-    WS_SYSMENU
-CAPTION "XRay Engine Internal Error"
-FONT 8, "MS Sans Serif"
-BEGIN
-    GROUPBOX        "Description",IDC_STATIC,0,0,265,45,BS_FLAT
-    GROUPBOX        "Source File",IDC_STATIC,0,45,200,20,BS_FLAT
-    GROUPBOX        "Line",IDC_STATIC,205,45,60,20,BS_FLAT
-    LISTBOX         IDC_STACK,0,65,200,110,NOT LBS_NOTIFY | 
-                    LBS_NOINTEGRALHEIGHT | LBS_NOSEL | WS_VSCROLL | 
-                    WS_TABSTOP
-    DEFPUSHBUTTON   "Stop",IDSTOP,205,130,60,14,BS_FLAT
-    PUSHBUTTON      "Debug",IDDEBUG,205,145,60,14,BS_FLAT
-    PUSHBUTTON      "Continue",11,205,160,60,14,BS_FLAT
-    LTEXT           "",IDC_FILE,4,53,191,8
-    LTEXT           "",IDC_LINE,209,53,51,8
-    LTEXT           "",IDC_DESC,5,7,255,35
-END
-
-IDD_LOG DIALOG  0, 0, 245, 286
-STYLE DS_ABSALIGN | DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | 
-    DS_NOFAILCREATE | DS_CENTER | WS_VISIBLE | WS_CAPTION
-CAPTION "XRay Engine"
-FONT 10, "Fixedsys"
-BEGIN
-    LISTBOX         IDC_LIST,0,0,245,285,NOT LBS_NOTIFY | 
-                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
-BEGIN
-    IDD_VERIFY, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 258
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 168
-    END
-
-    IDD_LOG, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 238
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 279
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Neutral (Default) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
 // Russian resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
@@ -104,7 +28,14 @@ LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_XRAY                ICON                    "icon1.ico"
+IDI_ICON1               ICON                    "stalker.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP2             BITMAP                  "ui_splash3.bmp"
 #endif    // Russian resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -166,7 +97,8 @@ STYLE DS_ABSALIGN | DS_SETFONT | DS_SETFOREGROUND | DS_CENTER | WS_POPUP |
     WS_VISIBLE
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    CONTROL         109,IDC_STATIC,"Static",SS_BITMAP,0,0,333,211
+    CONTROL         116,IDC_STATIC,"Static",SS_BITMAP | SS_REALSIZEIMAGE,0,0,
+                    333,165
 END
 
 
@@ -180,21 +112,11 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_STARTUP, DIALOG
     BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 326
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 158
+        RIGHTMARGIN, 332
     END
 END
 #endif    // APSTUDIO_INVOKED
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Bitmap
-//
-
-IDB_BITMAP1             BITMAP                  "StartUp_Logo.bmp"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

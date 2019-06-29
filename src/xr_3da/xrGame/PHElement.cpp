@@ -240,6 +240,7 @@ void CPHElement::SetTransform(const Fmatrix &m0){
 	VERIFY2(dBodyGetPosition(m_body),"not valide safe position");
 	VERIFY2(dBodyGetLinearVel(m_body),"not valide safe velocity");
 	m_flags.set(flUpdate,TRUE);
+	m_shell->spatial_move();
 }
 
 void CPHElement::getQuaternion(Fquaternion& quaternion)
@@ -257,6 +258,7 @@ void CPHElement::setQuaternion(const Fquaternion& quaternion)
 	dBodySetQuaternion(m_body,q);
 	CPHDisablingRotational::Reinit();
 	m_flags.set(flUpdate,TRUE);
+	m_shell->spatial_move();
 }
 void CPHElement::GetGlobalPositionDynamic(Fvector* v)
 {
@@ -273,6 +275,7 @@ void CPHElement::SetGlobalPositionDynamic(const Fvector& position)
 	dBodySetPosition(m_body,position.x,position.y,position.z);
 	CPHDisablingTranslational::Reinit();
 	m_flags.set(flUpdate,TRUE);
+	m_shell->spatial_move();
 }
 
 void CPHElement::TransformPosition(const Fmatrix &form)
@@ -293,6 +296,7 @@ void CPHElement::TransformPosition(const Fmatrix &form)
 	m_body_interpolation.ResetPositions();
 	m_body_interpolation.ResetRotations();
 	m_flags.set(flUpdate,TRUE);
+	m_shell->spatial_move();
 }
 CPHElement::~CPHElement	()
 {

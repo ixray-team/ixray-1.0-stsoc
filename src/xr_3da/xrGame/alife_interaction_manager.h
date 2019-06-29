@@ -16,6 +16,7 @@ class CALifeInteractionManager :
 	public CALifeCombatManager,
 	public CALifeCommunicationManager
 {
+/**
 	friend class CCheckForInteractionPredicate;
 protected:
 	u32								m_inventory_slot_count;
@@ -24,9 +25,12 @@ public:
 	BOOL_VECTOR						m_temp_marks;
 	ALife::WEAPON_P_VECTOR			m_temp_weapons;	
 
+/**/
 public:
 									CALifeInteractionManager	(xrServer *server, LPCSTR section);
+/**
 	virtual							~CALifeInteractionManager	();
 			void					check_for_interaction		(CSE_ALifeSchedulable		*tpALifeSchedulable);
 			void					check_for_interaction		(CSE_ALifeSchedulable		*tpALifeSchedulable,		GameGraph::_GRAPH_ID		tGraphID);
+/**/
 };

@@ -78,19 +78,16 @@ void CWeapon::FireTrace		(const Fvector& P, const Fvector& D)
 		FireBullet(P, D, fire_disp, l_cartridge, H_Parent()->ID(), ID(), SendHit);
 	}
 
-	StartShotParticles	();
-	if(m_bShotLight) Light_Start();
+	StartShotParticles		();
+	
+	if(m_bLightShotEnabled) 
+		Light_Start			();
 
 	
 	// Ammo
 	m_magazine.pop_back	();
-//	if (!m_magazine.empty())
-//		m_fCurrentCartirdgeDisp = m_magazine.back().m_kDisp;
 	--iAmmoElapsed;
-/*
-	if(iAmmoElapsed==0) 
-		OnMagazineEmpty();
-*/
+
 	//проверить не произошла ли осечка
 	CheckForMisfire();
 

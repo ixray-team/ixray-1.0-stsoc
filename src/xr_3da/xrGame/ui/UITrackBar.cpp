@@ -80,13 +80,6 @@ void CUITrackBar::SetCurrentValue()
 void CUITrackBar::Draw()
 {
 	CUIWindow::Draw();
-/*
-	Fvector2 p;
-	GetAbsolutePos(p);
-	string128 buff;
-	sprintf(buff,"[%.2f %.2f], %.2f",m_min,m_max,m_val);
-	UI()->Font()->pFontSmall->Out(p.x, p.y, buff);
-*/
 }
 
 void CUITrackBar::SaveValue()
@@ -187,6 +180,8 @@ void CUITrackBar::UpdatePosRelativeToMouse()
 		_vf		+= __fstep;
 
 	__fval		= __fmin+_vf;
+	
+	clamp		(__fval, __fmin, __fmax);
 
 	if(m_b_is_float)
 		m_f_val	= __fval;

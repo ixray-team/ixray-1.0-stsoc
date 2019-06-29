@@ -23,7 +23,7 @@ void CLevel::cl_Process_Spawn(NET_Packet& P)
 	if (E->s_flags.is(M_SPAWN_UPDATE))
 		E->UPDATE_Read	(P);
 //-------------------------------------------------
-//	Msg ("M_SPAWN - %s[%d] - %d", *s_name, E->ID, E->ID_Parent);
+//	Msg ("M_SPAWN - %s[%d][%x] - %d", *s_name,  E->ID, E,E->ID_Parent);
 //-------------------------------------------------
 	//force object to be local for server client
 	if (OnServer())		{
@@ -66,10 +66,6 @@ void CLevel::g_cl_Spawn		(LPCSTR name, u8 rp, u16 flags, Fvector pos)
 	// Destroy
 	F_entity_Destroy	(E);
 }
-
-#ifdef DEBUG_MEMORY_MANAGER
-	XRCORE_API	BOOL	g_bMEMO;
-#endif // DEBUG_MEMORY_MANAGER
 
 #ifdef DEBUG
 	extern Flags32				psAI_Flags;

@@ -12,6 +12,7 @@ class CUISpinText;
 class CUIMapInfo;
 class CUIComboBox;
 class CUIXml;
+class CExtraContentFilter;
 
 #define	MAP_LIST			"mp\\map_list.ltx"
 #define	MAP_ROTATION_LIST	"maprot_list.ltx"
@@ -79,4 +80,6 @@ private:
 	xr_string			m_srv_params;
 
 	int					m_item2del;
+
+	CExtraContentFilter*	m_pExtraContentFilter;
 };

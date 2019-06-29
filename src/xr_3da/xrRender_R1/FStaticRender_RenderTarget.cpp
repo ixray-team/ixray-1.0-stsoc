@@ -11,6 +11,7 @@ CRenderTarget::CRenderTarget()
 	bAvailable			= FALSE;
 	RT					= 0;
 	pTempZB				= 0;
+	ZB					= 0;
 
 	param_blur			= 0.f;
 	param_gray			= 0.f;

@@ -135,7 +135,7 @@ void CControllerAura::update_schedule()
 
 	if (active()) {
 		CEffectorCam* ce = Actor()->Cameras().GetCamEffector((ECamEffectorType)effControllerAura2);
-		if(!ce) AddEffector(Actor(), effControllerAura2, "effector_controller_aura2", 0.08f);
+		if(!ce) AddEffector(Actor(), effControllerAura2, "effector_controller_aura2", 0.15f);
 	}else{
 		CEffectorCam* ce = Actor()->Cameras().GetCamEffector((ECamEffectorType)effControllerAura2);
 		if(ce)

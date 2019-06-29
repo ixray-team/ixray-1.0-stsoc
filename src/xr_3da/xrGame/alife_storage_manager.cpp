@@ -64,12 +64,18 @@ void CALifeStorageManager::save	(LPCSTR save_name, bool update_name)
 	writer->w					(dest_data,dest_count);
 	xr_free						(dest_data);
 	FS.w_close					(writer);
+#ifdef DEBUG
 	Msg							("* Game %s is successfully saved to file '%s' (%d bytes compressed to %d)",m_save_name,temp,source_count,dest_count + 4);
+#else // DEBUG
+	Msg							("* Game %s is successfully saved to file '%s'",m_save_name,temp);
+#endif // DEBUG
 
 	if (!update_name)
 		strcpy					(m_save_name,save);
 }
 
+#include "string_table.h"
+#include "../igame_persistent.h"
 bool CALifeStorageManager::load	(LPCSTR save_name)
 {
 	CTimer						timer;
@@ -94,7 +100,8 @@ bool CALifeStorageManager::load	(LPCSTR save_name)
 	}
 
 	string512					temp;
-	pApp->LoadTitle				(strconcat(temp,"Loading saved game \"",save_name,SAVE_EXTENSION,"\"..."));
+	strconcat(temp,CStringTable().translate("st_loading_saved_game").c_str()," \"",save_name,SAVE_EXTENSION,"\"");
+	g_pGamePersistent->LoadTitle(temp);
 
 	unload						();
 	reload						(m_section);
@@ -122,12 +129,13 @@ bool CALifeStorageManager::load	(LPCSTR save_name)
 			VERIFY				(id == (*I).second->ID);
 			register_object		((*I).second,false);
 		}
+
+		registry().load			(source);
+
 		can_register_objects	(true);
 
 		for (I = B; I != E; ++I)
 			(*I).second->on_register	();
-
-		registry().load			(source);
 	}
 
 	xr_free						(source_data);

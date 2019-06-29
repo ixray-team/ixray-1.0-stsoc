@@ -28,6 +28,7 @@ CGroupHierarchyHolder::~CGroupHierarchyHolder			()
 	VERIFY						(!m_agent_manager);
 }
 
+#ifdef SQUAD_HIERARCHY_HOLDER_USE_LEADER
 void CGroupHierarchyHolder::update_leader				()
 {
 	m_leader					= 0;
@@ -39,6 +40,7 @@ void CGroupHierarchyHolder::update_leader				()
 			break;
 		}
 }
+#endif // SQUAD_HIERARCHY_HOLDER_USE_LEADER
 
 void CGroupHierarchyHolder::register_in_group			(CEntity *member)
 {
@@ -61,11 +63,13 @@ void CGroupHierarchyHolder::register_in_group			(CEntity *member)
 
 void CGroupHierarchyHolder::register_in_squad			(CEntity *member)
 {
+#ifdef SQUAD_HIERARCHY_HOLDER_USE_LEADER
 	if (!leader() && member->g_Alive()) {
 		m_leader				= member;
 		if (!squad().leader())
 			squad().leader		(member);
 	}
+#endif // SQUAD_HIERARCHY_HOLDER_USE_LEADER
 }
 
 void CGroupHierarchyHolder::register_in_agent_manager	(CEntity *member)
@@ -91,7 +95,7 @@ void CGroupHierarchyHolder::register_in_group_senses	(CEntity *member)
 	}
 }
 
-void CGroupHierarchyHolder::unregister_in_group			(CEntity *member, bool member_is_destroying)
+void CGroupHierarchyHolder::unregister_in_group			(CEntity *member)
 {
 	VERIFY						(member);
 	MEMBER_REGISTRY::iterator	I = std::find(m_members.begin(),m_members.end(),member);
@@ -99,8 +103,9 @@ void CGroupHierarchyHolder::unregister_in_group			(CEntity *member, bool member_
 	m_members.erase				(I);
 }
 
-void CGroupHierarchyHolder::unregister_in_squad			(CEntity *member, bool member_is_destroying)
+void CGroupHierarchyHolder::unregister_in_squad			(CEntity *member)
 {
+#ifdef SQUAD_HIERARCHY_HOLDER_USE_LEADER
 	if (leader() && (leader()->ID() == member->ID())) {
 		update_leader					();
 		if (squad().leader()->ID() == member->ID())
@@ -109,17 +114,15 @@ void CGroupHierarchyHolder::unregister_in_squad			(CEntity *member, bool member_
 			else
 				squad().update_leader	();
 	}
+#endif // SQUAD_HIERARCHY_HOLDER_USE_LEADER
 }
 
-void CGroupHierarchyHolder::unregister_in_agent_manager	(CEntity *member, bool member_is_destroying)
+void CGroupHierarchyHolder::unregister_in_agent_manager	(CEntity *member)
 {
 	if (get_agent_manager()) {
 		agent_manager().member().remove	(member);
 		if (agent_manager().member().members().empty())
-			if (!member_is_destroying)
-				m_agent_manager			= 0;
-			else
-				xr_delete				(m_agent_manager);
+			xr_delete					(m_agent_manager);
 	}
 
 	if (m_members.empty()) {
@@ -129,7 +132,7 @@ void CGroupHierarchyHolder::unregister_in_agent_manager	(CEntity *member, bool m
 	}
 }
 
-void CGroupHierarchyHolder::unregister_in_group_senses	(CEntity *member, bool member_is_destroying)
+void CGroupHierarchyHolder::unregister_in_group_senses	(CEntity *member)
 {
 	CCustomMonster			*monster = smart_cast<CCustomMonster*>(member);
 	if (monster) {
@@ -147,10 +150,10 @@ void CGroupHierarchyHolder::register_member				(CEntity *member)
 	register_in_group_senses	(member);
 }
 
-void CGroupHierarchyHolder::unregister_member			(CEntity *member, bool member_is_destroying)
+void CGroupHierarchyHolder::unregister_member			(CEntity *member)
 {
-	unregister_in_group			(member,member_is_destroying);
-	unregister_in_squad			(member,member_is_destroying);
-	unregister_in_agent_manager	(member,member_is_destroying);
-	unregister_in_group_senses	(member,member_is_destroying);
+	unregister_in_group			(member);
+	unregister_in_squad			(member);
+	unregister_in_agent_manager	(member);
+	unregister_in_group_senses	(member);
 }

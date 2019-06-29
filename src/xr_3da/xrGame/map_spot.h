@@ -17,7 +17,7 @@ public:
 	CMapLocation*			MapLocation						()							{return m_map_location;}
 	virtual LPCSTR			GetHint							();
 	virtual		void		Update							();
-	virtual		bool		OnMouseDown						(bool left_button = true);
+	virtual		bool		OnMouseDown						(int mouse_btn);
 	virtual		void		OnFocusLost						();
 };
 

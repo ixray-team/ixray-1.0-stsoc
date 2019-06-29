@@ -63,11 +63,11 @@ CStats::~CStats()
 
 void _draw_cam_pos(CGameFont* pFont)
 {
-	float sz		= pFont->GetSize();
-	pFont->SetSize	(14);
+	float sz		= pFont->GetHeight();
+	pFont->SetHeightI(0.02f);
 	pFont->SetColor	(0xffffffff);
 	pFont->Out		(10, 600, "CAMERA POSITION:  [%3.2f,%3.2f,%3.2f]",VPUSH(Device.vCameraPosition));
-	pFont->SetSize	(sz);
+	pFont->SetHeight(sz);
 	pFont->OnRender	();
 }
 
@@ -97,6 +97,7 @@ void CStats::Show()
 		RenderDUMP_RT.FrameEnd		();
 		RenderDUMP_SKIN.FrameEnd	();	
 		RenderDUMP_Wait.FrameEnd	();	
+		RenderDUMP_Wait_S.FrameEnd	();	
 		RenderDUMP_HUD.FrameEnd		();	
 		RenderDUMP_Glows.FrameEnd	();	
 		RenderDUMP_Lights.FrameEnd	();	
@@ -114,7 +115,8 @@ void CStats::Show()
 		clBOX.FrameEnd				();
 		clFRUSTUM.FrameEnd			();
 		
-		netClient.FrameEnd			();
+		netClient1.FrameEnd			();
+		netClient2.FrameEnd			();
 		netServer.FrameEnd			();
 		
 		TEST0.FrameEnd				();
@@ -162,18 +164,18 @@ void CStats::Show()
 		pFont->OnRender	();
 	}
 
-	CGameFont&	F			= *((CGameFont*)pFont);
-	float		f_base_size	= 8;	//F.GetSize();
-				F.SetSize	(f_base_size);
+	CGameFont& F = *pFont;
+	float		f_base_size	= 0.01f;
+				F.SetHeightI	(f_base_size);
 
 	if (vtune.enabled())	{
-		float sz		= pFont->GetSize();
-		pFont->SetSize	(16);
+		float sz		= pFont->GetHeight();
+		pFont->SetHeightI(0.02f);
 		pFont->SetColor	(0xFFFF0000	);
 		pFont->OutSet	(Device.dwWidth/2.0f+(pFont->SizeOf_("--= tune =--")/2.0f),Device.dwHeight/2.0f);
 		pFont->OutNext	("--= tune =--");
 		pFont->OnRender	();
-		pFont->SetSize	(sz);
+		pFont->SetHeight(sz);
 	};
 
 	// Show them
@@ -195,6 +197,9 @@ void CStats::Show()
 		F.OutNext	("POLY:        %d/%d",		RCache.stat.polys,RCache.stat.calls?RCache.stat.polys/RCache.stat.calls:0);
 		F.OutNext	("DIP/DP:      %d",			RCache.stat.calls);
 #ifdef DEBUG
+		F.OutSkip	();
+		F.OutNext	("mapped:      %d",			g_file_mapped_memory);
+		F.OutSkip	();
 		F.OutNext	("SH/T/M/C:    %d/%d/%d/%d",RCache.stat.states,RCache.stat.textures,RCache.stat.matrices,RCache.stat.constants);
 		F.OutNext	("RT/PS/VS:    %d/%d/%d",	RCache.stat.target_rt,RCache.stat.ps,RCache.stat.vs);
 		F.OutNext	("DCL/VB/IB:   %d/%d/%d",   RCache.stat.decl,RCache.stat.vb,RCache.stat.ib);
@@ -230,7 +235,8 @@ void CStats::Show()
 		F.OutNext	("  HOM:       %2.2fms, %d",RenderCALC_HOM.result,	RenderCALC_HOM.count);
 		F.OutNext	("  Skeletons: %2.2fms, %d",Animation.result,		Animation.count);
 		F.OutNext	("R_DUMP:      %2.2fms, %2.1f%%",RenderDUMP.result,	PPP(RenderDUMP.result));	
-		F.OutNext	("  Wait:      %2.2fms",RenderDUMP_Wait.result);	
+		F.OutNext	("  Wait-L:    %2.2fms",RenderDUMP_Wait.result);	
+		F.OutNext	("  Wait-S:    %2.2fms",RenderDUMP_Wait_S.result);	
 		F.OutNext	("  Skinning:  %2.2fms",RenderDUMP_SKIN.result);	
 		F.OutNext	("  DT_Vis/Cnt:%2.2fms",RenderDUMP_DT_VIS.result,RenderDUMP_DT_Count);	
 		F.OutNext	("  DT_Render: %2.2fms",RenderDUMP_DT_Render.result);	
@@ -253,8 +259,9 @@ void CStats::Show()
 		F.OutNext	("clBOX:       %2.2fms, %d, %2.0fK",clBOX.result,		clBOX.count,b_ps);
 		F.OutNext	("clFRUSTUM:   %2.2fms, %d",		clFRUSTUM.result,	clFRUSTUM.count	);
 		F.OutSkip	();
-		F.OutNext	("netClient:   %2.2fms, %d",netClient.result,netClient.count);
-		F.OutNext	("netServer:   %2.2fms, %d",netServer.result,netServer.count);
+		F.OutNext	("netClientRecv:   %2.2fms, %d",	netClient1.result,netClient1.count);
+		F.OutNext	("netClientSend:   %2.2fms, %d",	netClient2.result,netClient2.count);
+		F.OutNext	("netServer:   %2.2fms, %d",		netServer.result,netServer.count);
 		F.OutSkip	();
 
 		F.OutSkip	();
@@ -287,19 +294,19 @@ void CStats::Show()
 
 		//////////////////////////////////////////////////////////////////////////
 		// Renderer specific
-		F.SetSize						(f_base_size);
+		F.SetHeightI						(f_base_size);
 		F.OutSet						(200,0);
 		Render->Statistics				(&F);
 
 		//////////////////////////////////////////////////////////////////////////
 		// Game specific
-		F.SetSize						(f_base_size);
+		F.SetHeightI						(f_base_size);
 		F.OutSet						(400,0);
 		g_pGamePersistent->Statistics	(&F);
 
 		//////////////////////////////////////////////////////////////////////////
 		// process PURE STATS
-		F.SetSize						(f_base_size);
+		F.SetHeightI						(f_base_size);
 		seqStats.Process				(rp_Stats);
 		pFont->OnRender					();
 	};
@@ -316,7 +323,7 @@ void CStats::Show()
 		CGameFont&	F = *((CGameFont*)pFont);
 		F.SetColor						(color_rgba(255,16,16,255));
 		F.OutSet						(300,300);
-		F.SetSize						(f_base_size*2);
+		F.SetHeightI						(f_base_size*2);
 		if (fFPS<30)					F.OutNext	("FPS       < 30:   %3.1f",	fFPS);
 		if (RCache.stat.verts>500000)	F.OutNext	("Verts     > 500k: %d",	RCache.stat.verts);
 		//if (RCache.stat.polys>500000)	F.OutNext	("Polys     > 500k: %d",	RCache.stat.polys);
@@ -340,7 +347,7 @@ void CStats::Show()
 		CGameFont&	F = *((CGameFont*)pFont);
 		F.SetColor	(color_rgba(255,16,16,191));
 		F.OutSet	(200,0);
-		F.SetSize	(f_base_size);
+		F.SetHeightI	(f_base_size);
 #if 0
 		for (u32 it=0; it<errors.size(); it++)
 			F.OutNext("%s",errors[it].c_str());
@@ -374,7 +381,8 @@ void CStats::Show()
 		RenderDUMP.FrameStart		();	
 		RenderDUMP_RT.FrameStart	();
 		RenderDUMP_SKIN.FrameStart	();	
-		RenderDUMP_Wait.FrameStart();	
+		RenderDUMP_Wait.FrameStart	();	
+		RenderDUMP_Wait_S.FrameStart();	
 		RenderDUMP_HUD.FrameStart	();	
 		RenderDUMP_Glows.FrameStart	();	
 		RenderDUMP_Lights.FrameStart();	
@@ -392,7 +400,8 @@ void CStats::Show()
 		clBOX.FrameStart			();
 		clFRUSTUM.FrameStart		();
 		
-		netClient.FrameStart		();
+		netClient1.FrameStart		();
+		netClient2.FrameStart		();
 		netServer.FrameStart		();
 
 		TEST0.FrameStart			();
@@ -422,7 +431,7 @@ void CStats::OnDeviceCreate			()
 
 //	if (!strstr(Core.Params, "-dedicated"))
 #ifndef DEDICATED_SERVER
-		pFont	= xr_new<CGameFont>		("stat_font");
+	pFont	= xr_new<CGameFont>		("stat_font", CGameFont::fsDeviceIndependent);
 #endif
 	
 	if(!pSettings->section_exist("evaluation")

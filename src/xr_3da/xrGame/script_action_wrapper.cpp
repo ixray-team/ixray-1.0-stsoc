@@ -34,7 +34,6 @@ void CScriptActionWrapper::initialize_static	(CScriptActionBase *action)
 
 void CScriptActionWrapper::execute				()
 {
-	THROW_EXCEPTION_IF_NO_SCRIPTS_IN_GOAP;
 	luabind::call_member<void>			(this,"execute");
 }
 

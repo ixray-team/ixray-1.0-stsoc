@@ -65,16 +65,15 @@ void CMMSound::music_Play(){
 	VERIFY			(FS.exist("$game_sounds$", _path ));	
 	VERIFY			(FS.exist("$game_sounds$", _path2 ));
 
-	m_music_l.create(_path,st_Effect,sg_SourceType);
-	m_music_r.create(_path2,st_Effect,sg_SourceType);
+	m_music_l.create(_path,st_Music,sg_SourceType);
+	m_music_r.create(_path2,st_Music,sg_SourceType);
 
-    m_music_l.play_at_pos(NULL, Fvector().set(-1.f, 0.f, 1.f), sm_2D);
-    m_music_r.play_at_pos(NULL, Fvector().set(1.f, 0.f, 1.f), sm_2D);
-//	Msg("CMMSound::music_Play");
+    m_music_l.play_at_pos(NULL, Fvector().set(-0.5f,0.f,0.3f), sm_2D);
+    m_music_r.play_at_pos(NULL, Fvector().set(+0.5f,0.f,0.3f), sm_2D);
 }
 
 void CMMSound::music_Update(){
-	if (Device.Pause()) return;
+	if (Device.Paused()) return;
 	if (0==m_music_l._feedback() || 0==m_music_r._feedback())
 		music_Play();
 }
@@ -82,7 +81,6 @@ void CMMSound::music_Update(){
 void CMMSound::music_Stop(){
     m_music_l.stop();
 	m_music_r.stop();
-	Msg("CMMSound::music_Stop");
 }
 
 void CMMSound::all_Stop(){

@@ -35,7 +35,7 @@ game_sv_mp::game_sv_mp() :inherited()
 	m_strWeaponsData		= xr_new<CItemMgr>();
 	m_bVotingActive = false;	
 	//------------------------------------------------------
-//	g_pGamePersistent->Environment.SetWeather("mp_weather");
+//	g_pGamePersistent->Environment().SetWeather("mp_weather");
 	m_aRanks.clear();	
 	//------------------------------------------------------	
 }
@@ -387,7 +387,9 @@ void	game_sv_mp::SpawnPlayer				(ClientID id, LPCSTR N)
 void	game_sv_mp::AllowDeadBodyRemove		(ClientID id, u16 GameID)
 {
 	CSE_Abstract* pSObject = get_entity_from_eid(GameID);
-	pSObject->owner = (xrClientData*)m_server->GetServerClient();
+
+	if (pSObject)
+		pSObject->owner = (xrClientData*)m_server->GetServerClient();
 
 	CObject* pObject =  Level().Objects.net_Find(GameID);
 	
@@ -569,7 +571,11 @@ bool game_sv_mp::OnNextMap				()
 	Msg("Going to level %s", MapName.c_str());
 	m_bMapSwitched = true;
 
-	if (!stricmp(MapName.c_str(), Level().name().c_str())) return false;
+	if (!stricmp(MapName.c_str(), Level().name().c_str()))
+	{
+		m_bMapSwitched = false;
+		return false;
+	}
 	string1024 Command;
 	sprintf(Command, "sv_changelevel %s", MapName.c_str());
 	Console->Execute(Command);
@@ -812,6 +818,7 @@ void	game_sv_mp::ClearPlayerItems		(game_PlayerState* ps)
 void	game_sv_mp::SetPlayersDefItems		(game_PlayerState* ps)
 {
 	ClearPlayerItems(ps);
+	if (ps->team<0) return;
 	//-------------------------------------------
 	//fill player with default items
 	if (ps->team < s16(TeamList.size()))
@@ -860,6 +867,7 @@ void	game_sv_mp::SetPlayersDefItems		(game_PlayerState* ps)
 		if (m_strWeaponsData->GetItemsCount() <= *pItemID) continue;
 		
 		shared_str WeaponName = m_strWeaponsData->GetItemName((*pItemID) & 0x00FF);
+		if (!xr_strcmp(*WeaponName, "mp_wpn_knife")) continue;
 		u16 AmmoID = u16(-1);
 		if (pSettings->line_exist(WeaponName, "ammo_class"))
 		{
@@ -875,8 +883,11 @@ void	game_sv_mp::SetPlayersDefItems		(game_PlayerState* ps)
 		
 //		ps->pItemList.push_back(pWpnAmmo->SlotItem_ID);
 //		ps->pItemList.push_back(pWpnAmmo->SlotItem_ID);
-		ps->pItemList.push_back(AmmoID);
-		ps->pItemList.push_back(AmmoID);
+		if (Type() == GAME_ARTEFACTHUNT)
+		{
+			ps->pItemList.push_back(AmmoID);
+			ps->pItemList.push_back(AmmoID);
+		}		
 	};
 };
 

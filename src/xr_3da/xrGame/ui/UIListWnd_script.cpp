@@ -12,19 +12,6 @@
 
 using namespace luabind;
 
-//bool CUIListWnd::AddText_script(LPCSTR str, int shift, u32 color, CGameFont* pFont,bool doParse)
-//{
-//	CUIString			s;
-//	float shift_ = float(shift);
-//	s.SetText(str);
-//	if(doParse){
-//		CUIStatic::PreprocessText(s.m_str,GetWidth()-shift-5,pFont);
-//	}
-//
-//	return AddParsedItem<CUIListItem>(s, shift_, color, pFont);
-//
-//}
-
 bool CUIListWnd::AddItem_script(CUIListItem* item){
 	return AddItem(item, -1);
 }
@@ -34,6 +21,12 @@ bool xrRender_test_hw_script()
 {
 	return !!xrRender_test_hw();
 }
+
+struct CUIListItemWrapper : public CUIListItem, public luabind::wrap_base {};
+
+struct CUIListItemExWrapper : public CUIListItemEx, public luabind::wrap_base {};
+
+
 #pragma optimize("s",on)
 void CUIListWnd::script_register(lua_State *L)
 {
@@ -54,11 +47,10 @@ void CUIListWnd::script_register(lua_State *L)
 		.def("SetItemHeight",			&CUIListWnd::SetItemHeight)
 		.def("GetItem",					&CUIListWnd::GetItem)
 		.def("GetItemPos",				&CUIListWnd::GetItemPos)
-		.def("GetSize",					&CUIListWnd::GetSize)
+		.def("GetSize",					&CUIListWnd::GetItemsCount)
 		.def("ScrollToBegin",			&CUIListWnd::ScrollToBegin)
 		.def("ScrollToEnd",				&CUIListWnd::ScrollToEnd)
 		.def("ScrollToPos",				&CUIListWnd::ScrollToPos)
-		.def("GetLongestSignWidth",		&CUIListWnd::GetLongestSignWidth)
 		.def("SetWidth",				&CUIListWnd::SetWidth)
 		.def("SetTextColor",			&CUIListWnd::SetTextColor)
 		.def("ActivateList",			&CUIListWnd::ActivateList)
@@ -72,8 +64,12 @@ void CUIListWnd::script_register(lua_State *L)
 		.def("GetSelectedItem",			&CUIListWnd::GetSelectedItem)
 		.def("ResetFocusCapture",		&CUIListWnd::ResetFocusCapture),
 
-		class_<CUIListItem, CUIButton>("CUIListItem")
+		class_<CUIListItem, CUIButton, CUIListItemWrapper>("CUIListItem")
 		.def(							constructor<>()),
+
+		class_<CUIListItemEx, CUIListItem/**/, CUIListItemExWrapper/**/>("CUIListItemEx")
+		.def(							constructor<>())
+		.def("SetSelectionColor",		&CUIListItemEx::SetSelectionColor),
 
 		class_<SServerFilters>("SServerFilters")
 		.def(							constructor<>())
@@ -93,6 +89,7 @@ void CUIListWnd::script_register(lua_State *L)
 		.def("RefreshList",				&CServerList::RefreshGameSpyList)
 		.def("RefreshQuick",			&CServerList::RefreshQuick)
 		.def("ShowServerInfo",			&CServerList::ShowServerInfo)
+		.def("NetRadioChanged",			&CServerList::NetRadioChanged)
 		.def("SetSortFunc",				&CServerList::SetSortFunc),
 		
 

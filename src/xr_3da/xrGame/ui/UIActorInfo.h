@@ -50,7 +50,7 @@ public:
 public:
 					CUIActorStaticticHeader	(CUIActorInfoWnd* w);
 	void			Init					(CUIXml* xml, LPCSTR path, int idx);
-	virtual bool	OnMouseDown				(bool left_button = true);
+	virtual bool	OnMouseDown				(int mouse_btn);
 	virtual void	SetSelected				(bool b);
 
 	int										m_index;
@@ -60,6 +60,7 @@ class CUIActorStaticticDetail :public CUIWindow
 {
 protected:
 public:
+	CUIStatic*		m_text0;
 	CUIStatic*		m_text1;
 	CUIStatic*		m_text2;
 	CUIStatic*		m_text3;

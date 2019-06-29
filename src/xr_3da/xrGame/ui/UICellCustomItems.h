@@ -42,6 +42,7 @@ protected:
 	bool						is_launcher					();
 public:
 								CUIWeaponCellItem			(CWeapon* itm);
+				virtual			~CUIWeaponCellItem			();
 	virtual		void			Update						();
 				CWeapon*		object						() {return (CWeapon*)m_pData;}
 	virtual		void			OnAfterChild				();
@@ -58,10 +59,4 @@ public:
 						CBuyItemCustomDrawCell	(LPCSTR str, CGameFont* pFont);
 	virtual void		OnDraw					(CUICellItem* cell);
 
-};
-
-class CUICellItemAccelDraw :public ICustomDrawCell
-{
-public:
-	virtual void		OnDraw					(CUICellItem* cell);
 };

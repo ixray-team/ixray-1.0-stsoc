@@ -36,21 +36,19 @@ class CPhraseDialog;
 class CPhraseDialogManager;
 
 class CPhraseDialog	: public CSharedClass<SPhraseDialogData, shared_str, false>,
-					  public CXML_IdToIndex<shared_str, int, CPhraseDialog>
+					  public CXML_IdToIndex<CPhraseDialog>
 {
 private:
 	typedef CSharedClass<SPhraseDialogData, shared_str, false>				inherited_shared;
-	typedef CXML_IdToIndex<shared_str, int, CPhraseDialog>					id_to_index;
+	typedef CXML_IdToIndex<CPhraseDialog>									id_to_index;
 
 	friend id_to_index;
 public:
-			 CPhraseDialog	(void);
-	virtual ~CPhraseDialog	(void);
+							CPhraseDialog		();
+	virtual					~CPhraseDialog		();
 
-	//переобределяем copy constructor и оператор ==,
-	//чтоб не ругался компилятор
-			CPhraseDialog	(const CPhraseDialog& pharase_dialog) {*this = pharase_dialog;}
-			CPhraseDialog&	operator = (const CPhraseDialog& pharase_dialog) {*this = pharase_dialog; return *this;}
+							CPhraseDialog		(const CPhraseDialog& pharase_dialog) {*this = pharase_dialog;}
+							CPhraseDialog&		operator = (const CPhraseDialog& pharase_dialog) {*this = pharase_dialog; return *this;}
 
 	
 	virtual void			Load				(shared_str dialog_id);
@@ -61,7 +59,7 @@ public:
 	IC		bool			IsInit				() {return ((FirstSpeaker()!=NULL)&& (SecondSpeaker()!=NULL));}
 
 	//реинициализация диалога
-	virtual void Reset  ();
+	virtual void			Reset				();
 
 	//список предикатов начала диалога
 	virtual bool			Precondition		(const CGameObject* pSpeaker1, const CGameObject* pSpeaker2);
@@ -126,17 +124,13 @@ protected:
 	virtual void			load_shared	(LPCSTR);
 	
 	//рекурсивное добавление фраз в граф
-	void					AddPhrase	(XML_NODE* phrase_node, int phrase_id, int prev_phrase_id);
+	void					AddPhrase	(CUIXml* pXml, XML_NODE* phrase_node, int phrase_id, int prev_phrase_id);
 public:
 	CPhrase*				AddPhrase	(LPCSTR text, int phrase_id, int prev_phrase_id, int goodwil_level);
 	void					SetCaption	(LPCSTR str);
 	void					SetPriority	(int val);
 
 protected:
-
-	//буфферные данные для рекурсивной функции
-	CUIXml					uiXml;
-	XML_NODE*				phrase_list_node;
 
 	static void				InitXmlIdToIndex();
 };

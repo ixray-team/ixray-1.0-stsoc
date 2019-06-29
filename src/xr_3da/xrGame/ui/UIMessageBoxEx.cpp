@@ -25,6 +25,11 @@ void CUIMessageBoxEx::SetText(LPCSTR text){
 
 }
 
+LPCSTR CUIMessageBoxEx::GetText ()
+{
+	return m_pMessageBox->GetText();
+}
+
 void CUIMessageBoxEx::SendMessage(CUIWindow* pWnd, s16 msg, void* pData /* = NULL */){
 	CUIWndCallback::OnEvent(pWnd, msg, pData);
 	if (pWnd == m_pMessageBox)

@@ -166,6 +166,12 @@ motions_container::~motions_container()
 	VERIFY	(container.empty());
 	s_bones_array_const = 0;
 }
+
+bool motions_container::has(shared_str key)
+{
+	return (container.find(key)!=container.end());
+}
+
 motions_value* motions_container::dock(shared_str key, IReader *data, vecBones* bones)
 {
 	motions_value*	result		= 0	;
@@ -173,6 +179,7 @@ motions_value* motions_container::dock(shared_str key, IReader *data, vecBones* 
 	if (I!=container.end())		result = I->second;
 	if (0==result)				{
 		// loading motions
+		VERIFY					(data);
 		result					= xr_new<motions_value>();
 		result->m_dwReference	= 0;
 		BOOL bres				= result->load	(key.c_str(),data,bones);

@@ -508,7 +508,7 @@ void CreateTreeBranch(shared_str nesting, shared_str leafName, CUIListWnd *pList
 	bool status = false;
 
 	// Для всех рутовых элементов
-	for (int i = 0; i < pListToAdd->GetSize(); ++i)
+	for (int i = 0; i < pListToAdd->GetItemsCount(); ++i)
 	{
 		pTVItem = smart_cast<CUITreeViewItem*>(pListToAdd->GetItem(i));
 		R_ASSERT(pTVItem);

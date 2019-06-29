@@ -60,7 +60,8 @@ private:
 	xr_vector<SPass*>									v_passes;
 	xr_vector<ShaderElement*>							v_elements;
 	xr_vector<Shader*>									v_shaders;
-
+	
+	xr_vector<ref_texture>								m_necessary;
 	// misc
 public:
 	CInifile*											m_description;
@@ -166,9 +167,11 @@ public:
 	void			DeleteGeom				(const SGeometry* VS		);
 	void			DeferredLoad			(BOOL E)					{ bDeferredLoad=E;	}
 	void			DeferredUpload			();
-	void			DeferredUnload			();
+//.	void			DeferredUnload			();
 	void			Evict					();
-	void			Dump					();
+	void			StoreNecessaryTextures	();
+	void			DestroyNecessaryTextures();
+	void			Dump					(bool bBrief);
 };
 
 #endif //ResourceManagerH

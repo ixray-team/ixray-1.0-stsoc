@@ -35,27 +35,25 @@ struct SArticleData : CSharedResource
 
 class CEncyclopediaArticle;
 
-class CEncyclopediaArticle : public CSharedClass<SArticleData, ARTICLE_ID, false>
-							,public CXML_IdToIndex<ARTICLE_ID,	int, CEncyclopediaArticle>
+class CEncyclopediaArticle : public CSharedClass<SArticleData, shared_str, false>
+							,public CXML_IdToIndex<CEncyclopediaArticle>
 {
 private:
-	typedef CSharedClass<SArticleData, ARTICLE_ID, false>					inherited_shared;
-	typedef CXML_IdToIndex<ARTICLE_ID, int, CEncyclopediaArticle>	id_to_index;
+	typedef CSharedClass<SArticleData, shared_str, false>					inherited_shared;
+	typedef CXML_IdToIndex<CEncyclopediaArticle>							id_to_index;
 
 	friend id_to_index;
 public:
-	CEncyclopediaArticle			();
-	virtual ~CEncyclopediaArticle	();
+						CEncyclopediaArticle		();
+	virtual				~CEncyclopediaArticle		();
 
-	virtual void Load	(ARTICLE_ID str_id);
-//	virtual void Load	(ARTICLE_INDEX  index);
-
+	virtual void Load	(shared_str str_id);
 
 protected:
-	ARTICLE_ID			m_ArticleId;
+	shared_str			m_ArticleId;
 	virtual	void		load_shared					(LPCSTR);
 	static  void		InitXmlIdToIndex			();
 public:
-	const ARTICLE_ID	Id							()						{return m_ArticleId;}
+	const shared_str	Id							()						{return m_ArticleId;}
 	SArticleData*		data						()						{ VERIFY(inherited_shared::get_sd()); return inherited_shared::get_sd();}
 };

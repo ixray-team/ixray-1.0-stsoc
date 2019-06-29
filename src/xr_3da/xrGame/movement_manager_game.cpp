@@ -50,7 +50,10 @@ void CMovementManager::process_game_path()
 //					break;
 		}
 		case ePathStateBuildGamePath : {
-			game_path().build_path(object().ai_location().game_vertex_id(),game_dest_vertex_id());
+			game_path().build_path(
+				object().ai_location().game_vertex_id(),
+				game_dest_vertex_id()
+			);
 
 			if (game_path().failed()) {
 				Msg			("! Cannot build GAME path! (object %s)",*object().cName());

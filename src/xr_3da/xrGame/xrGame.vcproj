@@ -16,8 +16,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -42,9 +42,9 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Debug/xrGame.pch"
-				AssemblerListingLocation="Debug\"
-				ObjectFile="Debug\"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -58,18 +58,15 @@
 				IgnoreImportLibrary="TRUE"
 				AdditionalOptions="/MACHINE:I386 
 "
-				AdditionalDependencies="x:\xr_3da.lib"
 				ShowProgress="0"
-				OutputFile="x:\xrGame.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
-				GenerateMapFile="TRUE"
-				MapFileName="x:\xrGame.map"
+				GenerateMapFile="FALSE"
+				MapFileName=""
 				MapExports="FALSE"
-				ImportLibrary="x:\xrGame.lib"/>
+				ImportLibrary="x:\libraries\$(ProjectName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
@@ -100,8 +97,8 @@
 		</Configuration>
 		<Configuration
 			Name="Mixed|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Mixed"
+			OutputDirectory="x:\binaries\"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -124,10 +121,10 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerOutput="0"
-				AssemblerListingLocation="Mixed\"
-				ObjectFile="Mixed\"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -139,15 +136,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 "
-				AdditionalDependencies="odbc32.lib odbccp32.lib x:\xr_3da.lib"
-				OutputFile="x:\xrGame.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
-				GenerateMapFile="TRUE"
-				MapFileName=".\Mixed/xrGame.map"
-				ImportLibrary="x:\xrGame.lib"
+				GenerateMapFile="FALSE"
+				MapFileName="$(OutDir)/$(ProjectName).map"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -179,8 +173,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -206,10 +200,10 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Release/xrGame.pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerOutput="0"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -221,19 +215,17 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 "
-				AdditionalDependencies="odbc32.lib odbccp32.lib x:\xr_3da.lib"
-				OutputFile="x:\xrGame.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
 				GenerateMapFile="FALSE"
-				MapFileName="x:\xrGame.map"
+				MapFileName=""
 				SubSystem="0"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="x:\xrGame.lib"/>
+				ImportLibrary="x:\libraries\$(ProjectName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
@@ -250,90 +242,6 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1049"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="DebugNoExceptions|Win32"
-			OutputDirectory="x:\"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				EnableIntrinsicFunctions="FALSE"
-				FavorSizeOrSpeed="0"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="2"
-				PreprocessorDefinitions="WIN32;_DEBUG;DEBUG;_WINDOWS;_USRDLL;XRGAME_EXPORTS;dSINGLE;MSVC;FORCE_NO_EXCEPTIONS"
-				StringPooling="FALSE"
-				MinimalRebuild="TRUE"
-				ExceptionHandling="FALSE"
-				BasicRuntimeChecks="3"
-				SmallerTypeCheck="TRUE"
-				RuntimeLibrary="3"
-				BufferSecurityCheck="TRUE"
-				EnableFunctionLevelLinking="FALSE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
-				AssemblerListingLocation="DebugNoExceptions\"
-				ObjectFile="DebugNoExceptions\"
-				ProgramDataBaseFileName="$(IntDir)/"
-				BrowseInformation="0"
-				WarningLevel="4"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				CallingConvention="2"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				IgnoreImportLibrary="TRUE"
-				AdditionalOptions="/MACHINE:I386 
-"
-				AdditionalDependencies="x:\xr_3da.lib"
-				ShowProgress="0"
-				OutputFile="x:\xrGame.dll"
-				LinkIncremental="2"
-				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories=""
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
-				GenerateMapFile="TRUE"
-				MapFileName="x:\xrGame.map"
-				MapExports="FALSE"
-				ImportLibrary="x:\xrGame.lib"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName="x:\xrGame.tlb"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
 				Culture="1049"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
@@ -1657,6 +1565,9 @@
 							<File
 								RelativePath=".\alife_monster_abstract.cpp">
 							</File>
+							<File
+								RelativePath=".\alife_monster_base.cpp">
+							</File>
 							<Filter
 								Name="brain"
 								Filter="">
@@ -2024,13 +1935,6 @@
 							Name="Release|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
-								DisableSpecificWarnings="4121"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								CallingConvention="0"
 								DisableSpecificWarnings="4121"/>
 						</FileConfiguration>
 					</File>
@@ -3928,12 +3832,6 @@
 									Name="VCCLCompilerTool"
 									ShowIncludes="FALSE"/>
 							</FileConfiguration>
-							<FileConfiguration
-								Name="DebugNoExceptions|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									ShowIncludes="FALSE"/>
-							</FileConfiguration>
 						</File>
 						<File
 							RelativePath=".\Ai\Stalker\ai_stalker.h">
@@ -4167,6 +4065,16 @@
 										<File
 											RelativePath=".\stalker_combat_actions_inline.h">
 										</File>
+										<Filter
+											Name="base"
+											Filter="">
+											<File
+												RelativePath=".\stalker_combat_action_base.cpp">
+											</File>
+											<File
+												RelativePath=".\stalker_combat_action_base.h">
+											</File>
+										</Filter>
 									</Filter>
 									<Filter
 										Name="kill_wounded"
@@ -4489,21 +4397,11 @@
 							<Tool
 								Name="VCCustomBuildTool"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
-							<Tool
-								Name="VCCustomBuildTool"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\graph_abstract_inline.h">
 						<FileConfiguration
 							Name="Debug|Win32">
-							<Tool
-								Name="VCCustomBuildTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
 							<Tool
 								Name="VCCustomBuildTool"/>
 						</FileConfiguration>
@@ -4774,16 +4672,6 @@
 									RelativePath=".\path_manager_game_vertex_inline.h">
 								</File>
 							</Filter>
-							<Filter
-								Name="vertex_type"
-								Filter="">
-								<File
-									RelativePath=".\path_manager_game_vertex_type.h">
-								</File>
-								<File
-									RelativePath=".\path_manager_game_vertex_type_inline.h">
-								</File>
-							</Filter>
 						</Filter>
 						<Filter
 							Name="path_manager_generic"
@@ -4849,9 +4737,6 @@
 							</File>
 							<File
 								RelativePath=".\path_manager_params_game_vertex.h">
-							</File>
-							<File
-								RelativePath=".\path_manager_params_game_vertex_type.h">
 							</File>
 							<File
 								RelativePath=".\path_manager_params_nearest_vertex.h">
@@ -5573,12 +5458,6 @@
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="3"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="3"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\script_engine_export.h">
@@ -5599,12 +5478,6 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								DisableSpecificWarnings="4996"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								DisableSpecificWarnings="4996"/>
@@ -5691,6 +5564,7 @@
 							<Tool
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="0"
+								PrecompiledHeaderThrough=""
 								WarningLevel="2"/>
 						</FileConfiguration>
 						<FileConfiguration
@@ -5702,13 +5576,6 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="0"
-								WarningLevel="2"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="0"
@@ -5763,12 +5630,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugNoExceptions|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
@@ -5856,12 +5717,6 @@
 									Name="VCCLCompilerTool"
 									ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 							</FileConfiguration>
-							<FileConfiguration
-								Name="DebugNoExceptions|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-							</FileConfiguration>
 						</File>
 						<File
 							RelativePath=".\ai\Monsters\ai_monster_effector.h">
@@ -5940,12 +5795,6 @@
 							</FileConfiguration>
 							<FileConfiguration
 								Name="Release|Win32"
-								ExcludedFromBuild="TRUE">
-								<Tool
-									Name="VCCLCompilerTool"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="DebugNoExceptions|Win32"
 								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"/>
@@ -6044,12 +5893,6 @@
 								Name="VCCLCompilerTool"
 								DisableSpecificWarnings="4511,4512"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								DisableSpecificWarnings="4511,4512"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="Level_SLS_Default.cpp">
@@ -6088,12 +5931,6 @@
 							</FileConfiguration>
 							<FileConfiguration
 								Name="Release|Win32"
-								ExcludedFromBuild="TRUE">
-								<Tool
-									Name="VCCLCompilerTool"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="DebugNoExceptions|Win32"
 								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"/>
@@ -7668,11 +7505,6 @@
 									<Tool
 										Name="VCCustomBuildTool"/>
 								</FileConfiguration>
-								<FileConfiguration
-									Name="DebugNoExceptions|Win32">
-									<Tool
-										Name="VCCustomBuildTool"/>
-								</FileConfiguration>
 							</File>
 							<File
 								RelativePath=".\ExplosiveItem.cpp">
@@ -8075,31 +7907,7 @@
 					Name="NET Shared"
 					Filter="">
 					<File
-						RelativePath=".\client_id.h">
-					</File>
-					<File
-						RelativePath=".\client_id.h">
-					</File>
-					<File
-						RelativePath=".\NET_Client.h">
-					</File>
-					<File
-						RelativePath=".\NET_Compressor.h">
-					</File>
-					<File
-						RelativePath=".\NET_Messages.h">
-					</File>
-					<File
 						RelativePath="NET_Queue.h">
-					</File>
-					<File
-						RelativePath=".\NET_Server.h">
-					</File>
-					<File
-						RelativePath=".\NET_Shared.h">
-					</File>
-					<File
-						RelativePath=".\NET_utils.h">
 					</File>
 					<File
 						RelativePath=".\xrMessages.h">
@@ -8270,12 +8078,6 @@
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="3"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="3"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\smart_cast.h">
@@ -8329,6 +8131,16 @@
 							RelativePath=".\associative_vector_compare_predicate_inline.h">
 						</File>
 					</Filter>
+				</Filter>
+				<Filter
+					Name="Registry"
+					Filter="">
+					<File
+						RelativePath=".\RegistryFuncs.cpp">
+					</File>
+					<File
+						RelativePath=".\RegistryFuncs.h">
+					</File>
 				</Filter>
 			</Filter>
 			<Filter
@@ -8647,6 +8459,12 @@
 						RelativePath=".\GameSpy\GameSpy_Browser.h">
 					</File>
 					<File
+						RelativePath=".\gamespy\GameSpy_Full.cpp">
+					</File>
+					<File
+						RelativePath=".\gamespy\GameSpy_Full.h">
+					</File>
+					<File
 						RelativePath=".\GameSpy\GameSpy_FuncDefs.h">
 					</File>
 					<File
@@ -8660,6 +8478,12 @@
 					</File>
 					<File
 						RelativePath=".\GameSpy\GameSpy_GCD_Server.h">
+					</File>
+					<File
+						RelativePath=".\gamespy\GameSpy_HTTP.cpp">
+					</File>
+					<File
+						RelativePath=".\gamespy\GameSpy_HTTP.h">
 					</File>
 					<File
 						RelativePath=".\GameSpy\GameSpy_Keys.h">
@@ -8682,6 +8506,58 @@
 					<File
 						RelativePath=".\GameSpy\GameSpy_QR2_callbacks.h">
 					</File>
+					<Filter
+						Name="CdkeyDecode "
+						Filter="">
+						<File
+							RelativePath=".\gamespy\CdkeyDecode\base32.c">
+							<FileConfiguration
+								Name="Debug|Win32">
+								<Tool
+									Name="VCCLCompilerTool"
+									UsePrecompiledHeader="0"/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Mixed|Win32">
+								<Tool
+									Name="VCCLCompilerTool"
+									UsePrecompiledHeader="0"/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|Win32">
+								<Tool
+									Name="VCCLCompilerTool"
+									UsePrecompiledHeader="0"/>
+							</FileConfiguration>
+						</File>
+						<File
+							RelativePath=".\gamespy\CdkeyDecode\base32.h">
+						</File>
+						<File
+							RelativePath=".\gamespy\CdkeyDecode\cdkeydecode.c">
+							<FileConfiguration
+								Name="Debug|Win32">
+								<Tool
+									Name="VCCLCompilerTool"
+									UsePrecompiledHeader="0"/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Mixed|Win32">
+								<Tool
+									Name="VCCLCompilerTool"
+									UsePrecompiledHeader="0"/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|Win32">
+								<Tool
+									Name="VCCLCompilerTool"
+									UsePrecompiledHeader="0"/>
+							</FileConfiguration>
+						</File>
+						<File
+							RelativePath=".\gamespy\CdkeyDecode\cdkeydecode.h">
+						</File>
+					</Filter>
 				</Filter>
 				<Filter
 					Name="ID_Generator"
@@ -9335,12 +9211,6 @@
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="tri-colliderKNoOPC\dcTriListCollider.h">
@@ -9371,12 +9241,6 @@
 								Name="VCCLCompilerTool"
 								DisableSpecificWarnings="4002;4390"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								DisableSpecificWarnings="4002;4390"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\tri-colliderknoopc\dTriBox.h">
@@ -9397,12 +9261,6 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								DisableSpecificWarnings="4002;4390"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								DisableSpecificWarnings="4002;4390"/>
@@ -9437,12 +9295,6 @@
 								Name="VCCLCompilerTool"
 								DisableSpecificWarnings="4002;4390"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								DisableSpecificWarnings="4002;4390"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\tri-colliderknoopc\dTriCylinder.h">
@@ -9467,12 +9319,6 @@
 								Name="VCCLCompilerTool"
 								DisableSpecificWarnings="4002;4390"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								DisableSpecificWarnings="4002;4390"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="tri-colliderKNoOPC\dTriList.h">
@@ -9493,12 +9339,6 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								DisableSpecificWarnings="4002;4390"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								DisableSpecificWarnings="4002;4390"/>
@@ -9537,12 +9377,6 @@
 								Name="VCCLCompilerTool"
 								DisableSpecificWarnings="4002;4390"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								DisableSpecificWarnings="4002;4390"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="dCylinder\dCylinder.h">
@@ -9568,11 +9402,6 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="Release|Win32">
-							<Tool
-								Name="VCCustomBuildTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
 							<Tool
 								Name="VCCustomBuildTool"/>
 						</FileConfiguration>
@@ -9687,6 +9516,12 @@
 		<Filter
 			Name="UI"
 			Filter="">
+			<File
+				RelativePath=".\ui\CExtraContentFilter.cpp">
+			</File>
+			<File
+				RelativePath=".\ui\CExtraContentFilter.h">
+			</File>
 			<File
 				RelativePath=".\MainMenu.cpp">
 			</File>
@@ -9936,12 +9771,6 @@
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\ui\UIPointerGage.h">
@@ -10146,12 +9975,6 @@
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\ui\UITimeWnd.h">
@@ -10176,12 +9999,6 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="Release|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
@@ -10230,12 +10047,6 @@
 					Name="XML"
 					Filter="">
 					<File
-						RelativePath=".\ui\tinystr.h">
-					</File>
-					<File
-						RelativePath=".\ui\tinyxml.h">
-					</File>
-					<File
 						RelativePath=".\ui\UITextureMaster.cpp">
 					</File>
 					<File
@@ -10252,9 +10063,6 @@
 					</File>
 					<File
 						RelativePath=".\ui\xrUIXmlParser.h">
-					</File>
-					<File
-						RelativePath=".\ui\xrXMLParser.h">
 					</File>
 				</Filter>
 				<Filter
@@ -10288,67 +10096,6 @@
 					<File
 						RelativePath=".\ui\UIPropertiesBox_script.cpp">
 					</File>
-					<Filter
-						Name="ListBox"
-						Filter="">
-						<File
-							RelativePath=".\ui\UIListItem.cpp">
-						</File>
-						<File
-							RelativePath=".\ui\UIListItem.h">
-						</File>
-						<File
-							RelativePath=".\ui\UIListWnd.cpp">
-						</File>
-						<File
-							RelativePath=".\ui\UIListWnd.h">
-						</File>
-						<File
-							RelativePath=".\ui\UIListWnd_inline.h">
-						</File>
-						<File
-							RelativePath=".\ui\UIListWnd_script.cpp">
-						</File>
-						<Filter
-							Name="Ex"
-							Filter="">
-							<File
-								RelativePath=".\ui\UIListItemEx.cpp">
-							</File>
-							<File
-								RelativePath=".\ui\UIListItemEx.h">
-							</File>
-							<File
-								RelativePath=".\ui\UIListWndEx.cpp">
-							</File>
-							<File
-								RelativePath=".\ui\UIListWndEx.h">
-							</File>
-							<File
-								RelativePath=".\ui\UIListWndEx_script.cpp">
-							</File>
-						</Filter>
-						<Filter
-							Name="Multiplayer_list_item"
-							Filter="">
-							<File
-								RelativePath=".\ui\UIListItemMP.cpp">
-							</File>
-							<File
-								RelativePath=".\ui\UIListItemMP.h">
-							</File>
-						</Filter>
-						<Filter
-							Name="Save_Load_list_item"
-							Filter="">
-							<File
-								RelativePath=".\ui\UIListItemPair.cpp">
-							</File>
-							<File
-								RelativePath=".\ui\UIListItemPair.h">
-							</File>
-						</Filter>
-					</Filter>
 				</Filter>
 				<Filter
 					Name="Static"
@@ -10363,12 +10110,6 @@
 						RelativePath=".\UICustomItem.cpp">
 						<FileConfiguration
 							Name="Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ShowIncludes="FALSE"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								ShowIncludes="FALSE"/>
@@ -10542,12 +10283,6 @@
 								Name="VCCLCompilerTool"
 								DisableSpecificWarnings="4511,4512"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								DisableSpecificWarnings="4511,4512"/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\ui\uiscriptwnd_script.h">
@@ -10568,12 +10303,6 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								DisableSpecificWarnings="4511,4512"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugNoExceptions|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								DisableSpecificWarnings="4511,4512"/>
@@ -10635,28 +10364,6 @@
 					</File>
 					<File
 						RelativePath=".\ui\UIInteractiveBackground.h">
-					</File>
-				</Filter>
-				<Filter
-					Name="SpinBox"
-					Filter="">
-					<File
-						RelativePath=".\ui\UICustomSpin.cpp">
-					</File>
-					<File
-						RelativePath=".\ui\UICustomSpin.h">
-					</File>
-					<File
-						RelativePath=".\ui\UISpinNum.cpp">
-					</File>
-					<File
-						RelativePath=".\ui\UISpinNum.h">
-					</File>
-					<File
-						RelativePath=".\ui\UISpinText.cpp">
-					</File>
-					<File
-						RelativePath=".\ui\UISpinText.h">
 					</File>
 				</Filter>
 				<Filter
@@ -10805,6 +10512,60 @@
 					<File
 						RelativePath=".\ui\UIScrollBox.h">
 					</File>
+				</Filter>
+				<Filter
+					Name="SpinBox"
+					Filter="">
+					<File
+						RelativePath=".\ui\UICustomSpin.cpp">
+					</File>
+					<File
+						RelativePath=".\ui\UICustomSpin.h">
+					</File>
+					<File
+						RelativePath=".\ui\UISpinNum.cpp">
+					</File>
+					<File
+						RelativePath=".\ui\UISpinNum.h">
+					</File>
+					<File
+						RelativePath=".\ui\UISpinText.cpp">
+					</File>
+					<File
+						RelativePath=".\ui\UISpinText.h">
+					</File>
+				</Filter>
+				<Filter
+					Name="ListBox"
+					Filter="">
+					<File
+						RelativePath=".\ui\UIListItem.cpp">
+					</File>
+					<File
+						RelativePath=".\ui\UIListItem.h">
+					</File>
+					<File
+						RelativePath=".\ui\UIListWnd.cpp">
+					</File>
+					<File
+						RelativePath=".\ui\UIListWnd.h">
+					</File>
+					<File
+						RelativePath=".\ui\UIListWnd_inline.h">
+					</File>
+					<File
+						RelativePath=".\ui\UIListWnd_script.cpp">
+					</File>
+					<Filter
+						Name="Ex"
+						Filter="">
+						<File
+							RelativePath=".\ui\UIListItemEx.cpp">
+						</File>
+						<File
+							RelativePath=".\ui\UIListItemEx.h">
+						</File>
+					</Filter>
 				</Filter>
 			</Filter>
 			<Filter

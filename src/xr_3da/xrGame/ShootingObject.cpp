@@ -15,6 +15,7 @@
 #include "level.h"
 #include "level_bullet_manager.h"
 #include "clsid_game.h"
+#include "game_cl_single.h"
 
 #define HIT_POWER_EPSILON 0.05f
 #define WALLMARK_SIZE 0.04f
@@ -23,13 +24,17 @@ CShootingObject::CShootingObject(void)
 {
 	fTime							= 0;
  	fTimeToFire						= 0;
-	fHitPower						= 0.0f;
+	//fHitPower						= 0.0f;
+	fvHitPower.set(0.0f,0.0f,0.0f,0.0f);
 	m_fStartBulletSpeed				= 1000.f;
 
 	m_vCurrentShootDir.set			(0,0,0);
 	m_vCurrentShootPos.set			(0,0,0);
 	m_iCurrentParentID				= 0xFFFF;
 
+	m_fPredBulletTime				= 0.0f;
+	m_bUseAimBullet					= false;
+	m_fTimeToAim					= 0.0f;
 
 	//particles
 	m_sFlameParticlesCurrent		= m_sFlameParticles = NULL;
@@ -54,6 +59,11 @@ void CShootingObject::reinit()
 
 void CShootingObject::Load	(LPCSTR section)
 {
+	if(pSettings->line_exist(section,"light_disabled"))
+	{
+		m_bLightShotEnabled		= !pSettings->r_bool(section,"light_disabled");
+	}else
+		m_bLightShotEnabled		= true;
 
 	//время затрачиваемое на выстрел
 	fTimeToFire			= pSettings->r_float		(section,"rpm");
@@ -72,36 +82,61 @@ void CShootingObject::Light_Create		()
 	light_render				=	::Render->light_create();
 	if (::Render->get_generation()==IRender_interface::GENERATION_R2)	light_render->set_shadow	(true);
 	else																light_render->set_shadow	(false);
-	m_bShotLight				=	true;
 }
 
 void CShootingObject::Light_Destroy		()
 {
-	//lights
 	light_render.destroy		();
 }
 
 void CShootingObject::LoadFireParams	(LPCSTR section, LPCSTR prefix)
 {
-	string256 full_name;
+	string256	full_name;
+	string32	buffer;
+	shared_str	s_sHitPower;
 	//базовая дисперсия оружия
 	fireDispersionBase	= pSettings->r_float	(section,"fire_dispersion_base"	);
 	fireDispersionBase	= deg2rad				(fireDispersionBase);
 	//сила выстрела и его мощьность
-	fHitPower			= pSettings->r_float	(section,strconcat(full_name, prefix, "hit_power"));
+	s_sHitPower			= pSettings->r_string_wb(section,strconcat(full_name, prefix, "hit_power"));//читаем строку силы хита пули оружия
+	fvHitPower[egdMaster]	= (float)atof(_GetItem(*s_sHitPower,0,buffer));//первый параметр - это хит для уровня игры мастер
+
+	fvHitPower[egdVeteran]	= fvHitPower[egdMaster];//изначально параметры для других уровней
+	fvHitPower[egdStalker]	= fvHitPower[egdMaster];//сложности
+	fvHitPower[egdNovice]	= fvHitPower[egdMaster];//такие же
+	
+	int num_game_diff_param=_GetItemCount(*s_sHitPower);//узнаём колличество параметров для хитов
+	if (num_game_diff_param>1)//если задан второй параметр хита
+	{
+		fvHitPower[egdVeteran]	= (float)atof(_GetItem(*s_sHitPower,1,buffer));//то вычитываем его для уровня ветерана
+	}
+	if (num_game_diff_param>2)//если задан третий параметр хита
+	{
+		fvHitPower[egdStalker]	= (float)atof(_GetItem(*s_sHitPower,2,buffer));//то вычитываем его для уровня сталкера
+	}
+	if (num_game_diff_param>3)//если задан четвёртый параметр хита
+	{
+		fvHitPower[egdNovice]	= (float)atof(_GetItem(*s_sHitPower,3,buffer));//то вычитываем его для уровня новичка
+	}
+	
+	//fHitPower			= pSettings->r_float	(section,strconcat(full_name, prefix, "hit_power"));
 	fHitImpulse			= pSettings->r_float	(section,strconcat(full_name, prefix, "hit_impulse"));
 	//максимальное расстояние полета пули
 	fireDistance		= pSettings->r_float	(section,strconcat(full_name, prefix, "fire_distance"));
 	//начальная скорость пули
 	m_fStartBulletSpeed = pSettings->r_float	(section,strconcat(full_name, prefix, "bullet_speed"));
+	m_bUseAimBullet		= pSettings->r_bool		(section,strconcat(full_name, prefix, "use_aim_bullet"));
+	if (m_bUseAimBullet)
+	{
+		m_fTimeToAim		= pSettings->r_float	(section,strconcat(full_name, prefix, "time_to_aim"));
+	}
 }
 
 void CShootingObject::LoadLights		(LPCSTR section, LPCSTR prefix)
 {
-	string256 full_name;
-
+	string256				full_name;
 	// light
-	if(m_bShotLight) 
+	if(m_bLightShotEnabled) 
 	{
 		Fvector clr			= pSettings->r_fvector3		(section, strconcat(full_name, prefix, "light_color"));
 		light_base_color.set(clr.x,clr.y,clr.z,1);
@@ -124,8 +159,6 @@ void CShootingObject::Light_Start	()
 		
 		light_build_color.set		(Random.randFs(light_var_color,light_base_color.r),Random.randFs(light_var_color,light_base_color.g),Random.randFs(light_var_color,light_base_color.b),1);
 		light_build_range			= Random.randFs(light_var_range,light_base_range);
-
-//.		light_render->set_active	(true);
 	}
 }
 
@@ -134,13 +167,14 @@ void CShootingObject::Light_Render	(const Fvector& P)
 	float light_scale			= light_time/light_lifetime;
 	R_ASSERT(light_render);
 
-
 	light_render->set_position	(P);
 	light_render->set_color		(light_build_color.r*light_scale,light_build_color.g*light_scale,light_build_color.b*light_scale);
 	light_render->set_range		(light_build_range*light_scale);
 
 	if(	!light_render->get_active() )
-			light_render->set_active	(true);
+	{
+		light_render->set_active	(true);
+	}
 }
 
 
@@ -228,10 +262,6 @@ void CShootingObject::LoadFlameParticles (LPCSTR section, LPCSTR prefix)
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-// Weapon particles
-//////////////////////////////////////////////////////////////////////////
-//партиклы гильз
 void CShootingObject::OnShellDrop	(const Fvector& play_pos,
 									 const Fvector& parent_vel)
 {
@@ -309,7 +339,7 @@ void CShootingObject::UpdateFlameParticles	()
 //подсветка от выстрела
 void CShootingObject::UpdateLight()
 {
-	if (m_bShotLight && light_time>0)		
+	if (light_render && light_time>0)		
 	{
 		light_time -= Device.fTimeDelta;
 		if (light_time<=0) StopLight();
@@ -318,13 +348,17 @@ void CShootingObject::UpdateLight()
 
 void CShootingObject::StopLight			()
 {
-	if(light_render)light_render->set_active(false);
+	if(light_render){
+		light_render->set_active(false);
+	}
 }
 
 void CShootingObject::RenderLight()
 {
-	if ( light_render && m_bShotLight && light_time>0 ) 
+	if ( light_render && light_time>0 ) 
+	{
 		Light_Render(get_CurrentFirePoint());
+	}
 }
 
 bool CShootingObject::SendHitAllowed		(CObject* pUser)
@@ -372,10 +406,59 @@ void CShootingObject::FireBullet(const Fvector& pos,
 	m_vCurrentShootDir = dir;
 	m_vCurrentShootPos = pos;
 	m_iCurrentParentID = parent_id;
+	
+	bool aim_bullet;
+	if (m_bUseAimBullet)
+	{
+		if (ParentMayHaveAimBullet())
+		{
+			if (m_fPredBulletTime==0.0)
+			{
+				aim_bullet=true;
+			}
+			else
+			{
+				if ((Device.fTimeGlobal-m_fPredBulletTime)>=m_fTimeToAim)
+				{
+					aim_bullet=true;
+				}
+				else
+				{
+					aim_bullet=false;
+				}
+			}
+		}
+		else
+		{
+			aim_bullet=false;
+		}
+	}
+	else
+	{
+		aim_bullet=false;
+	}
+	m_fPredBulletTime = Device.fTimeGlobal;
 
-	Level().BulletManager().AddBullet(	pos, dir, m_fStartBulletSpeed, fHitPower, 
+	float l_fHitPower;
+	if (ParentIsActor())//если из оружия стреляет актёр(игрок)
+	{
+		if (GameID() == GAME_SINGLE)
+		{
+			l_fHitPower=fvHitPower[g_SingleGameDifficulty];
+		}
+		else
+		{
+			l_fHitPower=fvHitPower[egdMaster];
+		}
+	}
+	else
+	{
+		l_fHitPower=fvHitPower[egdMaster];
+	}
+
+	Level().BulletManager().AddBullet(	pos, dir, m_fStartBulletSpeed, l_fHitPower, 
 										fHitImpulse, parent_id, weapon_id, 
-										ALife::eHitTypeFireWound, fireDistance, cartridge, send_hit);
+										ALife::eHitTypeFireWound, fireDistance, cartridge, send_hit, aim_bullet);
 }
 
 void CShootingObject::FireStart	()

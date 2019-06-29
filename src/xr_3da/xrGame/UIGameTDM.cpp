@@ -14,6 +14,8 @@
 #include "ui/TeamInfo.h"
 #include <dinput.h>
 
+#include "object_broker.h"
+
 #define MSGS_OFFS 510
 
 //--------------------------------------------------------------------
@@ -43,6 +45,8 @@ CUIGameTDM::CUIGameTDM()
 //.	gr = xml_init.InitAutoStaticGroup	(uiXml, "team2_score",		m_team2_score);
 //.	(*gr.back()).SetText				(*CTeamInfo::GetTeam2_name());
 //.	(*gr.back()).SetTextColor			(CTeamInfo::GetTeam2_color());
+
+	m_pUITeamSelectWnd	= xr_new<CUISpawnWnd>	();
 }
 //--------------------------------------------------------------------
 void CUIGameTDM::SetClGame (game_cl_GameState* g)
@@ -110,6 +114,8 @@ CUIGameTDM::~CUIGameTDM()
 	xr_delete			(m_team2_icon);
 	xr_delete			(m_team1_score);
 	xr_delete			(m_team2_score);
+
+	delete_data			(m_pUITeamSelectWnd);
 }
 //--------------------------------------------------------------------
 bool CUIGameTDM::IR_OnKeyboardPress(int dik)
@@ -135,15 +141,14 @@ bool CUIGameTDM::IR_OnKeyboardRelease(int dik)
 {
 	switch (dik) {
 		case DIK_CAPSLOCK :
-		{
-			if (m_game)
 			{
-				if (!m_game->Get_ShowPlayerNamesEnabled())
-					m_game->Set_ShowPlayerNames(false);
-				return true;
-			};
-		}break;
-
+				if (m_game)
+				{
+					if (!m_game->Get_ShowPlayerNamesEnabled())						
+						m_game->Set_ShowPlayerNames(false);
+					return true;
+				};
+			}break;
 	}
 	if(inherited::IR_OnKeyboardRelease(dik)) return true;
 	
@@ -187,4 +192,10 @@ void CUIGameTDM::SetFraglimit(int local_frags, int fraglimit)
 		sprintf(str,"%s", "--");
 
 	m_pFragLimitIndicator->SetText(str);
+}
+
+void CUIGameTDM::reset_ui				()
+{
+	inherited::reset_ui();
+	m_pUITeamSelectWnd->Reset();
 }

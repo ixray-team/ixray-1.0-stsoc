@@ -217,7 +217,7 @@ void CCarWeapon::OnShot()
 
 	StartShotParticles		();
 	
-	if(m_bShotLight) 
+	if(m_bLightShotEnabled) 
 		Light_Start			();
 
 	StartFlameParticles		();

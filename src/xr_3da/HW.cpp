@@ -44,15 +44,12 @@ void CHW::Reset		(HWND hwnd)
 	else					DevPP.FullScreen_RefreshRateInHz	= D3DPRESENT_RATE_DEFAULT;
 #endif
 
-	_SHOW_REF				("* RESET: before: DeviceREF:",HW.pDevice);
 	while	(TRUE)	{
 		HRESULT _hr							= HW.pDevice->Reset	(&DevPP);
 		if (SUCCEEDED(_hr))					break;
 		Msg		("! ERROR: [%dx%d]: %s",DevPP.BackBufferWidth,DevPP.BackBufferHeight,Debug.error2string(_hr));
 		Sleep	(100);
 	}
-	_SHOW_REF				("* RESET: after : DeviceREF:",HW.pDevice);
-
 	R_CHK				(pDevice->GetRenderTarget			(0,&pBaseRT));
 	R_CHK				(pDevice->GetDepthStencilSurface	(&pBaseZB));
 #ifdef DEBUG
@@ -70,13 +67,13 @@ void CHW::CreateD3D	()
 #ifndef DEDICATED_SERVER
 	LPCSTR		_name			= "d3d9.dll";
 #else
-	LPCSTR		_name			= "d3d9-null.dll";
+	LPCSTR		_name			= "xrd3d9-null.dll";
 #endif
 
 	hD3D9            			= LoadLibrary(_name);
 	R_ASSERT2	           	 	(hD3D9,"Can't find 'd3d9.dll'\nPlease install latest version of DirectX before running this program");
     typedef IDirect3D9 * WINAPI _Direct3DCreate9(UINT SDKVersion);
-    _Direct3DCreate9* createD3D	= (_Direct3DCreate9*)GetProcAddress(hD3D9,"Direct3DCreate9");	R_ASSERT(createD3D);
+	_Direct3DCreate9* createD3D	= (_Direct3DCreate9*)GetProcAddress(hD3D9,"Direct3DCreate9");	R_ASSERT(createD3D);
     this->pD3D 					= createD3D( D3D_SDK_VERSION );
     R_ASSERT2					(this->pD3D,"Please install DirectX 9.0c");
 }
@@ -121,17 +118,20 @@ D3DFORMAT CHW::selectDepthStencil	(D3DFORMAT fTarget)
 
 void	CHW::DestroyDevice	()
 {
+	_SHOW_REF				("refCount:pBaseZB",pBaseZB);
 	_RELEASE				(pBaseZB);
+
+	_SHOW_REF				("refCount:pBaseRT",pBaseRT);
 	_RELEASE				(pBaseRT);
 #ifdef DEBUG
+	_SHOW_REF				("refCount:dwDebugSB",dwDebugSB);
 	_RELEASE				(dwDebugSB);
 #endif
 #ifdef _EDITOR
 	_RELEASE				(HW.pDevice);
 #else
 	_SHOW_REF				("DeviceREF:",HW.pDevice);
-	while (HW.pDevice->Release())	;	//.
-	HW.pDevice				= 0		;
+	_RELEASE				(HW.pDevice);
 #endif    
 	DestroyD3D				();
 	
@@ -462,6 +462,7 @@ void	CHW::updateWindowProps	(HWND m_hWnd)
 		};
 
 		AdjustWindowRect		(	&m_rcWindowBounds, dwWindowStyle, FALSE );
+
 		SetWindowPos			(	m_hWnd, 
 									HWND_TOP,	
 									m_rcWindowBounds.left, 
@@ -477,6 +478,7 @@ void	CHW::updateWindowProps	(HWND m_hWnd)
 
 #ifndef DEDICATED_SERVER
 		ShowCursor	(FALSE);
+		SetForegroundWindow( m_hWnd );
 #endif
 }
 
@@ -530,12 +532,16 @@ void	fill_vid_mode_list			(CHW* _hw)
 	vid_mode_token[_cnt-1].id			= -1;
 	vid_mode_token[_cnt-1].name		= NULL;
 
-	Msg("Avialable video modes[%d]:",_tmp.size());
+#ifdef DEBUG
+	Msg("Available video modes[%d]:",_tmp.size());
+#endif // DEBUG
 	for(i=0; i<_tmp.size();++i)
 	{
 		vid_mode_token[i].id		= i;
 		vid_mode_token[i].name		= _tmp[i];
+#ifdef DEBUG
 		Msg							("[%s]",_tmp[i]);
+#endif // DEBUG
 	}
 }
 #endif

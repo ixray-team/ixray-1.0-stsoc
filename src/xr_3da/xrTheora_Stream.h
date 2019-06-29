@@ -14,7 +14,7 @@ class ENGINE_API CTheoraStream{
 	theora_comment		t_comment;
 	theora_state		t_state;
 
-	IReader*			source;
+	CStreamReader		*source;
 
 	yuv_buffer			t_yuv_buffer;
 

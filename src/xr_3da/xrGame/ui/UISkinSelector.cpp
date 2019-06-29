@@ -11,6 +11,9 @@
 #include "../game_cl_deathmatch.h"
 #include "../xr_level_controller.h"
 #include "../HUDManager.h"
+#include "CExtraContentFilter.h"
+
+#include "../object_broker.h"
 
 CUISkinSelectorWnd::CUISkinSelectorWnd(const char* strSectionName, s16 team)
 {	
@@ -36,6 +39,9 @@ CUISkinSelectorWnd::CUISkinSelectorWnd(const char* strSectionName, s16 team)
 	m_pBtnBack		= xr_new<CUI3tButton>();	AttachChild(m_pBtnBack);
 
 	m_firstSkin = 0;
+	//---------------------------------------------------
+	m_pExtraContentFilter = xr_new<CExtraContentFilter>();
+	//---------------------------------------------------
 	Init(strSectionName);	
 }
 
@@ -53,6 +59,9 @@ CUISkinSelectorWnd::~CUISkinSelectorWnd()
 	xr_delete(m_pBtnBack);	
 	for (int i = 0; i<4; i++)
 		xr_delete(m_pImage[i]);
+
+	delete_data(m_pExtraContentFilter);
+	delete_data(m_skinsEnabled);
 }
 
 void CUISkinSelectorWnd::InitSkins(){
@@ -67,6 +76,8 @@ void CUISkinSelectorWnd::InitSkins(){
 	{
 		_GetItem(lst, j, singleItem);
 		m_skins.push_back(singleItem);
+		if (m_pExtraContentFilter->IsDataEnabled(singleItem))
+			m_skinsEnabled.push_back(j);
 	}
 }
 
@@ -89,6 +100,9 @@ void CUISkinSelectorWnd::UpdateSkins(){
 			m_pImage[i]->SetText(itoa((m_firstSkin + 1 + i)%10,buf,10));
 		else
 			m_pImage[i]->SetText("");
+
+		xr_vector<int>::iterator it = std::find(m_skinsEnabled.begin(), m_skinsEnabled.end(), i + m_firstSkin);
+		m_pImage[i]->Enable(it != m_skinsEnabled.end());
 	}
 
 	m_pButtons[0]->Enable(m_firstSkin > 0);
@@ -162,7 +176,7 @@ void CUISkinSelectorWnd::SendMessage(CUIWindow *pWnd, s16 msg, void *pData)
                 for (int i = 0; i<4; i++)
 					if (pWnd == m_pImage[i])
 					{
-						m_iActiveIndex = i;
+						m_iActiveIndex = m_firstSkin+i;
 						OnBtnOK();					
 					}
 			break;
@@ -191,6 +205,11 @@ void CUISkinSelectorWnd::OnBtnCancel(){
 void CUISkinSelectorWnd::OnBtnOK(){
 	Game().StartStopMenu(this,true);
 	game_cl_Deathmatch * dm = smart_cast<game_cl_Deathmatch *>(&(Game()));
+	if (m_iActiveIndex == -1)
+	{
+		m_iActiveIndex	= m_skinsEnabled[::Random.randI(m_skinsEnabled.size())];
+
+	}
 	dm->OnSkinMenu_Ok();
 }
 
@@ -229,9 +248,17 @@ bool CUISkinSelectorWnd::OnKeyboard(int dik, EUIMessages keyboard_action)
 
 	if (dik >= DIK_1 && dik < (int)right_border + DIK_1)
 	{
-		m_iActiveIndex = dik - DIK_1;
-		OnBtnOK();
-		return true;
+		int NewIndex = dik - DIK_1;
+		Msg("Selected %d", NewIndex);
+		for (u32 i=0; i<m_skinsEnabled.size(); i++)
+			Msg("Enabled - %d", m_skinsEnabled[i]);
+		xr_vector<int>::iterator It = std::find(m_skinsEnabled.begin(), m_skinsEnabled.end(), NewIndex);
+		if (It != m_skinsEnabled.end())
+		{
+			m_iActiveIndex = NewIndex;
+			OnBtnOK();			
+		}
+		return true;		
 	}
 
 	game_cl_Deathmatch * dm = smart_cast<game_cl_Deathmatch *>(&(Game()));
@@ -308,4 +335,8 @@ void CUISkinSelectorWnd::SetCurSkin(int skin){
 	UpdateSkins();
 }
 
-
+void	CUISkinSelectorWnd::Update			()
+{
+	UpdateSkins();
+	inherited::Update();
+}

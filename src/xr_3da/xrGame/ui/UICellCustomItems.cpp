@@ -9,8 +9,8 @@
 CUIInventoryCellItem::CUIInventoryCellItem(CInventoryItem* itm)
 {
 	m_pData											= (void*)itm;
+
 	inherited::SetShader							(InventoryUtilities::GetEquipmentIconsShader());
-//	inherited::InitTexture							("ui\\ui_icon_equipment");
 
 	m_grid_size.set									(itm->GetGridWidth(),itm->GetGridHeight());
 	Frect rect; 
@@ -80,7 +80,9 @@ void CUIAmmoCellItem::UpdateItemText()
 CUIWeaponCellItem::CUIWeaponCellItem(CWeapon* itm)
 :inherited(itm)
 {
-	ZeroMemory(m_addons,sizeof(m_addons));
+	m_addons[eSilencer]		= NULL;
+	m_addons[eScope]		= NULL;
+	m_addons[eLauncher]		= NULL;
 
 	if(itm->SilencerAttachable())
 		m_addon_offset[eSilencer].set(object()->GetSilencerX(), object()->GetSilencerY());
@@ -90,6 +92,11 @@ CUIWeaponCellItem::CUIWeaponCellItem(CWeapon* itm)
 
 	if(itm->GrenadeLauncherAttachable())
 		m_addon_offset[eLauncher].set(object()->GetGrenadeLauncherX(), object()->GetGrenadeLauncherY());
+}
+
+#include "../object_broker.h"
+CUIWeaponCellItem::~CUIWeaponCellItem()
+{
 }
 
 bool CUIWeaponCellItem::is_scope()
@@ -278,25 +285,4 @@ void CBuyItemCustomDrawCell::OnDraw(CUICellItem* cell)
 	UI()->ClientToScreenScaled			(pos, pos.x, pos.y);
 	m_pFont->Out						(pos.x, pos.y, m_string);
 	m_pFont->OnRender					();
-}
-
-#include <dinput.h>
-#include "../HUDManager.h"
-void CUICellItemAccelDraw::OnDraw(CUICellItem* cell)
-{
-	int acc									= cell->GetAccelerator();
-	if(acc!=0)
-	{
-		if(acc==11)							
-			acc = 1;
-		Fvector2							pos;
-		string64							buff;
-
-		sprintf								(buff,"%d", acc - DIK_ESCAPE);
-		CGameFont* pFont					= UI()->Font()->pFontLetterica16Russian;
-		cell->GetAbsolutePos				(pos);
-		UI()->ClientToScreenScaled			(pos, pos.x, pos.y);
-		pFont->Out							(pos.x, pos.y, buff);
-		pFont->OnRender						();
-	}
 }

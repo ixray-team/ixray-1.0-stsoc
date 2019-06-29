@@ -1,7 +1,7 @@
 #ifndef __XR_INPUT__
 #define __XR_INPUT__
 
-#define DIRECTINPUT_VERSION 0x0700
+#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
 class	ENGINE_API				IInputReceiver;
@@ -41,9 +41,9 @@ public:
 		DIDEVICEOBJECTINSTANCE		objectInfo;
 	};
 private:
-	LPDIRECTINPUT7				pDI;			// The DInput object
-	LPDIRECTINPUTDEVICE7		pMouse;			// The DIDevice7 interface
-	LPDIRECTINPUTDEVICE7		pKeyboard;		// The DIDevice7 interface
+	LPDIRECTINPUT8				pDI;			// The DInput object
+	LPDIRECTINPUTDEVICE8		pMouse;			// The DIDevice7 interface
+	LPDIRECTINPUTDEVICE8		pKeyboard;		// The DIDevice7 interface
 	//----------------------
 	u32							timeStamp	[COUNT_MOUSE_AXIS];
 	u32							timeSave	[COUNT_MOUSE_AXIS];
@@ -53,7 +53,7 @@ private:
 	//----------------------
 	BOOL						KBState		[COUNT_KB_BUTTONS];
 
-	HRESULT						CreateInputDevice(	LPDIRECTINPUTDEVICE7* device, GUID guidDevice,
+	HRESULT						CreateInputDevice(	LPDIRECTINPUTDEVICE8* device, GUID guidDevice,
 													const DIDATAFORMAT* pdidDataFormat, u32 dwFlags,
 													u32 buf_size );
 
@@ -89,6 +89,7 @@ public:
 
 public:
 			void				exclusive_mode				(const bool &exclusive);
+			bool				get_dik_name				(int dik, LPSTR dest, int dest_sz);
 };
 
 extern ENGINE_API CInput *		pInput;

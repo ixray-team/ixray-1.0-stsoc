@@ -446,11 +446,16 @@ namespace SmartDynamicCast {
 #ifdef DEBUG
 			T1					*temp = SmartDynamicCast::smart_cast<_T1>(const_cast<_T2*>(p));
 			T1					*test = dynamic_cast<T1*>(p);
-			if (temp != test) {
-				string4096		_temp;
-				sprintf			(_temp,"SmartCast<%s*>(%s*) FAILED (result differs from the dynamic_cast) or object is CORRUPTED!",typeid(T1).name(),typeid(T2).name());
-				VERIFY2			(temp == test,_temp);
-			}
+			VERIFY2				(
+				temp == test,
+				make_string(
+					"SmartCast<%s*>(%s*) FAILED (result differs from the dynamic_cast) or object is CORRUPTED (0x%08x -> 0x%08x)!",
+					typeid(T1).name(),
+					typeid(T2).name(),
+					*(u32*)&test,
+					*(u32*)&temp
+				)
+			);
 			return				(temp);
 #else
 			return				(SmartDynamicCast::smart_cast<_T1>(const_cast<_T2*>(p)));

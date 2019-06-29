@@ -44,6 +44,7 @@ void FProgressive::Load		(const char* N, IReader *data, u32 dwFlags)
     nSWI.reserved[2]	= lods().r_u32();
     nSWI.reserved[3]	= lods().r_u32();
     nSWI.count			= lods().r_u32();
+	VERIFY				(NULL==nSWI.sw);
     nSWI.sw				= xr_alloc<FSlideWindow>(nSWI.count);
 	lods().r			(nSWI.sw,nSWI.count*sizeof(FSlideWindow));
 
@@ -59,8 +60,9 @@ void FProgressive::Load		(const char* N, IReader *data, u32 dwFlags)
 		xSWI->reserved[2]	= def().r_u32();
 		xSWI->reserved[3]	= def().r_u32();
 		xSWI->count			= def().r_u32();
+		VERIFY				(NULL==xSWI->sw);
 		xSWI->sw			= xr_alloc<FSlideWindow>(xSWI->count);
-		def().r			(xSWI->sw,xSWI->count*sizeof(FSlideWindow));
+		def().r				(xSWI->sw,xSWI->count*sizeof(FSlideWindow));
 	}
 #endif
 }
@@ -73,7 +75,7 @@ void FProgressive::Render	(float LOD)
 		int lod_id			= iFloor((1.f-clampr(LOD,0.f,1.f))*float(xSWI->count-1)+0.5f);
 		VERIFY				(lod_id>=0 && lod_id<int(xSWI->count));
 		FSlideWindow& SW	= xSWI->sw[lod_id];
-		RCache.set_Geometry	(m_fast->geom);
+		RCache.set_Geometry	(m_fast->rm_geom);
 		RCache.Render		(D3DPT_TRIANGLELIST,m_fast->vBase,0,SW.num_verts,m_fast->iBase+SW.offset,SW.num_tris);
 		RCache.stat.r.s_static.add	(SW.num_verts);
 	} else {
@@ -85,7 +87,7 @@ void FProgressive::Render	(float LOD)
 		}
 		VERIFY				(lod_id>=0 && lod_id<int(nSWI.count));
 		FSlideWindow& SW	= nSWI.sw[lod_id];
-		RCache.set_Geometry	(geom);
+		RCache.set_Geometry	(rm_geom);
 		RCache.Render		(D3DPT_TRIANGLELIST,vBase,0,SW.num_verts,iBase+SW.offset,SW.num_tris);
 		RCache.stat.r.s_static.add	(SW.num_verts);
 	}

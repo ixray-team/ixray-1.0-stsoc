@@ -1,17 +1,3 @@
-//=============================================================================
-//  Filename:   UIMessages.h
-//	Created by Roman E. Marchenko, vortex@gsc-game.kiev.ua
-//	Copyright 2004. GSC Game World
-//	---------------------------------------------------------------------------
-//  Список всех сообщений всех контролов и диалоговых окон интерфейса проекта 
-//	S.T.A.L.K.E.R. Shadow of chernobyl
-//=============================================================================
-
-#ifndef UI_MESSAGES_H_
-#define UI_MESSAGES_H_
-
-//////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 //////////////////////////////////////////////////////////////////////////
@@ -21,8 +7,12 @@ enum EUIMessages
 	// CUIWindow
 	WINDOW_LBUTTON_DOWN = 0,
 	WINDOW_RBUTTON_DOWN,
+	WINDOW_CBUTTON_DOWN,
+
 	WINDOW_LBUTTON_UP,
 	WINDOW_RBUTTON_UP,
+	WINDOW_CBUTTON_UP,
+
 	WINDOW_MOUSE_MOVE,
 	WINDOW_MOUSE_WHEEL_UP,
 	WINDOW_MOUSE_WHEEL_DOWN,
@@ -59,7 +49,6 @@ enum EUIMessages
 	
 	// CUIScrollBox
 	SCROLLBOX_MOVE,
-	SCROLLBOX_STOP,
 
 	// CUIScrollBar
 	SCROLLBAR_VSCROLL,
@@ -142,11 +131,8 @@ enum EUIMessages
 	//CUIAnimationBase
     ANIMATION_STOPPED,
 	EDIT_TEXT_CHANGED,
+	EDIT_TEXT_COMMIT,
 	MAP_SHOW_HINT,
 	MAP_HIDE_HINT,
 	MAP_SELECT_SPOT,
 };
-
-//////////////////////////////////////////////////////////////////////////
-
-#endif //UI_MESSAGES_H_

@@ -94,6 +94,11 @@ void	smapvis::flushoccq	()
 		if (state==state_working)	state	= state_usingTC;
 	}
 }
+void	smapvis::resetoccq	()
+{
+	if (testQ_frame==(Device.dwFrame+1))		testQ_frame--;
+	flushoccq		();
+}
 
 void	smapvis::mark				()
 {

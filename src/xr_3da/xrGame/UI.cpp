@@ -18,7 +18,7 @@ CUI::CUI(CHUDManager* p)
 	m_pMessagesWnd					= xr_new<CUIMessagesWindow>();
 
 	m_Parent						= p;
-	pUIGame							= 0;
+	pUIGame							= NULL;
 
 	ShowGameIndicators				();
 	ShowCrosshair					();
@@ -34,8 +34,13 @@ CUI::~CUI()
 
 //--------------------------------------------------------------------
 
-void CUI::Load()
+void CUI::Load(CUIGameCustom* pGameUI)
 {
+	if(pGameUI){
+		pGameUI->SetClGame(&Game());
+		m_pMessagesWnd->SetChatOwner(&Game());
+		return;
+	}
 	pUIGame = Game().createGameUI();
 	R_ASSERT(pUIGame);
 }
@@ -56,7 +61,6 @@ void CUI::UIOnFrame()
 		//update windows
 		if( GameIndicatorsShown() && psHUD_Flags.is(HUD_DRAW|HUD_DRAW_RT) )
 		{
-			UIMainIngameWnd->SetFont(m_Parent->Font().pFontMedium);
 			UIMainIngameWnd->Update	();
 		}
 	}
@@ -203,7 +207,11 @@ bool CUI::IR_OnMouseMove(int dx,int dy)
 
 void CUI::AddInfoMessage			(LPCSTR message)
 {
-	UIMainIngameWnd->AddInfoMessage	(message);
+	SDrawStaticStruct* ss	=	pUIGame->GetCustomStatic(message);
+	if(!ss)
+	{
+		ss					= pUIGame->AddCustomStatic(message, true);
+	}
 }
 
 void CUI::ShowGameIndicators()
@@ -229,4 +237,9 @@ void CUI::HideCrosshair()
 bool CUI::CrosshairShown()
 {
 	return !!psHUD_Flags.test	(HUD_CROSSHAIR_RT);
+}
+
+void CUI::OnConnected()
+{
+	UIMainIngameWnd->OnConnected();
 }

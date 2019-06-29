@@ -8,6 +8,13 @@
 
 #include "LocatorAPI_defs.h"
 
+#pragma warning(push)
+#pragma warning(disable:4995)
+#include <io.h>
+#pragma warning(pop)
+
+class XRCORE_API CStreamReader;
+
 class XRCORE_API CLocatorAPI  
 {
 	friend class FS_Path;
@@ -40,6 +47,9 @@ private:
 	DEFINE_SET_PRED				(file,files_set,files_it,file_pred);
     DEFINE_VECTOR				(archive,archives_vec,archives_it);
 
+	DEFINE_VECTOR				(_finddata_t,FFVec,FFIt);
+	FFVec						rec_files;
+
     int							m_iLockRescan	; 
     void						rescan_path		(LPCSTR full_path, BOOL bRecurse);
     void						check_pathes	();
@@ -68,20 +78,45 @@ public:
 		flTargetFolderOnly		= (1<<5),
 		flCacheFiles			= (1<<6),
 		flScanAppRoot			= (1<<7),
-		flNeedCheck				= (1<<8)
+		flNeedCheck				= (1<<8),
+		flDumpFileActivity		= (1<<9),
 	};    
 	Flags32						m_Flags			;
 	u32							dwAllocGranularity;
 	u32							dwOpenCounter;
+
+private:
+			void				check_cached_files	(LPSTR fname, const file &desc, LPCSTR &source_name);
+
+			void				file_from_cache_impl(IReader *&R, LPSTR fname, const file &desc);
+			void				file_from_cache_impl(CStreamReader *&R, LPSTR fname, const file &desc);
+	template <typename T>
+			void				file_from_cache		(T *&R, LPSTR fname, const file &desc, LPCSTR &source_name);
+			
+			void				file_from_archive	(IReader *&R, LPCSTR fname, const file &desc);
+			void				file_from_archive	(CStreamReader *&R, LPCSTR fname, const file &desc);
+
+			void				copy_file_to_build	(IWriter *W, IReader *r);
+			void				copy_file_to_build	(IWriter *W, CStreamReader *r);
+	template <typename T>
+			void				copy_file_to_build	(T *&R, LPCSTR source_name);
+
+			bool				check_for_file		(LPCSTR path, LPCSTR _fname, LPSTR fname, const file *&desc);
+	
+	template <typename T>
+	IC		T					*r_open_impl		(LPCSTR path, LPCSTR _fname);
+
 public:
 								CLocatorAPI		();
 								~CLocatorAPI	();
 	void						_initialize		(u32 flags, LPCSTR target_folder=0, LPCSTR fs_name=0);
 	void						_destroy		();
 
+	CStreamReader*				rs_open			(LPCSTR initial, LPCSTR N);
 	IReader*					r_open			(LPCSTR initial, LPCSTR N);
 	IC IReader*					r_open			(LPCSTR N){return r_open(0,N);}
 	void						r_close			(IReader* &S);
+	void						r_close			(CStreamReader* &fs);
 
 	IWriter*					w_open			(LPCSTR initial, LPCSTR N);
 	IC IWriter*					w_open			(LPCSTR N){return w_open(0,N);}

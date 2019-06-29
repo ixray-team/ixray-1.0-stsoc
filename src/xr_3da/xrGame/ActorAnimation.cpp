@@ -292,7 +292,9 @@ CMotion*        FindMotionKeys(MotionID motion_ID,IRender_Visual* V)
 	return (VA && motion_ID.valid())?VA->LL_GetRootMotion(motion_ID):0;
 }
 
+#ifdef DEBUG
 BOOL	g_ShowAnimationInfo = TRUE;
+#endif // DEBUG
 char* mov_state[] ={
 	"idle",
 	"walk",
@@ -541,8 +543,8 @@ void CActor::g_SetAnimation( u32 mstate_rl )
 	}
 #ifdef _DEBUG
 	if(bDebug){
-		HUD().Font().pFontSmall->OutSetI	(0,0);
-		HUD().Font().pFontSmall->OutNext("[%s]",mov_state[moving_idx]);
+		HUD().Font().pFontStat->OutSetI	(0,0);
+		HUD().Font().pFontStat->OutNext("[%s]",mov_state[moving_idx]);
 	}
 #endif
 
@@ -563,7 +565,7 @@ void CActor::g_SetAnimation( u32 mstate_rl )
 		if (mstate_rl&mcLLookout)	strcat(buf,"LLookout ");
 		if (mstate_rl&mcRLookout)	strcat(buf,"RLookout ");
 		if (m_bJumpKeyPressed)		strcat(buf,"+Jumping ");
-		HUD().Font().pFontSmall->OutNext	("MSTATE:     [%s]",buf);
+		HUD().Font().pFontStat->OutNext	("MSTATE:     [%s]",buf);
 /*
 		switch (m_PhysicMovementControl->Environment())
 		{
@@ -571,10 +573,10 @@ void CActor::g_SetAnimation( u32 mstate_rl )
 		case CPHMovementControl::peInAir:		strcpy(buf,"air");				break;
 		case CPHMovementControl::peAtWall:		strcpy(buf,"wall");				break;
 		}
-		HUD().Font().pFontSmall->OutNext	(buf);
-		HUD().Font().pFontSmall->OutNext	("Accel     [%3.2f, %3.2f, %3.2f]",VPUSH(NET_SavedAccel));
-		HUD().Font().pFontSmall->OutNext	("V         [%3.2f, %3.2f, %3.2f]",VPUSH(m_PhysicMovementControl->GetVelocity()));
-		HUD().Font().pFontSmall->OutNext	("vertex ID   %d",ai_location().level_vertex_id());
+		HUD().Font().pFontStat->OutNext	(buf);
+		HUD().Font().pFontStat->OutNext	("Accel     [%3.2f, %3.2f, %3.2f]",VPUSH(NET_SavedAccel));
+		HUD().Font().pFontStat->OutNext	("V         [%3.2f, %3.2f, %3.2f]",VPUSH(m_PhysicMovementControl->GetVelocity()));
+		HUD().Font().pFontStat->OutNext	("vertex ID   %d",ai_location().level_vertex_id());
 		
 		Game().m_WeaponUsageStatistic->Draw();
 		*/

@@ -36,6 +36,12 @@ void CRenderTarget::accum_omnip_geom_create		()
 
 void CRenderTarget::accum_omnip_geom_destroy()
 {
+#ifdef DEBUG
+	_SHOW_REF("g_accum_omnip_ib",g_accum_omnip_ib);
+#endif // DEBUG
 	_RELEASE(g_accum_omnip_ib);
+#ifdef DEBUG
+	_SHOW_REF("g_accum_omnip_vb",g_accum_omnip_vb);
+#endif // DEBUG
 	_RELEASE(g_accum_omnip_vb);
 }

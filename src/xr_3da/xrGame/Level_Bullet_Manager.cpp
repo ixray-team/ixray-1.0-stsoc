@@ -166,7 +166,8 @@ void CBulletManager::AddBullet(const Fvector& position,
 							   ALife::EHitType e_hit_type,
 							   float maximum_distance,
 							   const CCartridge& cartridge,
-							   bool SendHit)
+							   bool SendHit,
+							   bool AimBullet)
 {
 	m_Lock.Enter	();
 	VERIFY		(u16(-1)!=cartridge.bullet_material_idx);
@@ -176,6 +177,7 @@ void CBulletManager::AddBullet(const Fvector& position,
 	SBullet& bullet		= m_Bullets.back();
 	bullet.Init			(position, direction, starting_speed, power, impulse, sender_id, sendersweapon_id, e_hit_type, maximum_distance, cartridge, SendHit);
 	bullet.frame_num	= Device.dwFrame;
+	bullet.flags.aim_bullet	=	AimBullet;
 	if (SendHit && GameID() != GAME_SINGLE)
 		Game().m_WeaponUsageStatistic->OnBullet_Fire(&bullet, cartridge);
 	m_Lock.Leave	();

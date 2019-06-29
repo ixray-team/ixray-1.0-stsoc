@@ -37,6 +37,9 @@ public:
 	virtual void	Load			(LPCSTR N, IReader *data, u32 dwFlags);
 	virtual void	Copy			(IRender_Visual *pFrom	);
 	virtual void	Release			();
+private:
+	FTreeVisual_ST				(const FTreeVisual_ST& other);
+	void	operator=			( const FTreeVisual_ST& other);
 };
 
 class FTreeVisual_PM :	public FTreeVisual
@@ -53,6 +56,9 @@ public:
 	virtual void	Load			(LPCSTR N, IReader *data, u32 dwFlags);
 	virtual void	Copy			(IRender_Visual *pFrom	);
 	virtual void	Release			();
+private:
+	FTreeVisual_PM				(const FTreeVisual_PM& other);
+	void	operator=			( const FTreeVisual_PM& other);
 };
 
 const int		FTreeVisual_tile	= 16;

@@ -44,6 +44,7 @@ typedef enum
 
 typedef enum {SBFalse, SBTrue} SBBool;
 typedef enum {PTFalse, PTTrue} PTBool;
+typedef enum {sbcm_int, sbcm_float, sbcm_strcase, sbcm_stricase} SBCompareMode;
 
 typedef enum {key_server, key_player, key_team} qr2_key_type;
 
@@ -57,6 +58,52 @@ e_qrnochallengeerror, //no challenge was received from the master - either the m
 qr2_error_t_count
 } qr2_error_t;
 
+typedef int GHTTPRequest;
+typedef enum
+{
+	GHTTPFalse,
+	GHTTPTrue
+} GHTTPBool;
+
+typedef enum
+{
+	GHTTPSocketInit,			// Socket creation and initialization.
+	GHTTPHostLookup,            // Resolving hostname to IP (asynchronously if possible).
+	GHTTPLookupPending,			// Asychronous DNS lookup pending.
+	GHTTPConnecting,            // Waiting for socket connect to complete.
+	GHTTPSecuringSession,		// Setup secure channel.
+	GHTTPSendingRequest,        // Sending the request.
+	GHTTPPosting,               // Positing data (skipped if not posting).
+	GHTTPWaiting,               // Waiting for a response.
+	GHTTPReceivingStatus,       // Receiving the response status.
+	GHTTPReceivingHeaders,      // Receiving the headers.
+	GHTTPReceivingFile          // Receiving the file.
+} GHTTPState;
+
+typedef enum
+{
+	GHTTPSuccess,               // 0:  Successfully retrieved file.
+	GHTTPOutOfMemory,           // 1:  A memory allocation failed.
+	GHTTPBufferOverflow,        // 2:  The user-supplied buffer was too small to hold the file.
+	GHTTPParseURLFailed,        // 3:  There was an error parsing the URL.
+	GHTTPHostLookupFailed,      // 4:  Failed looking up the hostname.
+	GHTTPSocketFailed,          // 5:  Failed to create/initialize/read/write a socket.
+	GHTTPConnectFailed,         // 6:  Failed connecting to the http server.
+	GHTTPBadResponse,           // 7:  Error understanding a response from the server.
+	GHTTPRequestRejected,       // 8:  The request has been rejected by the server.
+	GHTTPUnauthorized,          // 9:  Not authorized to get the file.
+	GHTTPForbidden,             // 10: The server has refused to send the file.
+	GHTTPFileNotFound,          // 11: Failed to find the file on the server.
+	GHTTPServerError,           // 12: The server has encountered an internal error.
+	GHTTPFileWriteFailed,       // 13: An error occured writing to the local file (for ghttpSaveFile[Ex]).
+	GHTTPFileReadFailed,        // 14: There was an error reading from a local file (for posting files from disk).
+	GHTTPFileIncomplete,        // 15: Download started but was interrupted.  Only reported if file size is known.
+	GHTTPFileToBig,             // 16: The file is to big to be downloaded (size exceeds range of interal data types)
+	GHTTPEncryptionError,       // 17: Error with encryption engine.
+	GHTTPRequestCancelled       // 18: User requested cancel and/or graceful close.
+} GHTTPResult;
+
+typedef __int64 GHTTPByteCount;
 //-----------------------------------------------------------------------------------------------
 typedef void (__cdecl* fnSBCallback)(void* sb, SBCallbackReason reason, void* server, void *instance);
 typedef void (__cdecl* fnAuthCallBackFn)(int gameid, int localid, int authenticated, char *errmsg, void *instance);
@@ -73,6 +120,10 @@ typedef int  (__cdecl* fnqr2_countcallback_t)(qr2_key_type keytype, void *userda
 typedef void (__cdecl* fnqr2_adderrorcallback_t)(qr2_error_t error, char *errmsg, void *userdata);	
 
 typedef void (__cdecl* ptPatchCallback) ( PTBool available, PTBool mandatory, const char * versionName, int fileID, const char * downloadURL,  void * param );
+
+typedef void (__cdecl* ghttpProgressCallback) ( GHTTPRequest request, GHTTPState state, const char * buffer, GHTTPByteCount bufferLen, GHTTPByteCount bytesReceived, GHTTPByteCount totalSize, void * param );
+
+typedef GHTTPBool (__cdecl* ghttpCompletedCallback) ( GHTTPRequest request, GHTTPResult result, char * buffer, GHTTPByteCount bufferLen, void * param );
 
 extern "C" {
 

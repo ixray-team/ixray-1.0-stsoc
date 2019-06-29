@@ -146,14 +146,10 @@ CObjectPropertyEvaluatorNoItems::_value_type CObjectPropertyEvaluatorNoItems::ev
 	if (!object().inventory().ActiveItem())
 		return		(true);
 	
-	CWeapon			*weapon = smart_cast<CWeapon*>(object().inventory().ActiveItem());
-	if (!weapon)
-		return		(false);
-
-	if (weapon->GetState() == CWeapon::eShowing)
+	if (object().inventory().ActiveItem()->IsHidden())
 		return		(true);
 
-	if (weapon->GetState() == CWeapon::eHidden)
+	if (object().inventory().ActiveItem()->IsShowing())
 		return		(true);
 
 	return			(false);

@@ -2,7 +2,7 @@
 #include "../script_space.h"
 
 //UI-controls
-#include "UIListWndEx.h"
+#include "UIListWnd.h"
 #include "UIScriptWnd.h"
 #include "UIButton.h"
 #include "UIMessageBox.h"
@@ -32,10 +32,10 @@ export_class &script_register_ui_window2(export_class &instance)
 		.def("GetProgressBar",	(CUIProgressBar* (BaseType::*)(LPCSTR)) BaseType::GetControl<CUIProgressBar>)
 		.def("GetTabControl",	(CUITabControl* (BaseType::*)(LPCSTR)) BaseType::GetControl<CUITabControl>)
 		.def("GetListWnd",		(CUIListWnd* (BaseType::*)(LPCSTR)) BaseType::GetControl<CUIListWnd>)
-		.def("GetListWndEx",	(CUIListWndEx* (BaseType::*)(LPCSTR)) BaseType::GetControl<CUIListWndEx>)
 
 		.def("OnKeyboard",		&BaseType::OnKeyboard, &WrapType::OnKeyboard_static)
 		.def("Update",			&BaseType::Update, &WrapType::Update_static)
+		.def("Dispatch",		&BaseType::Dispatch, &WrapType::Dispatch_static)
 
 	;return	(instance);
 }

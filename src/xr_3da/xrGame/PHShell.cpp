@@ -1538,6 +1538,17 @@ void CPHShell::SetIgnoreDynamic()
 {
 	CPHCollideValidator::SetDynamicNotCollide(*this);
 }
+
+void CPHShell::SetRagDoll()
+{
+	CPHCollideValidator::SetRagDollClass(*this);
+}
+
+void CPHShell::SetIgnoreRagDoll()
+{
+	CPHCollideValidator::SetRagDollClassNotCollide(*this);
+}
+
 void	CPHShell::				SetSmall()
 {
 	CPHCollideValidator::SetClassSmall(*this);
@@ -1545,7 +1556,7 @@ void	CPHShell::				SetSmall()
 
 void	CPHShell::				SetIgnoreSmall()
 {
-	CPHCollideValidator::SetCharacterClassNotCollide(*this);
+	CPHCollideValidator::SetClassSmallNotCollide(*this);
 }
 void CPHShell::CutVelocity(float l_limit,float a_limit)
 {

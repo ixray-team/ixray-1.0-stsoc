@@ -155,15 +155,23 @@ void CUIActorInfoWnd::FillPointsDetail	(int idx)
 		CUIActorStaticticDetail* itm		= xr_new<CUIActorStaticticDetail>();
 		itm->Init							(&uiXml, path, 0);
 
-		sprintf								(buff,"%d. %s",_cntr, *CStringTable().translate((*it).key));
-		itm->m_text1->SetTextST				(buff);
+		sprintf								(buff,"%d.",_cntr);
+		itm->m_text0->SetText				(buff);
+
+		itm->m_text1->SetTextST				(*CStringTable().translate((*it).key));
+		itm->m_text1->AdjustHeightToText	();
 
 		sprintf								(buff,"x%d", (*it).count);
 		itm->m_text2->SetTextST				(buff);
 
 		sprintf								(buff,"%d", (*it).points);
 		itm->m_text3->SetTextST				(buff);
-
+		Fvector2 sz							= itm->GetWndSize();
+		float _height;
+		
+		_height								= _max(sz.y, itm->m_text1->GetWndPos().y+itm->m_text1->GetWndSize().y+3);
+		sz.y								= _height;
+		itm->SetWndSize						(sz);
 		UIDetailList->AddWindow				(itm, true);
 	}
 }
@@ -240,9 +248,9 @@ void CUIActorStaticticHeader::Init	(CUIXml* xml, LPCSTR path, int idx)
 
 }
 
-bool CUIActorStaticticHeader::OnMouseDown	(bool left_button)
+bool CUIActorStaticticHeader::OnMouseDown	(int mouse_btn)
 {
-	if(left_button && m_index!=100 && m_index>0){
+	if(mouse_btn==MOUSE_1 && m_index!=100 && m_index>0){
 		m_actorInfoWnd->MasterList().SetSelected	(this);
 		return true;
 	}else
@@ -267,6 +275,10 @@ void CUIActorStaticticDetail::Init		(CUIXml* xml, LPCSTR path, int idx)
 	xml_init.InitWindow					(*xml, path, idx, this);
 
 	xml->SetLocalRoot					(xml->NavigateToNode(path,idx));
+
+	m_text0								= xr_new<CUIStatic>(); m_text0->SetAutoDelete(true);
+	AttachChild							(m_text0);
+	xml_init.InitStatic					(*xml, "text_0", 0, m_text0);
 
 	m_text1								= xr_new<CUIStatic>(); m_text1->SetAutoDelete(true);
 	AttachChild							(m_text1);

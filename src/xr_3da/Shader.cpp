@@ -97,3 +97,23 @@ BOOL Shader::equal	(Shader& S)
 }
 BOOL Shader::equal	(Shader* S)
 {	return	equal(*S);	}
+
+void STextureList::clear()
+{
+	iterator it			= begin();
+	iterator it_e		= end();
+	for(;it!=it_e; ++it)
+		(*it).second.destroy();
+
+	erase(begin(),end());
+}
+
+void STextureList::clear_not_free()
+{
+	iterator it			= begin();
+	iterator it_e		= end();
+	for(;it!=it_e; ++it)
+		(*it).second.destroy();
+
+	erase(begin(),end());
+}

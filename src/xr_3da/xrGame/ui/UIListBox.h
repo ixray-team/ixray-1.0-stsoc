@@ -28,6 +28,7 @@ public:
 	float			GetLongestLength				();
 
 	virtual	void	SetSelected						(CUIWindow* w)	{CUIScrollView::SetSelected(w);};
+		u32			GetSelectedIDX					();
 		void		SetSelectedIDX					(u32 idx);
 		void		SetSelected						(u32 uid);
 		void		SetSelected						(LPCSTR txt);

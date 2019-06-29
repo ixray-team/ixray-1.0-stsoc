@@ -14,7 +14,7 @@
 #include "shader_xrlc.h"
 #include "xrMU_Model.h"
 
-#pragma comment(lib,"x:\\dxt.lib")
+#pragma comment(lib,"dxt.lib")
 extern "C" bool __declspec(dllimport) __stdcall DXTCompress(LPCSTR out_name, u8* raw_data, u8* normal_map, u32 w, u32 h, u32 pitch, STextureParams* fmt, u32 depth);
 
 struct b_BuildTexture : public b_texture

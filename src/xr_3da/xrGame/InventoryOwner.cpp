@@ -32,9 +32,10 @@
 #include "purchase_list.h"
 #include "clsid_game.h"
 
-//////////////////////////////////////////////////////////////////////////
-// CInventoryOwner class 
-//////////////////////////////////////////////////////////////////////////
+#include "alife_object_registry.h"
+
+#include "CustomOutfit.h"
+
 CInventoryOwner::CInventoryOwner			()
 {
 	m_pTrade					= NULL;
@@ -48,6 +49,7 @@ CInventoryOwner::CInventoryOwner			()
 	
 	m_known_info_registry		= xr_new<CInfoPortionWrapper>();
 	m_tmp_active_slot_num		= NO_ACTIVE_SLOT;
+	m_need_osoznanie_mode		= FALSE;
 }
 
 DLL_Pure *CInventoryOwner::_construct		()
@@ -72,6 +74,15 @@ void CInventoryOwner::Load					(LPCSTR section)
 {
 	if(pSettings->line_exist(section, "inv_max_weight"))
 		m_inventory->SetMaxWeight( pSettings->r_float(section,"inv_max_weight") );
+
+	if(pSettings->line_exist(section, "need_osoznanie_mode"))
+	{
+		m_need_osoznanie_mode=pSettings->r_bool(section,"need_osoznanie_mode");
+	}
+	else
+	{
+		m_need_osoznanie_mode=FALSE;
+	}
 }
 
 void CInventoryOwner::reload				(LPCSTR section)
@@ -214,15 +225,6 @@ CPda* CInventoryOwner::GetPDA() const
 	return (CPda*)(m_inventory->m_slots[PDA_SLOT].m_pIItem);
 }
 
-bool CInventoryOwner::IsActivePDA() const
-{
-	if(GetPDA() && GetPDA()->IsActive())
-		return true;
-	else
-		return false;
-}
-
-
 CTrade* CInventoryOwner::GetTrade() 
 {
 	R_ASSERT2(m_pTrade, "trade for object does not init yet");
@@ -319,7 +321,13 @@ float CInventoryOwner::GetWeaponAccuracy	() const
 //максимальный переносимы вес
 float  CInventoryOwner::MaxCarryWeight () const
 {
-	return inventory().GetMaxWeight();
+	float ret =  inventory().GetMaxWeight();
+
+	const CCustomOutfit* outfit	= GetOutfit();
+	if(outfit)
+		ret += outfit->m_additional_weight2;
+
+	return ret;
 }
 
 void CInventoryOwner::spawn_supplies		()
@@ -374,7 +382,10 @@ u16 CInventoryOwner::object_id	()  const
 void CInventoryOwner::SetCommunity	(CHARACTER_COMMUNITY_INDEX new_community)
 {
 	CEntityAlive* EA					= smart_cast<CEntityAlive*>(this); VERIFY(EA);
-	CSE_Abstract* e_entity				= Level().Server->game->get_entity_from_eid	(EA->ID()); VERIFY(e_entity);
+
+	CSE_Abstract* e_entity				= ai().alife().objects().object(EA->ID(), false);
+	if(!e_entity) return;
+
 	CSE_ALifeTraderAbstract* trader		= smart_cast<CSE_ALifeTraderAbstract*>(e_entity);
 	if(!trader) return;
 
@@ -387,7 +398,8 @@ void CInventoryOwner::SetCommunity	(CHARACTER_COMMUNITY_INDEX new_community)
 void CInventoryOwner::SetRank			(CHARACTER_RANK_VALUE rank)
 {
 	CEntityAlive* EA					= smart_cast<CEntityAlive*>(this); VERIFY(EA);
-	CSE_Abstract* e_entity				= Level().Server->game->get_entity_from_eid	(EA->ID()); VERIFY(e_entity);
+	CSE_Abstract* e_entity				= ai().alife().objects().object(EA->ID(), false);
+	if(!e_entity) return;
 	CSE_ALifeTraderAbstract* trader		= smart_cast<CSE_ALifeTraderAbstract*>(e_entity);
 	if(!trader) return;
 
@@ -399,10 +411,13 @@ void CInventoryOwner::ChangeRank			(CHARACTER_RANK_VALUE delta)
 {
 	SetRank(Rank()+delta);
 }
+
 void CInventoryOwner::SetReputation		(CHARACTER_REPUTATION_VALUE reputation)
 {
 	CEntityAlive* EA					= smart_cast<CEntityAlive*>(this); VERIFY(EA);
-	CSE_Abstract* e_entity				= Level().Server->game->get_entity_from_eid	(EA->ID()); VERIFY(e_entity);
+	CSE_Abstract* e_entity				= ai().alife().objects().object(EA->ID(), false);
+	if(!e_entity) return;
+
 	CSE_ALifeTraderAbstract* trader		= smart_cast<CSE_ALifeTraderAbstract*>(e_entity);
 	if(!trader) return;
 

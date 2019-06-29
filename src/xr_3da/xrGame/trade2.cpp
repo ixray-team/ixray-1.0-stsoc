@@ -61,48 +61,65 @@ bool CTrade::CanTrade()
 	return true;
 }
 
-void CTrade::SellItem(CInventoryItem* pItem)
+void CTrade::TransferItem(CInventoryItem* pItem, bool bBuying)
 {
 	// сумма сделки учитывая ценовой коэффициент
 	// актер цену не говорит никогда, все делают за него
-	u32						dwTransferMoney = GetItemPrice(pItem);
+	u32 dwTransferMoney					= GetItemPrice(pItem, bBuying);
 
-	pThis.inv_owner->on_before_sell		(pItem);
-	pPartner.inv_owner->on_before_buy	(pItem);
+	if(bBuying)
+	{
+		pPartner.inv_owner->on_before_sell	(pItem);
+		pThis.inv_owner->on_before_buy		(pItem);
+	}else
+	{
+		pThis.inv_owner->on_before_sell		(pItem);
+		pPartner.inv_owner->on_before_buy	(pItem);
+	}
 
-	// выбросить у себя 
+	CGameObject* O1			= smart_cast<CGameObject *>(pPartner.inv_owner);
+	CGameObject* O2			= smart_cast<CGameObject *>(pThis.inv_owner);
+	
+	if(!bBuying)
+		swap(O1,O2);
+
 	NET_Packet				P;
-	CGameObject				*O = smart_cast<CGameObject *>(pThis.inv_owner);
-	O->u_EventGen			(P,GE_TRADE_SELL,O->ID());
+	O1->u_EventGen			(P,GE_TRADE_SELL,O1->ID());
 	P.w_u16					(pItem->object().ID());
-	O->u_EventSend			(P);
+	O1->u_EventSend			(P);
 
-	// добавить себе денег
-	pThis.inv_owner->set_money ( pThis.inv_owner->get_money() + dwTransferMoney, false );
+	if(bBuying)
+		pPartner.inv_owner->set_money( pPartner.inv_owner->get_money() + dwTransferMoney, false );
+	else
+		pThis.inv_owner->set_money( pThis.inv_owner->get_money() + dwTransferMoney, false );
 
 	// взять у партнера
-	O						= smart_cast<CGameObject *>(pPartner.inv_owner);
-	O->u_EventGen			(P,GE_TRADE_BUY,O->ID());
+	O2->u_EventGen			(P,GE_TRADE_BUY,O2->ID());
 	P.w_u16					(pItem->object().ID());
-	O->u_EventSend			(P);
+	O2->u_EventSend			(P);
 
-	// уменьшить денег у партнера
-	pPartner.inv_owner->set_money( pPartner.inv_owner->get_money()- dwTransferMoney, false );
+	if(bBuying)
+		pThis.inv_owner->set_money( pThis.inv_owner->get_money() - dwTransferMoney, false );
+	else
+		pPartner.inv_owner->set_money( pPartner.inv_owner->get_money() - dwTransferMoney, false );
 
-	CAI_Trader* pTrader = NULL;
 
-	if (pPartner.type == TT_TRADER) 
+	CAI_Trader* pTrader		= NULL;
+
+	if (pThis.type == TT_TRADER && bBuying) 
 	{
-		CArtefact* pArtefact= smart_cast<CArtefact*>(pItem);
-		if(pArtefact){
-			pTrader = smart_cast<CAI_Trader*>(pPartner.base);
-			m_bNeedToUpdateArtefactTasks |= pTrader->BuyArtefact(pArtefact);
+		CArtefact* pArtefact	= smart_cast<CArtefact*>(pItem);
+		if(pArtefact)
+		{
+			pTrader							= smart_cast<CAI_Trader*>(pThis.base);
+			m_bNeedToUpdateArtefactTasks |= pTrader->BuyArtefact		(pArtefact);
 		}
-
 	}
-	if((pPartner.type==TT_ACTOR) || (pThis.type==TT_ACTOR)){
-		bool bDir = (pThis.type==TT_ACTOR);
-		Actor()->callback(GameObject::eTradeSellBuyItem)(pItem->object().lua_game_object(), bDir, dwTransferMoney);
+
+	if((pPartner.type==TT_ACTOR) || (pThis.type==TT_ACTOR))
+	{
+		bool bDir = (pThis.type!=TT_ACTOR) && bBuying;
+		Actor()->callback	(GameObject::eTradeSellBuyItem)(pItem->object().lua_game_object(), bDir, dwTransferMoney);
 	}
 }
 
@@ -129,7 +146,7 @@ CInventoryOwner* CTrade::GetPartner()
 	return pPartner.inv_owner;
 }
 
-u32	CTrade::GetItemPrice	(PIItem pItem)
+u32	CTrade::GetItemPrice(PIItem pItem, bool b_buying)
 {
 	CArtefact				*pArtefact = smart_cast<CArtefact*>(pItem);
 
@@ -163,7 +180,8 @@ u32	CTrade::GetItemPrice	(PIItem pItem)
 	bool					buying = true;
 	bool					is_actor = (pThis.type == TT_ACTOR) || (pPartner.type == TT_ACTOR);
 	if (is_actor) {
-		buying				= (pPartner.type == TT_ACTOR);
+//.		buying				= (pPartner.type == TT_ACTOR);
+		buying				= b_buying;
 		_partner			= &(buying ? pThis : pPartner);
 	}
 	else {
@@ -177,11 +195,11 @@ u32	CTrade::GetItemPrice	(PIItem pItem)
 
 
 	if (buying){
-		if( ! partner.inv_owner->trade_parameters().enabled(CTradeParameters::action_sell(0),pItem->object().cNameSect()) ) return 0;
-		p_trade_factors		= &partner.inv_owner->trade_parameters().factors(CTradeParameters::action_sell(0),pItem->object().cNameSect());
-	}else{
 		if( ! partner.inv_owner->trade_parameters().enabled(CTradeParameters::action_buy(0),pItem->object().cNameSect()) ) return 0;
 		p_trade_factors		= &partner.inv_owner->trade_parameters().factors(CTradeParameters::action_buy(0),pItem->object().cNameSect());
+	}else{
+		if( ! partner.inv_owner->trade_parameters().enabled(CTradeParameters::action_sell(0),pItem->object().cNameSect()) ) return 0;
+		p_trade_factors		= &partner.inv_owner->trade_parameters().factors(CTradeParameters::action_sell(0),pItem->object().cNameSect());
 	}
 	const CTradeFactors		&trade_factors = *p_trade_factors;
 

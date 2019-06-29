@@ -243,24 +243,26 @@ CRenderTarget::CRenderTarget		()
 	s_occq.create					(b_occq,		"r2\\occq");
 
 	// DIRECT (spot)
-	D3DFORMAT						depth_format;
-	if	(RImplementation.o.depth16)	depth_format	= D3DFMT_D16;
-	else							depth_format	= D3DFMT_D24X8;
+	D3DFORMAT						depth_format	= (D3DFORMAT)RImplementation.o.HW_smap_FORMAT;
+
 	if (RImplementation.o.HW_smap)
 	{
-		u32	size					=RImplementation.o.smapsize;
+		D3DFORMAT	nullrt				= D3DFMT_R5G6B5;
+		if (RImplementation.o.nullrt)	nullrt	= (D3DFORMAT)MAKEFOURCC('N','U','L','L');
+
+		u32	size					=RImplementation.o.smapsize	;
 		rt_smap_depth.create		(r2_RT_smap_depth,			size,size,depth_format	);
-		rt_smap_surf.create			(r2_RT_smap_surf,			size,size,D3DFMT_R5G6B5	);
+		rt_smap_surf.create			(r2_RT_smap_surf,			size,size,nullrt		);
 		rt_smap_ZB					= NULL;
 		s_accum_mask.create			(b_accum_mask,				"r2\\accum_mask");
 		s_accum_direct.create		(b_accum_direct,			"r2\\accum_direct");
 	}
 	else
 	{
-		u32	size					=RImplementation.o.smapsize;
+		u32	size					=RImplementation.o.smapsize	;
 		rt_smap_surf.create			(r2_RT_smap_surf,			size,size,D3DFMT_R32F);
 		rt_smap_depth				= NULL;
-		R_CHK						(HW.pDevice->CreateDepthStencilSurface	(size,size,depth_format,D3DMULTISAMPLE_NONE,0,TRUE,&rt_smap_ZB,NULL));
+		R_CHK						(HW.pDevice->CreateDepthStencilSurface	(size,size,D3DFMT_D24X8,D3DMULTISAMPLE_NONE,0,TRUE,&rt_smap_ZB,NULL));
 		s_accum_mask.create			(b_accum_mask,				"r2\\accum_mask");
 		s_accum_direct.create		(b_accum_direct,			"r2\\accum_direct");
 	}
@@ -288,7 +290,7 @@ CRenderTarget::CRenderTarget		()
 
 	// BLOOM
 	{
-		D3DFORMAT	fmt				= D3DFMT_A16B16G16R16F;		//D3DFMT_A8R8G8B8;			//;		// D3DFMT_X8R8G8B8
+		D3DFORMAT	fmt				= D3DFMT_A8R8G8B8;			//;		// D3DFMT_X8R8G8B8
 		u32	w=BLOOM_size_X, h=BLOOM_size_Y;
 		u32 fvf_build				= D3DFVF_XYZRHW|D3DFVF_TEX4|D3DFVF_TEXCOORDSIZE2(0)|D3DFVF_TEXCOORDSIZE2(1)|D3DFVF_TEXCOORDSIZE2(2)|D3DFVF_TEXCOORDSIZE2(3);
 		u32 fvf_filter				= (u32)D3DFVF_XYZRHW|D3DFVF_TEX8|D3DFVF_TEXCOORDSIZE4(0)|D3DFVF_TEXCOORDSIZE4(1)|D3DFVF_TEXCOORDSIZE4(2)|D3DFVF_TEXCOORDSIZE4(3)|D3DFVF_TEXCOORDSIZE4(4)|D3DFVF_TEXCOORDSIZE4(5)|D3DFVF_TEXCOORDSIZE4(6)|D3DFVF_TEXCOORDSIZE4(7);
@@ -462,11 +464,32 @@ CRenderTarget::~CRenderTarget	()
 {
 	// Textures
 	t_material->surface_set		(NULL);
-	_RELEASE					(rt_smap_ZB				);
+
+#ifdef DEBUG
+	_SHOW_REF					("t_material_surf",t_material_surf);
+#endif // DEBUG
+	_RELEASE					(t_material_surf);
+
+	t_LUM_src->surface_set		(NULL);
+	t_LUM_dest->surface_set		(NULL);
+
+#ifdef DEBUG
+	_SHOW_REF("t_envmap_0 - #small",t_envmap_0->pSurface);
+	_SHOW_REF("t_envmap_1 - #small",t_envmap_1->pSurface);
+#endif // DEBUG
+	t_envmap_0->surface_set		(NULL);
+	t_envmap_1->surface_set		(NULL);
+	t_envmap_0.destroy			();
+	t_envmap_1.destroy			();
+
+	_RELEASE					(rt_smap_ZB);
 
 	// Jitter
 	for (int it=0; it<TEX_jitter_count; it++)	{
 		t_noise	[it]->surface_set	(NULL);
+#ifdef DEBUG
+		_SHOW_REF("t_noise_surf[it]",t_noise_surf[it]);
+#endif // DEBUG
 		_RELEASE					(t_noise_surf[it]);
 	}
 

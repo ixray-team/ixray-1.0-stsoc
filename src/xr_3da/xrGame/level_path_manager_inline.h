@@ -47,7 +47,7 @@ IC	void CLevelManagerTemplate::build_path	(const _vertex_id_type start_vertex_id
 
 #ifdef DEBUG
 	if (failed()) {
-		Msg						("! NPC %s couldn't build path from \n! [%d][%f][%f][%f]\n! to\n! [%d][%f][%f][%f]",*m_object->object().cName(),start_vertex_id,VPUSH(ai().level_graph().vertex_position(start_vertex_id)),dest_vertex_id,VPUSH(ai().level_graph().vertex_position(dest_vertex_id)));
+		Msg						("~ NPC %s couldn't build path from \n~ [%d][%f][%f][%f]\n~ to\n~ [%d][%f][%f][%f]",*m_object->object().cName(),start_vertex_id,VPUSH(ai().level_graph().vertex_position(start_vertex_id)),dest_vertex_id,VPUSH(ai().level_graph().vertex_position(dest_vertex_id)));
 	}
 #endif
 
@@ -75,6 +75,13 @@ TEMPLATE_SPECIALIZATION
 IC	bool CLevelManagerTemplate::check_vertex			(const _vertex_id_type vertex_id) const
 {
 	return						(inherited::check_vertex(vertex_id) && (!m_object || object().accessible(vertex_id)));
+}
+
+TEMPLATE_SPECIALIZATION
+IC	void CLevelManagerTemplate::on_restrictions_change	()
+{
+	m_failed_start_vertex_id	= _vertex_id_type(-1);
+	m_failed_dest_vertex_id		= _vertex_id_type(-1);
 }
 
 #undef TEMPLATE_SPECIALIZATION

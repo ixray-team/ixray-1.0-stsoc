@@ -8,7 +8,7 @@
 #include "hit.h"
 #include "PHDestroyable.h"
 #include "car.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include "../skeletoncustom.h"
 #include "MathUtils.h"
 #include "game_object_space.h"

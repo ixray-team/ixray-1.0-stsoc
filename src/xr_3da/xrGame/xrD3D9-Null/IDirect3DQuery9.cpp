@@ -8,7 +8,6 @@ const GUID DECLSPEC_SELECTANY IID_IDirect3DQuery9;
 xrIDirect3DQuery9::xrIDirect3DQuery9(IDirect3DDevice9* pIDirect3DDevice9, D3DQUERYTYPE rType) : m_refCount(0)
 {
 	APIDEBUG("xrIDirect3DQuery9::xrIDirect3DQuery9");
-
 	DataSize = 0;
 	memcpy(&Type, &rType, sizeof(rType));
 	CreationCallStack = NULL;
@@ -42,7 +41,9 @@ ULONG			xrIDirect3DQuery9::Release()
 	if (m_refCount < 0)
 	{
 		delete this;
+		return ULONG_Proc(-1);
 	}
+	
 	return ULONG_Proc(m_refCount);
 }
 

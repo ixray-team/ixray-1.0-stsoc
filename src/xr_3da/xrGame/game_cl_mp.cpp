@@ -61,6 +61,17 @@ game_cl_mp::game_cl_mp()
 	//-------------------------------------
 	LoadBonuses();
 	//-------------------------------------	
+	//-----------------------------------------------------------
+	//-----------------------------------------------------------
+/*	pBuySpawnMsgBox		= xr_new<CUIMessageBoxEx>();
+	//.	pBuySpawnMsgBox->SetWorkPhase(GAME_PHASE_INPROGRESS);
+	pBuySpawnMsgBox->Init("message_box_buy_spawn");
+	pBuySpawnMsgBox->AddCallback("msg_box", MESSAGE_BOX_YES_CLICKED, CUIWndCallback::void_function(this, &game_cl_mp::OnBuySpawn));
+	string1024	BuySpawnText;
+	sprintf(BuySpawnText, "You can buy a spawn for %d $. Press Yes to pay.", 
+		abs(m_iSpawn_Cost));
+	pBuySpawnMsgBox->SetText(BuySpawnText);
+*/	//-----------------------------------------------------------
 };
 
 game_cl_mp::~game_cl_mp()
@@ -93,7 +104,7 @@ game_cl_mp::~game_cl_mp()
 //	xr_delete(m_pSpeechMenu);
 	DestroyMessagesMenus();
 
-	xr_delete(pBuySpawnMsgBox);
+//	xr_delete(pBuySpawnMsgBox);
 
 	m_pBonusList.clear();
 
@@ -106,18 +117,7 @@ CUIGameCustom*		game_cl_mp::createGameUI			()
 {
 //	m_pSpeechMenu = xr_new<CUISpeechMenu>("test_speech_section");
 	HUD().GetUI()->m_pMessagesWnd->SetChatOwner(this);
-	//-----------------------------------------------------------
-	m_iSpawn_Cost = READ_IF_EXISTS(pSettings, r_s32, "artefacthunt_gamedata", "spawn_cost", -10000);
-	//-----------------------------------------------------------
-	pBuySpawnMsgBox		= xr_new<CUIMessageBoxEx>();
-//.	pBuySpawnMsgBox->SetWorkPhase(GAME_PHASE_INPROGRESS);
-	pBuySpawnMsgBox->Init("message_box_buy_spawn");
-	pBuySpawnMsgBox->AddCallback("msg_box", MESSAGE_BOX_YES_CLICKED, CUIWndCallback::void_function(this, &game_cl_mp::OnBuySpawn));
-	string1024	BuySpawnText;
-	sprintf(BuySpawnText, "You can buy a spawn for %d $. Press Yes to pay.", 
-		abs(m_iSpawn_Cost));
-	pBuySpawnMsgBox->SetText(BuySpawnText);
-	//-----------------------------------------------------------	
+		
 	return NULL;
 };
 
@@ -142,6 +142,7 @@ bool	game_cl_mp::NeedToSendReady_Spectator			(int key, game_PlayerState* ps)
 
 bool	game_cl_mp::OnKeyboardPress			(int key)
 {
+	CStringTable st;
 	if ( kJUMP == key || kWPN_FIRE == key )
 	{
 		bool b_need_to_send_ready = false;
@@ -184,17 +185,21 @@ bool	game_cl_mp::OnKeyboardPress			(int key)
 		case kCHAT_TEAM:
 			{
 				shared_str prefix;
+				
 
 				CUIChatWnd* pChatWnd = HUD().GetUI()->m_pMessagesWnd->GetChatWnd();
 
 				if (kCHAT_TEAM == key)
 				{
-					prefix = "to team> ";
+//					prefix = "to team> ";
+					prefix.sprintf("%s> ", *st.translate("st_mp_say_to_team"));
+					
 					pChatWnd->TeamChat();
 				}
 				else
 				{
-					prefix = "to all> ";
+//					prefix = "to all> ";
+					prefix.sprintf("%s> ", *st.translate("st_mp_say_to_all"));					
 					pChatWnd->AllChat();
 				}
 
@@ -217,9 +222,9 @@ bool	game_cl_mp::OnKeyboardPress			(int key)
 				else
 				{
 					if (!IsVotingEnabled())
-						OnCantVoteMsg("Voting disabled by server!");
-					else
-						OnCantVoteMsg("Can't run more than one voting!");
+						OnCantVoteMsg(*st.translate("st_mp_disabled_voting"));
+					else						
+						OnCantVoteMsg(*st.translate("mp_only_one_voting"));
 				};
 			}break;
 		case kVOTE:
@@ -229,9 +234,9 @@ bool	game_cl_mp::OnKeyboardPress			(int key)
 				else
 				{
 					if (!IsVotingEnabled())
-						OnCantVoteMsg("Voting disabled by server!");
+						OnCantVoteMsg(*st.translate("st_mp_disabled_voting"));
 					else
-						OnCantVoteMsg("There currently no active voting!");
+						OnCantVoteMsg(*st.translate("st_mp_no_current_voting"));
 				}
 			}break;
 		case kVOTEYES:
@@ -482,20 +487,21 @@ void game_cl_mp::shedule_Update(u32 dt)
 				StartStopMenu(pChatWnd, false);
 		}break;
 	}
-
+/*
 	if (!local_player || !local_player->testFlag(GAME_PLAYER_FLAG_VERY_VERY_DEAD))
 	{
-		if (pBuySpawnMsgBox->IsShown()) StartStopMenu(pBuySpawnMsgBox, true);
+		if (pBuySpawnMsgBox && pBuySpawnMsgBox->IsShown()) StartStopMenu(pBuySpawnMsgBox, true);
 	};
-
+*/
 	UpdateMapLocations();	
 
 	u32 cur_game_state = Phase();
+/*
 	if(pBuySpawnMsgBox && pBuySpawnMsgBox->IsShown() && cur_game_state!=GAME_PHASE_INPROGRESS)
 	{
 		pBuySpawnMsgBox->GetHolder()->StartStopMenu(pBuySpawnMsgBox, true);
 	}
-
+*/
 	if(m_pVoteStartWindow && m_pVoteStartWindow->IsShown() && cur_game_state!=GAME_PHASE_INPROGRESS)
 	{
 		m_pVoteStartWindow->GetHolder()->StartStopMenu(m_pVoteStartWindow, true);
@@ -566,8 +572,10 @@ void game_cl_mp::OnPlayerVoted			(game_PlayerState* ps)
 }
 void game_cl_mp::LoadTeamData			(const shared_str& TeamName)
 {
-	cl_TeamStruct Team;
-	ZeroMemory(&Team, sizeof(Team));
+	cl_TeamStruct			Team;
+	Team.IndicatorPos.set	(0.f,0.f,0.f);
+	Team.Indicator_r1		= 0.f;
+	Team.Indicator_r2		= 0.f;
 
 	Team.caSection = TeamName;
 	if (pSettings->section_exist(TeamName))

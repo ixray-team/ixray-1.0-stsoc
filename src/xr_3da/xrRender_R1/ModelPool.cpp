@@ -121,7 +121,9 @@ IRender_Visual*	CModelPool::Instance_Load		(const char* N, BOOL allow_register)
 	}
 	
 	// Actual loading
+#ifdef DEBUG
 	if (bLogging)		Msg		("- Uncached model loading: %s",fn);
+#endif // DEBUG
 
 	IReader*			data	= FS.r_open(fn);
 	ogf_header			H;
@@ -345,7 +347,7 @@ void	CModelPool::Discard	(IRender_Visual* &V, BOOL b_complete)
 			{
 				if (I->name==name)
 				{
-					if(b_complete)
+					if(b_complete || strchr(*name,'#'))
 					{
 						VERIFY(I->refs>0);
             			I->refs--; 

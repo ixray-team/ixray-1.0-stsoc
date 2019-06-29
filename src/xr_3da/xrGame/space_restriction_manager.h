@@ -45,12 +45,13 @@ protected:
 	IC		CRestrictionPtr		restriction						(ALife::_OBJECT_ID id);
 			CRestrictionPtr		restriction						(shared_str out_restrictors, shared_str in_restrictors);
 	IC		void				collect_garbage					();
-	virtual void				on_default_restrictions_changed	(const RestrictionSpace::ERestrictorTypes &restrictor_type, shared_str old_restrictions, shared_str new_restrictions);
+	virtual void				on_default_restrictions_changed	();
 
 public:
 								CSpaceRestrictionManager		();
 	virtual						~CSpaceRestrictionManager		();
-	IC		void				restrict						(ALife::_OBJECT_ID id, shared_str out_restrictors, shared_str in_restrictors);
+			void				restrict						(ALife::_OBJECT_ID id, shared_str out_restrictors, shared_str in_restrictors);
+			void				unrestrict						(ALife::_OBJECT_ID id);
 			void				add_restrictions				(ALife::_OBJECT_ID id, shared_str out_restrictions, shared_str in_restrictions);
 			void				remove_restrictions				(ALife::_OBJECT_ID id, shared_str out_restrictions, shared_str in_restrictions);
 			void				change_restrictions				(ALife::_OBJECT_ID id, shared_str add_out_restrictions, shared_str add_in_restrictions, shared_str remove_out_restrictions, shared_str remove_in_restrictions);

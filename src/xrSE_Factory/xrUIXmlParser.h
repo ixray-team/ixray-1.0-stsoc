@@ -1,6 +1,10 @@
 #pragma once
 
-#include "xrXMLParser.h"
+#ifdef XRGAME_EXPORTS
+	#include "../../../xrXMLParser/xrXMLParser.h"
+#else
+	#include "../xrXMLParser/xrXMLParser.h"
+#endif
 
 class CUIXml :public CXml
 {

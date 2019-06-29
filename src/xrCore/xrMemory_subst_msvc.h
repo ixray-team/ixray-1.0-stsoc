@@ -1,4 +1,4 @@
-#ifdef DEBUG_MEMORY_MANAGER
+#ifdef DEBUG_MEMORY_NAME
 // new(0)
 template <class T>
 IC	T*		xr_new		()
@@ -60,7 +60,7 @@ IC	T*		xr_new		(const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5
 	T* ptr	= (T*)Memory.mem_alloc(sizeof(T), typeid(T).name());
 	return new (ptr) T(p1,p2,p3,p4,p5,p6,p7,p8,p9);
 }
-#else // DEBUG_MEMORY_MANAGER
+#else // DEBUG_MEMORY_NAME
 // new(0)
 template <class T>
 IC	T*		xr_new		()
@@ -122,7 +122,7 @@ IC	T*		xr_new		(const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5
 	T* ptr	= (T*)Memory.mem_alloc(sizeof(T));
 	return new (ptr) T(p1,p2,p3,p4,p5,p6,p7,p8,p9);
 }
-#endif // DEBUG_MEMORY_MANAGER
+#endif // DEBUG_MEMORY_NAME
 
 template <bool _is_pm, typename T>
 struct xr_special_free

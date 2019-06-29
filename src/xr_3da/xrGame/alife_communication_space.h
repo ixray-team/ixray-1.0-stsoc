@@ -8,6 +8,7 @@
 
 #pragma once
 
+/**
 #include "xrServer_Objects_Alife_Items.h"
 
 namespace ALifeCommunication {
@@ -19,3 +20,4 @@ namespace ALifeCommunication {
 		};
 	};
 }
+/**/

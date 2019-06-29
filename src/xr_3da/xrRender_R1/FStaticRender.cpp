@@ -122,7 +122,7 @@ IRender_Visual*			CRender::model_Create			(LPCSTR name, IReader* data)			{ retur
 IRender_Visual*			CRender::model_CreateChild		(LPCSTR name, IReader* data)			{ return Models->CreateChild(name,data);}
 IRender_Visual*			CRender::model_Duplicate		(IRender_Visual* V)						{ return Models->Instance_Duplicate(V);	}
 void					CRender::model_Delete			(IRender_Visual* &V, BOOL bDiscard)		{ Models->Delete(V,bDiscard);			}
-IRender_DetailModel*	CRender::model_CreateDM			(IReader*	F)
+IRender_DetailModel*	CRender::model_CreateDM			(IReader*F)
 {
 	CDetail*	D		= xr_new<CDetail> ();
 	D->Load				(F);
@@ -189,6 +189,12 @@ void					CRender::add_StaticWallmark		(ref_shader& S, const Fvector& P, float s,
 	VERIFY2							(_valid(P) && _valid(s) && T && verts && (s>EPS_L), "Invalid static wallmark params");
 	Wallmarks->AddStaticWallmark	(T,verts,P,&*S,s);
 }
+
+void					CRender::clear_static_wallmarks	()
+{
+	Wallmarks->clear				();
+}
+
 void					CRender::add_SkeletonWallmark	(intrusive_ptr<CSkeletonWallmark> wm)
 {
 	Wallmarks->AddSkeletonWallmark				(wm);
@@ -489,8 +495,10 @@ void	CRender::Render		()
 	r_dsgraph_render_graph						(0);			// normal level
 	if(Details)Details->Render					();				// grass / details
 	r_dsgraph_render_lods						(true,false);	// lods - FB
-	g_pGamePersistent->Environment.RenderSky	();				// sky / sun
-	g_pGamePersistent->Environment.RenderClouds	();				// clouds
+
+	g_pGamePersistent->Environment().RenderSky	();				// sky / sun
+	g_pGamePersistent->Environment().RenderClouds	();				// clouds
+
 	r_pmask										(true,false);	// disable priority "1"
 	o.vis_intersect								= TRUE			;
 	HOM.Disable									();
@@ -509,8 +517,8 @@ void	CRender::Render		()
 	PortalTraverser.fade_render					();				// faded-portals
 	r_dsgraph_render_sorted						();				// strict-sorted geoms
 	if(L_Glows)L_Glows->Render					();				// glows
-	g_pGamePersistent->Environment.RenderFlares	();				// lens-flares
-	g_pGamePersistent->Environment.RenderLast	();				// rain/thunder-bolts
+	g_pGamePersistent->Environment().RenderFlares	();				// lens-flares
+	g_pGamePersistent->Environment().RenderLast	();				// rain/thunder-bolts
 
 	// Postprocess, if necessary
 	Target->End									();

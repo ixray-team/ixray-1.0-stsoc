@@ -329,6 +329,7 @@ void CCharacterPhysicsSupport::in_UpdateCL()
 	CalculateTimeDelta();
 	if(m_pPhysicsShell&&m_pPhysicsShell->isFullActive())
 	{
+		m_pPhysicsShell->SetRagDoll();//Теперь шела относиться к классу объектов cbClassRagDoll
 		m_pPhysicsShell->InterpolateGlobalTransform(&mXFORM);
 	}
 

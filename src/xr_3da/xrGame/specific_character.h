@@ -55,13 +55,11 @@ struct SSpecificCharacterData : CSharedResource
 #ifdef  XRGAME_EXPORTS
 	
 	//начальный диалог
-	shared_str				m_StartDialog;
+	shared_str					m_StartDialog;
 	//диалоги актера, которые будут доступны только при встрече с данным персонажем
-	DIALOG_ID_VECTOR		m_ActorDialogs;
+	DIALOG_ID_VECTOR			m_ActorDialogs;
 
-	//положение большой икноки (для торговли и общения) в файле с иконками 
-	int	m_iIconX, m_iIconY;
-
+	shared_str					m_icon_name;
 	//команда 
 	CHARACTER_COMMUNITY			m_Community;
 
@@ -97,12 +95,12 @@ class CCharacterInfo;
 class CSE_ALifeTraderAbstract;
 
 
-class CSpecificCharacter: public CSharedClass<SSpecificCharacterData, SPECIFIC_CHARACTER_ID, false>,
-						  public CXML_IdToIndex<SPECIFIC_CHARACTER_ID, int, CSpecificCharacter>
+class CSpecificCharacter: public CSharedClass<SSpecificCharacterData, shared_str, false>,
+						  public CXML_IdToIndex<CSpecificCharacter>
 {
 private:
-	typedef CSharedClass	<SSpecificCharacterData, SPECIFIC_CHARACTER_ID, false>				inherited_shared;
-	typedef CXML_IdToIndex	<SPECIFIC_CHARACTER_ID, int, CSpecificCharacter>					id_to_index;
+	typedef CSharedClass	<SSpecificCharacterData, shared_str, false>				inherited_shared;
+	typedef CXML_IdToIndex	<CSpecificCharacter>									id_to_index;
 
 	friend id_to_index;
 	friend CInventoryOwner;
@@ -113,17 +111,17 @@ public:
 								CSpecificCharacter		();
 								~CSpecificCharacter		();
 
-	virtual void				Load					(SPECIFIC_CHARACTER_ID		id);
+	virtual void				Load					(shared_str		id);
 
 protected:
-	const SSpecificCharacterData* data					() const { VERIFY(inherited_shared::get_sd()); return inherited_shared::get_sd();}
-	SSpecificCharacterData*		  data					()	   { VERIFY(inherited_shared::get_sd()); return inherited_shared::get_sd();}
+	const SSpecificCharacterData* data					() const	{ VERIFY(inherited_shared::get_sd()); return inherited_shared::get_sd();}
+	SSpecificCharacterData*		  data					()			{ VERIFY(inherited_shared::get_sd()); return inherited_shared::get_sd();}
 
 	//загрузка из XML файла
 	virtual void				load_shared				(LPCSTR);
 	static void					InitXmlIdToIndex		();
 
-	SPECIFIC_CHARACTER_ID		m_OwnId;
+	shared_str		m_OwnId;
 public:
 
 #ifdef  XRGAME_EXPORTS
@@ -146,8 +144,7 @@ public:
 	int							crouch_type				() const ;
 	LPCSTR						critical_wound_weights	() const ;
 
-	int							TradeIconX				() const	 {return data()->m_iIconX;}
-	int							TradeIconY				() const	 {return data()->m_iIconY;}
+	const shared_str&			IconName				() const	{return data()->m_icon_name;};
 #endif
 	shared_str					terrain_sect			() const;
 };

@@ -11,6 +11,7 @@ private:
 	typedef xrClientData inherited;
 public:
 	string64			m_pChallengeString;
+	int					m_iCDKeyReauthHint;
 	bool				m_bCDKeyAuth;
 
 	xrGameSpyClientData			();
@@ -26,7 +27,8 @@ private:
 	int								m_iReportToMasterServer;
 
 	BOOL							m_bQR2_Initialized;
-	void							QR2_Init						();
+//	void							QR2_Init						(u32 PortID);
+	void							QR2_Init						(int PortID);
 	void							QR2_ShutDown					();
 	
 	BOOL							m_bCDKey_Initialized;
@@ -44,10 +46,10 @@ public:
 	shared_str						Password;
 	int								m_iMaxPlayers;
 	bool							m_bCheckCDKey;
-	BOOL							m_bDedicated;
 
 	int								GetPlayersCount					();
 	void							OnCDKey_Validation				(int LocalID, int res, char* errormsg);
+	void							OnCDKey_ReValidation			(int LocalID, int hint, char* challenge);
 	CGameSpy_QR2*					QR2() {return &m_QR2;} ;
 public:
 	xrGameSpyServer					();
@@ -61,5 +63,6 @@ public:
 	virtual IClient*		client_Create		();
 
 	virtual u32				OnMessage			(NET_Packet& P, ClientID/*DPNID*/ sender);	// Non-Zero means broadcasting with "flags" as returned
+	virtual void			OnError_Add			(qr2_error_t error) {};
 };
 

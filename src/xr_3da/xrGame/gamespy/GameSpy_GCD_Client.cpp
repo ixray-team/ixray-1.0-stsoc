@@ -6,58 +6,42 @@
 
 CGameSpy_GCD_Client::CGameSpy_GCD_Client()
 {
-	hGameSpyDLL = NULL;
+	m_hGameSpyDLL = NULL;
 
-	LoadGameSpy();
+	LPCSTR			g_name	= "xrGameSpy.dll";
+	Log				("Loading DLL:",g_name);
+	m_hGameSpyDLL			= LoadLibrary	(g_name);
+	if (0==m_hGameSpyDLL)	R_CHK			(GetLastError());
+	R_ASSERT2		(m_hGameSpyDLL,"GameSpy DLL raised exception during loading or there is no game DLL at all");
+
+	LoadGameSpy(m_hGameSpyDLL);
+};
+CGameSpy_GCD_Client::CGameSpy_GCD_Client(HMODULE hGameSpyDLL)
+{
+	m_hGameSpyDLL = NULL;
+
+	LoadGameSpy(hGameSpyDLL);
 };
 
 CGameSpy_GCD_Client::~CGameSpy_GCD_Client()
 {
-	if (hGameSpyDLL)
+	if (m_hGameSpyDLL)
 	{
-		FreeLibrary(hGameSpyDLL);
-		hGameSpyDLL = NULL;
+		FreeLibrary(m_hGameSpyDLL);
+		m_hGameSpyDLL = NULL;
 	}
 };
-void	CGameSpy_GCD_Client::LoadGameSpy()
+void	CGameSpy_GCD_Client::LoadGameSpy(HMODULE hGameSpyDLL)
 {
-	LPCSTR			g_name	= "xrGameSpy.dll";
-	Log				("Loading DLL:",g_name);
-	hGameSpyDLL			= LoadLibrary	(g_name);
-	if (0==hGameSpyDLL)	R_CHK			(GetLastError());
-	R_ASSERT2		(hGameSpyDLL,"GameSpy DLL raised exception during loading or there is no game DLL at all");
 
-	GAMESPY_LOAD_FN(xrGS_gcd_compute_response_newauth);
-	GAMESPY_LOAD_FN(xrGS_gcd_compute_response_reauth);
+	GAMESPY_LOAD_FN(xrGS_gcd_compute_response);	
 }
 
-string64	gsCDKey = "xxxx-xxxx-xxxx-xxxx";
-void CGameSpy_GCD_Client::CreateRespond	(char* RespondStr, char* ChallengeStr)
+string64	gsCDKey = "";
+extern	void	GetCDKey(char* CDKeyStr);
+void CGameSpy_GCD_Client::CreateRespond	(char* RespondStr, char* ChallengeStr, u8 Reauth)
 {
-/*
-	//--------------- Get CDKey ------------------------------------------
-	string128 CDKeyStr = "aaaa-ssss-dddd-ffff";
-
-	HKEY KeyCDKey = 0;
-	long res = RegOpenKeyEx(HKEY_CURRENT_USER, 
-		REGISTRY_CDKEY_STR, 0, KEY_READ, &KeyCDKey);
-	if (res == ERROR_SUCCESS && KeyCDKey != 0)
-	{
-		DWORD KeyValueSize = 128;
-		DWORD KeyValueType = REG_SZ;
-		res = RegQueryValueEx(KeyCDKey, "value", NULL, &KeyValueType, (LPBYTE)CDKeyStr, &KeyValueSize);
-	};
-	switch (res)
-	{
-	case ERROR_PATH_NOT_FOUND:
-	case ERROR_FILE_NOT_FOUND:
-		{
-			Msg("No CD-key found");
-			//			return;
-		}break;
-	};
-	//--------------- Create Respond -------------------------------------
-*/
-//	string128 ResponseStr;	
-	xrGS_gcd_compute_response_newauth(gsCDKey, ChallengeStr, RespondStr);
+	string64 CDKey = "";
+	GetCDKey(CDKey);
+	xrGS_gcd_compute_response(_strupr(CDKey), ChallengeStr, RespondStr, (Reauth == 1));
 }

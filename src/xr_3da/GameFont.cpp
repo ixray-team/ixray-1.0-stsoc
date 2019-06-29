@@ -4,32 +4,43 @@
 #include "GameFont.h"
 #include "Render.h"
 extern ENGINE_API BOOL g_bRendering; 
+ENGINE_API Fvector2		g_current_font_scale={1.0f,1.0f};
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 #define MAX_CHARS	1024
 CGameFont::CGameFont(LPCSTR section, u32 flags)
 {
-	fCurrentSize				= 0.0f;
+	fCurrentHeight				= 0.0f;
 	uFlags						= flags;
 	Initialize	(pSettings->r_string(section,"shader"),pSettings->r_string(section,"texture"));
 	if (pSettings->line_exist(section,"size")){
 		float sz = pSettings->r_float(section,"size");
-		if (uFlags&fsDeviceIndependent)	SetSizeI(sz);
-		else							SetSize(sz);
+		if (uFlags&fsDeviceIndependent)	SetHeightI(sz);
+		else							SetHeight(sz);
 	}
 	if (pSettings->line_exist(section,"interval"))
 		SetInterval(pSettings->r_fvector2(section,"interval"));
 }
+
 CGameFont::CGameFont(LPCSTR shader, LPCSTR texture, u32 flags)
 {
-	fCurrentSize				= 0.0f;
+	fCurrentHeight				= 0.0f;
 	uFlags						= flags;
-	Initialize	(shader,texture);
+	Initialize					(shader,texture);
 }
-void CGameFont::Initialize		(LPCSTR cShader, LPCSTR cTexture)
+
+void CGameFont::Initialize		(LPCSTR cShader, LPCSTR cTextureName)
 {
+	string_path					cTexture;
+
+	LPCSTR _lang				= pSettings->r_string("string_table", "font_prefix");
+	bool is_di					= strstr(cTextureName, "ui_font_hud_01") || 
+								  strstr(cTextureName, "ui_font_hud_02") ||
+								  strstr(cTextureName, "ui_font_console_02");
+	if(_lang && !is_di)
+		strconcat				(cTexture, cTextureName, _lang);
+	else
+		strcpy					(cTexture, cTextureName);
+
 	uFlags						&=~fsValid;
 	vTS.set						(1.f,1.f); // обязательно !!!
 
@@ -69,7 +80,7 @@ void CGameFont::Initialize		(LPCSTR cShader, LPCSTR cTexture)
 				TCMap[i].set		((i%cpl)*width,(i/cpl)*fHeight,width);
 		}
 	}
-	SetSize						(fHeight);
+	fCurrentHeight				= fHeight;
 
 	CInifile::Destroy			(ini);
 
@@ -107,6 +118,7 @@ void CGameFont::OnRender()
 	if (!(uFlags&fsValid)){
 		CTexture* T		= RCache.get_ActiveTexture(0);
 		vTS.set			((int)T->get_Width(),(int)T->get_Height());
+/*
 		vHalfPixel.set	(0.5f/float(vTS.x),0.5f/float(vTS.y));
 		for (int i=0; i<256; i++){
 			Fvector& tc	= TCMap[i];
@@ -114,6 +126,9 @@ void CGameFont::OnRender()
 			tc.y		/= float(vTS.y);
 			tc.z		/= float(vTS.x);
 		}
+		fTCHeight		= fHeight/float(vTS.y);
+		uFlags			|= fsValid;
+*/
 		fTCHeight		= fHeight/float(vTS.y);
 		uFlags			|= fsValid;
 	}
@@ -144,18 +159,16 @@ void CGameFont::OnRender()
 			if (len) {
 				float	X	= float(iFloor(PS.x));
 				float	Y	= float(iFloor(PS.y));
-				float	S	= PS.size*(::Render->getTarget()->get_width()/Device.dwWidth);		//ConvertSize	(PS.size);
-
+				float	S	= PS.height*g_current_font_scale.y;
 				float	Y2	= Y+S;
-				S			= (S*vTS.x)/fHeight;
 
 				switch(PS.align)
 				{
 				case alCenter:	
-						X	-= ( iFloor(SizeOf_(PS.string,PS.size)*.5f) ) / (1024.0f / ::Render->getTarget()->get_width());	
+						X	-= ( iFloor(SizeOf_(PS.string,PS.height)*.5f) ) * g_current_font_scale.x;	
 						break;
 				case alRight:	
-						X	-=	iFloor(SizeOf_(PS.string,PS.size));		
+						X	-=	iFloor(SizeOf_(PS.string,PS.height));		
 						break;
 				}
 
@@ -173,16 +186,22 @@ void CGameFont::OnRender()
 				for (int j=0; j<len; j++)
 				{
 					int c			= GetCharRM	(PS.string[j]);
-					const Fvector& l= GetCharTC	(PS.string[j]);
-					float scw		= S*l.z;
+					
+					Fvector l		= GetCharTC	(PS.string[j]);
+					float scw		= l.z * g_current_font_scale.x;
+					
+//.					float scw		= vTS.x * l.z * g_current_font_scale.x;
+					
+					float fTCWidth	= l.z/vTS.x;
+
 					if ((c>=0)&&!fis_zero(l.z))
 					{
-						tu			= l.x+vHalfPixel.x;
-						tv			= l.y+vHalfPixel.y;
-						v->set		(X,		Y2,	clr2,tu,		tv+fTCHeight);	v++;
-						v->set		(X,		Y,	clr, tu,		tv);			v++;
-						v->set		(X+scw,	Y2,	clr2,tu+l.z,	tv+fTCHeight);	v++;
-						v->set		(X+scw,	Y,	clr, tu+l.z,	tv);			v++;
+						tu			= l.x/vTS.x;//+vHalfPixel.x;
+						tv			= l.y/vTS.y;//+vHalfPixel.y;
+						v->set		(X-0.5f,		Y2-0.5f,	clr2,tu,			tv+fTCHeight);	v++;
+						v->set		(X-0.5f,		Y-0.5f,		clr, tu,			tv);			v++;
+						v->set		(X+scw-0.5f,	Y2-0.5f,	clr2,tu+fTCWidth,	tv+fTCHeight);	v++;
+						v->set		(X+scw-0.5f,	Y-0.5f,		clr, tu+fTCWidth,	tv);			v++;
 					}
 					X+=scw*vInterval.x;
 				}
@@ -200,24 +219,6 @@ void CGameFont::OnRender()
 	strings.clear_not_free			();
 }
 
-void CGameFont::Add(float _x, float _y, LPCSTR s, u32 _c, float _size)
-{
-	if (!Device.bActive)	return;
-	String	rs;
-	u32		len = xr_strlen(s);
-	VERIFY	(len<sizeof(rs.string));
-	rs.x=_x;
-	rs.y=_y;
-	rs.c=_c;
-	rs.size=_size;
-	if (len) {
-		strings.push_back(rs);
-		strncpy			((char *) &(strings[strings.size()-1].string),s,sizeof(rs.string)-1);
-		((char *) &(strings[strings.size()-1].string)) [sizeof(rs.string)-1]=0;
-	}
-}
-
-
 void __cdecl CGameFont::OutI(float _x, float _y, LPCSTR fmt,...)
 {
 //	if (!Device.bActive)	return;
@@ -225,7 +226,7 @@ void __cdecl CGameFont::OutI(float _x, float _y, LPCSTR fmt,...)
 	rs.x		=DI2PX(_x);
 	rs.y		=DI2PY(_y);
 	rs.c		=dwCurrentColor;
-	rs.size		=fCurrentSize;
+	rs.height		=fCurrentHeight;
 	rs.align	=eCurrentAlignment;
 
 	va_list		 p;
@@ -237,12 +238,12 @@ void __cdecl CGameFont::OutI(float _x, float _y, LPCSTR fmt,...)
 }
 void __cdecl CGameFont::Out(float _x, float _y, LPCSTR fmt,...)
 {
-	if (!Device.bActive)	return;
+	if (!Device.b_is_Active)	return;
 	String		rs;
 	rs.x		=_x;
 	rs.y		=_y;
 	rs.c		=dwCurrentColor;
-	rs.size		=fCurrentSize;
+	rs.height	=fCurrentHeight;
 	rs.align	=eCurrentAlignment;
 
 	va_list		 p;
@@ -254,18 +255,18 @@ void __cdecl CGameFont::Out(float _x, float _y, LPCSTR fmt,...)
 
 void __cdecl CGameFont::OutNext(LPCSTR fmt,...)
 {
-	if (!Device.bActive)	return;
+	if (!Device.b_is_Active)	return;
 	String rs;
-	rs.x=fCurrentX;
-	rs.y=fCurrentY;
-	rs.c=dwCurrentColor;
-	rs.size=fCurrentSize;
-	rs.align=eCurrentAlignment;
+	rs.x			=fCurrentX;
+	rs.y			=fCurrentY;
+	rs.c			=dwCurrentColor;
+	rs.height		=fCurrentHeight;
+	rs.align		=eCurrentAlignment;
 
-	va_list		p;
-	va_start	(p,fmt);
-	int vs_sz	= _vsnprintf(rs.string,sizeof(rs.string)-1,fmt,p); rs.string[sizeof(rs.string)-1]=0;
-	va_end		(p);
+	va_list			p;
+	va_start		(p,fmt);
+	int vs_sz		= _vsnprintf(rs.string,sizeof(rs.string)-1,fmt,p); rs.string[sizeof(rs.string)-1]=0;
+	va_end			(p);
 
 	if (vs_sz)	strings.push_back(rs);
 	OutSkip(1);
@@ -273,13 +274,13 @@ void __cdecl CGameFont::OutNext(LPCSTR fmt,...)
 
 void __cdecl CGameFont::OutPrev(LPCSTR fmt,...)
 {
-	if (!Device.bActive)	return;
+	if (!Device.b_is_Active)	return;
 	String rs;
-	rs.x=fCurrentX;
-	rs.y=fCurrentY;
-	rs.c=dwCurrentColor;
-	rs.size=fCurrentSize;
-	rs.align=eCurrentAlignment;
+	rs.x			=fCurrentX;
+	rs.y			=fCurrentY;
+	rs.c			=dwCurrentColor;
+	rs.height		=fCurrentHeight;
+	rs.align		=eCurrentAlignment;
 
 	va_list		p;
 	va_start	(p,fmt);
@@ -297,7 +298,7 @@ void CGameFont::OutSkip(float val)
 
 float CGameFont::SizeOf_(char s,float size)
 {
-	return		( GetCharTC(s).z*size/fHeight*vInterval.x*vTS.x ) * 1024.0f / ::Render->getTarget()->get_width();
+	return		( GetCharTC(s).z*vInterval.x/* *vTS.x*/ );
 }
 
 float CGameFont::SizeOf_(LPCSTR s,float size)
@@ -308,29 +309,24 @@ float CGameFont::SizeOf_(LPCSTR s,float size)
 		if (len) 
 			for (int j=0; j<len; j++) 
 				X			+= GetCharTC(s[j]).z;
-		return				(X*size/fHeight*vInterval.x*vTS.x) * 1024.0f / ::Render->getTarget()->get_width();
+		return				(X*vInterval.x/**vTS.x*/);
 	}
 	return 0;
 }
 
 float CGameFont::CurrentHeight_	()
 {
-	return fCurrentSize * vInterval.y * 768.0f / ::Render->getTarget()->get_height();;
+	return fCurrentHeight * vInterval.y;
 }
 
-/*
-float CGameFont::SizeOfRel(LPCSTR s)
+void CGameFont::SetHeightI(float S)	
 {
-	return SizeOf(s)*1024.0f/::Render->getTarget()->get_width();
-}
+	VERIFY			( uFlags&fsDeviceIndependent );
+	fCurrentHeight	= S*Device.dwHeight;
+};
 
-float CGameFont::SizeOfRel(char s)
+void CGameFont::SetHeight(float S)	
 {
-	return SizeOf(s)*1024.0f/::Render->getTarget()->get_width();
-}
-
-float CGameFont::CurrentHeightRel()
-{
-	return CurrentHeight()*768.0f/::Render->getTarget()->get_height();
-}
-*/
+	VERIFY			( uFlags&fsDeviceIndependent );
+	fCurrentHeight	= S;
+};

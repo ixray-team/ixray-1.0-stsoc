@@ -8,6 +8,8 @@
 
 #include "stdafx.h"
 #include "alife_communication_manager.h"
+
+/**
 #include "alife_communication_space.h"
 #include "xrServer_objects_ALife_All.h"
 #include "alife_object_registry.h"
@@ -74,20 +76,22 @@ public:
 			return						(tpALifeInventoryItem1->m_dwCost > tpALifeInventoryItem2->m_dwCost);
 	}
 };
+/**/
 
 CALifeCommunicationManager::CALifeCommunicationManager	(xrServer *server, LPCSTR section) :
-	inherited		(server,section)
+	CALifeSimulatorBase	(server,section)
 {
-	m_tpItems1.reserve			(MAX_STACK_DEPTH);
-	m_tpItems2.reserve			(MAX_STACK_DEPTH);
-	m_tpBlockedItems1.reserve	(MAX_STACK_DEPTH);
-	m_tpBlockedItems2.reserve	(MAX_STACK_DEPTH);
-	m_tpTrader1.reserve			(MAX_STACK_DEPTH);
-	m_tpTrader1.reserve			(MAX_STACK_DEPTH);
-	m_tpSums1.reserve			(MAX_STACK_DEPTH);
-	m_tpSums2.reserve			(MAX_STACK_DEPTH);
+//	m_tpItems1.reserve			(MAX_STACK_DEPTH);
+//	m_tpItems2.reserve			(MAX_STACK_DEPTH);
+//	m_tpBlockedItems1.reserve	(MAX_STACK_DEPTH);
+//	m_tpBlockedItems2.reserve	(MAX_STACK_DEPTH);
+//	m_tpTrader1.reserve			(MAX_STACK_DEPTH);
+//	m_tpTrader1.reserve			(MAX_STACK_DEPTH);
+//	m_tpSums1.reserve			(MAX_STACK_DEPTH);
+//	m_tpSums2.reserve			(MAX_STACK_DEPTH);
 }
 
+/**
 CALifeCommunicationManager::~CALifeCommunicationManager	()
 {
 }
@@ -612,8 +616,8 @@ void CALifeCommunicationManager::vfAppendBlockedItems(CSE_ALifeHumanAbstract *tp
 
 void CALifeCommunicationManager::vfPerformTrading(CSE_ALifeHumanAbstract *tpALifeHumanAbstract1, CSE_ALifeHumanAbstract *tpALifeHumanAbstract2)
 {
-	VERIFY					(tpALifeHumanAbstract1->check_inventory_consistency());
-	VERIFY					(tpALifeHumanAbstract2->check_inventory_consistency());
+//	VERIFY					(tpALifeHumanAbstract1->check_inventory_consistency());
+//	VERIFY					(tpALifeHumanAbstract2->check_inventory_consistency());
 
 	m_tpItems1.clear	();
 	m_tpItems2.clear	();
@@ -747,8 +751,8 @@ void CALifeCommunicationManager::vfPerformTrading(CSE_ALifeHumanAbstract *tpALif
 		}
 	}
 
-	VERIFY				(tpALifeHumanAbstract1->check_inventory_consistency());
-	VERIFY				(tpALifeHumanAbstract2->check_inventory_consistency());
+//	VERIFY				(tpALifeHumanAbstract1->check_inventory_consistency());
+//	VERIFY				(tpALifeHumanAbstract2->check_inventory_consistency());
 
 	int					l_iItemCount1 = tpALifeHumanAbstract1->children.size();
 	int					l_iItemCount2 = tpALifeHumanAbstract2->children.size();
@@ -761,25 +765,25 @@ void CALifeCommunicationManager::vfPerformTrading(CSE_ALifeHumanAbstract *tpALif
 		vfRestoreItems	(tpALifeHumanAbstract2,m_tpItems2);
 	}
 
-	VERIFY				(tpALifeHumanAbstract1->check_inventory_consistency());
-	VERIFY				(tpALifeHumanAbstract2->check_inventory_consistency());
+//	VERIFY				(tpALifeHumanAbstract1->check_inventory_consistency());
+//	VERIFY				(tpALifeHumanAbstract2->check_inventory_consistency());
 
 #ifdef FAST_OWNERSHIP
 	vfAttachGatheredItems(tpALifeHumanAbstract1,tpALifeHumanAbstract2,m_tpBlockedItems1);
-	VERIFY					(tpALifeHumanAbstract1->check_inventory_consistency());
-	VERIFY					(tpALifeHumanAbstract2->check_inventory_consistency());
+//	VERIFY					(tpALifeHumanAbstract1->check_inventory_consistency());
+//	VERIFY					(tpALifeHumanAbstract2->check_inventory_consistency());
 
 	vfAttachGatheredItems(tpALifeHumanAbstract2,tpALifeHumanAbstract1,m_tpBlockedItems2);
-	VERIFY					(tpALifeHumanAbstract1->check_inventory_consistency());
-	VERIFY					(tpALifeHumanAbstract2->check_inventory_consistency());
+//	VERIFY					(tpALifeHumanAbstract1->check_inventory_consistency());
+//	VERIFY					(tpALifeHumanAbstract2->check_inventory_consistency());
 #else
 	else {
 		vfAttachGatheredItems(tpALifeHumanAbstract1,m_tpBlockedItems1);
 		vfAttachGatheredItems(tpALifeHumanAbstract2,m_tpBlockedItems2);
 	}
 #endif
-	VERIFY					(tpALifeHumanAbstract1->check_inventory_consistency());
-	VERIFY					(tpALifeHumanAbstract2->check_inventory_consistency());
+//	VERIFY					(tpALifeHumanAbstract1->check_inventory_consistency());
+//	VERIFY					(tpALifeHumanAbstract2->check_inventory_consistency());
 
 #ifdef DEBUG
 	if (psAI_Flags.test(aiALife)) {
@@ -898,3 +902,4 @@ void CALifeCommunicationManager::communicate_with_customer(CSE_ALifeHumanAbstrac
 		tpALifeHumanAbstract->attach		(original_pda,true);
 	}
 }
+/**/

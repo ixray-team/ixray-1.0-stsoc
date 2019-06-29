@@ -46,14 +46,14 @@ void  CInventoryOwner::OnEvent (NET_Packet& P, u16 type)
 class CFindByIDPred
 {
 public:
-	CFindByIDPred(INFO_ID element_to_find) {element = element_to_find;}
+	CFindByIDPred(shared_str element_to_find) {element = element_to_find;}
 	bool operator () (const INFO_DATA& data) const {return data.info_id == element;}
 private:
-	INFO_ID element;
+	shared_str element;
 };
 
 
-bool CInventoryOwner::OnReceiveInfo(INFO_ID info_id) const
+bool CInventoryOwner::OnReceiveInfo(shared_str info_id) const
 {
 	VERIFY( info_id.size() );
 	//добавить запись в реестр
@@ -106,7 +106,7 @@ void CInventoryOwner::DumpInfo() const
 }
 #endif
 
-void CInventoryOwner::OnDisableInfo(INFO_ID info_id) const
+void CInventoryOwner::OnDisableInfo(shared_str info_id) const
 {
 	VERIFY( info_id.size() );
 	//удалить запись из реестра
@@ -123,7 +123,7 @@ void CInventoryOwner::OnDisableInfo(INFO_ID info_id) const
 	known_info.erase(it);
 }
 
-void CInventoryOwner::TransferInfo(INFO_ID info_id, bool add_info) const
+void CInventoryOwner::TransferInfo(shared_str info_id, bool add_info) const
 {
 	VERIFY( info_id.size() );
 	const CObject* pThisObject = smart_cast<const CObject*>(this); VERIFY(pThisObject);
@@ -146,7 +146,7 @@ void CInventoryOwner::TransferInfo(INFO_ID info_id, bool add_info) const
 	}
 }
 
-bool CInventoryOwner::HasInfo(INFO_ID info_id) const
+bool CInventoryOwner::HasInfo(shared_str info_id) const
 {
 	VERIFY( info_id.size() );
 	const KNOWN_INFO_VECTOR* known_info = m_known_info_registry->registry().objects_ptr ();
@@ -158,7 +158,7 @@ bool CInventoryOwner::HasInfo(INFO_ID info_id) const
 	return true;
 }
 
-bool CInventoryOwner::GetInfo	(INFO_ID info_id, INFO_DATA& info_data) const
+bool CInventoryOwner::GetInfo	(shared_str info_id, INFO_DATA& info_data) const
 {
 	VERIFY( info_id.size() );
 	const KNOWN_INFO_VECTOR* known_info = m_known_info_registry->registry().objects_ptr ();

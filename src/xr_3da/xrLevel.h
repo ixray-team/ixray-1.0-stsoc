@@ -74,7 +74,7 @@ struct	hdrNODES
 };
 #pragma pack(pop)
 
-#pragma pack(push,1)
+#pragma pack(push)
 #pragma pack(1)
 #ifndef _EDITOR
 class NodePosition {

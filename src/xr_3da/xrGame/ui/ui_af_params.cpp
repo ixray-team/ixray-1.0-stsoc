@@ -37,24 +37,30 @@ LPCSTR af_item_sect_names[] = {
 };
 
 LPCSTR af_item_param_names[] = {
-	"(health)",
-	"(radiation)",
-	"(satiety)",
-	"(power)",
-	"(bleeding)",
+	"ui_inv_health",
+	"ui_inv_radiation",
+	"ui_inv_satiety",
+	"ui_inv_power",
+	"ui_inv_bleeding",
 
-	"(burn_imm)",
-	"(strike_imm)",
-	"(shock_imm)",
-	"(wound_imm)",
-	"(radiation_imm)",
-	"(telepatic_imm)",
-	"(chemical_burn_imm)",
-	"(explosion_imm)",
-	"(fire_wound_imm)",
+	"ui_inv_outfit_burn_protection",			// "(burn_imm)",
+	"ui_inv_outfit_strike_protection",			// "(strike_imm)",
+	"ui_inv_outfit_shock_protection",			// "(shock_imm)",
+	"ui_inv_outfit_wound_protection",			// "(wound_imm)",
+	"ui_inv_outfit_radiation_protection",		// "(radiation_imm)",
+	"ui_inv_outfit_telepatic_protection",		// "(telepatic_imm)",
+	"ui_inv_outfit_chemical_burn_protection",	// "(chemical_burn_imm)",
+	"ui_inv_outfit_explosion_protection",		// "(explosion_imm)",
+	"ui_inv_outfit_fire_wound_protection",		// "(fire_wound_imm)",
 };
 
-
+LPCSTR af_actor_param_names[]={
+	"satiety_health_v",
+	"radiation_v",
+	"satiety_v",
+	"satiety_power_v",
+	"wound_incarnation_v",
+};
 void CUIArtefactParams::InitFromXml(CUIXml& xml_doc)
 {
 	LPCSTR _base				= "af_params";
@@ -77,7 +83,7 @@ bool CUIArtefactParams::Check(const shared_str& af_section)
 {
 	return !!pSettings->line_exist(af_section, "af_actor_properties");
 }
-
+#include "../string_table.h"
 void CUIArtefactParams::SetInfo(const shared_str& af_section)
 {
 
@@ -89,10 +95,14 @@ void CUIArtefactParams::SetInfo(const shared_str& af_section)
 		CUIStatic* _s			= m_info_items[i];
 
 		float					_val;
-		if(i<_max_item_index1){
-			_val				= pSettings->r_float(af_section, af_item_sect_names[i]);
-			if						(fis_zero(_val))				continue;
-			_val					*= 10000.0f;
+		if(i<_max_item_index1)
+		{
+			float _actor_val	= pSettings->r_float	("actor_condition", af_actor_param_names[i]);
+			_val				= pSettings->r_float	(af_section, af_item_sect_names[i]);
+
+			if					(fis_zero(_val))				continue;
+			
+			_val				= (_val/_actor_val)*100.0f;
 		}else
 		{
 			shared_str _sect	= pSettings->r_string(af_section, "hit_absorbation_sect");
@@ -102,8 +112,26 @@ void CUIArtefactParams::SetInfo(const shared_str& af_section)
 			_val				*= 100.0f;
 
 		}
+		LPCSTR _sn = "%";
+		if(i==_item_radiation_restore_speed || i==_item_power_restore_speed)
+		{
+			_val				/= 100.0f;
+			_sn					= "";
+		}
 
-		sprintf					(_buff, "%s %s %+.0f %%", af_item_param_names[i], (_val>0)?"%c[green]":"%c[red]", _val);
+		LPCSTR _color = (_val>0)?"%c[green]":"%c[red]";
+		
+		if(i==_item_bleeding_restore_speed || i==_item_radiation_restore_speed)
+			_color = (_val>0)?"%c[red]":"%c[green]";
+
+//.		if(i==_item_radiation_restore_speed /*|| i==_item_bleeding_restore_speed*/)
+//.			_val		*=	-1.0f;
+
+		sprintf					(	_buff, "%s %s %+.0f %s", 
+									CStringTable().translate(af_item_param_names[i]).c_str(), 
+									_color, 
+									_val, 
+									_sn);
 		_s->SetText				(_buff);
 		_s->SetWndPos			(_s->GetWndPos().x, _h);
 		_h						+= _s->GetWndSize().y;

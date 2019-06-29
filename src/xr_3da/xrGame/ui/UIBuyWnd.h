@@ -50,6 +50,7 @@ public:
 	virtual bool 				CanBuyAllItems				();
 	virtual void 				ResetItems					();
 	virtual void				SetRank						(u32 rank);
+	virtual u32					GetRank						();
 
 	virtual void				ItemToBelt					(const shared_str& sectionName);
 	virtual void				ItemToRuck					(const shared_str& sectionName, u32 addons);
@@ -94,6 +95,7 @@ public:
 	const u8			GetWeaponAddonInfoByIndex	(u8 idx);
 
 	void				ReloadItemsPrices			();
+	virtual bool	IsIgnoreMoneyAndRank		();
 
 protected:
 	void				DestroyAllItems				();

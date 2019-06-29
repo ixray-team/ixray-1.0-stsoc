@@ -43,6 +43,9 @@
 #include "ai/monsters/burer/burer.h"
 #include "GamePersistent.h"
 #include "actor.h"
+#include "alife_simulator.h"
+#include "alife_object_registry.h"
+#include "client_spawn_manager.h"
 
 #ifdef DEBUG
 #	include "debug_renderer.h"
@@ -91,6 +94,12 @@ CCustomMonster::~CCustomMonster	()
 	xr_delete					(m_memory_manager);
 	xr_delete					(m_movement_manager);
 	xr_delete					(m_sound_player);
+
+#ifdef DEBUG
+	Msg							("dumping client spawn manager stuff for object with id %d",ID());
+	Level().client_spawn_manager().dump	(ID());
+#endif // DEBUG
+	Level().client_spawn_manager().clear(ID());
 }
 
 void CCustomMonster::Load		(LPCSTR section)
@@ -518,9 +527,9 @@ void CCustomMonster::update_range_fov	(float &new_range, float &new_fov, float s
 {
 	const float	standard_far_plane			= eye_range;
 
-	float	current_fog_density				= GamePersistent().Environment.CurrentEnv.fog_density	;	
+	float	current_fog_density				= GamePersistent().Environment().CurrentEnv.fog_density	;	
 	// 0=no_fog, 1=full_fog, >1 = super-fog
-	float	current_far_plane				= GamePersistent().Environment.CurrentEnv.far_plane	;	
+	float	current_far_plane				= GamePersistent().Environment().CurrentEnv.far_plane	;	
 	// 300=standart, 50=super-fog
 
 	new_fov									= start_fov;
@@ -661,10 +670,7 @@ BOOL CCustomMonster::net_Spawn	(CSE_Abstract* DC)
 		else {
 			Fvector									dest_position;
 			u32										level_vertex_id;
-			if (ai().level_graph().inside(ai_location().level_vertex_id(),Position()))
-				level_vertex_id						= movement().restrictions().accessible_nearest(Position(),dest_position);
-			else
-				level_vertex_id						= movement().restrictions().accessible_nearest(ai().level_graph().vertex_position(ai_location().level_vertex_id()),dest_position);
+			level_vertex_id							= movement().restrictions().accessible_nearest(ai().level_graph().vertex_position(ai_location().level_vertex_id()),dest_position);
 			movement().set_level_dest_vertex		(level_vertex_id);
 			movement().detail().set_dest_position	(dest_position);
 		}
@@ -752,22 +758,6 @@ bool CCustomMonster::use_model_pitch	() const
 {
 	return					(true);
 }
-/* moved to CEntity
-void CCustomMonster::ChangeTeam(int team, int squad, int group)
-{
-	if ((team == g_Team()) && (squad == g_Squad()) && (group == g_Group())) return;
-	VERIFY2(g_Alive(), "Try to change team of a dead object");
-	
-	// remove from current team
-	Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member	(this,false);
-
-	id_Team					= team;
-	id_Squad				= squad;
-	id_Group				= group;
-
-	// add to new team
-	Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).register_member		(this);
-}*/
 
 void CCustomMonster::PitchCorrection() 
 {
@@ -959,10 +949,10 @@ LPCSTR CCustomMonster::visual_name	(CSE_Abstract *server_entity)
 	if (creature->g_Alive())
 		return					(inherited::visual_name(server_entity));
 
-	if (!creature->m_game_death_time)
+	if (creature->m_story_id != INVALID_STORY_ID)
 		return					(inherited::visual_name(server_entity));
 
-	if (!creature->m_flags.test(CSE_ALifeObject::flCorpseRemoval))
+	if (!creature->m_game_death_time)
 		return					(inherited::visual_name(server_entity));
 
 	ALife::_TIME_ID				game_death_time = creature->m_game_death_time;
@@ -989,13 +979,15 @@ CVisualMemoryManager *CCustomMonster::visual_memory	() const
 void CCustomMonster::save (NET_Packet &packet)
 {
 	inherited::save			(packet);
-	memory().save			(packet);
+	if (g_Alive())
+		memory().save		(packet);
 }
 
 void CCustomMonster::load (IReader &packet)		
 {
 	inherited::load			(packet);
-	memory().load			(packet);
+	if (g_Alive())
+		memory().load		(packet);
 }
 
 

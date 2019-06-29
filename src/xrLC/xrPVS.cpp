@@ -2,7 +2,7 @@
 #include "build.h"
 #include "xrOcclusion.h"
 
-#pragma comment(lib,"x:\\xrOcclusion.lib")
+#pragma comment(lib,"xrOcclusion.lib")
 #pragma comment(lib,"winmm.lib")
 
 typedef xr_vector<u16>	vecW;

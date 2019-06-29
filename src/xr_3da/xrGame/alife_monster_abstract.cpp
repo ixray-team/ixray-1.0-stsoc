@@ -133,6 +133,8 @@ CSE_ALifeItemWeapon	*CSE_ALifeMonsterAbstract::tpfGetBestWeapon(ALife::EHitType 
 
 ALife::EMeetActionType	CSE_ALifeMonsterAbstract::tfGetActionType(CSE_ALifeSchedulable *tpALifeSchedulable, int iGroupIndex, bool bMutualDetection)
 {
+	return						(ALife::eMeetActionTypeIgnore);
+	/**
 	if (ALife::eCombatTypeMonsterMonster == ai().alife().combat_type()) {
 		CSE_ALifeMonsterAbstract	*l_tpALifeMonsterAbstract = smart_cast<CSE_ALifeMonsterAbstract*>(tpALifeSchedulable);
 		R_ASSERT2					(l_tpALifeMonsterAbstract,"Inconsistent meet action type");
@@ -146,6 +148,7 @@ ALife::EMeetActionType	CSE_ALifeMonsterAbstract::tfGetActionType(CSE_ALifeSchedu
 		}
 		else
 			return					(ALife::eMeetActionTypeAttack);
+	/**/
 }
 
 bool CSE_ALifeMonsterAbstract::bfActive()
@@ -200,4 +203,26 @@ Fvector CSE_ALifeMonsterAbstract::draw_level_position	() const
 	brain().update				();
 #endif
 	return						(brain().movement().detail().draw_level_position());
+}
+
+bool CSE_ALifeMonsterAbstract::redundant				() const
+{
+	if (g_Alive())
+		return					(false);
+
+	if (m_bOnline)
+		return					(false);
+
+	if (m_story_id != INVALID_STORY_ID)
+		return					(false);
+
+	if (!m_game_death_time)
+		return					(false);
+
+	ALife::_TIME_ID				current_time = alife().time_manager().game_time();
+	VERIFY						(m_game_death_time <= current_time);
+	if ((m_game_death_time + m_stay_after_death_time_interval) > current_time)
+		return					(false);
+
+	return						(true);
 }

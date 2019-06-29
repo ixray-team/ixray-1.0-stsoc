@@ -55,7 +55,7 @@ int dcTriListCollider::CollideBox(dxGeom* Box, int Flags, dContactGeom* Contacts
 		(bt,
 		Box,
 		Geometry,
-		3,
+		Flags,
 		Contacts,   
 		Stride,
 		AABB
@@ -93,7 +93,7 @@ int dcTriListCollider::CollideCylinder(dxGeom* Cylinder, int Flags, dContactGeom
 		ct,
 		Cylinder,
 		Geometry,
-		3,
+		Flags,
 		Contacts,   
 		Stride,
 		AABB

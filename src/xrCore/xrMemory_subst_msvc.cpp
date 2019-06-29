@@ -1,9 +1,10 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include	"xrMemory_align.h"
+#include "xrMemory_align.h"
+#include "xrMemory_pure.h"
 
-#ifndef		__BORLANDC__
+#ifndef	__BORLANDC__
 
 #ifndef DEBUG_MEMORY_MANAGER
 #	define	debug_mode 0
@@ -29,26 +30,38 @@ ICF	u32		get_pool			(size_t size)
 	else						return pid;
 }
 
+#ifdef PURE_ALLOC
+bool	g_use_pure_alloc		= false;
+#endif // PURE_ALLOC
+
 void*	xrMemory::mem_alloc		(size_t size
-#ifdef DEBUG_MEMORY_MANAGER
+#	ifdef DEBUG_MEMORY_NAME
 								 , const char* _name
-#endif // DEBUG_MEMORY_MANAGER
+#	endif // DEBUG_MEMORY_NAME
 								 )
 {
-	// if (mem_initialized)		Memory.dbg_check			();
 	stat_calls++;
 
-#ifdef DEBUG_MEMORY_MANAGER
-	//if (_name && (0==strcmp(_name,"C++ NEW")) && (12==size))
-	//{
-	//	debug_cs.Enter		();
-	//	debug_cs.Leave		();
-	//}
-#endif // DEBUG_MEMORY_MANAGER
-	// if (size>14310800 && size<14310860)	__asm int 3;
+#ifdef PURE_ALLOC
+	static bool g_use_pure_alloc_initialized = false;
+	if (!g_use_pure_alloc_initialized) {
+		g_use_pure_alloc_initialized	= true;
+		g_use_pure_alloc				= !!strstr(GetCommandLine(),"-pure_alloc");
+	}
+
+	if (g_use_pure_alloc) {
+		void							*result = malloc(size);
+#ifdef USE_MEMORY_MONITOR
+		memory_monitor::monitor_alloc	(result,size,_name);
+#endif // USE_MEMORY_MONITOR
+		return							(result);
+	}
+#endif // PURE_ALLOC
+
 #ifdef DEBUG_MEMORY_MANAGER
 	if (mem_initialized)		debug_cs.Enter		();
 #endif // DEBUG_MEMORY_MANAGER
+
 	u32		_footer				=	debug_mode?4:0;
 	void*	_ptr				=	0;
 
@@ -90,18 +103,31 @@ void*	xrMemory::mem_alloc		(size_t size
 	//	__asm int 3;
 	//}
 #endif // DEBUG_MEMORY_MANAGER
+#ifdef USE_MEMORY_MONITOR
+	memory_monitor::monitor_alloc	(_ptr,size,_name);
+#endif // USE_MEMORY_MONITOR
 	return	_ptr;
 }
 
 void	xrMemory::mem_free		(void* P)
 {
+	stat_calls++;
+#ifdef USE_MEMORY_MONITOR
+	memory_monitor::monitor_free(P);
+#endif // USE_MEMORY_MONITOR
+
+#ifdef PURE_ALLOC
+	if (g_use_pure_alloc) {
+		free					(P);
+		return;
+	}
+#endif // PURE_ALLOC
+
 #ifdef DEBUG_MEMORY_MANAGER
 	if(g_globalCheckAddr==P)
 		__asm int 3;
 #endif // DEBUG_MEMORY_MANAGER
-	
 
-	stat_calls++;
 #ifdef DEBUG_MEMORY_MANAGER
 	if (mem_initialized)		debug_cs.Enter		();
 #endif // DEBUG_MEMORY_MANAGER
@@ -123,18 +149,31 @@ void	xrMemory::mem_free		(void* P)
 }
 
 extern BOOL	g_bDbgFillMemory	;
+
 void*	xrMemory::mem_realloc	(void* P, size_t size
-#ifdef DEBUG_MEMORY_MANAGER
+#ifdef DEBUG_MEMORY_NAME
 								 , const char* _name
-#endif // DEBUG_MEMORY_MANAGER
+#endif // DEBUG_MEMORY_NAME
 								 )
 {
 	stat_calls++;
-	if (0==P)					return mem_alloc	(size
-#ifdef DEBUG_MEMORY_MANAGER
+#ifdef PURE_ALLOC
+	if (g_use_pure_alloc) {
+		void							*result = realloc(P,size);
+#	ifdef USE_MEMORY_MONITOR
+		memory_monitor::monitor_free	(P);
+		memory_monitor::monitor_alloc	(result,size,_name);
+#	endif // USE_MEMORY_MONITOR
+		return							(result);
+	}
+#endif // PURE_ALLOC
+	if (0==P) {
+		return mem_alloc	(size
+#	ifdef DEBUG_MEMORY_NAME
 		,_name
-#endif // DEBUG_MEMORY_MANAGER
+#	endif // DEBUG_MEMORY_NAME
 		);
+	}
 
 #ifdef DEBUG_MEMORY_MANAGER
 	if(g_globalCheckAddr==P)
@@ -171,28 +210,33 @@ void*	xrMemory::mem_realloc	(void* P, size_t size
 #ifdef DEBUG_MEMORY_MANAGER
 		if		(debug_mode)	dbg_register	(_ptr,size,_name);
 #endif // DEBUG_MEMORY_MANAGER
+#ifdef USE_MEMORY_MONITOR
+		memory_monitor::monitor_free	(P);
+		memory_monitor::monitor_alloc	(_ptr,size,_name);
+#endif // USE_MEMORY_MONITOR
 	} else if (1==p_mode)		{
 		// pooled realloc
 		R_ASSERT2				(p_current<mem_pools_count,"Memory corruption");
 		u32		s_current		= mem_pools[p_current].get_element();
 		u32		s_dest			= (u32)size;
 		void*	p_old			= P;
-		void*	p_new			= mem_alloc		(size
-#ifdef DEBUG_MEMORY_MANAGER
+
+		void*	p_new			= mem_alloc(size
+#ifdef DEBUG_MEMORY_NAME
 			,_name
-#endif // DEBUG_MEMORY_MANAGER
-			);
+#endif // DEBUG_MEMORY_NAME
+		);
 		mem_copy				(p_new,p_old,_min(s_current,s_dest));
 		mem_free				(p_old);
 		_ptr					= p_new;
 	} else if (2==p_mode)		{
 		// relocate into another mmgr(pooled) from real
 		void*	p_old			= P;
-		void*	p_new			= mem_alloc		(size
-#ifdef DEBUG_MEMORY_MANAGER
+		void*	p_new			= mem_alloc(size
+#	ifdef DEBUG_MEMORY_NAME
 			,_name
-#endif // DEBUG_MEMORY_MANAGER
-			);
+#	endif // DEBUG_MEMORY_NAME
+		);
 		mem_copy				(p_new,p_old,(u32)size);
 		mem_free				(p_old);
 		_ptr					= p_new;
@@ -208,4 +252,4 @@ void*	xrMemory::mem_realloc	(void* P, size_t size
 	return	_ptr;
 }
 
-#endif
+#endif // __BORLANDC__

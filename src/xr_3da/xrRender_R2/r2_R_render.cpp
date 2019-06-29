@@ -18,6 +18,48 @@ void CRender::render_main	(Fmatrix&	m_ViewProjection, bool _fportals)
 
 	// Calculate sector(s) and their objects
 	if (pLastSector)		{
+		//!!!
+		//!!! BECAUSE OF PARALLEL HOM RENDERING TRY TO DELAY ACCESS TO HOM AS MUCH AS POSSIBLE
+		//!!!
+		{
+			// Traverse object database
+			g_SpatialSpace->q_frustum
+				(
+				lstRenderables,
+				ISpatial_DB::O_ORDERED,
+				STYPE_RENDERABLE + STYPE_LIGHTSOURCE,
+				ViewBase
+				);
+
+			// (almost) Exact sorting order (front-to-back)
+			std::sort			(lstRenderables.begin(),lstRenderables.end(),pred_sp_sort);
+
+			// Determine visibility for dynamic part of scene
+			set_Object							(0);
+			u32 uID_LTRACK						= 0xffffffff;
+			if (phase==PHASE_NORMAL)			{
+				uLastLTRACK	++;
+				if (lstRenderables.size())		uID_LTRACK	= uLastLTRACK%lstRenderables.size();
+
+				// update light-vis for current entity / actor
+				CObject*	O					= g_pGameLevel->CurrentViewEntity();
+				if (O)		{
+					CROS_impl*	R					= (CROS_impl*) O->ROS();
+					if (R)		R->update			(O);
+				}
+
+				// update light-vis for selected entity
+				// track lighting environment
+				if (lstRenderables.size())		{
+					IRenderable*	renderable		= lstRenderables[uID_LTRACK]->dcast_Renderable	();
+					if (renderable)	{
+						CROS_impl*		T = (CROS_impl*)renderable->renderable_ROS	();
+						if (T)			T->update	(renderable);
+					}
+				}
+			}
+		}
+
 		// Traverse sector/portal structure
 		PortalTraverser.traverse	
 			(
@@ -25,7 +67,7 @@ void CRender::render_main	(Fmatrix&	m_ViewProjection, bool _fportals)
 			ViewBase,
 			Device.vCameraPosition,
 			m_ViewProjection,
-			CPortalTraverser::VQ_HOM + CPortalTraverser::VQ_SSA + 0
+			CPortalTraverser::VQ_HOM + CPortalTraverser::VQ_SSA + CPortalTraverser::VQ_FADE
 			//. disabled scissoring (HW.Caps.bScissor?CPortalTraverser::VQ_SCISSOR:0)	// generate scissoring info
 			);
 
@@ -40,33 +82,7 @@ void CRender::render_main	(Fmatrix&	m_ViewProjection, bool _fportals)
 			}
 		}
 
-		// Traverse object database
-		g_SpatialSpace->q_frustum
-			(
-			lstRenderables,
-			ISpatial_DB::O_ORDERED,
-			STYPE_RENDERABLE + STYPE_LIGHTSOURCE,
-			ViewBase
-			);
-
-		// (almost)Exact sorting order (front-to-back)
-		std::sort			(lstRenderables.begin(),lstRenderables.end(),pred_sp_sort);
-
-		// Determine visibility for dynamic part of scene
-		set_Object							(0);
-		//. g_pGameLevel->pHUD->Render_First( );
-		u32 uID_LTRACK						= 0xffffffff;
-		if (phase==PHASE_NORMAL)			{
-			uLastLTRACK	++;
-			if (lstRenderables.size())		uID_LTRACK	= uLastLTRACK%lstRenderables.size();
-
-			// update light-vis for current entity / actor
-			CObject*	O					= g_pGameLevel->CurrentViewEntity();
-			if (O)		{
-				CROS_impl*	R					= (CROS_impl*) O->ROS();
-				if (R)		R->update			(O);
-			}
-		}
+		// Traverse frustums
 		for (u32 o_it=0; o_it<lstRenderables.size(); o_it++)
 		{
 			ISpatial*	spatial		= lstRenderables[o_it];		spatial->spatial_updatesector	();
@@ -77,8 +93,12 @@ void CRender::render_main	(Fmatrix&	m_ViewProjection, bool _fportals)
 				// lightsource
 				light*			L				= (light*)	(spatial->dcast_Light());
 				VERIFY							(L);
-				Lights.add_light				(L);
-				continue						;
+				float	lod		= L->get_LOD	();
+				if (lod>EPS_L)	{
+					vis_data&		vis		= L->get_homdata	( );
+					if	(HOM.visible(vis))	Lights.add_light	(L);
+				}
+				continue					;
 			}
 
 			if	(PortalTraverser.i_marker != sector->r_marker)	continue;	// inactive (untouched) sector
@@ -104,12 +124,6 @@ void CRender::render_main	(Fmatrix&	m_ViewProjection, bool _fportals)
 					if (!bVisible)					break;	// exit loop on frustums
 
 					// Rendering
-					if (o_it==uID_LTRACK)	{
-						// track lighting environment
-						// VERIFY					(renderable->renderable.ROS);
-						CROS_impl*		T = (CROS_impl*)renderable->renderable_ROS	();
-						if (T)			T->update	(renderable);
-					}
 					set_Object						(renderable);
 					renderable->renderable_Render	();
 					set_Object						(0);
@@ -121,7 +135,7 @@ void CRender::render_main	(Fmatrix&	m_ViewProjection, bool _fportals)
 	}
 	else
 	{
-		set_Object											(0);
+		set_Object									(0);
 		if (g_pGameLevel && (phase==PHASE_NORMAL))	g_pGameLevel->pHUD->Render_Last();		// HUD
 	}
 }
@@ -192,8 +206,10 @@ void CRender::Render		()
 	// HOM
 	ViewBase.CreateFromMatrix					(Device.mFullTransform, FRUSTUM_P_LRTB + FRUSTUM_P_FAR);
 	View										= 0;
-	HOM.Enable									();
-	HOM.Render									(ViewBase);
+	if (!ps_r2_ls_flags.test(R2FLAG_EXP_MT_CALC))	{
+		HOM.Enable									();
+		HOM.Render									(ViewBase);
+	}
 
 	//******* Z-prefill calc - DEFERRER RENDERER
 	if (ps_r2_ls_flags.test(R2FLAG_ZFILL))		{
@@ -203,7 +219,7 @@ void CRender::Render		()
 		m_project.build_projection	(
 			deg2rad(Device.fFOV*Device.fASPECT), 
 			Device.fASPECT, VIEWPORT_NEAR, 
-			z_distance * g_pGamePersistent->Environment.CurrentEnv.far_plane);
+			z_distance * g_pGamePersistent->Environment().CurrentEnv.far_plane);
 		m_zfill.mul	(m_project,Device.mView);
 		r_pmask										(true,false);	// enable priority "0"
 		set_Recorder								(NULL)		;
@@ -221,6 +237,26 @@ void CRender::Render		()
 		Target->phase_scene_prepare					();
 	}
 
+	//*******
+	// Sync point
+	Device.Statistic->RenderDUMP_Wait_S.Begin	();
+	if (1)
+	{
+		CTimer	T;							T.Start	();
+		BOOL	result						= FALSE;
+		HRESULT	hr							= S_FALSE;
+		while	((hr=q_sync_point[q_sync_count]->GetData	(&result,sizeof(result),D3DGETDATA_FLUSH))==S_FALSE) {
+			if (!SwitchToThread())			Sleep(ps_r2_wait_sleep);
+			if (T.GetElapsed_ms() > 500)	{
+				result	= FALSE;
+				break;
+			}
+		}
+	}
+	Device.Statistic->RenderDUMP_Wait_S.End		();
+	q_sync_count								= (q_sync_count+1)%2;
+	CHK_DX										(q_sync_point[q_sync_count]->Issue(D3DISSUE_END));
+
 	//******* Main calc - DEFERRER RENDERER
 	// Main calc
 	Device.Statistic->RenderCALC.Begin			();
@@ -233,20 +269,27 @@ void CRender::Render		()
 	r_pmask										(true,false);	// disable priority "1"
 	Device.Statistic->RenderCALC.End			();
 
-	//******* Main render
+	BOOL	split_the_scene_to_minimize_wait		= FALSE;
+	if (ps_r2_ls_flags.test(R2FLAG_EXP_SPLIT_SCENE))	split_the_scene_to_minimize_wait=TRUE;
+
+	//******* Main render :: PART-0	-- first
+	if (!split_the_scene_to_minimize_wait)
 	{
-		// level
+		// level, DO NOT SPLIT
 		Target->phase_scene_begin				();
 		r_dsgraph_render_hud					();
 		r_dsgraph_render_graph					(0);
 		r_dsgraph_render_lods					(true,true);
 		if(Details)	Details->Render				();
 		Target->phase_scene_end					();
+	} else {
+		// level, SPLIT
+		Target->phase_scene_begin				();
+		r_dsgraph_render_graph					(0);
+		Target->disable_aniso					();
 	}
 
 	//******* Occlusion testing of volume-limited light-sources
-	q_sync_count								= (q_sync_count+1)%2;
-	CHK_DX										(q_sync_point[q_sync_count]->Issue(D3DISSUE_END));
 	Target->phase_occq							();
 	LP_normal.clear								();
 	LP_pending.clear							();
@@ -288,12 +331,35 @@ void CRender::Render		()
 	LP_normal.sort							();
 	LP_pending.sort							();
 
+	//******* Main render :: PART-1 (second)
+	if (split_the_scene_to_minimize_wait)	{
+		// skybox can be drawn here
+		if (0)
+		{
+			Target->u_setrt		( Target->rt_Generic_0,	Target->rt_Generic_1,0,HW.pBaseZB );
+			RCache.set_CullMode	( CULL_NONE );
+			RCache.set_Stencil	( FALSE		);
+
+			// draw skybox
+			RCache.set_ColorWriteEnable					();
+			CHK_DX(HW.pDevice->SetRenderState			( D3DRS_ZENABLE,	FALSE				));
+			g_pGamePersistent->Environment().RenderSky	();
+			CHK_DX(HW.pDevice->SetRenderState			( D3DRS_ZENABLE,	TRUE				));
+		}
+
+		// level
+		Target->phase_scene_begin				();
+		r_dsgraph_render_hud					();
+		r_dsgraph_render_lods					(true,true);
+		if(Details)	Details->Render				();
+		Target->phase_scene_end					();
+	}
+
 	// Wall marks
 	if(Wallmarks)	{
 		Target->phase_wallmarks					();
 		g_r										= 0;
 		Wallmarks->Render						();				// wallmarks has priority as normal geometry
-
 	}
 
 	// Update incremental shadowmap-visibility solver
@@ -325,22 +391,6 @@ void CRender::Render		()
 	HOM.Disable								();
 	render_lights							(LP_normal);
 	
-	// Sync-Point
-	Device.Statistic->RenderDUMP_Wait.Begin	();
-	{
-		CTimer	T;							T.Start	();
-		BOOL	result						= FALSE;
-		HRESULT	hr							= S_FALSE;
-		while	((hr=q_sync_point[q_sync_count]->GetData	(&result,sizeof(result),D3DGETDATA_FLUSH))==S_FALSE) {
-			if (!SwitchToThread())			Sleep(1);
-			if (T.GetElapsed_ms() > 500)	{
-				result	= FALSE;
-				break;
-			}
-		}
-	}
-	Device.Statistic->RenderDUMP_Wait.End	();
-	
 	// Lighting, dependant on OCCQ
 	render_lights							(LP_pending);
 
@@ -364,7 +414,7 @@ void CRender::render_forward				()
 		r_dsgraph_render_graph					(1)	;					// normal level, secondary priority
 		PortalTraverser.fade_render				()	;					// faded-portals
 		r_dsgraph_render_sorted					()	;					// strict-sorted geoms
-		g_pGamePersistent->Environment.RenderLast()	;					// rain/thunder-bolts
+		g_pGamePersistent->Environment().RenderLast()	;					// rain/thunder-bolts
 	}
 
 	RImplementation.o.distortion				= FALSE;				// disable distorion

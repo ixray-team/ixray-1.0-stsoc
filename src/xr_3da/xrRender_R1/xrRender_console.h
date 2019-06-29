@@ -94,6 +94,8 @@ extern ECORE_API float			ps_r2_zfill;				// .1f
 
 extern ECORE_API float			ps_r2_dhemi_scale;			// 1.5f
 extern ECORE_API int			ps_r2_dhemi_count;			// 5
+extern ECORE_API float			ps_r2_slight_fade;			// 1.f
+extern ECORE_API int			ps_r2_wait_sleep;
 
 enum
 {
@@ -109,8 +111,16 @@ enum
 	R2FLAG_ZFILL				= (1<<9),
 	R2FLAG_R1LIGHTS				= (1<<10),
 	R2FLAG_SUN_IGNORE_PORTALS	= (1<<11),
-//	R2FLAG_SUN_STATIC			= (1<<12),
 
+//	R2FLAG_SUN_STATIC			= (1<<12),
+	
+	R2FLAG_EXP_SPLIT_SCENE					= (1<<13),
+	R2FLAG_EXP_DONT_TEST_UNSHADOWED			= (1<<14),
+
+	R2FLAG_USE_NVDBT			= (1<<15),
+	R2FLAG_USE_NVSTENCIL		= (1<<16),
+
+	R2FLAG_EXP_MT_CALC			= (1<<17),
 };
 
 extern void						xrRender_initconsole	();

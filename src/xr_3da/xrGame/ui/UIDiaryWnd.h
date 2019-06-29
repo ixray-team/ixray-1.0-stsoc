@@ -19,16 +19,15 @@ class CUIDiaryWnd: public CUIWindow, public CUIWndCallback
 {
 	typedef CUIWindow inherited;
 	enum EDiaryFilter{
-			eNews			= 0,
 //			eInfo,
-			eJournal,
+			eJournal=0,
+			eNews,
 			eNone
 	};
 protected:
 	EDiaryFilter		m_currFilter;
 
 	CUINewsWnd*			m_UINewsWnd;
-//	CUIVideoPlayerWnd*	m_videoWnd;
 
 	CUIWindow*			m_UILeftWnd;
 	CUIWindow*			m_UIRightWnd;
@@ -45,7 +44,9 @@ protected:
 	CGameFont*			m_pTreeItemFont;
 	u32					m_uTreeItemColor;
 
+	xr_vector<Fvector2>	m_sign_places;
 	CUIStatic*			m_updatedSectionImage;
+	CUIStatic*			m_oldSectionImage;
 
 	typedef xr_vector<CEncyclopediaArticle*>			ArticlesDB;
 	typedef xr_vector<CEncyclopediaArticle*>::iterator	ArticlesDB_it;

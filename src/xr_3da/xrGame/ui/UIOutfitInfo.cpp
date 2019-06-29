@@ -35,8 +35,8 @@ LPCSTR _imm_names []={
 
 LPCSTR _imm_st_names[]={
 	"ui_inv_outfit_burn_protection",
-	"ui_inv_outfit_strike_protection",
 	"ui_inv_outfit_shock_protection",
+	"ui_inv_outfit_strike_protection",
 	"ui_inv_outfit_wound_protection",
 	"ui_inv_outfit_radiation_protection",
 	"ui_inv_outfit_telepatic_protection",

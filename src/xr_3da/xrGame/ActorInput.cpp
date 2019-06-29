@@ -25,6 +25,8 @@
 #include "CharacterPhysicsSupport.h"
 #include "InventoryBox.h"
 
+bool g_bAutoClearCrouch = true;
+
 void CActor::IR_OnKeyboardPress(int cmd)
 {
 	if (Remote())		return;
@@ -71,6 +73,13 @@ void CActor::IR_OnKeyboardPress(int cmd)
 //				u_EventGen(P, GE_ACTOR_JUMPING, ID());
 //				u_EventSend(P);
 			}
+		}break;
+	case kCROUCH_TOGGLE:
+		{
+			g_bAutoClearCrouch = !g_bAutoClearCrouch;
+			if (!g_bAutoClearCrouch)
+				mstate_wishful |= mcCrouch;
+
 		}break;
 	case kSPRINT_TOGGLE:	
 		{
@@ -188,6 +197,7 @@ void CActor::IR_OnKeyboardRelease(int cmd)
 		{
 		case kJUMP:		mstate_wishful &=~mcJump;		break;
 		case kDROP:		if(GAME_PHASE_INPROGRESS == Game().Phase()) g_PerformDrop();				break;
+		case kCROUCH:	g_bAutoClearCrouch = true;
 		}
 	}
 }

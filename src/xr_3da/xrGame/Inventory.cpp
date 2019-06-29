@@ -459,26 +459,20 @@ bool CInventory::Action(s32 cmd, u32 flags)
 		case kUSE:
 			{
 			}break;
-		case kWPN_RELOAD:
-		case kDROP:
-		case kWPN_FIRE:
-		case kWPN_NEXT:
+		
+		case kDROP:		
+		
 			{
 				SendActionEvent(cmd, flags);
 				return true;
 			}break;
+
+		case kWPN_NEXT:
+		case kWPN_RELOAD:
+		case kWPN_FIRE:
 		case kWPN_FUNC:
 		case kWPN_FIREMODE_NEXT:
 		case kWPN_FIREMODE_PREV:
-		
-/*		case kWPN_1:
-		case kWPN_2:
-		case kWPN_3:
-		case kWPN_4:
-		case kWPN_5:
-		case kWPN_6:
-		case kARTEFACT:
-*/
 		case kWPN_ZOOM : 
 		case kTORCH:
 		case kNIGHT_VISION:

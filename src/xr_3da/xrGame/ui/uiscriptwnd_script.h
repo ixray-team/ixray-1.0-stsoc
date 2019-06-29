@@ -14,6 +14,12 @@ struct CWrapperBase : public T, public luabind::wrap_base {
 	{ call_member<void>(this,"Update");}
 	static void Update_static(inherited* ptr)
 	{ ptr->self_type::inherited::Update();}
+
+	virtual bool Dispatch(int cmd, int param)
+	{ return call_member<bool>(this,"Dispatch", cmd, param);}
+	static bool Dispatch_static(inherited* ptr, int cmd, int param)
+	{ return ptr->self_type::inherited::Dispatch(cmd,param);}
+
 };
 
 typedef CWrapperBase<CUIDialogWndEx> WrapType;

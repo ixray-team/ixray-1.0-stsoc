@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #include "xrRender_console.h"
 
-#pragma comment(lib,"x:\\xr_3DA")
+#pragma comment(lib,"xr_3DA")
 
 BOOL APIENTRY DllMain( HANDLE hModule, 
                        DWORD  ul_reason_for_call, 

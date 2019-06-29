@@ -10,6 +10,7 @@ struct LIST_SRV_SIZES {
 	float game; 
 	float players;
 	float ping;
+	float version;
 };
 
 struct SRV_ICONS{
@@ -25,6 +26,7 @@ struct LIST_SRV_INFO{
 	shared_str game;
 	shared_str players;
 	shared_str ping;
+	shared_str version;
 	SRV_ICONS  icons;
 	int			Index;
 };
@@ -36,7 +38,8 @@ struct LIST_SRV_ITEM {
 	LIST_SRV_INFO	info;
 };
 
-class CUIListItemServer : public CUIListItem {
+class CUIListItemServer : public CUIListItem 
+{
 public:
 	CUIListItemServer();
 
@@ -46,28 +49,29 @@ public:
 	virtual void Draw();
 
 	// own
-	virtual void Init(LIST_SRV_ITEM& params, float x, float y, float width, float height);
-			void SetParams(LIST_SRV_ITEM& params);
-			void CreateConsoleCommand(xr_string& command, LPCSTR player_name);
-			int  Get_gs_index() {return m_srv_info.info.Index;}
-			LIST_SRV_ITEM* GetInfo() {return &m_srv_info;};
+	virtual void			Init					(LIST_SRV_ITEM& params, float x, float y, float width, float height);
+			void			SetParams				(LIST_SRV_ITEM& params);
+			void			CreateConsoleCommand	(xr_string& command, LPCSTR player_name);
+			int				Get_gs_index			()		{return m_srv_info.info.Index;}
+			LIST_SRV_ITEM*	GetInfo					()		{return &m_srv_info;};
 	
 
 protected:
-			void SetTextColor(u32 color);
-			void SetFont(CGameFont* pFont);
-	LIST_SRV_SIZES m_sizes;
+			void			SetTextColor			(u32 color);
+			void			SetFont					(CGameFont* pFont);
+	LIST_SRV_SIZES			m_sizes;
 
-	LIST_SRV_ITEM m_srv_info;
+	LIST_SRV_ITEM			m_srv_info;
 
-	CUIWindow m_icon;
-	CUIStatic m_iconPass;
-	CUIStatic m_iconDedicated;
-	CUIStatic m_iconPunkBuster;
-	CUIStatic m_server;
-	CUIStatic m_map;
-	CUIStatic m_game;
-	CUIStatic m_players;
-	CUIStatic m_ping;
+	CUIWindow 				m_icon;
+	CUIStatic 				m_iconPass;
+	CUIStatic 				m_iconDedicated;
+	CUIStatic 				m_iconPunkBuster;
+	CUIStatic 				m_server;
+	CUIStatic 				m_map;
+	CUIStatic 				m_game;
+	CUIStatic 				m_players;
+	CUIStatic 				m_ping;
+	CUIStatic 				m_version;
 
 };

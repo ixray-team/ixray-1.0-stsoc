@@ -104,7 +104,7 @@ IC void add_contact_body_effector(dBodyID body,const dContact& c,SGameMtl* mater
 
 IC static int CollideIntoGroup(dGeomID o1, dGeomID o2,dJointGroupID jointGroup,CPHIsland* world,const int &MAX_CONTACTS)
 {
-	const int RS= 800;
+	const int RS= 800+10;
 	const int N = RS;
 	
 	static dContact contacts[RS];

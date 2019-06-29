@@ -39,15 +39,7 @@ public:
 
 	bool OnKeyboardPress(int dik);
 
-public:
-	// Функция для вывода служебных сообщений, таких как "здась спать нельзя",
-	// "рюкзак переполнен", и т.д. Возвращаем указатель на добавленный элемент
-	void AddInfoMessage					(LPCSTR message);
-
 protected:
-//.	void				HideAll						();
-//.	void				ShowAll						();
-//.	bool				m_bShowHudCrosshair;
 	
 	CUIStatic			UIStaticDiskIO;
 	CUIStatic			UIStaticHealth;
@@ -61,8 +53,6 @@ protected:
 
 	//иконка, показывающая количество активных PDA
 	CUIStatic			UIPdaOnline;
-	// Список входящих информационных сообщений
-	CUIGameLog			UIInfoMessages;
 	
 	//изображение оружия
 	CUIStatic			UIWeaponBack;
@@ -161,6 +151,8 @@ protected:
 public:
 	CUICarPanel&		CarPanel							(){return UICarPanel;};
 	CUIMotionIcon&		MotionIcon							(){return UIMotionIcon;}
+	void				OnConnected							();
+	void				reset_ui							();
 protected:
 	CInventoryItem*		m_pPickUpItem;
 	CUIStatic			UIPickUpItemIcon;

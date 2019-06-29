@@ -216,7 +216,7 @@ public:
 	virtual bool						useful								(const CEnemyManager *manager, const CEntityAlive *object) const;
 	
 	// PDA && Dialogs
-//	virtual void						ReceivePdaMessage					(u16 who, EPdaMsg msg, INFO_ID info_id);
+//	virtual void						ReceivePdaMessage					(u16 who, EPdaMsg msg, shared_str info_id);
 	virtual void						UpdateAvailableDialogs				(CPhraseDialogManager* partner);
 
 	// scripts
@@ -532,6 +532,15 @@ private:
 			void						notify_on_wounded_or_killed					();
 			void	xr_stdcall			remove_critical_hit							();
 //////////////////////////////////////////////////////////////////////////
+private:
+	bool	m_registered_in_combat_on_migration;
+
+public:
+	virtual	void						on_before_change_team						();
+	virtual	void						on_after_change_team						();
+
+private:
+	bool	m_can_select_items;
 
 public:
 	DECLARE_SCRIPT_REGISTER_FUNCTION

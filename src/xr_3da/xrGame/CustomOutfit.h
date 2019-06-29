@@ -27,7 +27,6 @@ public:
 	//если на персонаже надет костюм
 	float							GetPowerLoss		();
 
-	Fvector2						GetIconPos			();
 
 	virtual void					OnMoveToSlot		();
 	virtual void					OnMoveToRuck		();
@@ -37,6 +36,7 @@ protected:
 	float							m_fPowerLoss;
 
 	shared_str						m_ActorVisual;
+	shared_str						m_full_icon_name;
 	SBoneProtections*				m_boneProtection;	
 protected:
 	u32								m_ef_equipment_type;
@@ -44,6 +44,8 @@ protected:
 public:
 	float							m_additional_weight;
 	float							m_additional_weight2;
-	virtual u32						ef_equipment_type	() const;
-	virtual	BOOL					BonePassBullet					(int boneID);
+	shared_str						m_NightVisionSect;
+	virtual u32						ef_equipment_type		() const;
+	virtual	BOOL					BonePassBullet			(int boneID);
+	const shared_str&				GetFullIconName			() const	{return m_full_icon_name;};
 };

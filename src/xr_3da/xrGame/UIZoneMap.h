@@ -36,5 +36,6 @@ public:
 	bool						ZoomOut			();
 
 	CUIStatic&					Background		()									{return m_background;};
+	void						SetupCurrentMap	();
 };
 

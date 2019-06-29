@@ -43,7 +43,15 @@ public:
 		u32		fp16_blend			: 1;
 		u32		albedo_wo			: 1;						// work-around albedo on less capable HW
 		u32		HW_smap				: 1;
+		u32		HW_smap_PCF			: 1;
+		u32		HW_smap_FETCH4		: 1;
+
+		u32		HW_smap_FORMAT		: 32;
+
 		u32		nvstencil			: 1;
+		u32		nvdbt				: 1;
+
+		u32		nullrt				: 1;
 
 		u32		distortion			: 1;
 		u32		distortion_enabled	: 1;
@@ -112,12 +120,12 @@ public:
 	u32															q_sync_count	;
 private:
 	// Loading / Unloading
-	void							LoadBuffers					(IReader	*fs,	BOOL	_alternative);
+	void							LoadBuffers					(CStreamReader	*fs,	BOOL	_alternative);
 	void							LoadVisuals					(IReader	*fs);
 	void							LoadLights					(IReader	*fs);
 	void							LoadPortals					(IReader	*fs);
 	void							LoadSectors					(IReader	*fs);
-	void							LoadSWIs					(IReader	*fs);
+	void							LoadSWIs					(CStreamReader	*fs);
 
 	BOOL							add_Dynamic					(IRender_Visual	*pVisual, u32 planes);		// normal processing
 	void							add_Static					(IRender_Visual	*pVisual, u32 planes);
@@ -221,6 +229,7 @@ public:
 
 	// wallmarks
 	virtual void					add_StaticWallmark			(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V);
+	virtual void					clear_static_wallmarks		();
 	virtual void					add_SkeletonWallmark		(intrusive_ptr<CSkeletonWallmark> wm);
 	virtual void					add_SkeletonWallmark		(const Fmatrix* xf, CKinematics* obj, ref_shader& sh, const Fvector& start, const Fvector& dir, float size);
 

@@ -88,6 +88,7 @@ void	SMusicTrack::Play()
 {
 	m_SourceLeft.play_at_pos	(0,Fvector().set(-0.5f,0.f,0.3f),sm_2D);
 	m_SourceRight.play_at_pos	(0,Fvector().set(+0.5f,0.f,0.3f),sm_2D);
+	SetVolume					(1.0f);
 }
 
 void SMusicTrack::SetVolume(float volume)
@@ -127,9 +128,9 @@ void CLevelSoundManager::Load()
 
 	// music
 	m_CurrentTrack		= -1;
-	string_path			gameLtxPath;
-	FS.update_path		(gameLtxPath, "$game_config$", "game.ltx");
-	CInifile gameLtx	(gameLtxPath);
+
+	CInifile& gameLtx	= *pGameIni;
+
 	if (gameLtx.section_exist(Level().name())){
 		if (gameLtx.line_exist(Level().name(),"music_tracks")){
 			LPCSTR music_sect		= gameLtx.r_string(Level().name(),"music_tracks");
@@ -157,7 +158,7 @@ void CLevelSoundManager::Unload()
 
 void CLevelSoundManager::Update()
 {
-	if (Device.Pause())				return;
+	if (Device.Paused())				return;
 	if (Device.dwPrecacheFrame!=0)	return;
 	// static sounds
 	u32 game_time				= Level().GetGameDayTimeMS();

@@ -49,6 +49,7 @@ public:
 	CStatTimer	Animation;			// skeleton calculation
 	CStatTimer	RenderDUMP;			// actual primitive rendering
 	CStatTimer	RenderDUMP_Wait;	// ...waiting something back (queries results, etc.)
+	CStatTimer	RenderDUMP_Wait_S;	// ...frame-limit sync
 	CStatTimer	RenderDUMP_RT;		// ...render-targets
 	CStatTimer	RenderDUMP_SKIN;	// ...skinning
 	CStatTimer	RenderDUMP_HUD;		// ...hud rendering
@@ -72,7 +73,8 @@ public:
 	CStatTimer	clBOX;				// total: box query
 	CStatTimer	clFRUSTUM;			// total: frustum query
 	
-	CStatTimer	netClient;
+	CStatTimer	netClient1;
+	CStatTimer	netClient2;
 	CStatTimer	netServer;
 	
 	CStatTimer	TEST0;				// debug counter

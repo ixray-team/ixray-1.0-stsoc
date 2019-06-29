@@ -40,7 +40,7 @@
 BOOL CLevel::Load_GameSpecific_Before()
 {
 	// AI space
-	pApp->LoadTitle						("Loading AI objects...");
+	g_pGamePersistent->LoadTitle		("st_loading_ai_objects");
 	string256							fn_game;
 	
 	if (GamePersistent().GameType() == GAME_SINGLE && !ai().get_alife() && FS.exist(fn_game,"$level$","level.ai"))

@@ -135,10 +135,6 @@ SDrawStaticStruct* CUIGameCustom::AddCustomStatic			(LPCSTR id, bool bSingleInst
 			return &(*it);
 	}
 	
-//	CUIXml uiXml;
-//	bool xml_result					= uiXml.Init(CONFIG_PATH, UI_PATH, "ui_custom_msgs.xml");
-//	R_ASSERT3						(xml_result, "xml file not found", "ui_custom_msgs.xml");
-
 	CUIXmlInit xml_init;
 	m_custom_statics.push_back		(SDrawStaticStruct());
 	SDrawStaticStruct& sss			= m_custom_statics.back();
@@ -146,6 +142,9 @@ SDrawStaticStruct* CUIGameCustom::AddCustomStatic			(LPCSTR id, bool bSingleInst
 	sss.m_static					= xr_new<CUIStatic>();
 	sss.m_name						= id;
 	xml_init.InitStatic				(*m_msgs_xml, id, 0, sss.m_static);
+	float ttl						= m_msgs_xml->ReadAttribFlt(id, 0, "ttl", -1);
+	if(ttl>0.0f)
+		sss.m_endTime				= Device.fTimeGlobal + ttl;
 
 	return &sss;
 }
@@ -226,6 +225,7 @@ using namespace luabind;
 CUIGameCustom* get_hud(){
 	return HUD().GetUI()->UIGame();
 }
+
 
 #pragma optimize("s",on)
 void CUIGameCustom::script_register(lua_State *L)

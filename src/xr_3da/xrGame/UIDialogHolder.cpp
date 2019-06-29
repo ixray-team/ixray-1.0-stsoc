@@ -184,9 +184,11 @@ void CDialogHolder::SetMainInputReceiver	(CUIDialogWnd* ir, bool _find_remove)
 		m_input_receivers.push_back(recvItem(ir));
 	}
 };
-
+//. #include "ai_space.h"
+//. #include "script_engine.h"
 void CDialogHolder::StartStopMenu(CUIDialogWnd* pDialog, bool bDoHideIndicators)
 {
+//.	ai().script_engine().script_log	(eLuaMessageTypeError,"foo");
 	if( pDialog->IsShown() )
 		StopMenu(pDialog);
 	else
@@ -207,13 +209,13 @@ void CDialogHolder::shedule_Update(u32 dt)
 {
 	ISheduled::shedule_Update(dt);
 
-	if( m_dialogsToRender.size() )
-	{
-		std::sort	(m_dialogsToRender.begin(), m_dialogsToRender.end() );
+	if (m_dialogsToRender.empty())
+		return;
 
-		while	((m_dialogsToRender.size()) && (!m_dialogsToRender[m_dialogsToRender.size()-1].enabled)) 
-			m_dialogsToRender.pop_back();
-	}
+	std::sort			(m_dialogsToRender.begin(), m_dialogsToRender.end() );
+
+	while ((m_dialogsToRender.size()) && (!m_dialogsToRender[m_dialogsToRender.size()-1].enabled)) 
+		m_dialogsToRender.pop_back();
 }
 
 float CDialogHolder::shedule_Scale()

@@ -1,11 +1,3 @@
-//////////////////////////////////////////////////////////////////////
-// UIListItem.h: элемент окна списка CUIListWnd
-//////////////////////////////////////////////////////////////////////
-
-#ifndef _UI_LIST_ITEM_H_
-#define _UI_LIST_ITEM_H_
-
-
 #pragma once
 #include "UIbutton.h"
 
@@ -33,9 +25,6 @@ public:
 			int	GetGroupID() { return m_iGroupID; }
 			void SetGroupID(int ID) { m_iGroupID = ID; }
 
-			//возвращает длину в пиксел€х надписи
-			int GetSignWidht();
-
 	virtual void	MarkSelected				(bool b){};
 	// переопредел€ем критерий подсвечивани€ текста
 	virtual bool IsHighlightText();
@@ -58,5 +47,3 @@ protected:
 	// подсвечиваетс€ кнопка или нет?
 	bool m_bHighlightText;
 };
-
-#endif

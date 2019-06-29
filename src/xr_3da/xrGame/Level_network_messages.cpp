@@ -9,6 +9,10 @@
 #include "xrServer.h"
 #include "Actor.h"
 #include "game_cl_base_weapon_usage_statistic.h"
+#include "ai_space.h"
+#include "saved_game_wrapper.h"
+#include "level_graph.h"
+#include "clsid_game.h"
 
 void CLevel::ClientReceive()
 {
@@ -33,6 +37,7 @@ void CLevel::ClientReceive()
 		{
 		case M_SPAWN:			
 			{
+				if (!m_bGameConfigStarted) break;
 				/*/
 				cl_Process_Spawn(*P);
 				/*/
@@ -100,6 +105,8 @@ void CLevel::ClientReceive()
 		//---------------------------------------------------
 				UpdateDeltaUpd(timeServer());
 				if (pObjects4CrPr.empty() && pActors4CrPr.empty())
+					break;
+				if (O->CLS_ID != CLSID_OBJECT_ACTOR)
 					break;
 
 				u32 dTime = 0;
@@ -206,6 +213,21 @@ void CLevel::ClientReceive()
 		case M_LOAD_GAME:
 		case M_CHANGE_LEVEL:
 			{
+				if(m_type==M_LOAD_GAME)
+				{
+					string256						saved_name;
+					P->r_stringZ					(saved_name);
+					if(xr_strlen(saved_name) && ai().get_alife())
+					{
+						CSavedGameWrapper			wrapper(saved_name);
+						if (wrapper.level_id() == ai().level_graph().level_id()) 
+						{
+							Engine.Event.Defer	("Game:QuickLoad", size_t(xr_strdup(saved_name)), 0);
+
+							break;
+						}
+					}
+				}
 				Engine.Event.Defer	("KERNEL:disconnect");
 				Engine.Event.Defer	("KERNEL:start",size_t(xr_strdup(*m_caServerOptions)),size_t(xr_strdup(*m_caClientOptions)));
 			}break;
@@ -268,9 +290,8 @@ void CLevel::ClientReceive()
 		case M_PAUSE_GAME:
 			{
 				if (!net_IsSyncronised()) break;
-				u8 Pause = P->r_u8();
-				Device.Pause(!(Pause == 0));
-				Sound->pause_emitters(!!Device.Pause());
+				u8 Pause		= P->r_u8();
+				Device.Pause	(!(Pause == 0), TRUE, TRUE, "on_event");
 			}break;
 		case M_BULLET_CHECK_RESPOND:
 			{

@@ -20,6 +20,8 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 
+	void	SetPort(CEdit* pPortItem, int NumPorts, int* UsedPorts);
+
 	DECLARE_MESSAGE_MAP()
 public:
 	CEdit m_pHostName;
@@ -36,4 +38,10 @@ public:
 //	CEdit m_pMapRotationFile;
 	afx_msg void OnBnClickedMapRotation();
 	CButton m_pVotingAllowed;
+	CEdit m_pSVPort;
+	CEdit m_pGSPort;
+	CEdit m_pCLPort;
+	afx_msg void OnBnClickedSvPortButton();
+	afx_msg void OnBnClickedClPortbutton();
+	afx_msg void OnBnClickedGsPortbutton();
 };

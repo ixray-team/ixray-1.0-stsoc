@@ -1,144 +1,75 @@
-//////////////////////////////////////////////////////////////////////
-// UIScrollBox.h: класс перемещаемой каретки в CScrollBar
-//////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
-#include ".\uiscrollbox.h"
+#include "uiscrollbox.h"
+#include "..\uicursor.h"
 
-
-
-//#define SCROLLBOX_HORZ	"ui\\ui_scb_scroll_box"
-//#define SCROLLBOX_VERT	"ui\\ui_scb_scroll_box_v"
-
-
-
-
-CUIScrollBox::CUIScrollBox(void)
+CUIScrollBox::CUIScrollBox()
 {
-	m_bAvailableTexture = true;
-	m_bIsHorizontal = true;
-	
-	SetPushOffset( Fvector2().set(0.0f,0.0f));
+	m_bAvailableTexture		= true;
+	m_bIsHorizontal			= true;
 }
 
-CUIScrollBox::~CUIScrollBox(void)
+void CUIScrollBox::SetHorizontal()
 {
-}
-
-void CUIScrollBox::SetHorizontal(){
 	m_bIsHorizontal = true;
 }
 
-void CUIScrollBox::SetVertical(){
+void CUIScrollBox::SetVertical()
+{
 	m_bIsHorizontal = false;
 }
 
-void CUIScrollBox::Init(float x, float y, float length, float broad)
-{
-	CUIButton::Init(x,y,length, broad);
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-
 bool CUIScrollBox::OnMouse(float x, float y, EUIMessages mouse_action)
 {
-	float deltaX = 0;
-	float deltaY = 0;
+	bool cursor_over;
 
-	//проверить попадает ли курсор на кнопку
-	//координаты заданы относительно самой кнопки
-	bool cursor_on_button;
-
-	if(x>=0 && x<GetWidth() && y>=0 && y<GetHeight())
-		cursor_on_button = true;
+	if(x>=-10.0f && x<GetWidth()+10.0f && y>=-10.0f && y<GetHeight()+10.0f)
+		cursor_over = true;
 	else
-		cursor_on_button = false;
+		cursor_over = false;
 
+	bool im_capturer = (GetParent()->GetMouseCapturer()==this);
 
-	if(m_eButtonState == BUTTON_NORMAL)
+	if(mouse_action == WINDOW_LBUTTON_DOWN)
 	{
-		if(mouse_action == WINDOW_LBUTTON_DOWN)
-		{
-			m_eButtonState = BUTTON_PUSHED;
-		
-			GetParent()->SetCapture(this, true);
-		}
+		GetParent()->SetCapture(this, true);
 	}
-	else if(m_eButtonState == BUTTON_PUSHED)
+	else if(mouse_action == WINDOW_LBUTTON_UP)
+	{		
+		GetParent()->SetCapture(this, false);
+	}
+	else if(im_capturer && mouse_action == WINDOW_MOUSE_MOVE && cursor_over)
 	{
-		if(mouse_action == WINDOW_LBUTTON_UP)
-		{
-			if(cursor_on_button)
-			{
-				GetMessageTarget()->SendMessage(this, BUTTON_CLICKED);
-				m_bButtonClicked = true;
-			}
-		
-			m_eButtonState = BUTTON_NORMAL;
-		
-			//освободить мышь
-			GetParent()->SetCapture(this, false);
+		Fvector2	pos		= GetWndPos();
+		Fvector2	delta	= GetUICursor()->GetPosDelta();
 
-			GetMessageTarget()->SendMessage(this, SCROLLBOX_STOP);
-		}
-		else if(mouse_action == WINDOW_MOUSE_MOVE)
-		{
-//			if(!cursor_on_button)
-//				m_eButtonState = BUTTON_UP;
-//			else
-			{
-				deltaX = x - m_iOldMouseX;
-				deltaY = y - m_iOldMouseY;
+		if(m_bIsHorizontal)
+			pos.x				+= delta.x;
+		else
+			pos.y				+= delta.y;
 
-				if(m_bIsHorizontal)
-				{
-					SetWndPos(GetWndRect().left+deltaX, GetWndRect().top);
-				}
-				else
-					SetWndPos(GetWndRect().left, GetWndRect().top+deltaY);
+		SetWndPos			(pos);
 
-				GetMessageTarget()->SendMessage(this, SCROLLBOX_MOVE);
-			}
-		}
+		GetMessageTarget()->SendMessage(this, SCROLLBOX_MOVE);
 	}
-	else if(m_eButtonState == BUTTON_UP)
-	{
-		if(mouse_action == WINDOW_MOUSE_MOVE)
-		{
-			if(cursor_on_button)
-				m_eButtonState = BUTTON_PUSHED;
-		}
-		else if(mouse_action == WINDOW_LBUTTON_UP)
-		{
-			m_eButtonState = BUTTON_NORMAL;
-			GetParent()->SetCapture(this, false);
-		}
-	}
-
-
-	//запомнить положение мыши, с учетом
-	//возможного перемещения каретки
-	m_iOldMouseX = x - deltaX;
-	m_iOldMouseY = y - deltaY;
-
-	return true;
+	return				true;
 }
 
 void CUIScrollBox::Draw()
 {
 	if(m_bIsHorizontal){
-		if (m_UIStaticItem.GetOriginalRect().width()){
+		if (m_UIStaticItem.GetOriginalRect().width())
+		{
 			int tile		= iFloor(GetWidth()/m_UIStaticItem.GetOriginalRect().width());
 			float rem		= GetWidth()-tile*m_UIStaticItem.GetOriginalRect().width();
 			m_UIStaticItem.SetTile(tile,1,rem,0);
 		}
 	}else{
-		if (m_UIStaticItem.GetOriginalRect().height()){
+		if (m_UIStaticItem.GetOriginalRect().height())
+		{
 			int tile		= iFloor(GetHeight()/m_UIStaticItem.GetOriginalRect().height());
 			float rem		= GetHeight()-tile*m_UIStaticItem.GetOriginalRect().height();
 			m_UIStaticItem.SetTile(1,tile,0,rem);
 		}
 	}
-	 CUIButton::Draw();
+	 inherited::Draw();
 }

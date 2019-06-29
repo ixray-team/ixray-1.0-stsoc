@@ -13,23 +13,27 @@
 
 // refs
 class CObjectAnimator;
+class CScriptParticles;
 
 class CScriptParticlesCustom: public CParticlesObject{
 	CObjectAnimator*			m_animator;
-								~CScriptParticlesCustom();
+	virtual						~CScriptParticlesCustom();
+	CScriptParticles*			m_owner;
 public:
-								CScriptParticlesCustom(LPCSTR caParticlesName);
+								CScriptParticlesCustom(CScriptParticles* owner, LPCSTR caParticlesName);
 	virtual void				shedule_Update		(u32 dt);
 
 	void						LoadPath			(LPCSTR caPathName);
 	void						StartPath			(bool looped);
 	void						StopPath			();
 	void						PausePath			(bool val);
+	virtual void				PSI_internal_delete	();
+	virtual void				PSI_destroy			();
 };
 
 class CScriptParticles{
-	CScriptParticlesCustom*		m_particles;
 public:
+	CScriptParticlesCustom*		m_particles;
 								CScriptParticles	(LPCSTR caParticlesName);
 	virtual						~CScriptParticles	();
 

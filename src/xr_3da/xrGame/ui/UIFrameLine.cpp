@@ -57,23 +57,16 @@ void CUIFrameLine::SetColor(u32 cl)
 void CUIFrameLine::UpdateSize()
 {
 	VERIFY(g_bRendering);
-//	CTexture	*T;
 
-//	float		fScale = HUD().GetScale();
-
-	// Left or top texture
-//	RCache.set_Shader(elements[flFirst].GetShader());
-//	T				= RCache.get_ActiveTexture(0);
-	float f_width		= elements[flFirst].GetOriginalRect().width();//static_cast<int>(T->get_Width());
-	float f_height	= elements[flFirst].GetOriginalRect().height();//static_cast<int>(T->get_Height());
+	float f_width		= elements[flFirst].GetOriginalRect().width();
+	float f_height		= elements[flFirst].GetOriginalRect().height();
 	elements[flFirst].SetPos(iPos.x, iPos.y);
 
 	// Right or bottom texture
-//	RCache.set_Shader(elements[flSecond].GetShader());
-//	T				= RCache.get_ActiveTexture(0);
-	float s_width		= elements[flSecond].GetOriginalRect().width();// static_cast<int>(T->get_Width());
-	float s_height	= elements[flSecond].GetOriginalRect().height();//static_cast<int>(T->get_Height());
-	bHorizontalOrientation ?
+	float s_width		= elements[flSecond].GetOriginalRect().width();
+	float s_height		= elements[flSecond].GetOriginalRect().height();
+	
+	(bHorizontalOrientation) ?
 		elements[flSecond].SetPos(iPos.x + iSize - s_width, iPos.y) :
 		elements[flSecond].SetPos(iPos.x, iPos.y + iSize - s_height);
 
@@ -108,10 +101,8 @@ void CUIFrameLine::UpdateSize()
 	float rem;
 	int tile;
 
-//	RCache.set_Shader(elements[flBack].GetShader());
-//	T				= RCache.get_ActiveTexture(0);
-	float b_width		= elements[flBack].GetOriginalRect().width();//static_cast<int>(T->get_Width());
-	float b_height	= elements[flBack].GetOriginalRect().height();//static_cast<int>(T->get_Height());
+	float b_width		= elements[flBack].GetOriginalRect().width();
+	float b_height		= elements[flBack].GetOriginalRect().height();
 
 	if (bHorizontalOrientation)
 	{

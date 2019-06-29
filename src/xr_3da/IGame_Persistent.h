@@ -61,7 +61,8 @@ public:
 #endif
 	IMainMenu*						m_pMainMenu;	
 
-	CEnvironment					Environment;
+	CEnvironment*					pEnvironment;
+	CEnvironment&					Environment()	{return *pEnvironment;};
 	BOOL							bDedicatedServer	;
 
 	virtual bool					OnRenderPPUI_query	() { return FALSE; };	// should return true if we want to have second function called
@@ -101,15 +102,16 @@ public:
 #else
 	{}
 #endif
+	virtual	void					LoadTitle			(LPCSTR str){}
 };
 
 class IMainMenu
 {
 public:
-	virtual			~IMainMenu						()							{};
-	virtual void	Activate						(bool bActive)				=0; 
-	virtual	bool	IsActive						()							=0; 
-	virtual void	DestroyInternal					()							=0;
+	virtual			~IMainMenu						()													{};
+	virtual void	Activate						(bool bActive)										=0; 
+	virtual	bool	IsActive						()													=0; 
+	virtual void	DestroyInternal					(bool bForce)										=0;
 };
 
 extern ENGINE_API	IGame_Persistent*	g_pGamePersistent;

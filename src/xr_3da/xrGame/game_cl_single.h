@@ -15,6 +15,7 @@ public :
 	void		OnDifficultyChanged		();
 };
 
+
 // game difficulty
 enum ESingleGameDifficulty{
 	egdNovice			= 0,

@@ -222,7 +222,7 @@ void CDrawUtilities::OnDeviceCreate()
     vs_TL.create	(FVF::F_TL,RCache.Vertex.Buffer(),RCache.Index.Buffer());
     vs_LIT.create	(FVF::F_LIT,RCache.Vertex.Buffer(),RCache.Index.Buffer());
 
-	m_Font						= xr_new<CGameFont>("hud_font_small");
+	m_Font						= xr_new<CGameFont>("stat_font");
 }
 
 void CDrawUtilities::OnDeviceDestroy()
@@ -561,7 +561,7 @@ IC float 				_y2real			(float y)
 
 void CDrawUtilities::dbgDrawPlacement(const Fvector& p, int sz, u32 clr, LPCSTR caption, u32 clr_font)
 {
-	VERIFY( Device.bReady );
+	VERIFY( Device.b_is_Ready );
     Fvector c;
 	float w	= p.x*Device.mFullTransform._14 + p.y*Device.mFullTransform._24 + p.z*Device.mFullTransform._34 + Device.mFullTransform._44;
     if (w<0) return; // culling
@@ -1033,7 +1033,7 @@ void CDrawUtilities::DrawAxis(const Fmatrix& T)
 
 void CDrawUtilities::DrawObjectAxis(const Fmatrix& T, float sz, BOOL sel)
 {
-	VERIFY( Device.bReady );
+	VERIFY( Device.b_is_Ready );
 	_VertexStream*	Stream	= &RCache.Vertex;
     Fvector c,r,n,d;
 	float w	= T.c.x*Device.mFullTransform._14 + T.c.y*Device.mFullTransform._24 + T.c.z*Device.mFullTransform._34 + Device.mFullTransform._44;
@@ -1077,7 +1077,7 @@ void CDrawUtilities::DrawObjectAxis(const Fmatrix& T, float sz, BOOL sel)
 
 void CDrawUtilities::DrawGrid()
 {
-	VERIFY( Device.bReady );
+	VERIFY( Device.b_is_Ready );
 	_VertexStream*	Stream	= &RCache.Vertex;
     u32 vBase;
 	// fill VB
@@ -1093,7 +1093,7 @@ void CDrawUtilities::DrawGrid()
 }
 
 void CDrawUtilities::DrawSelectionRect(const Ivector2& m_SelStart, const Ivector2& m_SelEnd){
-	VERIFY( Device.bReady );
+	VERIFY( Device.b_is_Ready );
 	// fill VB
 	_VertexStream*	Stream	= &RCache.Vertex;
     u32 vBase;

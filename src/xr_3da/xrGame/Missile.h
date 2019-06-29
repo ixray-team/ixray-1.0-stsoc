@@ -46,6 +46,7 @@ public:
 	virtual void 			Hide();
 	virtual bool 			IsHidden					() const {return GetState() == MS_HIDDEN;}
 	virtual bool 			IsHiding					() const {return GetState() == MS_HIDING;}
+	virtual bool 			IsShowing					() const {return GetState() == MS_SHOWING;}
 
 	virtual void 			Throw();
 	virtual void 			Destroy();

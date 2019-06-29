@@ -100,6 +100,7 @@ void CRenderTarget::accum_spot	(light* L)
 	// Common constants
 	Fvector		L_dir,L_clr,L_pos;	float L_spec;
 	L_clr.set					(L->color.r,L->color.g,L->color.b);
+	L_clr.mul					(L->get_LOD());
 	L_spec						= u_diffuse2s	(L_clr);
 	Device.mView.transform_tiny	(L_pos,L->position);
 	Device.mView.transform_dir	(L_dir,L->direction);
@@ -131,9 +132,24 @@ void CRenderTarget::accum_spot	(light* L)
 		RCache.set_ca				("m_lmap",		0,	m_Lmap._11, m_Lmap._21, m_Lmap._31, m_Lmap._41	);
 		RCache.set_ca				("m_lmap",		1,	m_Lmap._12, m_Lmap._22, m_Lmap._32, m_Lmap._42	);
 
+		// Fetch4 : enable
+		if (RImplementation.o.HW_smap_FETCH4)	{
+			//. we hacked the shader to force smap on S0
+#			define FOURCC_GET4  MAKEFOURCC('G','E','T','4') 
+			HW.pDevice->SetSamplerState	( 0, D3DSAMP_MIPMAPLODBIAS, FOURCC_GET4 );
+		}
+
 		RCache.set_Stencil			(TRUE,D3DCMP_LESSEQUAL,dwLightMarkerID,0xff,0x00);
 		draw_volume					(L);
+
+		// Fetch4 : disable
+		if (RImplementation.o.HW_smap_FETCH4)	{
+			//. we hacked the shader to force smap on S0
+#			define FOURCC_GET1  MAKEFOURCC('G','E','T','1') 
+			HW.pDevice->SetSamplerState	( 0, D3DSAMP_MIPMAPLODBIAS, FOURCC_GET1 );
+		}
 	}
+
 	// blend-copy
 	if (!RImplementation.o.fp16_blend)	{
 		u_setrt						(rt_Accumulator,NULL,NULL,HW.pBaseZB);

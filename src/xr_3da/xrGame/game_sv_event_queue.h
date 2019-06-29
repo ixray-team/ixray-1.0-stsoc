@@ -1,6 +1,6 @@
 #pragma once
 
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 
 struct GameEvent
 {

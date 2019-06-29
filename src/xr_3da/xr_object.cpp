@@ -35,8 +35,10 @@ void CObject::cNameVisual_set	(shared_str N)
 	{
 		IRender_Visual			*old_v = renderable.visual;
 		
+#ifdef DEBUG
 		if(NameVisual.size())
 			Msg("---change NameVisual from[%s] to [%s]",NameVisual.c_str(), N.c_str());
+#endif // DEBUG
 
 		NameVisual				= N;
 		renderable.visual		= Render->model_Create	(*N);
@@ -159,8 +161,10 @@ BOOL CObject::net_Spawn			(CSE_Abstract* data)
 			collidable.model	= xr_new<CCF_Skeleton>	(this);
 		}
 	}
-	spatial_register			();
-	shedule_register			();
+	R_ASSERT(spatial.space);	spatial_register();
+
+	if (register_schedule())
+		shedule_register		();
 
 	// reinitialize flags
 //.	Props.bActiveCounter		= 0;	
@@ -176,9 +180,11 @@ void CObject::net_Destroy		()
 {
 	VERIFY						(getDestroy());
 	xr_delete					(collidable.model);
-	shedule_unregister			();
+	if (register_schedule())
+		shedule_unregister		();
+
 	spatial_unregister			();
-	setDestroy					(true);
+//	setDestroy					(true);
 	// remove visual
 	cNameVisual_set				( 0 );
 }
@@ -343,4 +349,16 @@ void CObject::MakeMeCrow			()
 		if (!processing_enabled())		return	;
 		Props.crow						= true	;
 		MakeMeCrow_internal				()		;
+}
+
+void CObject::setDestroy			(BOOL _destroy)
+{
+	if (_destroy == (BOOL)Props.bDestroy)
+		return;
+
+	Props.bDestroy	= _destroy?1:0;
+	if (_destroy)
+		g_pGameLevel->Objects.register_object_to_destroy	(this);
+	else
+		VERIFY		(!g_pGameLevel->Objects.registered_object_to_destroy(this));
 }

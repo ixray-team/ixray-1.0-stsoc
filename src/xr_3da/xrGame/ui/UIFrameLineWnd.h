@@ -1,14 +1,3 @@
-//=============================================================================
-//  Filename:   UIFrameLineWnd.h
-//	Created by Roman E. Marchenko, vortex@gsc-game.kiev.ua
-//	Copyright 2004. GSC Game World
-//	---------------------------------------------------------------------------
-//  Обертка над UIFrameLine классом
-//=============================================================================
-
-#ifndef UI_FRAME_LINE_WND_H_
-#define UI_FRAME_LINE_WND_H_
-
 #pragma once
 
 #include "UIFrameLine.h"
@@ -39,5 +28,3 @@ protected:
 	bool			m_bTextureAvailable;
 	CUIFrameLine	UIFrameLine;	
 };
-
-#endif	// UI_FRAME_LINE_WND_H_

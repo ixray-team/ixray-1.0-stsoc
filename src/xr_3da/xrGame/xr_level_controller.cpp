@@ -5,116 +5,101 @@
 #include "../xr_ioc_cmd.h"
 #include "xr_level_controller.h"
 #include "string_table.h"
- 
-//************************************************ Input
-int key_binding			[ 2048	];
 
-_keybind  keybind[]		= {
-	{ "left",			kLEFT			},	
-	{ "right",			kRIGHT			},
-	{ "up",				kUP				},	
-	{ "down",			kDOWN			},
-	{ "jump",			kJUMP			},	
-	{ "crouch",			kCROUCH			},
-	{ "accel",			kACCEL			},
-	{ "sprint_toggle",  kSPRINT_TOGGLE  },
+_binding	g_key_bindings		[bindings_count]; 
+_key_group	g_current_keygroup	= _sp;
 
-	{ "forward",		kFWD			},	
-	{ "back",			kBACK			},
-	{ "lstrafe",		kL_STRAFE		},	
-	{ "rstrafe",		kR_STRAFE		},
+_action  actions[]		= {
+	{ "left",				kLEFT					,_both},	
+	{ "right",				kRIGHT					,_both},	
+	{ "up",					kUP						,_both},	
+	{ "down",				kDOWN					,_both},	
+	{ "jump",				kJUMP					,_both},	
+	{ "crouch",				kCROUCH					,_both},	
+	{ "crouch_toggle",		kCROUCH_TOGGLE			,_both},	
+	{ "accel",				kACCEL					,_both},	
+	{ "sprint_toggle",  	kSPRINT_TOGGLE  		,_both},	
+																
+	{ "forward",			kFWD					,_both},	
+	{ "back",				kBACK					,_both},	
+	{ "lstrafe",			kL_STRAFE				,_both},	
+	{ "rstrafe",			kR_STRAFE				,_both},	
+																
+	{ "llookout",			kL_LOOKOUT				,_both},	
+	{ "rlookout",			kR_LOOKOUT				,_both},	
+																
+	{ "turn_engine",		kENGINE					,_sp},		
+																
+	{ "cam_1",				kCAM_1					,_both},	
+	{ "cam_2",				kCAM_2					,_both},	
+	{ "cam_3",				kCAM_3					,_both},	
+	{ "cam_4",				kCAM_4					,_both},	
+	{ "cam_zoom_in",		kCAM_ZOOM_IN			,_both},	
+	{ "cam_zoom_out",		kCAM_ZOOM_OUT			,_both},	
+															
+	{ "torch",				kTORCH					,_both},	
+	{ "night_vision",		kNIGHT_VISION			,_both},	
+	{ "wpn_1",				kWPN_1					,_both},	
+	{ "wpn_2",				kWPN_2					,_both},	
+	{ "wpn_3",				kWPN_3					,_both},	
+	{ "wpn_4",				kWPN_4					,_both},	
+	{ "wpn_5",				kWPN_5					,_both},	
+	{ "wpn_6",				kWPN_6					,_both},	
+	{ "artefact",			kARTEFACT				,_mp},		
+	{ "wpn_next",			kWPN_NEXT				,_both},	
+	{ "wpn_fire",			kWPN_FIRE				,_both},	
+	{ "wpn_zoom",			kWPN_ZOOM				,_both},	
+	{ "wpn_zoom_inc",		kWPN_ZOOM_INC			,_both},	
+	{ "wpn_zoom_dec",		kWPN_ZOOM_DEC			,_both},	
+	{ "wpn_reload",			kWPN_RELOAD				,_both},	
+	{ "wpn_func",			kWPN_FUNC				,_both},	
+	{ "wpn_firemode_prev",	kWPN_FIREMODE_PREV		,_both},	
+	{ "wpn_firemode_next",	kWPN_FIREMODE_NEXT		,_both},	
+															
+	{ "pause",				kPAUSE					,_both},	
+	{ "drop",				kDROP					,_both},	
+	{ "use",				kUSE					,_both},	
+	{ "scores",				kSCORES					,_both},	
+	{ "chat",				kCHAT					,_mp},		
+	{ "chat_team",			kCHAT_TEAM				,_mp},		
+	{ "screenshot",			kSCREENSHOT				,_both},	
+	{ "quit",				kQUIT					,_both},	
+	{ "console",			kCONSOLE				,_both},	
+	{ "inventory",			kINVENTORY				,_both},	
+	{ "buy_menu",			kBUY					,_mp},		
+	{ "skin_menu",			kSKIN					,_mp},		
+	{ "team_menu",			kTEAM					,_mp},		
+	{ "active_jobs",		kACTIVE_JOBS			,_sp},		
+	{ "map",				kMAP					,_both},	
+	{ "contacts",			kCONTACTS				,_sp},		
+	{ "ext_1",				kEXT_1					,_both},	
+																
+	{ "vote_begin",			kVOTE_BEGIN				,_mp},		
+	{ "vote",				kVOTE					,_mp},		
+	{ "vote_yes",			kVOTEYES				,_mp},		
+	{ "vote_no",			kVOTENO					,_mp},		
+																
+	{ "next_slot",			kNEXT_SLOT				,_both},	
+	{ "prev_slot",			kPREV_SLOT				,_both},	
+															
+	{ "speech_menu_0",		kSPEECH_MENU_0			,_mp},		
+	{ "speech_menu_1",		kSPEECH_MENU_1			,_mp},		
+	{ "speech_menu_2",		kSPEECH_MENU_2			,_mp},		
+	{ "speech_menu_3",		kSPEECH_MENU_3			,_mp},		
+	{ "speech_menu_4",		kSPEECH_MENU_4			,_mp},		
+	{ "speech_menu_5",		kSPEECH_MENU_5			,_mp},		
+	{ "speech_menu_6",		kSPEECH_MENU_6			,_mp},		
+	{ "speech_menu_7",		kSPEECH_MENU_7			,_mp},		
+	{ "speech_menu_8",		kSPEECH_MENU_8			,_mp},		
+	{ "speech_menu_9",		kSPEECH_MENU_9			,_mp},		
+																
+	{ "use_bandage",		kUSE_BANDAGE			,_sp},		
+	{ "use_medkit",			kUSE_MEDKIT				,_sp},		
+																
+	{ NULL, 				kLASTACTION				,_both}		
+};															
 
-	{ "llookout",		kL_LOOKOUT		},	
-	{ "rlookout",		kR_LOOKOUT		},
-
-	{ "turn_engine",	kENGINE			},
-
-	{ "cam_1",			kCAM_1			},	
-	{ "cam_2",			kCAM_2			},
-	{ "cam_3",			kCAM_3			},	
-	{ "cam_4",			kCAM_4			},
-	{ "cam_zoom_in",	kCAM_ZOOM_IN	},	
-	{ "cam_zoom_out",	kCAM_ZOOM_OUT	},
-
-	{ "torch",			kTORCH			},
-	{ "night_vision",	kNIGHT_VISION	},
-	{ "wpn_1",			kWPN_1			},
-	{ "wpn_2",			kWPN_2			},
-	{ "wpn_3",			kWPN_3			},
-	{ "wpn_4",			kWPN_4			},
-	{ "wpn_5",			kWPN_5			},
-	{ "wpn_6",			kWPN_6			},
-	{ "artefact",		kARTEFACT		},
-	{ "wpn_next",		kWPN_NEXT		},
-//.	{ "wpn_prev",		kWPN_PREV		},
-	{ "wpn_fire",		kWPN_FIRE		},
-	{ "wpn_zoom",		kWPN_ZOOM		},
-	{ "wpn_reload",		kWPN_RELOAD		},
-	{ "wpn_func",		kWPN_FUNC		},
-	{ "wpn_firemode_prev",	kWPN_FIREMODE_PREV },
-	{ "wpn_firemode_next",	kWPN_FIREMODE_NEXT },
-	
-	{ "pause",			kPAUSE			},	
-	{ "drop",			kDROP			},	
-	{ "use",			kUSE			},	
-	{ "scores",			kSCORES			},	
-	{ "chat",			kCHAT			},	
-	{ "chat_team",		kCHAT_TEAM		},	
-	{ "screenshot",		kSCREENSHOT		},	
-	{ "quit",			kQUIT			},
-	{ "console",		kCONSOLE		},
-	{ "inventory",		kINVENTORY		},
-	{ "buy_menu",		kBUY			},
-	{ "skin_menu",		kSKIN			},
-	{ "team_menu",		kTEAM			},
-	{ "pda",			kPDA			},
-	{ "active_jobs",	kACTIVE_JOBS	},
-	{ "map",			kMAP			},
-	{ "contacts",		kCONTACTS		},
-
-	{ "ext_1",			kEXT_1			},
-	{ "ext_2",			kEXT_2			},
-	{ "ext_3",			kEXT_3			},
-	{ "ext_4",			kEXT_4			},
-	{ "ext_5",			kEXT_5			},
-	{ "ext_6",			kEXT_6			},
-	{ "ext_7",			kEXT_7			},
-	{ "ext_8",			kEXT_8			},
-	{ "ext_9",			kEXT_9			},
-	{ "ext_10",			kEXT_10			},
-	{ "ext_11",			kEXT_11			},
-	{ "ext_12",			kEXT_12			},
-	{ "ext_13",			kEXT_13			},
-	{ "ext_14",			kEXT_14			},
-	{ "ext_15",			kEXT_15			},
-	{ "vote_begin",		kVOTE_BEGIN		},
-	{ "vote",			kVOTE			},
-	{ "vote_yes",		kVOTEYES		},
-	{ "vote_no",		kVOTENO			},
-
-	{ "next_slot",		kNEXT_SLOT		},
-	{ "prev_slot",		kPREV_SLOT		},
-
-	{ "speech_menu_0",	kSPEECH_MENU_0	},
-	{ "speech_menu_1",	kSPEECH_MENU_1	},
-	{ "speech_menu_2",	kSPEECH_MENU_2	},
-	{ "speech_menu_3",	kSPEECH_MENU_3	},
-	{ "speech_menu_4",	kSPEECH_MENU_4	},
-	{ "speech_menu_5",	kSPEECH_MENU_5	},
-	{ "speech_menu_6",	kSPEECH_MENU_6	},
-	{ "speech_menu_7",	kSPEECH_MENU_7	},
-	{ "speech_menu_8",	kSPEECH_MENU_8	},
-	{ "speech_menu_9",	kSPEECH_MENU_9	},
-
-//.	{ "insult_msg",		kINSULT_MSG		},
-//.	{ "insult_jesture",	kINSULT_JESTURE	},
-	{ "use_bandage",	kUSE_BANDAGE	},
-	{ "use_medkit",		kUSE_MEDKIT		},
-
-	{ NULL, 			0				}
-};
-
-_keybind keynames[] = {
+_keyboard keyboards[] = {
 	{ "kESCAPE",	 	DIK_ESCAPE		},	{ "k1",				DIK_1			},
 	{ "k2",				DIK_2			},	{ "k3",				DIK_3			},
 	{ "k4",				DIK_4			},	{ "k5",				DIK_5			},
@@ -179,65 +164,265 @@ _keybind keynames[] = {
 	{ "mouse2",			MOUSE_2			},	{ "mouse3",			MOUSE_3			},
 	{ NULL, 			0				}
 };
-ConsoleBindCmds	bindConsoleCmds;
 
-int keyname_to_dik(LPCSTR keyname)
+void initialize_bindings()
+{
+	for(int idx=0; idx<bindings_count; ++idx)
+		g_key_bindings[idx].m_action = &actions[idx];
+	
+}
+
+void remap_keys()
 {
 	int idx				= 0;
-	while( keynames[idx].name )
+	string128			buff;
+	while(keyboards[idx].key_name)
 	{
-		if(!stricmp(keyname, keynames[idx].name) )
-			return keynames[idx].DIK;
+		buff[0]				= 0;
+		_keyboard&	kb		= keyboards[idx];
+		bool res			= pInput->get_dik_name(kb.dik, buff, 128 );
+		if(res)
+			kb.key_local_name	= buff;
+		else
+			kb.key_local_name	= kb.key_name;
+
+//.		Msg("[%s]-[%s]",kb.key_name, kb.key_local_name.c_str());
 		++idx;
 	}
-	R_ASSERT2("cant find corresponding DIK for keyname", keyname);
+}
+
+LPCSTR id_to_action_name(int _id)
+{
+	int idx				= 0;
+	while( actions[idx].action_name )
+	{
+		if(_id==actions[idx].id )
+			return actions[idx].action_name;
+		++idx;
+	}
+	Msg				("! cant find corresponding [action_name] for id");
+	return			NULL;
+}
+
+EGameActions action_name_to_id(LPCSTR _name)
+{
+	_action* action = action_name_to_ptr(_name);
+	if(action)
+		return action->id;
+	else
+		return	kNOTBINDED;
+}
+
+_action* action_name_to_ptr(LPCSTR _name)
+{
+	int idx				= 0;
+	while( actions[idx].action_name )
+	{
+		if( !stricmp(_name,actions[idx].action_name) )
+			return &actions[idx];
+		++idx;
+	}
+	Msg				("! cant find corresponding [id] for action_name", _name);
+	return			NULL;
+}
+
+LPCSTR	dik_to_keyname			(int _dik)
+{
+	_keyboard* kb = dik_to_ptr(_dik, true);
+	if(kb)
+		return kb->key_name;
+	else
+		return NULL;
+}
+
+_keyboard* dik_to_ptr(int _dik, bool bSafe)
+{
+	int idx =0;
+	while(keyboards[idx].key_name)
+	{
+		_keyboard&	kb		= keyboards[idx];
+		if(kb.dik==_dik)
+			return &keyboards[idx];
+		++idx;
+	}	
+	if (!bSafe)
+		Msg			("! cant find corresponding [_keyboard] for dik");
+	return			NULL;
+}
+
+int	keyname_to_dik (LPCSTR _name)
+{
+	_keyboard* _kb = keyname_to_ptr(_name);
+	return _kb->dik;
+}
+
+_keyboard*	keyname_to_ptr(LPCSTR _name)
+{
+	int idx =0;
+	while(keyboards[idx].key_name)
+	{
+		_keyboard&	kb		= keyboards[idx];
+		if( !stricmp(_name, kb.key_name) )
+			return &keyboards[idx];
+		++idx;
+	}	
+
+	Msg				("! cant find corresponding [_keyboard*] for keyname %s", _name);
+	return			NULL;
+}
+
+bool is_group_not_conflicted(_key_group g1, _key_group g2)
+{
+	return ((g1==_sp && g2==_mp) || (g1==_mp && g2==_sp));
+}
+
+bool is_group_matching(_key_group g1, _key_group g2)
+{
+	return ( (g1==g2) || (g1==_both) || (g2==_both) );
+}
+
+bool is_binded(EGameActions _action_id, int _dik)
+{
+	_binding* pbinding = &g_key_bindings[_action_id];
+	if(pbinding->m_keyboard[0] && pbinding->m_keyboard[0]->dik==_dik)
+		return true;
+
+	if(pbinding->m_keyboard[1] && pbinding->m_keyboard[1]->dik==_dik)
+		return true;
+	
+	return false;
+}
+
+int get_action_dik(EGameActions _action_id)
+{
+	_binding* pbinding = &g_key_bindings[_action_id];
+
+	if(pbinding->m_keyboard[0] )
+		return pbinding->m_keyboard[0]->dik;
+
+	if(pbinding->m_keyboard[1] )
+		return pbinding->m_keyboard[1]->dik;
+
 	return 0;
 }
-//-----------------------------------------------------------------------
-// Bind/Unbind/List
-//-----------------------------------------------------------------------
+
+EGameActions get_binded_action(int _dik)
+{
+	for(int idx=0; idx<bindings_count; ++idx)
+	{
+		_binding*	binding = &g_key_bindings[idx];
+
+		bool b_is_group_matching	= is_group_matching(binding->m_action->key_group,g_current_keygroup);
+		
+		if(!b_is_group_matching)	continue;
+
+		if(binding->m_keyboard[0] && binding->m_keyboard[0]->dik==_dik && b_is_group_matching)
+			return binding->m_action->id;
+		
+		if(binding->m_keyboard[1] && binding->m_keyboard[1]->dik==_dik && b_is_group_matching)
+			return binding->m_action->id;
+	}
+	return kNOTBINDED;
+}
+
+void GetActionAllBinding		(LPCSTR _action, char* dst_buff)
+{
+	int			action_id	= action_name_to_id(_action);
+	_binding*	pbinding	= &g_key_bindings[action_id];
+
+	string16	prim;
+	string16	sec;
+	prim[0]		= 0;
+	sec[0]		= 0;
+
+	if(pbinding->m_keyboard[0])
+	{
+		strcpy(prim, pbinding->m_keyboard[0]->key_local_name.c_str());
+	}
+	if(pbinding->m_keyboard[1])
+	{
+		strcpy(sec, pbinding->m_keyboard[1]->key_local_name.c_str());
+	}
+	
+	sprintf		(dst_buff,"%s%s%s", prim[0]?prim:"", (sec[0]&&prim[0])?" , ":"", sec[0]?sec:"");
+					
+}
+
+ConsoleBindCmds	bindConsoleCmds;
+BOOL bRemapped = FALSE;
+
 class CCC_Bind : public IConsole_Command
 {
+	int m_work_idx;
 public:
-	CCC_Bind(LPCSTR N) : IConsole_Command(N) {};
-	virtual void Execute(LPCSTR args) {
-		BOOL	binded=false;
-		char	action[256],key[256];
+	CCC_Bind(LPCSTR N, int idx) : IConsole_Command(N),m_work_idx(idx) {};
+	virtual void Execute(LPCSTR args) 
+	{
+		string256							action;
+		string256							key;
+		*action								= 0;
+		*key								= 0;
 
-		sscanf(args,"%s %s",action,key);
-		for (int i=0; keybind[i].name; ++i) {
-			if (_stricmp(keybind[i].name,action)==0) {
-				// i = action num
-				for (int j=0; keynames[j].name; ++j) {
-					if (_stricmp(keynames[j].name,key)==0) {
-						// j = key
-						binded=true;
-						key_binding[keynames[j].DIK]=keybind[i].DIK;
-					}
-				}
+		sscanf								(args,"%s %s", action, key);
+		if (!*action)
+			return;
+
+		if (!*key)
+			return;
+
+		if(!bRemapped) {
+			remap_keys	();
+			bRemapped	= TRUE;
+		}
+
+		if (!action_name_to_ptr(action))
+			return;
+
+		int action_id						= action_name_to_id			(action);
+		if (action_id==kNOTBINDED)
+			return;
+
+		_keyboard*	pkeyboard				= keyname_to_ptr(key);
+		if (!pkeyboard)
+			return;
+
+		_binding*	curr_pbinding			= &g_key_bindings[action_id];
+
+		curr_pbinding->m_keyboard[m_work_idx]= pkeyboard;
+			
+		{
+			for(int idx=0; idx<bindings_count; ++idx)
+			{
+				_binding*	binding			= &g_key_bindings[idx];
+				if(binding==curr_pbinding)	continue;
+
+				bool b_conflict = !is_group_not_conflicted(binding->m_action->key_group, curr_pbinding->m_action->key_group);
+
+				if(binding->m_keyboard[0]==pkeyboard && b_conflict)
+					binding->m_keyboard[0]=NULL;
+				
+				if(binding->m_keyboard[1]==pkeyboard && b_conflict)
+					binding->m_keyboard[1]=NULL;
 			}
 		}
-		if (!binded) {
-			Log("! Can't bind action: ", action);
-			Log("! Syntax error. See 'list_actions'.");
-		}
-		
+
+
 		CStringTable::ReparseKeyBindings();
 	}
 	virtual void Save(IWriter* F) 
 	{
-		F->w_printf("unbindall\r\n");
-		for (int i=0; i<2048; ++i) {
-			if (key_binding[i]) {
-				for (int j=0; keybind[j].name; ++j) {
-					if (keybind[j].DIK==key_binding[i]) {
-						for (int k=0; keynames[k].name; ++k) {
-							if (keynames[k].DIK==i) {
-								F->w_printf("bind %s %s\r\n", keybind[j].name, keynames[k].name);
-							}
-						}
-					}
-				}
+		if(m_work_idx==0)
+			F->w_printf		("unbindall\r\n");
+
+		for(int idx=0; idx<bindings_count;++idx)
+		{
+			_binding* pbinding = &g_key_bindings[idx];
+			if( pbinding->m_keyboard[m_work_idx] )
+			{
+				F->w_printf("%s %s %s\r\n", 
+							cName, 
+							pbinding->m_action->action_name,
+							pbinding->m_keyboard[m_work_idx]->key_name);
 			}
 		}
 	}
@@ -245,18 +430,16 @@ public:
 
 class CCC_UnBind : public IConsole_Command
 {
+	int m_work_idx;
 public:
-	CCC_UnBind(LPCSTR N) : IConsole_Command(N) 
+	CCC_UnBind(LPCSTR N, int idx) : IConsole_Command(N),m_work_idx(idx) 
 	{ bEmptyArgsHandled=TRUE; };
-	virtual void Execute(LPCSTR args) {
-		for (int i=0; keybind[i].name; ++i) {
-			if (_stricmp(keybind[i].name,args)==0) {
-				// i = action num
-				for (int j=0; j<2048; ++j) {
-					if (key_binding[j]==keybind[i].DIK) key_binding[j]=0;
-				}
-			}
-		}
+	virtual void Execute(LPCSTR args)
+	{
+		int action_id						= action_name_to_id			(args);
+		_binding*	pbinding				= &g_key_bindings[action_id];
+		pbinding->m_keyboard[m_work_idx]	= NULL;
+
 		CStringTable::ReparseKeyBindings();
 	}
 };
@@ -269,8 +452,10 @@ public:
 
 	virtual void Execute(LPCSTR args) {
 		Log("- --- Action list start ---");
-		for (int i=0; keybind[i].name; ++i) {
-			Log("-",keybind[i].name);
+		for(int idx=0; idx<bindings_count;++idx)
+		{
+			_binding* pbinding = &g_key_bindings[idx];
+			Log("-", pbinding->m_action->action_name);
 		}
 		Log("- --- Action list end   ---");
 	}
@@ -282,41 +467,26 @@ public:
 	CCC_UnBindAll(LPCSTR N) : IConsole_Command(N)
 	{ bEmptyArgsHandled=TRUE; };
 
-	virtual void Execute(LPCSTR args) {
-		ZeroMemory(key_binding,sizeof(key_binding));
-		bindConsoleCmds.clear();
+	virtual void Execute(LPCSTR args) 
+	{
+		for(int idx=0; idx<bindings_count;++idx)
+		{
+			_binding* pbinding		= &g_key_bindings[idx];
+			pbinding->m_keyboard[0]	= NULL;
+			pbinding->m_keyboard[1]	= NULL;
+		}
 
-		Console->Execute("cfg_load default_controls.ltx");
+		bindConsoleCmds.clear();
+//.		Console->Execute("cfg_load default_controls.ltx");
+
+		string_path				_cfg;
+		string_path				cmd;
+		FS.update_path			(_cfg,"$game_config$","default_controls.ltx");
+		strconcat				(cmd,"cfg_load", " ", _cfg);
+		Console->Execute		(cmd);
 	}
 };
 
-int NameIdx(int dik, bool b=true)
-{
-	int res = -1;
-	int i=0;
-	if(b){
-		for(i=0;i<2048; ++i){
-			if(	key_binding[i]==dik){
-				res = i;
-				break;
-			}
-		}
-	}else{
-		i=dik;
-		res = 0;
-	}
-
-	if(res!=-1){//found
-		res = -1;
-		for(int j=0;keynames[j].name;++j)
-			if(keynames[j].DIK == i){
-				res = j;
-				break;
-			}
-	}
-	return res;
-
-}
 class CCC_BindList : public IConsole_Command
 {
 public:
@@ -324,100 +494,36 @@ public:
 	{ bEmptyArgsHandled=TRUE; };
 
 	virtual void Execute(LPCSTR args) {
-		Log("- --- Bind list start ---");
-		string512	buff;			
-		string64	key_name;		
+		Log				("- --- Bind list start ---");
+		string512		buff;			
 		
-		for (int i=0; keybind[i].name; ++i) {
-			ZeroMemory(buff,sizeof(buff));
-			ZeroMemory(key_name,sizeof(key_name));
-			strcat(buff,keybind[i].name);
-			int idx = NameIdx(keybind[i].DIK);
-			if(idx!=-1){
-				strcat(key_name,keynames[idx].name);
-				strconcat(buff,buff," binded to ",key_name);
-			}else
-				strconcat(buff,buff," binded to nil");
-
-			Log(buff);
+		for(int idx=0; idx<bindings_count;++idx)
+		{
+			_binding* pbinding		= &g_key_bindings[idx];
+			sprintf		(buff,"[%s] primary is[%s] secondary is[%s]",
+						pbinding->m_action->action_name,
+						(pbinding->m_keyboard[0])?pbinding->m_keyboard[0]->key_local_name.c_str():"NULL",
+						(pbinding->m_keyboard[1])?pbinding->m_keyboard[1]->key_local_name.c_str():"NULL");
+			Log		(buff);
 		}
-		Log("- --- Bind list end   ---");
+		Log				("- --- Bind list end   ---");
 	}
 };
-
-void GetActionBinding(LPCSTR action, char* dst_buff)
-{
-	for (int i=0; i<2048; ++i) {
-		if (key_binding[i]) {
-			for (int j=0; keybind[j].name ; ++j) {
-				if ( (keybind[j].DIK==key_binding[i])&&(_stricmp(keybind[j].name,action)==0) ) {
-					for (int k=0; keynames[k].name; ++k) {
-						if (keynames[k].DIK==i) {
-							if( xr_strlen(dst_buff) )
-							strcat(dst_buff, " or ");
-
-							strcat(dst_buff, (keynames[k].name[0]=='k')? keynames[k].name+1 : keynames[k].name);
-							//F->w_printf("bind %s %s\r\n", keybind[j].name, keynames[k].name);
-						}
-					}
-				}
-			}
-		}
-	}
-
-}
-
-void GetActionBindingEx(LPCSTR action, char* dst_buff)
-{
-	for (int i=0; i<2048; ++i) {
-		if (key_binding[i]) {
-			for (int j=0; keybind[j].name ; ++j) {
-				if ( (keybind[j].DIK==key_binding[i])&&(_stricmp(keybind[j].name,action)==0) ) {
-					for (int k=0; keynames[k].name; ++k) {
-						if (keynames[k].DIK==i) {
-							if( xr_strlen(dst_buff) )
-								strcat(dst_buff, " or ");
-
-							strcat(dst_buff, keynames[k].name);
-							return;							
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-bool IsActionExist(LPCSTR action){
-    for (int i=0; true; i++)
-	{
-        if (keybind[i].name)
-		{
-			if (0 == xr_strcmp(action,keybind[i].name))
-				return true;
-		}
-		else
-			return false;
-	}
-}
 
 class CCC_BindConsoleCmd : public IConsole_Command
 {
 public:
 	CCC_BindConsoleCmd(LPCSTR N) : IConsole_Command(N) {};
-	virtual void Execute(LPCSTR args) {
-		string512 console_command;
-		string256 key;
-		int cnt = _GetItemCount(args,' ');
-		_GetItems(args,0,cnt-1,console_command,' ');
-		_GetItem(args,cnt-1,key,' ');
-		for (int j=0; keynames[j].name; ++j) {
-			if (_stricmp(keynames[j].name,key)==0) {
-				// j = key
-				bindConsoleCmds.bind(keynames[j].DIK, console_command);
-				return;
-			}
-		}
+	virtual void Execute(LPCSTR args) 
+	{
+		string512				console_command;
+		string256				key;
+		int cnt					= _GetItemCount(args,' ');
+		_GetItems				(args,0,cnt-1,console_command,' ');
+		_GetItem				(args,cnt-1,key,' ');
+
+		int dik					= keyname_to_dik(key);
+		bindConsoleCmds.bind	(dik, console_command);
 	}
 
 	virtual void Save(IWriter* F) 
@@ -434,12 +540,10 @@ public:
 	CCC_UnBindConsoleCmd(LPCSTR N) : IConsole_Command(N)
 	{ bEmptyArgsHandled=FALSE; };
 
-	virtual void Execute(LPCSTR args) {
-	for (int i=0; keybind[i].name; ++i) {
-		if (_stricmp(keybind[i].name,args)==0) {
-				bindConsoleCmds.unbind(keybind[i].DIK);
-			}
-		}
+	virtual void Execute(LPCSTR args) 
+	{
+		int _dik = keyname_to_dik	(args);
+		bindConsoleCmds.unbind		(_dik);
 	}
 };
 
@@ -475,26 +579,26 @@ bool ConsoleBindCmds::execute(int dik)
 void ConsoleBindCmds::save(IWriter* F)
 {
 	xr_map<int,_conCmd>::iterator it = m_bindConsoleCmds.begin();
-	for(;it!=m_bindConsoleCmds.end();++it){
-		string64 keyname;
-		int idx = NameIdx(it->first,false);
-		if(idx!=-1){
-			ZeroMemory(keyname,sizeof(keyname));
-			strcat(keyname,keynames[idx].name);
-			F->w_printf("bind_console %s %s\n", *it->second.cmd, keyname);
-		}
+	
+	for(;it!=m_bindConsoleCmds.end();++it)
+	{
+		LPCSTR keyname		= dik_to_keyname(it->first);
+		F->w_printf("bind_console %s %s\n", *it->second.cmd, keyname);
 	}
 }
 
 
 void CCC_RegisterInput()
 {
-	CMD1(CCC_Bind,		"bind"					);
-	CMD1(CCC_UnBind,	"unbind"				);
-	CMD1(CCC_UnBindAll,	"unbindall"				);
-	CMD1(CCC_ListActions,"list_actions"			);
+	initialize_bindings									();
+	CMD2(CCC_Bind,				"bind",					0);
+	CMD2(CCC_Bind,				"bind_sec",				1);
+	CMD2(CCC_UnBind,			"unbind",				0);
+	CMD2(CCC_UnBind,			"unbind_sec",			1);
+	CMD1(CCC_UnBindAll,			"unbindall"				);
+	CMD1(CCC_ListActions,		"list_actions"			);
 
-	CMD1(CCC_BindList,	"bind_list"				);
-	CMD1(CCC_BindConsoleCmd, "bind_console"			);
-	CMD1(CCC_UnBindConsoleCmd, "unbind_console"		);
+	CMD1(CCC_BindList,			"bind_list"				);
+	CMD1(CCC_BindConsoleCmd,	"bind_console"			);
+	CMD1(CCC_UnBindConsoleCmd,	"unbind_console"		);
 };

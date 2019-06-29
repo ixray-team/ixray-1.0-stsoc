@@ -23,7 +23,7 @@ typedef struct tagSPdaMessage
 	bool			question;
 	
 	// информаци
-	INFO_ID		info_id;
+	shared_str		info_id;
 
 	//время получения/отправки сообщения
 	ALife::_TIME_ID	time;
@@ -36,10 +36,10 @@ struct TALK_CONTACT_DATA
 {
 	TALK_CONTACT_DATA():id(u16(-1)),time(0){};
 	TALK_CONTACT_DATA(u16 contact_id, ALife::_TIME_ID contact_time):id(contact_id),time(contact_time){};
-	//id персонажа с которым говорили
-	u16				id;
 	//время контакта
 	ALife::_TIME_ID	time;
+	//id персонажа с которым говорили
+	u16				id;
 };
 
 DEFINE_VECTOR(TALK_CONTACT_DATA, TALK_CONTACT_VECTOR, TALK_CONTACT_VECTOR_IT);

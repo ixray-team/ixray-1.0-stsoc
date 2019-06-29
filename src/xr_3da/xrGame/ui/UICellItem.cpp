@@ -95,6 +95,7 @@ u32 CUICellItem::ChildsCount()
 
 void CUICellItem::PushChild(CUICellItem* c)
 {
+	R_ASSERT(c->ChildsCount()==0);
 	VERIFY				(this!=c);
 	m_childs.push_back	(c);
 	UpdateItemText		();
@@ -106,6 +107,8 @@ CUICellItem* CUICellItem::PopChild()
 	m_childs.pop_back	();
 	std::swap			(itm->m_pData, m_pData);
 	UpdateItemText		();
+	R_ASSERT			(itm->ChildsCount()==0);
+	itm->SetOwnerList	(NULL);
 	return				itm;
 }
 
@@ -163,7 +166,8 @@ void CUIDragItem::Init(const ref_shader& sh, const Frect& rect, const Frect& tex
 
 bool CUIDragItem::OnMouse(float x, float y, EUIMessages mouse_action)
 {
-	if(mouse_action == WINDOW_LBUTTON_UP){
+	if(mouse_action == WINDOW_LBUTTON_UP)
+	{
 		m_pParent->GetMessageTarget()->SendMessage(m_pParent,DRAG_DROP_ITEM_DROP,NULL);
 		return true;
 	}

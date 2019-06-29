@@ -12,7 +12,7 @@
 #include "../../inventory.h"
 #include "../../xrmessages.h"
 #include "../../shootingobject.h"
-#include "../../net_utils.h"
+#include "../../../../xrNetServer/net_utils.h"
 #include "../../level.h"
 #include "../../ai_monster_space.h"
 
@@ -79,6 +79,7 @@ void CAI_Stalker::OnEvent		(NET_Packet& P, u16 type)
 				O->H_SetParent	(0,!P.r_eof() && P.r_u8());
 				feel_touch_deny	(O,2000);
 			}
+
 			break;
 		}
 	}
@@ -94,7 +95,7 @@ void CAI_Stalker::feel_touch_new				(CObject* O)
 	// Now, test for game specific logical objects to minimize traffic
 	CInventoryItem		*I	= smart_cast<CInventoryItem*>	(O);
 
-	if (!g_Alive() || (I && I->useful_for_NPC() && can_take(I))) {
+	if (!wounded() && !critically_wounded() && I && I->useful_for_NPC() && can_take(I)) {
 #ifndef SILENCE
 		Msg("Taking item %s (%d)!",*I->cName(),I->ID());
 #endif
@@ -124,7 +125,7 @@ void CAI_Stalker::DropItemSendMessage(CObject *O)
 //PDA functions
 /////////////////////////
 /*
-void CAI_Stalker::ReceivePdaMessage(u16 who, EPdaMsg msg, INFO_ID info_id)
+void CAI_Stalker::ReceivePdaMessage(u16 who, EPdaMsg msg, shared_str info_id)
 {
 	CInventoryOwner::ReceivePdaMessage(who, msg, info_id);
 }*/

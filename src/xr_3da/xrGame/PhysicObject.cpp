@@ -41,7 +41,10 @@ BOOL CPhysicObject::net_Spawn(CSE_Abstract* DC)
 	CPHSkeleton::Spawn(e);
 	setVisible(TRUE);
 	setEnabled(TRUE);
-	if(!PPhysicsShell()->isBreakable()&&!CScriptBinder::object()&&!CPHSkeleton::IsRemoving())SheduleUnregister();
+
+	if (!PPhysicsShell()->isBreakable()&&!CScriptBinder::object()&&!CPHSkeleton::IsRemoving())
+		SheduleUnregister();
+
 	return TRUE;
 }
 
@@ -73,7 +76,7 @@ void CPhysicObject::RunStartupAnim(CSE_Abstract *D)
 }
 void CPhysicObject::net_Destroy()
 {
-	inherited::net_Destroy();
+	inherited::net_Destroy	();
 	CPHSkeleton::RespawnInit();
 }
 
@@ -285,4 +288,16 @@ Msg("%s",(*I).first);
 
 //////////////////////////////////////////////////////////////////////////
 
-	
+#include "script_space.h"
+
+using namespace luabind;
+
+#pragma optimize("s",on)
+void CPhysicObject::script_register(lua_State *L)
+{
+	module(L)
+	[
+		class_<CPhysicObject,CGameObject>("CPhysicObject")
+			.def(constructor<>())
+	];
+}

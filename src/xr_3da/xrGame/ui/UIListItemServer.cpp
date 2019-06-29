@@ -3,19 +3,23 @@
 #include "UIListItemServer.h"
 #include "UITextureMaster.h"
 
-CUIListItemServer::CUIListItemServer(){
-	AttachChild(&m_icon);
-	m_icon.AttachChild(&m_iconPass);
-	m_icon.AttachChild(&m_iconDedicated);
-	m_icon.AttachChild(&m_iconPunkBuster);
-	AttachChild(&m_server);
-	AttachChild(&m_map);
-	AttachChild(&m_game);
-	AttachChild(&m_players);
-	AttachChild(&m_ping);
+CUIListItemServer::CUIListItemServer()
+{
+	AttachChild					(&m_icon);
+	m_icon.AttachChild			(&m_iconPass);
+	m_icon.AttachChild			(&m_iconDedicated);
+	m_icon.AttachChild			(&m_iconPunkBuster);
+	AttachChild					(&m_server);
+	AttachChild					(&m_map);
+	AttachChild					(&m_game);
+	AttachChild					(&m_players);
+	AttachChild					(&m_ping);
+	AttachChild					(&m_version);
+	SetAutoDelete				(false);
 }
 
-void CUIListItemServer::Init(LIST_SRV_ITEM& params, float x, float y, float width, float height){
+void CUIListItemServer::Init(LIST_SRV_ITEM& params, float x, float y, float width, float height)
+{
 	CUIWindow::Init(x,y,width,height);
 
 	SetTextColor(params.color);
@@ -38,12 +42,15 @@ void CUIListItemServer::Init(LIST_SRV_ITEM& params, float x, float y, float widt
 //	m_game.SetText(*params.info.game);
 	offset += params.size.game;
 
-	m_players.Init(offset, 0, params.size.game, height);
+	m_players.Init(offset, 0, params.size.players, height);
 //	m_players.SetText(*params.info.players);
 	offset += params.size.players;
 
-	m_ping.Init(offset, 0, params.size.game, height);
+	m_ping.Init(offset, 0, params.size.ping, height);
 //	m_ping.SetText(*params.info.ping);
+	offset += params.size.ping;
+
+	m_version.Init(offset, 0, params.size.version, height);
 
 	float icon_size = CUITextureMaster::GetTextureHeight("ui_icon_password");
 //	if (params.info.icons.pass)
@@ -69,21 +76,37 @@ void CUIListItemServer::Init(LIST_SRV_ITEM& params, float x, float y, float widt
 
 	m_srv_info = params;
 }
+#include "../string_table.h"
+u32 cut_string_by_length(CGameFont* pFont, LPCSTR src, LPSTR dst, u32 dst_size, float length);
 
 void CUIListItemServer::SetParams(LIST_SRV_ITEM& params){
-	m_server.SetText(*params.info.server);
-	m_map.SetText(*params.info.map);
-	m_game.SetText(*params.info.game);
-	m_players.SetText(*params.info.players);
-	m_ping.SetText(*params.info.ping);
-	m_iconPass.Show(params.info.icons.pass);
-	m_iconDedicated.Show(params.info.icons.dedicated);
-	m_iconPunkBuster.Show(params.info.icons.punkbuster);
+	string1024				buff;
 
-	SetValue(params.info.Index);
+	LPCSTR _srv_name		= CStringTable().translate(params.info.server).c_str();
+	cut_string_by_length	(m_map.GetFont(), _srv_name, buff, sizeof(buff), m_server.GetWidth());
+	m_server.SetText		(buff);
+
+	LPCSTR _map_name		= CStringTable().translate(params.info.map).c_str();
+	cut_string_by_length	(m_map.GetFont(), _map_name, buff, sizeof(buff), m_map.GetWidth());
+	m_map.SetText			(buff);
+
+	LPCSTR _game_name		= CStringTable().translate(params.info.game).c_str();
+	cut_string_by_length	(m_game.GetFont(), _game_name, buff, sizeof(buff), m_game.GetWidth());
+	m_game.SetText			(buff);
+
+	m_players.SetTextST		(*params.info.players);
+	m_ping.SetTextST		(*params.info.ping);
+	m_version.SetTextST		(*params.info.version);
+
+	m_iconPass.Show			(params.info.icons.pass);
+	m_iconDedicated.Show	(params.info.icons.dedicated);
+	m_iconPunkBuster.Show	(params.info.icons.punkbuster);
+
+	SetValue				(params.info.Index);
 }
 
-void CUIListItemServer::Draw(){
+void CUIListItemServer::Draw()
+{
 	CUIStatic::Draw();
 	CUIWindow::Draw();
 }
@@ -96,15 +119,17 @@ void CUIListItemServer::SetTextColor(u32 color){
 	m_game.SetTextColor(color);
 	m_players.SetTextColor(color);
 	m_ping.SetTextColor(color);
+	m_version.SetTextColor(color);
 }
 
 void CUIListItemServer::SetFont(CGameFont* pFont){
-	m_icon.SetFont(pFont);
-	m_server.SetFont(pFont);
-	m_map.SetFont(pFont);
-	m_game.SetFont(pFont);
-	m_players.SetFont(pFont);
-	m_ping.SetFont(pFont);
+	m_icon.SetFont		(pFont);
+	m_server.SetFont	(pFont);
+	m_map.SetFont		(pFont);
+	m_game.SetFont		(pFont);
+	m_players.SetFont	(pFont);
+	m_ping.SetFont		(pFont);
+	m_version.SetFont	(pFont);
 }
 
 void CUIListItemServer::CreateConsoleCommand(xr_string& command, LPCSTR player_name){

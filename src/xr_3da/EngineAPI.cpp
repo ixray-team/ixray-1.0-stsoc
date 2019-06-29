@@ -26,6 +26,7 @@ CEngineAPI::CEngineAPI	()
 CEngineAPI::~CEngineAPI()
 {
 }
+extern u32 renderer_value; //con cmd
 
 void CEngineAPI::Initialize(void)
 {
@@ -45,13 +46,16 @@ void CEngineAPI::Initialize(void)
 	}
 	if (0==hRender)		{
 		// try to load R1
+		psDeviceFlags.set	(rsR2,FALSE);
+		renderer_value		= 0; //con cmd
+
 		Log				("Loading DLL:",	r1_name);
 		hRender			= LoadLibrary		(r1_name);
 		if (0==hRender)	R_CHK				(GetLastError());
 		R_ASSERT		(hRender);
 	}
 //#endif
-	//////////////////////////////////////////////////////////////////////////
+
 	// game	
 	{
 		LPCSTR			g_name	= "xrGame.dll";

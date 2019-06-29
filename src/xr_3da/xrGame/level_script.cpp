@@ -89,22 +89,22 @@ CScriptGameObject *get_object_by_id(u32 id)
 
 LPCSTR get_weather	()
 {
-	return			(*g_pGamePersistent->Environment.GetWeather());
+	return			(*g_pGamePersistent->Environment().GetWeather());
 }
 
 void set_weather	(LPCSTR weather_name, bool forced)
 {
-	return			(g_pGamePersistent->Environment.SetWeather(weather_name,forced));
+	return			(g_pGamePersistent->Environment().SetWeather(weather_name,forced));
 }
 
 bool set_weather_fx	(LPCSTR weather_name)
 {
-	return			(g_pGamePersistent->Environment.SetWeatherFX(weather_name));
+	return			(g_pGamePersistent->Environment().SetWeatherFX(weather_name));
 }
 
 bool is_wfx_playing	()
 {
-	return			(g_pGamePersistent->Environment.IsWFXPlaying());
+	return			(g_pGamePersistent->Environment().IsWFXPlaying());
 }
 
 void set_time_factor(float time_factor)
@@ -161,7 +161,7 @@ float cover_in_direction(u32 level_vertex_id, const Fvector &direction)
 
 float rain_factor()
 {
-	return			(g_pGamePersistent->Environment.CurrentEnv.rain_density);
+	return			(g_pGamePersistent->Environment().CurrentEnv.rain_density);
 }
 
 u32	vertex_in_direction(u32 level_vertex_id, Fvector direction, float max_distance)
@@ -341,7 +341,7 @@ CPHWorld* physics_world()
 }
 CEnvironment *environment()
 {
-	return		(&g_pGamePersistent->Environment);
+	return		(g_pGamePersistent->pEnvironment);
 }
 
 CEnvDescriptor *current_environment(CEnvironment *self)

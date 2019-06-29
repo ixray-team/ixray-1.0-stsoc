@@ -6,11 +6,24 @@ LRESULT CALLBACK TextConsole_WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 	switch(uMsg)
 	{
 	case WM_PAINT:
+		{			
+//			return 0;
+		}break;
+	case  WM_ERASEBKGND:
 		{
-
-			CTextConsole* pTextConsole = (CTextConsole*)Console;
-			pTextConsole->OnPaint();
-//			Console->OnPaint();
+			int x=0;
+			x=x;
+//			CTextConsole* pTextConsole = (CTextConsole*)Console;
+//			pTextConsole->OnPaint();
+//			return 1;
+		}break;
+	case WM_NCPAINT :
+		{
+//			CTextConsole* pTextConsole = (CTextConsole*)Console;
+//			pTextConsole->OnPaint();
+			int x=0;
+			x=x;
+//			return 0;
 		}break;
 	default:
 		break;
@@ -27,6 +40,9 @@ LRESULT CALLBACK TextConsole_LogWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LP
 
 	case WM_PAINT:
 		{
+			CTextConsole* pTextConsole = (CTextConsole*)Console;
+			pTextConsole->OnPaint();
+			return (LRESULT)0; // Say we handled it.
 		}break;
 	default:
 		break;

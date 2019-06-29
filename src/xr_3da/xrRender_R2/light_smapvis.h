@@ -25,6 +25,9 @@ public:
 	void			end			();
 	void			mark		();
 	void			flushoccq	();			// should be called when no rendering of light is supposed
+
+	void			resetoccq	();
+
 	IC	bool		sleep		()			{ return Device.dwFrame > frame_sleep; }
 
 	virtual		void	rfeedback_static	(IRender_Visual*	V);

@@ -94,6 +94,7 @@ public:
 class XRNETSERVER_API IPureServer
 {
 protected:
+	shared_str				connect_options;
 	IDirectPlay8Server*		NET;
 	IDirectPlay8Address*	net_Address_device;
 	
@@ -107,6 +108,7 @@ protected:
 	IClient*				SV_Client;
 
 	int						psNET_Port;	
+	
 
 	xr_vector<IBannedClient*>		BannedAddresses;
 
@@ -127,6 +129,7 @@ protected:
 	// Statistic
 	IServerStatistic		stats;
 	CTimer*					device_timer;
+	BOOL					m_bDedicated;
 
 	virtual void			new_client			(ClientID clientID, LPCSTR name, bool bLocal)   =0;
 			bool			GetClientAddress	(IDirectPlay8Address* pClientAddress, char* Address, DWORD* pPort = NULL);
@@ -138,7 +141,7 @@ protected:
 			LPCSTR			GetBannedListName	();
 
 public:
-	IPureServer				(CTimer* timer);
+	IPureServer				(CTimer* timer, BOOL Dedicated = FALSE);
 	virtual ~IPureServer	();
 	HRESULT					net_Handler			(u32 dwMessageType, PVOID pMessage);
 	
@@ -183,5 +186,5 @@ public:
 	virtual void			BanAddress			(char* Address, u32 BanTime);
 	IClient*				GetServerClient		()			{ return SV_Client; };
 
-
+	const shared_str&		GetConnectOptions	() const {return connect_options;}
 };

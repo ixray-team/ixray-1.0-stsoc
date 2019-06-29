@@ -12,11 +12,21 @@ class CUIMoneyIndicator;
 class CUIRankIndicator;
 class UIVoteStatusWnd;
 
+class CUIInventoryWnd;
+class CUIPdaWnd;
+class CUIMapDesc;
+
 class CUIGameDM: public CUIGameCustom
 {
 private:
 	game_cl_Deathmatch *	m_game;
 	typedef CUIGameCustom inherited;
+
+public:
+	CUIInventoryWnd*	m_pInventoryMenu;
+	CUIPdaWnd*			m_pPdaMenu;
+	CUIMapDesc*			m_pMapDesc;
+
 protected:
 	enum{
 		flShowFragList	= (1<<1),
@@ -91,4 +101,5 @@ public:
 			void					ShowPlayersList			(bool bShow);
 			void					ShowStatistic			(bool bShow);
 	virtual void					ReInitShownUI		(); 
+	virtual	void					reset_ui				();
 };

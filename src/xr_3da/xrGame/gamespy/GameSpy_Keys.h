@@ -69,11 +69,11 @@
 #define	G_BEARER_CANT_SPRINT_KEY				124
 												
 //---- Player keys								
-#define P_NAME__KEY								125
-#define P_FRAGS__KEY							126
-#define P_DEATH__KEY							127
-#define P_RANK__KEY								128
-#define P_TEAM__KEY								129
+//#define P_NAME__KEY								125
+//#define P_FRAGS__KEY							126
+//#define P_DEATH__KEY							127
+//#define P_RANK__KEY								128
+//#define P_TEAM__KEY								129
 #define P_SPECTATOR__KEY						130
 #define P_ARTEFACTS__KEY						131
 

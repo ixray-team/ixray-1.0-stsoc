@@ -66,6 +66,7 @@ void	ISpatial::spatial_register	()
 		// already registered - nothing to do
 	} else {
 		// register
+		R_ASSERT				(spatial.space);
 		spatial.space->insert	(this);
 		spatial.sector			=	0;
 	}

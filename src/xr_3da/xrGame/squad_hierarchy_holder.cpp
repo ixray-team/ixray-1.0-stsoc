@@ -26,6 +26,7 @@ CGroupHierarchyHolder &CSquadHierarchyHolder::group	(u32 group_id) const
 	return					(*m_groups[group_id]);
 }
 
+#ifdef SQUAD_HIERARCHY_HOLDER_USE_LEADER
 void CSquadHierarchyHolder::update_leader			()
 {
 	m_leader				= 0;
@@ -37,3 +38,4 @@ void CSquadHierarchyHolder::update_leader			()
 			break;
 		}
 }
+#endif // SQUAD_HIERARCHY_HOLDER_USE_LEADER

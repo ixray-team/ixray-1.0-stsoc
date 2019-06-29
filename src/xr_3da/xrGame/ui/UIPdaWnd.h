@@ -1,7 +1,3 @@
-// CUIPdaWnd.h:  диалог PDA
-// 
-//////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "UIDialogWnd.h"
@@ -42,10 +38,13 @@ protected:
 	// Бэкграунд
 	CUIStatic*				UIMainPdaFrame;
 	CUIStatic*				m_updatedSectionImage;
+	CUIStatic*				m_oldSectionImage;
 
 	// Текущий активный диалог
 	CUIWindow*				m_pActiveDialog;
 	EPdaTabs				m_pActiveSection;
+	xr_vector<Fvector2>		m_sign_places_main;
+
 public:
 	// Поддиалоги PDA
 	CUIMapWnd*				UIMapWnd;

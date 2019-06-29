@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include "xrServer_Objects_ALife.h"
 #include "xrServer_Objects_ALife_Monsters.h"
 #include "game_base_space.h"
@@ -21,12 +21,11 @@
 #ifndef XRGAME_EXPORTS
 #	include "bone.h"
 #	include "defines.h"
+	LPCSTR GAME_CONFIG = "game.ltx";
 #else
 #	include "..\bone.h"
 #	include "..\render.h"
 #endif
-
-LPCSTR GAME_CONFIG = "game.ltx";
 
 bool SortStringsByAlphabetPred (const shared_str& s1, const shared_str& s2)
 {
@@ -67,11 +66,16 @@ struct SFillPropData{
     void		load			()
     {
         // create ini
+#ifdef XRGAME_EXPORTS
+        CInifile				*Ini = 	pGameIni;
+#else // XRGAME_EXPORTS
         CInifile				*Ini = 0;
         string_path				gm_name;
         FS.update_path			(gm_name,"$game_config$",GAME_CONFIG);
         R_ASSERT3				(FS.exist(gm_name),"Couldn't find file",gm_name);
         Ini						= xr_new<CInifile>(gm_name);
+#endif // XRGAME_EXPORTS
+
         // location type
         LPCSTR					N,V;
         u32 					k;
@@ -125,7 +129,9 @@ struct SFillPropData{
 #endif
 		
         // destroy ini
-        xr_delete				(Ini);
+#ifndef XRGAME_EXPORTS
+		xr_delete				(Ini);
+#endif // XRGAME_EXPORTS
     }
     void		unload			()
     {

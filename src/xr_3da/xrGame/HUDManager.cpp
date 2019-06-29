@@ -1,7 +1,3 @@
-// XR_Interface.cpp: implementation of the CHUD class.
-//
-//////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
 #include "HUDManager.h"
 #include "hudtarget.h"
@@ -16,11 +12,8 @@ CFontManager::CFontManager()
 {
 	Device.seqDeviceReset.Add(this,REG_PRIORITY_HIGH);
 
-	m_all_fonts.push_back(&pFontSmall				);// used cpp
 	m_all_fonts.push_back(&pFontMedium				);// used cpp
 	m_all_fonts.push_back(&pFontDI					);// used cpp
-//.	m_all_fonts.push_back(&pFontHeaderEurope		);
-//.	m_all_fonts.push_back(&pFontHeaderRussian		); // ???
 	m_all_fonts.push_back(&pFontArial14				);// used xml
 	m_all_fonts.push_back(&pFontGraffiti19Russian	);
 	m_all_fonts.push_back(&pFontGraffiti22Russian	);
@@ -43,11 +36,8 @@ CFontManager::CFontManager()
 void CFontManager::InitializeFonts()
 {
 
-	InitializeFont(pFontSmall				,"hud_font_small"				);
 	InitializeFont(pFontMedium				,"hud_font_medium"				);
 	InitializeFont(pFontDI					,"hud_font_di",					CGameFont::fsGradient|CGameFont::fsDeviceIndependent);
-//.	InitializeFont(pFontHeaderEurope		,"ui_font_header_europe"		);
-//.	InitializeFont(pFontHeaderRussian		,"ui_font_header_russian"		);
 	InitializeFont(pFontArial14				,"ui_font_arial_14"				);
 	InitializeFont(pFontGraffiti19Russian	,"ui_font_graffiti19_russian"	);
 	InitializeFont(pFontGraffiti22Russian	,"ui_font_graffiti22_russian"	);
@@ -56,7 +46,7 @@ void CFontManager::InitializeFonts()
 	InitializeFont(pFontGraffiti32Russian	,"ui_font_graff_32"				);
 	InitializeFont(pFontGraffiti50Russian	,"ui_font_graff_50"				);
 	InitializeFont(pFontLetterica25			,"ui_font_letter_25"			);
-	InitializeFont(pFontStat				,"stat_font"					);
+	InitializeFont(pFontStat				,"stat_font",					CGameFont::fsDeviceIndependent);
 
 }
 
@@ -95,8 +85,8 @@ void CFontManager::InitializeFont(CGameFont*& F, LPCSTR section, u32 flags)
 #endif
 	if (pSettings->line_exist(section,"size")){
 		float sz = pSettings->r_float(section,"size");
-		if (flags&CGameFont::fsDeviceIndependent)	F->SetSizeI(sz);
-		else										F->SetSize(sz);
+		if (flags&CGameFont::fsDeviceIndependent)	F->SetHeightI(sz);
+		else										F->SetHeight(sz);
 	}
 	if (pSettings->line_exist(section,"interval"))
 	F->SetInterval(pSettings->r_fvector2(section,"interval"));
@@ -129,25 +119,32 @@ CHUDManager::CHUDManager()
 { 
 	pUI						= 0;
 	m_pHUDTarget			= xr_new<CHUDTarget>();
+	OnDisconnected			();
 }
 //--------------------------------------------------------------------
 CHUDManager::~CHUDManager()
 {
 	xr_delete			(pUI);
 	xr_delete			(m_pHUDTarget);
+	b_online			= false;
 }
 
 //--------------------------------------------------------------------
 
 void CHUDManager::Load()
 {
-	xr_delete			(pUI);
+	if(pUI){
+		pUI->Load			( pUI->UIGame() );
+		return;
+	}
 	pUI					= xr_new<CUI> (this);
-	pUI->Load			();
+	pUI->Load			(NULL);
+	OnDisconnected		();
 }
 //--------------------------------------------------------------------
 void CHUDManager::OnFrame()
 {
+	if(!b_online)					return;
 	if (pUI) pUI->UIOnFrame();
 	m_pHUDTarget->CursorOnFrame();
 }
@@ -180,13 +177,9 @@ void CHUDManager::Render_Last()
 	if (0==O)						return;
 	CActor*		A					= smart_cast<CActor*> (O);
 	if (A && !A->HUDview())			return;
-//	CCar*		C					= smart_cast<CCar*>	(O);
-//	if (C)							return;
 	if(O->CLS_ID == CLSID_CAR)
 		return;
 
-//	CSpectator*	S					= smart_cast<CSpectator*>	(O);
-//	if (S)							return;
 	if(O->CLS_ID == CLSID_SPECTATOR)
 		return;
 
@@ -199,8 +192,11 @@ void CHUDManager::Render_Last()
 extern void draw_wnds_rects();
 extern ENGINE_API BOOL bShowPauseString;
 //отрисовка элементов интерфейса
+#include "string_table.h"
 void  CHUDManager::RenderUI()
 {
+	if(!b_online)					return;
+
 	BOOL bAlready					= FALSE;
 	if (true || psHUD_Flags.is(HUD_DRAW | HUD_DRAW_RT))
 	{
@@ -214,11 +210,16 @@ void  CHUDManager::RenderUI()
 
 	draw_wnds_rects		();
 
-	if( Device.Pause() && bShowPauseString){
+	if( Device.Paused() && bShowPauseString){
 		CGameFont* pFont	= Font().pFontGraffiti50Russian;
 		pFont->SetColor		(0x80FF0000	);
-		pFont->OutSet		(Device.dwWidth/2.0f-(pFont->SizeOf_("Game paused")/2.0f),Device.dwHeight/2.0f);
-		pFont->OutNext		("Game paused");
+		LPCSTR _str			= CStringTable().translate("st_game_paused").c_str();
+		
+		Fvector2			_pos;
+		_pos.set			(UI_BASE_WIDTH/2.0f, UI_BASE_HEIGHT/2.0f);
+		UI()->ClientToScreenScaled(_pos);
+		pFont->SetAligment	(CGameFont::alCenter);
+		pFont->Out			(_pos.x, _pos.y, _str);
 		pFont->OnRender		();
 	}
 
@@ -261,5 +262,23 @@ void CHUDManager::OnScreenRatioChanged()
 	pUI->UIMainIngameWnd				= xr_new<CUIMainIngameWnd>	();
 	pUI->UIMainIngameWnd->Init			();
 	pUI->UnLoad							();
-	pUI->Load							();
+	pUI->Load							(pUI->UIGame());
 }
+
+void CHUDManager::OnDisconnected()
+{
+//.	if(!b_online)			return;
+	b_online				= false;
+	if(pUI)
+		Device.seqFrame.Remove	(pUI);
+}
+
+void CHUDManager::OnConnected()
+{
+	if(b_online)			return;
+	b_online				= true;
+	if(pUI){
+		Device.seqFrame.Add	(pUI,REG_PRIORITY_LOW-1000);
+	}
+}
+

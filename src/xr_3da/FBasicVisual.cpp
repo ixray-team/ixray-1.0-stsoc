@@ -13,6 +13,12 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
+IRender_Mesh::~IRender_Mesh()		
+{ 
+	_RELEASE(p_rm_Vertices); 
+	_RELEASE(p_rm_Indices);		
+}
+
 IRender_Visual::IRender_Visual		()
 {
 	Type				= 0;

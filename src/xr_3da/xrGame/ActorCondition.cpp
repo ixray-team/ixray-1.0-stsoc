@@ -16,7 +16,6 @@
 #include "script_callback_ex.h"
 #include "object_broker.h"
 #include "weapon.h"
-#include "CustomOutfit.h"
 
 #define MAX_SATIETY					1.0f
 #define START_SATIETY				0.5f
@@ -121,15 +120,16 @@ void CActorCondition::UpdateCondition()
 
 		float k_max_power = 1.0f;
 
-		if( true /*!IsSleeping()*/ ){
+		if( true )
+		{
 			float weight = object().inventory().TotalWeight();
 
-			float base_w = 40.0f;
-
+			float base_w = object().MaxCarryWeight();
+/*
 			CCustomOutfit* outfit	= m_object->GetOutfit();
 			if(outfit)
 				base_w += outfit->m_additional_weight2;
-
+*/
 
 			k_max_power = 1.0f + _min(weight,base_w)/base_w + _max(0.0f, (weight-base_w)/10.0f);
 		}else
@@ -163,7 +163,7 @@ void CActorCondition::UpdateCondition()
 		if(!pSettings->section_exist(pp_sect_name))
 			strcpy			(pp_sect_name, "effector_psy_health");
 
-		if	( !fsimilar(GetPsyHealth(), 1.0f) )
+		if	( !fsimilar(GetPsyHealth(), 1.0f, 0.05f) )
 		{
 			if(!ppe)
 			{
@@ -258,6 +258,8 @@ bool CActorCondition::IsCantWalk() const
 		m_bCantWalk		= false;
 	return				m_bCantWalk;
 }
+
+#include "CustomOutfit.h"
 
 bool CActorCondition::IsCantWalkWeight()
 {

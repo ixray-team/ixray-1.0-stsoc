@@ -44,4 +44,5 @@ public:
 			void			SetNoise			(float Pos);
 			void			SetLuminosity		(float Pos);
 			void			SetActorVisibility	(u16 who_id, float value);
+			void			ResetVisibility		();
 };

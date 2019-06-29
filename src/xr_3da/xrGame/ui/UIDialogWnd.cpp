@@ -51,7 +51,7 @@ bool CUIDialogWnd::IR_OnKeyboardHold(int dik)
 			IInputReceiver*		IR	= smart_cast<IInputReceiver*>( smart_cast<CGameObject*>(O) );
 			if (!IR)
 				return			(false);
-			IR->IR_OnKeyboardHold(key_binding[dik]);
+			IR->IR_OnKeyboardHold(get_binded_action(dik));
 		}
 	}
 	return false;
@@ -61,10 +61,11 @@ bool CUIDialogWnd::IR_OnKeyboardPress(int dik)
 {
 	if(!IR_process()) return false;
 	//mouse click
-	if(dik==MOUSE_1 || dik==MOUSE_2)
+	if(dik==MOUSE_1 || dik==MOUSE_2 || dik==MOUSE_3)
 	{
 		Fvector2 cp = GetUICursor()->GetPos();
-		if (OnMouse(cp.x,cp.y, dik==MOUSE_1? WINDOW_LBUTTON_DOWN : WINDOW_RBUTTON_DOWN))
+		EUIMessages action = (dik==MOUSE_1)?WINDOW_LBUTTON_DOWN :(dik==MOUSE_2)?WINDOW_RBUTTON_DOWN:WINDOW_CBUTTON_DOWN;
+		if (OnMouse(cp.x,cp.y, action))
             return true;
 	}
 
@@ -77,7 +78,7 @@ bool CUIDialogWnd::IR_OnKeyboardPress(int dik)
 			IInputReceiver*		IR	= smart_cast<IInputReceiver*>( smart_cast<CGameObject*>(O) );
 			if (!IR)
 				return			(false);
-			IR->IR_OnKeyboardPress(key_binding[dik]);
+			IR->IR_OnKeyboardPress(get_binded_action(dik));
 		}
 	}
 	return false;
@@ -88,10 +89,11 @@ bool CUIDialogWnd::IR_OnKeyboardRelease(int dik)
 	if(!IR_process()) return false;
 	
 	//mouse click
-	if(dik==MOUSE_1 || dik==MOUSE_2)
+	if(dik==MOUSE_1 || dik==MOUSE_2 || dik==MOUSE_3)
 	{
 		Fvector2 cp = GetUICursor()->GetPos();
-		if (OnMouse(cp.x, cp.y, dik==MOUSE_1 ? WINDOW_LBUTTON_UP : WINDOW_RBUTTON_UP))
+		EUIMessages action = (dik==MOUSE_1)?WINDOW_LBUTTON_UP :(dik==MOUSE_2)?WINDOW_RBUTTON_UP:WINDOW_CBUTTON_UP;
+		if (OnMouse(cp.x, cp.y, action))
             return true;
 	}
 
@@ -104,7 +106,7 @@ bool CUIDialogWnd::IR_OnKeyboardRelease(int dik)
 			IInputReceiver*		IR	= smart_cast<IInputReceiver*>( smart_cast<CGameObject*>(O) );
 			if (!IR)
 				return			(false);
-			IR->IR_OnKeyboardRelease(key_binding[dik]);
+			IR->IR_OnKeyboardRelease(get_binded_action(dik));
 		}
 	}
 	return false;
@@ -165,7 +167,7 @@ bool CUIDialogWnd::IR_process()
 {
 	if(!IsEnabled())					return false;
 
-	if(Device.Pause()&&!WorkInPause())	return false;
+	if(Device.Paused()&&!WorkInPause())	return false;
 	return true;
 }
 

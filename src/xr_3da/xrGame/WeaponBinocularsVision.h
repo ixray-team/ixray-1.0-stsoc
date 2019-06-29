@@ -35,6 +35,7 @@ public:
 	~CBinocularsVision			();
 	void	Update				();
 	void	Draw				();
+	void	remove_links		(CObject *object);
 
 protected :
 	CWeaponBinoculars*			m_parent;

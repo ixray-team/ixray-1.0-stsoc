@@ -78,7 +78,17 @@ void CKinematics::CalculateBones			(BOOL bForceExact)
 #ifdef DEBUG
 		// Validate
 		VERIFY3	(_valid(vis.box.min)&&_valid(vis.box.max),	"Invalid bones-xform in model", dbg_name.c_str());
-		VERIFY3	(vis.sphere.R<1000.f,						"Invalid bones-xform in model", dbg_name.c_str());
+		if(vis.sphere.R>1000.f)
+		{
+			for(u16 ii=0; ii<LL_BoneCount();++ii){
+				Fmatrix tr;
+
+				tr = LL_GetTransform(ii);
+				Log("bone ",LL_BoneName_dbg(ii));
+				Log("bone_matrix",tr);
+			}
+			Log("end-------");
+		}
 		VERIFY3	(vis.sphere.R<1000.f,						"Invalid bones-xform in model", dbg_name.c_str());
 #endif
 	}

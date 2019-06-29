@@ -26,7 +26,7 @@
 #include "ai_debug.h"
 #include "../igame_level.h"
 #include "level.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include "script_callback_ex.h"
 #include "MathUtils.h"
 #include "game_cl_base_weapon_usage_statistic.h"
@@ -120,6 +120,8 @@ void CGameObject::net_Destroy	()
 		Level().SetControlEntity				(0);
 	}
 
+	Level().RemoveObject_From_4CrPr(this);
+
 	Parent									= 0;
 
 	CScriptBinder::net_Destroy				();
@@ -197,9 +199,9 @@ void CGameObject::OnEvent		(NET_Packet& P, u16 type)
 		break;
 	case GE_DESTROY:
 		{
-//.			Msg				("- CL_destroy %s[%d] frame [%d]",cName().c_str(), ID(), Device.dwFrame);
+//			Msg				("- [%x] CL_destroy %s[%d] frame [%d]",this, cName().c_str(), ID(), Device.dwFrame);
 			setDestroy		(TRUE);
-			MakeMeCrow		();
+//			MakeMeCrow		();
 		}
 		break;
 	}
@@ -231,6 +233,8 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 		cName_set					(E->name_replace());
 
 	setID							(E->ID);
+//	Msg ("object[%x] setID [%d]", this, E->ID);
+//	R_ASSERT(Level().Objects.net_Find(E->ID) == NULL);
 	
 	// XForm
 	XFORM().setXYZ					(E->o_Angle);

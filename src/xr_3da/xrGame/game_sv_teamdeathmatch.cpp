@@ -41,8 +41,8 @@ void	game_sv_TeamDeathmatch::Create					(shared_str& options)
 void game_sv_TeamDeathmatch::net_Export_State						(NET_Packet& P, ClientID to)
 {
 	inherited::net_Export_State(P, to);
-	P.w_u8			(u8(g_sv_tdm_bFriendlyIndicators));
-	P.w_u8			(u8(g_sv_tdm_bFriendlyNames));
+	P.w_u8			(u8(Get_FriendlyIndicators()));
+	P.w_u8			(u8(Get_FriendlyNames()));
 }
 
 u8 game_sv_TeamDeathmatch::AutoTeam() 
@@ -218,13 +218,20 @@ void game_sv_TeamDeathmatch::OnPlayerChangeTeam(ClientID id_who, s16 team)
 
 void	game_sv_TeamDeathmatch::OnPlayerKillPlayer		(game_PlayerState* ps_killer, game_PlayerState* ps_killed, KILL_TYPE KillType, SPECIAL_KILL_TYPE SpecialKillType, CSE_Abstract* pWeaponA)
 {
+	s16 OldKills = 0;
+	if (ps_killer) OldKills = ps_killer->kills;
 	inherited::OnPlayerKillPlayer(ps_killer, ps_killed, KillType, SpecialKillType, pWeaponA);
-
 	if (!ps_killed || !ps_killer) return;
-	
-	UpdateTeamScore(ps_killer);	
-}
 
+//	SetTeamScore(ps_killer->team-1, GetTeamScore(ps_killer->team-1)+ps_killer->kills-OldKills);
+	UpdateTeamScore(ps_killer, OldKills);	
+}
+void	game_sv_TeamDeathmatch::UpdateTeamScore			(game_PlayerState* ps_killer, s16 OldKills)
+{
+	if (!ps_killer) return;
+	SetTeamScore(ps_killer->team-1, GetTeamScore(ps_killer->team-1)+ps_killer->kills-OldKills);
+}
+/*
 void	game_sv_TeamDeathmatch::UpdateTeamScore			(game_PlayerState* ps_killer)
 {
 	SetTeamScore(ps_killer->team-1, 0);
@@ -238,6 +245,7 @@ void	game_sv_TeamDeathmatch::UpdateTeamScore			(game_PlayerState* ps_killer)
 		SetTeamScore(ps_killer->team-1, GetTeamScore(ps_killer->team-1)+ps->kills );
 	};
 }
+*/
 
 KILL_RES	game_sv_TeamDeathmatch::GetKillResult			(game_PlayerState* pKiller, game_PlayerState* pVictim)
 {

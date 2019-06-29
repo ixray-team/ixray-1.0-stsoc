@@ -77,8 +77,10 @@ bool CUIChangeWeather::OnKeyboard(int dik, EUIMessages keyboard_action){
 			OnBtnCancel();
 			return true;
 		}
-		if (dik >= DIK_1 && dik <= DIK_4)
+		if (dik >= DIK_1 && dik <= DIK_4){
 			OnBtn(dik - DIK_1);
+			return true;
+		}
 	}
 
 	return false;

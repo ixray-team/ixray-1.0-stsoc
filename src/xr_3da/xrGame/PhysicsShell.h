@@ -247,6 +247,8 @@ IC					CKinematics					*PKinematics								()																{return m_pKinemati
 	virtual			bool						IsGroupObject								()																							= 0;
 	virtual			void						SetIgnoreStatic								()																							= 0;
 	virtual			void						SetIgnoreDynamic							()																							= 0;
+	virtual			void						SetRagDoll									()																							= 0;
+	virtual			void						SetIgnoreRagDoll							()																							= 0;
 	virtual			void						SetSmall									()																							= 0;
 	virtual			void						SetIgnoreSmall								()																							= 0;
 	virtual			bool						isFractured									()																							= 0;

@@ -13,7 +13,7 @@
 
 class CSmartZone : public CSpaceRestrictor {
 public:
-	virtual	bool	need_update	() {return true;};
+	virtual	bool	register_schedule	() const {return true;}
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 add_to_type_list(CSmartZone)

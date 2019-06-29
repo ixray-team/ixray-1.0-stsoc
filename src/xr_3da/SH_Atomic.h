@@ -1,10 +1,11 @@
 #ifndef sh_atomicH
 #define sh_atomicH
 #pragma once
-#pragma pack(push,4)
-
 #include "xr_resource.h"
 #include "tss_def.h"
+
+#pragma pack(push,4)
+
 
 //////////////////////////////////////////////////////////////////////////
 // Atomic resources
