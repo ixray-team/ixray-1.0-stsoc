@@ -1,0 +1,38 @@
+struct 	v2p_in
+{
+  half4 hemi:		COLOR0;		// Hemisphere, replicated
+  half2 tc0: 		TEXCOORD0;	// Texture coordinates 	(for sampling diffuse map)
+  half3	Pe: 		TEXCOORD1;	// Eye-space position 	(for lighting)
+  half3	Ne: 		TEXCOORD2;	// Eye-space normal	(for lighting)
+};
+
+struct 	p2f
+{
+  half4 Pe: 		COLOR0;		// Eye-space position 	(for lighting)
+  half4 Ne:		COLOR1;		// Eye-space normal	(for lighting)
+  half4 C:     		COLOR2;		// Diffuse color + specular mask
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+uniform sampler2D 	s_base;
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Pixel
+p2f 	main	( v2p_in I )
+{
+  p2f		O;
+
+  // 1. Base texture + kill pixels with low alpha
+  half4 	D 	= tex2D		(s_base, I.tc0);
+  half 	A 	= D.w-(240.h/255.h);
+  clip		(A);
+
+  // 2. Standart output
+  half3 Pe 	= I.Pe;
+  half3	NeN	= normalize	(I.Ne);
+  O.Pe		= half4		(Pe.x,	Pe.y,	Pe.z,	0);		// OUT: position
+  O.Ne 		= half4		(NeN.x,	NeN.y,	NeN.z,	I.hemi.x);	// OUT: normal.hemi
+  O.C		= half4		(D.x,	D.y,	D.z,	0);		// OUT: rgb.gloss
+  return O;
+}

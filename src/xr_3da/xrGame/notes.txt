@@ -1,0 +1,161 @@
+level.weather.rain.start
+level.weather.rain.stop
+
+//------------------------------------------------------------------------------
+
+4906140
+
+//------------------------------------------------------------------------------
+// Character Animations:
+//------------------------------------------------------------------------------
+Legs:
+	- Переступание с ноги на ногу при поворотах
+	- Walk
+		- forward
+		- back
+		- strafe left
+		- strafe right
+	- Run
+		- forward
+		- back
+		- strafe left
+		- strafe right
+	- Crouch walk
+		- forward
+		- back
+		- strafe left
+		- strafe right
+	- Crouch run
+		- forward
+		- back
+		- strafe left
+		- strafe right
+	- Jump
+		- start
+		- end
+		- idle
+
+Torso:
+	- Aim (Each Weapon Type)
+		- Walk/Run
+		- Crouch Walk/Run
+	- Reload
+	- Attack
+	- Use
+
+Legs&Torso:
+	- Idle
+	- Death
+	- Damage
+		- Fwd
+		- Back
+
+
+//------------------------------------------------------------------------------
+// Character Animations:
+//------------------------------------------------------------------------------
+- Переступание с ноги на ногу при поворотах
+- Walk
+	- forward
+	- back
+	- strafe left
+	- strafe right
+- Run
+	- forward
+	- back
+	- strafe left
+	- strafe right
+- Crouch walk
+	- forward
+	- back
+	- strafe left
+	- strafe right
+- Crouch run
+	- forward
+	- back
+	- strafe left
+	- strafe right
+- Jump
+	- start
+	- idle
+- Idle
+	- norm
+	- crouch
+- Death
+	- norm
+	- crouch
+
+//------------------------------------------------------------------------------
+// Управление отрядом
+//--------------------------------------+-----------------------+---------------+
+Команды:								|						|				|
+	1 идти по направлению: "бесконечно" | go in this direction	|				|
+	2 идти в заданную позицию:			| go to that position	|				|
+	3 удерживать позицию				| hold position         |(snippers)		| стек(1,2)
+	4 свободная охота					| xr_free hunting			|(kill'em all)	| стек(1,2)
+	5 идти ко мне (нужна помощь)		| need backup/follow me	|(dog's :)		|
+//--------------------------------------+-----------------------+---------------+
+Тригеры:
+	- стрелять только для защиты / всегда при обнаружении врага
+	- тихо но более медленно пробираться / быстро (особо не прикрываясь) но более шумно
+//--------------------------------------+-----------------------+---------------+
+	? ввязываться в ближний бой или предпочитать атаковать из далека
+
+I want to kill enemy
+
+enemy
+
+can_kill
+ready_to_kill
+see_enemy
+kill_distance
+can_get_item_to_kill
+enemy_is_danger
+wanna_kill
+
+enemy_can_kill
+enemy_ready_to_kill
+enemy_see_me
+enemy_kill_distance
+enemy_can_get_item_to_kill
+i_am_danger
+enemy_wanna_kill
+
+enemy && 
+can_kill && 
+ready_to_kill && 
+see_enemy && 
+kill_distance && 
+enemy_danger && 
+enemy_can_kill && 
+enemy_ready_to_kill && 
+enemy_see_me && 
+enemy_kill_distance && 
+i_am_danger && 
+wanna_kill && 
+enemy_wanna_kill
+	-> kill
+	
+
+if (enemy)
+	if (can_kill)
+		if (ready_to_kill)
+			if (see_enemy)
+				if (kill_distance)
+					kill
+				else
+					get_kill_distance
+			else
+				find_last_enemy
+		else
+			if (enemy_can_kill)
+				get_cover
+			else
+				prepare_to_kill
+	else
+		if (can_pick_up_item_to_kill)
+			pickup_item
+		else
+			search_item
+
+			

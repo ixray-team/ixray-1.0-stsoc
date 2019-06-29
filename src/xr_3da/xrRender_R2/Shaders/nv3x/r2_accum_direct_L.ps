@@ -1,0 +1,34 @@
+struct 	v2p
+{
+  half2 tc0: 		TEXCOORD0;	// Texture coordinates 	(for sampling maps)
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////
+uniform sampler2D 	s_position;
+uniform sampler2D 	s_normal;
+uniform sampler2D 	s_smap;
+uniform sampler2D 	s_material;
+uniform half4 		light_direction;
+uniform half4 		light_color;
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Pixel
+half4 	main		( v2p I )	: COLOR
+{
+  // Sample the fat framebuffer:
+  half4 _P		= tex2D 	(s_position, 	I.tc0); 
+  half4 _N		= tex2D 	(s_normal,   	I.tc0); 
+
+  // Normal, vector2eye, vector2light
+  half3 N		= half3		(_N.x,_N.y,_N.z);
+  half3 V 		= -normalize	(half3(_P.x,_P.y,_P.z));
+  half3 L 		= -half3	(light_direction.x,light_direction.y,light_direction.z);
+
+  // Diffuse = (L x N)
+  // Specular = (H x N)^m
+  half3 H		= normalize	(L+V);
+  half4 light 		= tex2D 	(s_material,	half2( dot(L,N), dot(H,N) ) );
+
+  // Final color
+  return  		light_color * light;
+}

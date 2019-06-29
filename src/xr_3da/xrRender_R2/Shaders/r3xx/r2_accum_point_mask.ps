@@ -1,0 +1,22 @@
+struct 	v2p
+{
+  half2 tc0: 		TEXCOORD0;	// Texture coordinates 	(for sampling maps)
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////
+uniform sampler2D 	s_position;
+uniform sampler2D 	s_normal;
+uniform samplerCUBE 	s_smap;
+uniform sampler1D 	s_attenuate;
+uniform half4 		light_color;
+uniform half4 		light_position;
+uniform float3x4 	m_W;
+uniform half3 		jitter[8];
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Pixel
+// note: it's used only with COLORWRITEENABLE=0, so code doesn't matter :)
+half4 	main_ps_1_1	( v2p I )	: COLOR
+{
+  return  		light_color;
+}

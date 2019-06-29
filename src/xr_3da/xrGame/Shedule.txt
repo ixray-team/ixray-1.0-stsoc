@@ -1,0 +1,63 @@
+	/ CORE
+		+ TODO: Blender compiling for editor
+		. TODO: Blender compiling for different number of layers
+		+ BUG:  File Sharing
+
+	/ SOUND
+		+ TODO: Rolloff
+		+ TODO: Apply effects volume
+		+ TODO: Culling			(by volume and attenuation)
+		+ TODO: Occlusion		(identity sphere, with probability)
+
+	/ OPTIMIZATION
+		. TODO: Batch culling
+		. TODO: collision database simplification
+		+ TODO: HOM
+			+ TODO: Rasterizer
+			+ TODO: Tester
+
+	/ GAME
+		+ TODO: Universal spawn
+		+ TODO: cl_Events
+		. TODO: sv_Events
+		. TODO: event: Activate
+		. TODO: event: Deactivate
+		. TODO: Zone(s)
+
+	/ EFFECTS
+		+ TODO: Blurred output, grayed output
+		+ TODO: Static HeightMap
+		+ TODO: Rain with collisions
+			+ TODO: Particles
+		. TODO: Ground Fog
+		. TODO: Lighting model
+			. TODO: Flash-lighting (ala Kreed :)
+			. TODO: Environment on models (ground lighting)
+			+ TODO: Dynamic lights (per-pixel attenuation)
+				. TODO: Geometric occlusion - shadowing
+			. TODO: BumpMapping on models
+			. TODO: Shadows from static_light+dynamic_models
+				. TODO: Geometric occlusion
+	
+	/ MISC
+		. TODO: Console Aliases
+
+	/ COMPILER
+		+ TODO: Compiler:Lighting:LM:Smooth/Sharp
+		. TODO: Translucency
+
+//-----------------------------------------------------------------------
+	. TODO:	Shaders
+			. TODO: N-Patches + tesselation level
+			? TODO: PixelShaders
+			+ TODO: Priority (sort order)
+			+ TODO: Disable optimize UV
+			. TODO: Conditions!!!	(scripts? = easy extendable) 
+			+ TODO: Strip out every building params
+			? TODO: Vertex shaders / ffp
+			+ TODO: Comments
+			+ TODO: Folders
+			+ TODO: Cubemaps
+			. TODO: Parametric shaders 
+			+ TODO: Compiler:Lighting:LM:Smooth/Sharp
+//-----------------------------------------------------------------------

@@ -1,0 +1,51 @@
+1. MacromediaFlash for menu(s)	- http://tulrich.com/geekstuff/gameswf.html
+
+Roadmap
+overal directions
+	content/tools/plugins
+			faster content authoring (deeper integration with standart art-packages)
+			shorter content delivery (art-package to engine)
+	no/or short preprocessing
+	complete integration with editors - WISIWIG - what I see is what I get, including lighting
+	fast run/edit/run cycle or even edit while run
+	improved scripting
+	no "level" concept, continous reality
+	deep atmosphere simulation
+	
+renderer	engine
+	overal directions
+		focus on improving realism
+		focus on dynamic/physical content
+		focus on dynamic lighting/shadowing
+		focus on deep postprocessing
+		focus on volumetric tech
+		focus on displacement mapping and deformations
+		focus on per-pixel materials
+	research directions
+		global illumination
+		photon mapping
+
+
+sound		engine
+	overal directions
+		focus on material interactions and wave tracing
+		focus on improving quality
+		deep music content scripting
+		5.1 content authoring / delivery
+
+network		engine
+	overal directions
+		scalability
+		distributed computing
+		clustering
+		
+physical	engine		
+	overal directions
+		scalability
+		offload work to GPU	(sparse matrix solvers, etc)
+
+core		tech
+	overal directions
+		improving programming time
+		error protection on all levels
+		more scripting (safe) at all levels

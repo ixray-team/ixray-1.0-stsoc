@@ -1,0 +1,58 @@
+////////////////////////////////////////////////////////////////////////////
+//	Module 		: data_storage_edge_path_inline.h
+//	Created 	: 21.03.2002
+//  Modified 	: 02.03.2004
+//	Author		: Dmitriy Iassenev
+//	Description : Edge path data storage inline functions
+////////////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#define TEMPLATE_SPECIALIZATION \
+	template<typename _edge_type, bool bEuclidianHeuristics>\
+	template <template <typename _T> class _vertex> 
+
+
+#define CEdgePathDataStorage		CDataStorageEdgePath<_edge_type,bEuclidianHeuristics>::CDataStorage<_vertex>
+
+TEMPLATE_SPECIALIZATION
+IC	CEdgePathDataStorage::CDataStorage			(const u32 vertex_count) :
+	inherited					(vertex_count)
+{
+}
+
+TEMPLATE_SPECIALIZATION
+CEdgePathDataStorage::~CDataStorage				()
+{
+}
+
+TEMPLATE_SPECIALIZATION
+IC	void CEdgePathDataStorage::assign_parent	(CGraphVertex	&neighbour, CGraphVertex *parent)
+{
+	inherited::assign_parent	(neighbour,parent);
+}
+
+TEMPLATE_SPECIALIZATION
+IC	void CEdgePathDataStorage::assign_parent	(CGraphVertex	&neighbour, CGraphVertex *parent, const _edge_type &edge)
+{
+	inherited::assign_parent	(neighbour,parent);
+	neighbour.edge()			= edge;
+}
+
+TEMPLATE_SPECIALIZATION
+IC	void CEdgePathDataStorage::get_edge_path	(xr_vector<_edge_type> &path, CGraphVertex *best)
+{
+	CGraphVertex			*t1 = best, *t2 = best->back();
+	for (u32 i=1; t2; t1 = t2, t2 = t2->back(), ++i) ;
+
+	path.resize				(--i);
+	t2						= best;
+
+	xr_vector<_edge_type>::reverse_iterator	I = path.rbegin();
+	xr_vector<_edge_type>::reverse_iterator	E = path.rend();
+	for (; t2->back() ; t2 = t2->back(), ++I)
+		*I = t2->edge();
+}
+
+#undef TEMPLATE_SPECIALIZATION
+#undef CEdgePathDataStorage

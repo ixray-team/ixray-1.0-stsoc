@@ -1,0 +1,312 @@
+	+ TODO: Engine: ***Sheduler***			
+	+ TODO: Engine: Adaptive Texture Sorter
+	+ TODO: Engine: Detail stripifier
+	+ TODO: Engine: Disable VS on Ge4 MX
+	+ TODO: Engine: LOD rendering
+	+ TODO: Engine: Single VB/IB
+	+ TODO: Engine: Native vertex-shaders
+	+ TODO: Engine: Detail texturing
+	. TODO: Engine: Show mip-maps
+	. TODO: Engine: Fog-pass
+	. TODO: Engine: Usage list
+	+ TODO: Engine: Load Cubemap
+	. TODO: Engine: Generate Cubemap
+
+	+ TODO: Weapons as 'native' objects
+	+ BUG:  NET: Can't connect
+	+ TODO: Level-unload / reload
+	+ TODO: ltx
+	+ TODO: NET: Server Disconnect
+	+ TODO: NET: Client Disconnect
+	+ BUG:  Sliding anims
+	+ BUG:  Lock after jump
+	+ BUG:  Shader still referenced
+	+ TODO: Gamma: Contrast/Brightness
+	+ TODO: SE : Properties
+	+ TODO: SE : Weapon
+	+ TODO: NET: Migrate
+	+ TODO: NET: Ownership
+	+ TODO: Weapons take
+    + TODO: Merge shadows from weapon and entity
+	+ TODO: HUD rendering
+	. TODO: Weapons ammo eject
+    + TODO: NET: Weapons
+   ?. TODO: Save/Load
+   ?+ TODO: NET: Save/Load
+	. TODO: NET: Demo Record/Replay
+	. TODO: NET: Actor camera save
+	
+	. TODO: Use xrSE as 'net_packet'
+	. TODO: Item: DROP
+	. TODO: Item usage history
+	
+	+ TODO: xrLC: merge IB
+	. TODO: xrLC: aligned split-plane heuristics
+	+ TODO: xrLC: LOD-building
+	+ TODO: xrLC: LOD-lighting
+	+ TODO: xrGame: Actor zone effect
+	
+--------------------------------------------------------
+11.09.2001
+- АИ
+	+ научить стрелять 
+		+ из глаз
+	+ целиться из глаз в центр
+	+ создать 2 ф-ции GetFireParams для эффектов (из оружия) и для стрельбы (из глаз)
+	+ разброс стрельбы
+	+ звук на стрельбу
+	+ звук на попадание/умирание
+	+ приседания (внутренняя команда)
+	+ одна комманда вместо очереди
+
+
+	- модель поведения
+		+ поиск актера (память)
+		+ teams
+
+	+ звуки рикошета (на уровне)
+	+ Flame on OnMoveVisible
+	+ оценка откуда попадание (для актера и монстра)	+ реакция монстра на попадание (разворот)
+	- m(g)
+	- particles
+-----------------------------------------------------------------------------------------------------------
+Oles:
+	+ BUG:	update blend-list before playing _new motion
+	+ BUG:	zero weight motions
+	+ BUG:  Ошибка (в связи с менеджером памяти) при создании консольных комманд
+	+ BUG:	Fonts
+	+ BUG:	level_unload
+
+	+ TODO: Glows ray-test cache
+	+ TODO: AI actors visibility(ray-test) cache
+	+ TODO:	видеть(фаззи-лоджик) в зависимости от времени (dt)
+	+ TODO: Deferred events
+	+ TODO: InterpretError
+	+ TODO: "Primitive" interface separation
+	+ TODO: Strip out old "messages"
+	+ TODO: CCreator specialization
+	+ TODO: "level_load" takes name
+	+ TODO: Scanning of level-names
+	+ TODO: path----Levels/Textures
+	+ TODO: Monster's spawn		(g_spawn name,team,squad,group)
+	+ TODO: Statistic
+	+ TODO: AI_Vision only for aliens
+	+ TODO: dynamic FSS states model
+	+ TODO: fuzzy-logic range-searching
+	+ TODO: A* with good heuristic
+		+ TODO:	O(1) node's allocator/deallocator
+	+ TODO: Teams
+		+ TODO: TeamManagement	(TeamLeader has list of teammates)
+		+ TODO: Respawn point specifies team
+	+ TODO: Path optimizer (fuckin' one)
+	+ TODO: AI Collision with mobile objects
+	+ TODO: prediction
+	+ TODO: parameters (selectors)
+	+ TODO: Separate physics for AI actors
+	. TODO: модель поведения
+		+ TODO: сопровождение лидера
+		+ TODO: атака
+		+ TODO: реакция на попадание
+		+ TODO: групповое сообщение об опасности + данные для радара
+	+ TODO: !!! Network !!! engine
+		+ TODO: approximate time sync
+	+ TODO: одновременно 2 цикла скелетной анимации (верх/низ)
+	. TODO: Engine
+			+ TODO: Auto merging visual's (Cached)
+			+ TODO: better DynamicIB/IBs pipeline
+			+ TODO: Specialized pipeline for Cached visuals
+			. TODO: Cached visuals SSE/3Dnow! optimizations
+-----------------------------------------------------------------------------------------------------------
+	. TODO: LevelCompiler
+			+ TODO: Pixel(texel) level lightmap packer
+			+ TODO: Read textures (any format) from editor's folder
+				+ 25 formats supported, including Photoshop's PSD
+			+ TODO: "unique" textures (lighting on landscape, etc)
+			+ TODO: Actual (calculated) per-pixel(texel) lightmap packer
+			+ TODO: partial lightmap calculation
+			+ TODO: partial lightmap shrinking
+			+ TODO: partial lightmap merging (don't scale uv's)
+			+ TODO: Auto merging visual's (Cached)
+				. TODO: Don't inter-merge, if strictly sorted
+			. TODO: относительный объем CHULLa от сферы - коеффициент
+			. TODO: collision database simplification
+			? TODO: detail objects
+-----------------------------------------------------------------------------------------------------------
+	. BUG:	Memory leaks (4)
+	. BUG:	vid_restart
+	. BUG:	STATE:_Attack: Иногда монстрик подходит вплотную и тупит :(
+	. BUG:  После рождения они висят в воздухе и тормозят :(
+	. BUG:  Motion blending
+
+	+ TODO: Sequences (AVI-like)
+	. TODO: Sequences cycling
+	+ TODO: Sorted cached pipeline
+	+ TODO: Unsorted normal pipeline
+	+ TODO: Sort/Dont-Sort based on screen space metrics (some speedup, from CPU only)
+	+ TODO: Equal-sort-order shaders must be resorted on "SSA" distance (major speedup on Ge3/R200)
+	. TODO: !!! Network !!!
+		+ TODO:	Remote actor	+ latency
+		+ TODO: Remote monster	+ latency
+		. TODO:	Local  actor	+ latency
+		+ TODO: Local  monster	+ latency
+		. TODO: Monsters fire-attack
+	+ TODO: Detail objects
+		+ TODO: Interpolation
+		+ TODO: Dither
+		+ TODO: Fastest rendering :)
+		+ TODO: Lighting
+		+ TODO: File reader
+	+ TODO: Semi-Static, vertex-cache optimized LOD (only on static)
+		..........UNRELIABLE..........
+	+ TODO: SoundMangager - 3D control on/off
+	+ TODO: timeGetTime() - kill this fuckin' function out of the code
+	. TODO: Per sector wallmarks
+
+	. TODO: Lighting model
+		. TODO: Semi static lights
+		. TODO: Environment on models (ground lighting)
+		+ TODO: Dynamic lights (per-pixel attenuation)
+			. TODO: Geometric occlusion - shadowing
+		. TODO: BumpMapping on models
+		. TODO: Shadows from static_light+dynamic_models
+			. TODO: Geometric occlusion
+	. TODO: AI
+		. TODO: не стрелять в своего если он находится на линии огня (отойти в сторону, и т.п.)
+		. TODO: модели поведения
+		. TODO: слух
+	. TODO: Console Aliases
+	. TODO: Ground Fog
+	. TODO:	Shaders
+			. TODO: N-Patches + tesselation level
+			. TODO: PixelShaders
+			+ TODO: Priority (sort order)
+			. TODO: Disable optimize UV
+			. TODO: Conditions!!!	(scripts? = easy extendable) 
+			. TODO: Strip out every building params
+			. TODO: Vertex shaders / ffp
+			. TODO: Comments
+			. TODO: Folders
+			. TODO: Cubemaps
+			. TODO: Parametric shaders 
+			. TODO: Compiler:Lighting:LM:Smooth/Sharp
+-----------------------------------------------------------------------------------------------------------
+Sanya:
+	+ BUG:  Run, Press Jump (don't release), after landing - release, try to jump again :)
+	+ BUG:	Turn sometimes cycles in continuesly
+	+ BUG:	При умирании игрок продолжает двигаться
+	+ BUG:  Координаты строк сообщений выводить в соответствии с разрешением
+	+ BUG:	SetHPB(-,-,+)
+	+ BUG:	RayPick -- не всегда выбирает монстрика (FillLine...)
+	+ BUG:	Не вращается пушка (callback??)
+	+ BUG:	Огонь в HUD отстает от ствола (? на один кадр)
+	+ BUG:	Прыжок у актора - виснем
+
+	. TODO: DirectX 8.1
+	+ TODO: Cursor - перенести в HUD
+	+-TODO: ControlCenter (HUD control panel - интерфейс для приказов/команд)
+		. "быстрый" интерфейс (без захвата ввода):
+			. группы: 
+				. короткая информация: количество юнитов, задача(тригеры) 
+				. полная информация: список юнитов, здоровье, броня, оружие
+		. дополнительный интерфейс (полный захват ввода):
+			. перегруппировка
+	. TODO: 2 models, fully working and animated
+	+ TODO: контроль 2-циклов анимации в актере
+	+ TODO: Particles in engine
+	. TODO: Weapons
+		. Пулемет 6-ти ствольный (переделать дизайн/HUD)
+		. EMS Rifle
+	. TODO: относительный объем CHULLa от сферы - коеффициент
+	. TODO: collision LOD per object (flag: top-level / detail) (dyn-dyn)
+	. TODO: PS доделать box update
+-----------------------------------------------------------------------------------------------------------
+Dima
+1. ALife simulation
+	+ Построение графа для уровня по точкам
+	+ Объединение графов всех уровней в единый граф для просчёта симуляции
+	+ Экспорт spawn-point-ов из редактора и построение "game.spawn"
+	+ Генерация на основе "game.spawn" новой игры
+	+ Просчёт всех NPC параллельно с действиями
+	+2Назначение событий, заданий и т.д., создание по действиям игрока событий и заданий
+	+ Стычки монстров во время симуляции
+	+ Spawn всего при переходе с уровня на уровень
+2. Монстры
+	+ Крысы
+	+-Зомби
+	. Собаки
+	. Солдаты
+	. Сталкеры
+	...
+-----------------------------------------------------------------------------------------------------------
+1. Network - spawn (Deathmatch/CTF)
+2. AI start position
+3. 
+
+--------------------------------------------------------------------------------------------------------------
+Hello Anton,
+
+  * GamePlay (Game, Scenario)
+    * Дима
+          1. Реалистичное зрение
+          2. Реалистичный слух
+          3. Монстры
+              - люди и нелюди
+                * реалистичное движение
+                * физика
+              - люди
+                * реалистичное поведение
+                * тактика ведения боя
+                * эвристика нахождения объектов (враг / артефакт)
+                * двусторонняя контекстно-зависимая передача информации
+          4. Эмуляция жизни
+          5. Оптимизация по скорости всего кода, дискретизация и распараллеливание  ресурсозависимых операций.
+  * Physics
+    * Vehicles
+    * Персонажи
+    * Мелкие обьекты
+    * Разбиваемые обьекты
+    * Флора
+  * Детальные обьекты
+    * Следы, Ветер, Реакция на прижимание, Турбулентные потоки
+    * Тени на них (???)
+    * Отодвинуть радиус + лоды
+  * Вода
+    * Лужа (инт)
+    * Море
+  * Освещение
+    * Разбиваемые Л.
+    * Миг. Л.
+    * Динамика (качание, вращение)
+    * Фонарь
+  *
+    * Детальные текст. (noise)
+    * Туман при большом к-ве проходов
+    * Ground fog
+    * Screen Post-process (зоны и т.п.)
+  * Сеть
+    * Миграция обьектов
+    * Распределенные вычисления
+    * Сохранение / загрузка
+    * Запись / воспроизведение демок
+  * Compatibility with old/buggy HW
+
+Slipch:
+	*Оптимизация:
+	
+		1 Xr	Space callission	
+		2 Spase collide enabled objects only
+		3 remove traditional islands - support enabled objects list
+		4 SIMD - some ode function
+		5 LCP and Jacobian for small matrix
+	*Saving for physics
+	*Interacting whith a car - discuss
+	*Kiling bones in breaking ojects and show particles
+	*Destroing a car - discus
+	*Collider - 
+			cylinder - additional points 
+			tri - primitives - remove exceed points
+			dynamic - dynamic passing through
+	*Bugs - Breakable!!
+	*Actor aplying force
+	*Physics - animation blending
+			

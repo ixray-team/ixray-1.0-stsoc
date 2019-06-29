@@ -1,0 +1,54 @@
+struct 	v2p
+{
+  half2 tc0: 		TEXCOORD0;	// Texture coordinates 	(for sampling maps)
+  half2 tc1: 		TEXCOORD1;	// Texture coordinates 	(for sampling maps)
+  half2 tc2: 		TEXCOORD2;	// Texture coordinates 	(for sampling maps)
+  half2 tc3: 		TEXCOORD3;	// Texture coordinates 	(for sampling maps)
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////
+uniform sampler2D 	s_position;
+uniform sampler2D 	s_normal;
+uniform sampler2D 	s_color;
+uniform sampler2D 	s_accumulator;
+uniform sampler2D 	s_mask;
+uniform half4 		light_dynamic_range;
+uniform half4 		light_hemi;
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Pixel
+// Note: oversimplified equations
+//      * incorrect summing, weighting
+half4 	main		( v2p I )	: COLOR
+{
+	half4		accum,D,L,H,light,C,S;
+
+	// rgb.gloss	
+	D			=	tex2D		(s_color,	I.tc0);
+	D			+=	tex2D		(s_color,	I.tc1);
+	D			+=	tex2D		(s_color,	I.tc2);
+	D			+=	tex2D		(s_color,	I.tc3);
+	
+	// diffuse.specular
+	L 			=	tex2D		(s_accumulator, I.tc0);
+	L 			+=	tex2D		(s_accumulator, I.tc1);
+	L 			+=	tex2D		(s_accumulator, I.tc2);
+	L 			+=	tex2D		(s_accumulator, I.tc3);
+
+	// normal.hemi - doen't change appearance too much :(
+	/*
+	H 			= 	tex2D		(s_normal, 	I.tc0).wwww;
+	H 			+= 	tex2D		(s_normal, 	I.tc1).wwww;
+	H 			+= 	tex2D		(s_normal, 	I.tc2).wwww;
+	H 			+= 	tex2D		(s_normal, 	I.tc3).wwww;
+	*/
+
+	// rgb*diffuse + gloss*specular
+	light 			= 	L*light_dynamic_range/* + H*light_hemi*/;	// combined lighting
+	C			=	D * light;					// rgb.gloss * light(rgb.specular)
+	S			=	half4		(C.w,C.w,C.w,C.w);		// replicated specular
+	
+	// we are interested only in colors > 1
+	half4 		final	= (C+S) - 1;
+	return 		half4	(final.x,final.y,final.z,tex2D(s_mask, I.tc0).a);
+}

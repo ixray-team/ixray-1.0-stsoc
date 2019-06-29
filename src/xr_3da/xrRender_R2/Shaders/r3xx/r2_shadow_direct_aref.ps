@@ -1,0 +1,21 @@
+struct 	v2p_in
+{
+	half depth: 	TEXCOORD0;	// Depth (0..1)
+	half2 tc0:	TEXCOORD1;	// Diffuse map for aref
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////
+uniform sampler2D 	s_base;
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Pixel
+half4 	main	( v2p_in I )	: COLOR
+{
+	// 1. Base texture + kill pixels with low alpha
+	half4 	C 	= tex2D		(s_base, I.tc0);
+	half 	A 	= C.w-(200.h/255.h);
+	clip		(A);
+
+	// 2.
+	return I.depth;
+}

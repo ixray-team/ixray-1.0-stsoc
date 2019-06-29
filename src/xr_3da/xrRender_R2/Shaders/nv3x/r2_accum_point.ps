@@ -1,0 +1,67 @@
+struct 	v2p
+{
+  half4 tc0: 		TEXCOORD0;	// Texture coordinates 	(for sampling maps)
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////
+uniform sampler2D 	s_position;
+uniform sampler2D 	s_normal;
+uniform sampler2D 	s_generic;
+uniform samplerCUBE 	s_smap;
+uniform sampler2D 	s_material;
+uniform half4 		light_color;
+uniform half4 		light_position;
+uniform float3x4 	m_W;
+uniform half3 		jitter[8];
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Pixel
+half4 	main		( v2p I )	: COLOR
+{
+  const half bias 	= -.08f;
+
+  // Sample the fat framebuffer:
+  half4 _P		= tex2Dproj 	(s_position, I.tc0); 
+  half4 _N		= tex2Dproj 	(s_normal,   I.tc0); 
+  half3 N		= half3		(_N.x,_N.y,_N.z);
+  half3 P 		= half3 	(_P.x,_P.y,_P.z);
+
+  half3 LP 		= P - (half3)light_position;		// cubemap aligned in eye space, so just position subtract
+  half	range 		= length	(LP);			// 
+  half 	att 		= 1 - range*light_position.w;		// linear attenuate, faster than tex1D... at least on R300
+
+  // Normal, vector2eye, vector2light
+  // Diffuse 	= (L x N)
+  // Specular 	= (H x N)^m
+  half3 V 		= -normalize	(P);
+  half3 L 		= -normalize 	(LP);			// this can be -LP/range, but HLSL optimizer stuck here :(
+  half3 H		= normalize	(L+V);
+  half4 light 		= tex2D 	(s_material,	half2( dot(L,N), dot(H,N) ) );
+
+  // compute fiter kernel size and perform filtering
+  half  s_center	= texCUBE 	(s_smap,	LP);	// central sample
+  half 	kernel 		= range-s_center;			// range to occluder
+
+  // sample shadow-map
+  half4 s0,s1,s2,s3,sC;
+  half2 sA;
+  half 	r_cmp 		= range+bias;				// range for compare
+  half4 one		= half4		(1,1,1,1)/8.f;		// summator :)
+ 
+  s0			= texCUBE	(s_smap,	LP+jitter[0]*kernel);
+  s1			= texCUBE	(s_smap,	LP+jitter[1]*kernel);
+  s2			= texCUBE	(s_smap,	LP+jitter[2]*kernel);
+  s3			= texCUBE	(s_smap,	LP+jitter[3]*kernel);
+  sC			= step		(half4(r_cmp-s0.x,r_cmp-s1.x,r_cmp-s2.x,r_cmp-s3.x),	0);
+  sA.x			= dot		(sC,one);
+
+  s0			= texCUBE	(s_smap,	LP+jitter[4]*kernel);
+  s1			= texCUBE	(s_smap,	LP+jitter[5]*kernel);
+  s2			= texCUBE	(s_smap,	LP+jitter[6]*kernel);
+  s3			= texCUBE	(s_smap,	LP+jitter[7]*kernel);
+  sC			= step		(half4(r_cmp-s0.x,r_cmp-s1.x,r_cmp-s2.x,r_cmp-s3.x),	0);
+  sA.y			= dot		(sC,one);
+
+  // Final color
+  return  		light_color * light * (sA.x+sA.y) * att;
+}

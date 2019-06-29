@@ -1,0 +1,57 @@
+struct 	v2p
+{
+  half2 tc0: 		TEXCOORD0;	// Texture coordinates 	(for sampling maps)
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////
+uniform sampler2D 	s_position;
+uniform sampler2D 	s_normal;
+uniform sampler2D 	s_smap;
+uniform sampler2D 	s_lightmap;
+uniform sampler2D 	s_material;
+uniform half4 		light_direction;
+uniform half4 		light_color;
+uniform half4 		light_position;	// xyz, 1/range
+uniform half4x4		m_WVP;
+uniform half4		jitter[6];
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Pixel
+// Note: this isn't a real spot
+//       it is directional light + distance attenuation + projective texture
+half4 	main		( v2p I )	: COLOR
+{
+  // Sample the fat framebuffer:
+  half4 _P		= tex2D 	(s_position, 	I.tc0); 
+  half4 _N		= tex2D 	(s_normal,   	I.tc0); 
+  half3 P 		= half3 	(_P.x,_P.y,_P.z);
+  half3 N		= half3		(_N.x,_N.y,_N.z);
+
+  // Normal, vector2eye, vector2light
+  half3 V 		= -normalize	(P);
+  half3 L 		= -half3	(light_direction.x,light_direction.y,light_direction.z);
+
+  // Diffuse  = (L x N)
+  // Specular = (H x N)^m
+  half3 H		= normalize	(L+V);
+  half4 light 		= tex2D 	(s_material,	half2( dot(L,N), dot(H,N) ) );
+
+  // Linear attenuation from range
+  half3 LP 		= P - (half3)light_position;
+  half	range 		= length	(LP);								// 
+  half 	att 		= (1 - range*light_position.w)*dot(normalize(LP),(half3)light_direction);	// linear attenuate, faster than tex1D... at least on R300
+
+  // Transform position to light/shadow space
+  half4 P4 		= half4		(_P.x,_P.y,_P.z,1);
+  half4 PLS		= mul		(m_WVP, P4);
+  half2 PLS_dw 		= PLS.xy / PLS.w;
+  half2	uv0		= PLS_dw.xy;
+  half  depth		= PLS.z;
+  
+  half4 lightmap 	= tex2D 	(s_lightmap, 	uv0);
+  half4 s0		= tex2D		(s_smap,	uv0);
+  half  shadow		= step		(depth-s0.x,	0);
+  
+  // Final color
+  return  		light_color * light * att * lightmap * shadow;
+}
