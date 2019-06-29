@@ -1,0 +1,27 @@
+**********************************************************
+***                                                    ***
+*** Note: This is a MODIFIED version of Lua 5.1 alpha. ***
+*** Files not relevant to LuaJIT have been removed.    ***
+***                                                    ***
+*** The unmodified Lua distribution is available at:   ***
+***                                                    ***
+***   http://www.lua.org/work/lua-5.1-alpha.tar.gz     ***
+***                                                    ***
+**********************************************************
+
+This directory contains some useful files and code.
+Unlike the code in ../src, everything here is in the public domain.
+
+lua.hpp
+	Lua header files for C++ using 'extern "C"'.
+
+lua.ico
+	A Lua icon for Windows (and web sites: save as favicon.ico).
+	Drawn by hand by Markus Gritsch <gritsch@iue.tuwien.ac.at>.
+
+lua.pc
+	pkg-config data for Lua
+
+strict.lua
+	Traps uses of undeclared global variables.
+

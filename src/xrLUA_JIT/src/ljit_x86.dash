@@ -1,0 +1,256 @@
+|//
+|// Common DynASM definitions and macros for x86 CPUs.
+|// Copyright (C) 2005 Mike Pall. See Copyright Notice in luajit.h
+|//
+|
+|// Standard DynASM declarations.
+|.arch x86
+|.section code, tail
+|
+|// Type definitions with (almost) global validity.
+|.type L,		lua_State,	esi	// L.
+|.type BASE,		TValue,		ebx	// L->base.
+|.type TOP,		TValue,		edi	// L->top (calls/open ops).
+|.type CI,		CallInfo,	ecx	// L->ci (calls, locally).
+|.type LCL,		LClosure,	eax	// func->value (calls).
+|
+|// Type definitions with local validity.
+|.type GL,		global_State
+|.type TVALUE,		TValue
+|.type VALUE,		Value
+|.type CINFO,		CallInfo
+|.type GCOBJECT,	GCObject
+|.type TSTRING,		TString
+|.type TABLE,		Table
+|.type CCLOSURE,	CClosure
+|.type PROTO,		Proto
+|.type UPVAL,		UpVal
+|.type NODE,		Node
+|
+|// Definitions copied to DynASM domain to avoid unnecessary constant args.
+|// CHECK: This must match with the definitions in lua.h!
+|.define LUA_TNIL,		0
+|.define LUA_TBOOLEAN,		1
+|.define LUA_TLIGHTUSERDATA,	2
+|.define LUA_TNUMBER,		3
+|.define LUA_TSTRING,		4
+|.define LUA_TTABLE,		5
+|.define LUA_TFUNCTION,		6
+|.define LUA_TUSERDATA,		7
+|.define LUA_TTHREAD,		8
+|
+|// Macros to test, set and copy stack slots.
+|.macro istt, idx, tp;  cmp dword BASE[idx].tt, tp; .endmacro
+|.macro isnil, idx;  istt idx, LUA_TNIL; .endmacro
+|.macro isnumber, idx;  istt idx, LUA_TNUMBER; .endmacro
+|.macro isstring, idx;  istt idx, LUA_TSTRING; .endmacro
+|.macro istable, idx;  istt idx, LUA_TTABLE; .endmacro
+|.macro isfunction, idx;  istt idx, LUA_TFUNCTION; .endmacro
+|
+|.macro tvisnil, tv;  cmp dword tv.tt, LUA_TNIL; .endmacro
+|
+|.macro settt, tv, tp; mov dword tv.tt, tp; .endmacro
+|
+|.macro setbvalue, tv, val		// May use eax.
+||if (val) {  /* true */
+|   mov eax, LUA_TBOOLEAN
+|   mov dword tv.value, eax		// Assumes: LUA_TBOOLEAN == 1
+|   settt tv, eax
+||} else {  /* false */
+|   mov dword tv.value, 0
+|   settt tv, LUA_TBOOLEAN
+||}
+|.endmacro
+|
+|.macro setnvalue, tv, vptr		// Pass a Value *!
+|  mov dword tv.value, (vptr)->na[0]
+|  mov dword tv.value.na[1], (vptr)->na[1]
+|  settt tv, LUA_TNUMBER
+|.endmacro
+|
+|.macro setsvalue, tv, vptr
+|  mov aword tv.value, vptr
+|  settt tv, LUA_TSTRING
+|.endmacro
+|
+|.macro sethvalue, tv, vptr
+|  mov aword tv.value, vptr
+|  settt tv, LUA_TTABLE
+|.endmacro
+|
+|.macro copyslot, D, S, R1, R2, R3
+|  mov R1, S.value;  mov R2, S.value.na[1];  mov R3, S.tt
+|  mov D.value, R1;  mov D.value.na[1], R2;  mov D.tt, R3
+|.endmacro
+|.macro copyslot, D, S, R1, R2
+|  mov R1, S.value;  mov R2, S.value.na[1];  mov D.value, R1
+|  mov R1, S.tt;  mov D.value.na[1], R2;  mov D.tt, R1
+|.endmacro
+|.macro copyslot, D, S
+|  copyslot D, S, ecx, edx, eax
+|.endmacro
+|
+|.macro copyconst, tv, tvk
+||switch (ttype(tvk)) {
+||case LUA_TNIL:
+|   settt tv, LUA_TNIL
+||  break;
+||case LUA_TBOOLEAN:
+|   setbvalue tv, bvalue(tvk)		// May use eax.
+||  break;
+||case LUA_TNUMBER: {
+|   setnvalue tv, &(tvk)->value
+||  break;
+||}
+||case LUA_TSTRING:
+|   setsvalue tv, &gcvalue(tvk)
+||  break;
+||default: lua_assert(0); break;
+||}
+|.endmacro
+|
+|// Macros to get Lua structures.
+|.macro getLCL, reg			// May use CI and TOP (edi).
+||if (!J->pt->is_vararg) {
+|  mov LCL:reg, BASE[-1].value
+||} else {
+|  mov CI, L->ci
+|  mov TOP, CI->func
+|  mov LCL:reg, TOP->value
+||}
+|.endmacro
+|.macro getLCL;  getLCL eax; .endmacro
+|
+|// Macros to handle variants.
+|.macro addidx, type, idx
+||if (idx) {
+|  add type, idx*#type
+||}
+|.endmacro
+|
+|.macro subidx, type, idx
+||if (idx) {
+|  sub type, idx*#type
+||}
+|.endmacro
+|
+|.macro TValuemul, reg
+||switch (sizeof(TValue)) {
+||case 8:
+|     sal reg, 3
+||  break;
+||case 12:
+|     sal reg, 2
+|     lea reg, [reg+reg*2]
+||  break;
+||case 16:
+|     sal reg, 4
+||  break;
+||default: jit_assert(0); break;
+||}
+|.endmacro
+|
+|.macro TValuediv, reg
+||switch (sizeof(TValue)) {
+||case 8:
+|     sar reg, 3
+||  break;
+||case 12:
+|     sar reg, 2
+|     imul reg, 0xaaaaaaab
+||  break;
+||case 16:
+|     sar reg, 4
+||  break;
+||default: jit_assert(0); break;
+||}
+|.endmacro
+|
+|.macro Nodemul, reg
+||if (sizeof(Node) == 32) {
+|  sal reg, 5
+||} else {
+|  imul reg, #NODE  // Yes, multiply by 28 is faster than shifts and adds.
+||}
+|.endmacro
+|
+|//
+|// x86 C calling conventions and stack frame layout during a JIT call:
+|//
+|// ebp+aword*2  ARG0      L
+|// -------------------------------
+|// ebp+aword*1  retaddr
+|// ebp+aword*0  frameptr       ebp
+|// ebp-aword*1  savereg0  TOP  edi
+|// ebp-aword*2  savereg1  BASE ebx
+|// ebp-aword*3  savereg2  L    esi
+|// ebp-aword*4  TMP0               <-- esp for first JIT frame.
+|// -------------------------------
+|//
+|// We could omit the fixed frame pointer (ebp) and have one more register
+|// available. But there is no pressing need (could use it for CI).
+|// Also yielding takes advantage of the fixed frame layout right now
+|// (storing the frame pointer in (say) L->frameptr would work, too).
+|// And it's easier for debugging (gdb is still confused -- why?).
+|//
+|// The stack is only aligned to awords (4 bytes). IMHO this is not really
+|// a big issue. Yes, unaligned doubles on the C stack increase the
+|// latency. But there are only a few isolated cases in the Lua core
+|// (e.g. hashnum() -- only used for non-integer keys) and they are not
+|// in the fast path. See the comments at the end of GATE_JC, too.
+|//
+|// [Aligning TValue is important, though -- see luaconf.h.]
+|//
+|
+|.define ARG2, [ebp+aword*4]
+|.define ARG1, [ebp+aword*3]
+|.define ARG0, [ebp+aword*2]
+|.macro saveR0, R;  mov [ebp-aword*1], R; .endmacro
+|.macro saveR1, R;  mov [ebp-aword*2], R; .endmacro
+|.macro saveR2, R;  mov [ebp-aword*3], R; .endmacro
+|.macro restoreR0, R;  mov R, [ebp-aword*1]; .endmacro
+|.macro restoreR1, R;  mov R, [ebp-aword*2]; .endmacro
+|.macro restoreR2, R;  mov R, [ebp-aword*3]; .endmacro
+|.define TMP0, [ebp-aword*4]
+|.define FRAME_OFFSET, aword*4
+|
+|.macro call, target, a1;  push a1;  call target;  add esp, aword*1; .endmacro
+|.macro call, target, a1, a2;  push a2;  push a1;
+|  call target;  add esp, aword*2; .endmacro
+|.macro call, target, a1, a2, a3;  push a3;  push a2;  push a1;
+|  call target;  add esp, aword*3; .endmacro
+|.macro call, target, a1, a2, a3, a4;  push a4;  push a3;  push a2;  push a1;
+|  call target;  add esp, aword*4; .endmacro
+|.macro call, target, a1, a2, a3, a4, a5;  push a5;  push a4;  push a3;
+|  push a2;  push a1;  call target;  add esp, aword*5; .endmacro
+|
+|// Annoying x87 stuff: support for two compare variants.
+|.macro fcomparepp			// Compare and pop st0 >< st1.
+||if (J->flags & JIT_F_CPU_CMOV) {
+|  fucomip st1
+|  fpop
+||} else {
+|  fucompp
+|  fnstsw ax				// eax modified!
+|  sahf
+|  // Sometimes test ah, imm8 would be faster.
+|  // But all following compares need to be changed then.
+|  // Don't bother since this is only compatibility stuff for old CPUs.
+||}
+|.endmacro
+|
+|// Annoying x87 stuff: check whether a number is an integer.
+|// The latency of fist/fild is the real problem here.
+|.macro checknum2int, reg, tv, fallback, tmp
+|  fld qword tv.value
+|  fist dword tmp
+|  fild dword tmp
+|  fcomparepp				// eax may be modified.
+|  mov reg, tmp
+|  jne fallback
+|  jp fallback
+|.endmacro
+|.macro checknum2int, reg, tv, fallback
+|  checknum2int reg, tv, fallback, TMP0
+|.endmacro
+|

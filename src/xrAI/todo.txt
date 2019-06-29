@@ -1,0 +1,8 @@
+	+ TODO: CanTravel
+	+ TODO: Recursion - must die :)
+	+ TODO: FindNode - slow :(
+	+ TODO: Planes invert
+	+ TODO:	Compress nodes
+	+ TODO:	Save nodes
+	+ TODO: Read emitters
+	- TODO: Build graph

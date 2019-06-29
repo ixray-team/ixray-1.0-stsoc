@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+<title>Portability Requirements for Coco</title>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=iso-8859-1" />
+<meta name="Author" content="Mike Pall" />
+<meta name="Copyright" content="Copyright (C) 2005, Mike Pall" />
+<meta name="Language" content="en" />
+<link rel="stylesheet" type="text/css" href="bluequad.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print" />
+</head>
+<body>
+<div id="site">
+<a href="http://luajit.luaforge.net/"><span>Lua<span id="logo">JIT</span></span></a>
+</div>
+<div id="head">
+<h1>Portability Requirements for Coco</h1>
+</div>
+<div id="nav">
+<ul><li>
+<a href="index.html">Index</a>
+</li><li>
+<a href="luajit.html">LuaJIT</a>
+<ul><li>
+<a href="luajit_features.html">Features</a>
+</li><li>
+<a href="luajit_install.html">Installation</a>
+</li><li>
+<a href="luajit_run.html">Running</a>
+</li><li>
+<a href="luajit_api.html">API Extensions</a>
+</li><li>
+<a href="luajit_intro.html">Introduction</a>
+</li><li>
+<a href="luajit_performance.html">Performance</a>
+</li><li>
+<a href="luajit_debug.html">Debugging</a>
+</li><li>
+<a href="luajit_changes.html">Changes</a>
+</li></ul>
+</li><li>
+<a href="coco.html">Coco</a>
+<ul><li>
+<a class="current" href="coco_portability.html">Portability</a>
+</li><li>
+<a href="coco_api.html">API Extensions</a>
+</li></ul>
+</li><li>
+<a href="dynasm.html">DynASM</a>
+<ul><li>
+<a href="dynasm_features.html">Features</a>
+</li><li>
+<a href="dynasm_examples.html">Examples</a>
+</li></ul>
+</li><li>
+<a href="http://luajit.luaforge.net/download.html">Download <span class="ext">&raquo;</span></a>
+</li></ul>
+</div>
+<div id="main">
+<p>
+Coco needs some machine-specific features which are
+inherently non-portable. Although the coverage is pretty good,
+this means that Coco will probably never be a standard part
+of the Lua core (which is pure ANSI&nbsp;C).
+</p>
+
+<h2>Context Switching Mechanisms</h2>
+<p>
+Coco relies on three different machine-specific mechanisms
+for allocating a C&nbsp;stack and switching context.
+The appropriate mechanism is automatically selected at compile time.
+</p>
+
+<h3>Modified setjmp buffer</h3>
+<p>
+This method changes a few fields in the setjmp buffer to
+redirect the next longjmp to a new function with a new stack
+frame. It needs a bit of guesswork and lots of #ifdef's to
+handle the supported CPU/OS combinations, but this is quite
+manageable.
+</p>
+<p>
+This is the fastest way for context switching because
+signals are not saved/restored (which is unnecessary and/or
+undesirable for Lua coroutines).
+</p>
+
+<h3>POSIX ucontext</h3>
+<p>
+The POSIX calls getcontext, makecontext and switchcontext
+are used to set up and switch between different C&nbsp;stacks.
+Although highly portable and even available for some
+esoteric platforms, it's slower than the setjmp method
+because it saves/restores signals, too.
+</p>
+<p>
+You can force the use of ucontext (instead of setjmp) by uncommenting
+the <tt>COCOFLAGS= -DCOCO_USE_UCONTEXT</tt> line in <tt>src/Makefile</tt>.
+</p>
+
+<h3>Windows Fibers</h3>
+<p>
+This is the standard method to set up and switch between
+different C&nbsp;stacks on Windows. It's available on Windows&nbsp;98
+and later.
+</p>
+
+<h2>Supported Platforms</h2>
+<p>
+Coco has been tested on the following platforms:
+</p>
+<pre>
+x86-linux         setjmp ucontext
+x86-freebsd-4.10  setjmp
+x86-freebsd-5.4   setjmp ucontext
+x86-netbsd-1.6    setjmp
+x86-netbsd-2.0    setjmp ucontext
+x86-openbsd-3.4   setjmp
+x86-solaris-9     ucontext
+x86-windows-98    fibers
+
+x64-linux         setjmp ucontext
+
+ppc32-osx         setjmp
+ppc32-linux       ucontext
+ppc64-linux       ucontext
+
+alpha-freebsd     ucontext
+alpha-osf1        ucontext
+
+ia64-linux        ucontext
+ia64-freebsd      ucontext
+
+hppa-hpux         ucontext
+</pre>
+<p>
+It should work pretty much anywhere where a <em>correct</em>
+POSIX ucontext implementation is available.
+</p>
+<p>
+Note that some older OS may have defective implementations
+because this system call is not widely used. E.g. some
+implementations don't mix well with other C&nbsp;library functions
+like <tt>malloc()</tt> or with native threads.
+This is really not the fault of Coco &mdash; please upgrade your OS.
+</p>
+<br class="flush" />
+</div>
+<div id="foot">
+<hr class="hide" />
+Copyright &copy; 2005 Mike Pall
+<span class="noprint">
+&middot;
+<a href="contact.html">Contact</a>
+</span>
+</div>
+</body>
+</html>
