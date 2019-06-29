@@ -57,7 +57,7 @@ void CRender::level_Load(IReader *fs)
 
 	marker						= 0;
 
-	if	(!g_pGamePersistent->bDedicatedServer)	{
+	if	(!g_dedicated_server)	{
 		// VB,IB,SWI
 		g_pGamePersistent->LoadTitle("st_loading_geometry");
 		CStreamReader				*geom = FS.rs_open	("$level$","level.geom");

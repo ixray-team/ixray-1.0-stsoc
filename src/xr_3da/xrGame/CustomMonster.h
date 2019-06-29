@@ -190,7 +190,6 @@ public:
 	virtual	void				reinit					();
 	virtual void				reload					(LPCSTR	section);				
 	virtual const SRotation		Orientation				() const;
-	virtual bool				use_model_pitch			() const;
 	virtual float				get_custom_pitch_speed	(float def_speed) {return def_speed;}
 	virtual bool				human_being				() const
 	{
@@ -302,7 +301,22 @@ public:
 	IC	const u32					&critical_wound_type						() const;
 
 	//////////////////////////////////////////////////////////////////////////
+private:
+	bool							m_invulnerable;
 
+public:
+	IC		void					invulnerable								(const bool &invulnerable);
+	IC		bool					invulnerable								() const;
+
+protected:
+	bool	m_update_rotation_on_frame;
+
+private:
+	bool	m_movement_enabled_before_animation_controller;
+
+public:
+	virtual	void					create_anim_mov_ctrl						(CBlend *b);
+	virtual	void					destroy_anim_mov_ctrl						();
 };
 
 #include "custommonster_inline.h"

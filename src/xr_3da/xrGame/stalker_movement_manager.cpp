@@ -100,7 +100,7 @@ void CStalkerMovementManager::set_desired_position(const Fvector *desired_positi
 	else {
 		m_target.m_use_desired_position	= false;
 #ifdef DEBUG
-		m_target.m_desired_position		= Fvector().set(_sqr(flt_max),_sqr(flt_max),_sqr(flt_max));
+		m_target.m_desired_position		= Fvector().set(flt_max,flt_max,flt_max);
 #endif
 	}
 }
@@ -192,8 +192,8 @@ void CStalkerMovementManager::reinit				()
 
 	m_current.m_use_desired_position	= false;
 	m_current.m_use_desired_direction	= false;
-	m_current.m_desired_position		= Fvector().set(_sqr(flt_max),_sqr(flt_max),_sqr(flt_max));
-	m_current.m_desired_direction		= Fvector().set(_sqr(flt_max),_sqr(flt_max),_sqr(flt_max));
+	m_current.m_desired_position		= Fvector().set(flt_max,flt_max,flt_max);
+	m_current.m_desired_direction		= Fvector().set(flt_max,flt_max,flt_max);
 	m_current.m_body_state				= eBodyStateStand;
 	m_current.m_movement_type			= eMovementTypeStand;
 	m_current.m_mental_state			= eMentalStateDanger;
@@ -514,8 +514,11 @@ void CStalkerMovementManager::set_nearest_accessible_position(Fvector desired_po
 	set_desired_position		(&desired_position);
 }
 
-void CStalkerMovementManager::update(u32 time_delta)
+void CStalkerMovementManager::update					(u32 time_delta)
 {
+	if (!enabled())
+		return;
+
 	VERIFY						((m_target.m_mental_state != eMentalStateFree) || (m_target.m_body_state != eBodyStateCrouch));
 	m_current					= m_target;
 
@@ -603,7 +606,7 @@ bool CStalkerMovementManager::is_object_on_the_way		(const CGameObject *object, 
 	return								(m_last_query_result);
 }
 
-IC float distance_to_line(const Fvector &p0, const Fvector &p1, const Fvector &p2)
+IC float distance_to_line								(const Fvector &p0, const Fvector &p1, const Fvector &p2)
 {
 	if (p0.similar(p2))
 		return							(0.f);

@@ -30,6 +30,7 @@ IC	const CLevelGraph	*CAI_Space::get_level_graph					() const
 	return					(m_level_graph);
 }
 
+#ifndef PRIQUEL
 IC	const CGameLevelCrossTable	&CAI_Space::cross_table				() const
 {
 	VERIFY					(m_cross_table);
@@ -40,6 +41,7 @@ IC	const CGameLevelCrossTable	*CAI_Space::get_cross_table			() const
 {
 	return					(m_cross_table);
 }
+#endif // PRIQUEL
 
 IC	CEF_Storage					&CAI_Space::ef_storage				() const
 {
@@ -62,11 +64,6 @@ IC	const CALifeSimulator		&CAI_Space::alife					() const
 IC	const CALifeSimulator		*CAI_Space::get_alife				() const
 {
 	return					(m_alife_simulator);
-}
-
-IC	void						CAI_Space::set_alife				(CALifeSimulator *alife_simulator)
-{
-	m_alife_simulator		= alife_simulator;
 }
 
 IC	const CCoverManager			&CAI_Space::cover_manager			() const

@@ -9,7 +9,6 @@
 #pragma once
 
 #include "property_evaluator.h"
-#include "script_space.h"
 
 class CScriptGameObject;
 

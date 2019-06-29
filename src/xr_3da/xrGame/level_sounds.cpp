@@ -68,9 +68,9 @@ void SMusicTrack::Load(LPCSTR fn, LPCSTR params)
 	m_DbgName			= fn;
 #endif
 	// create source
-	string256			_l, _r;
-	strconcat			(_l, fn, "_l");
-	strconcat			(_r, fn, "_r");
+	string_path			_l, _r;
+	strconcat			(sizeof(_l),_l, fn, "_l");
+	strconcat			(sizeof(_r),_r, fn, "_r");
 	m_SourceLeft.create	(_l,st_Music,sg_Undefined);
 	m_SourceRight.create(_r,st_Music,sg_Undefined);
 	// parse params
@@ -137,8 +137,8 @@ void CLevelSoundManager::Load()
 			if (music_sect && music_sect[0]){
 				Msg("- Loading music tracks from '%s'...",music_sect);
 				CInifile::Sect&	S	= gameLtx.r_section	(music_sect);
-				CInifile::SectIt it	= S.begin(), end = S.end();
-				m_MusicTracks.reserve	(S.size());
+				CInifile::SectCIt it	= S.Data.begin(), end = S.Data.end();
+				m_MusicTracks.reserve	(S.Data.size());
 				for (;it!=end; it++){
 					m_MusicTracks.push_back	(SMusicTrack());
 					m_MusicTracks.back().Load(*it->first,*it->second);

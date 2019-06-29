@@ -3,7 +3,6 @@
 
 #include "xrMessages.h"
 /////////////////////// QR2 ///////////////////////////////////////
-//void			xrGameSpyServer::QR2_Init			(u32 PortID)
 void			xrGameSpyServer::QR2_Init			(int PortID)
 {	
 	if (!m_QR2.Init(PortID, m_iReportToMasterServer, this)) return;

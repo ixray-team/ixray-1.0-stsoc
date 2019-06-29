@@ -170,13 +170,27 @@ BOOL CBaseMonster::net_Spawn (CSE_Abstract* DC)
 		return(FALSE);
 
 	CSE_Abstract							*e	= (CSE_Abstract*)(DC);
-	m_pPhysics_support->in_NetSpawn			(e);
+#ifndef PRIQUEL
+	m_pPhysics_support->in_NetSpawn			(e);//этот выззов с послудующими не связан, 
+												//но там есть хак - запуск анимации на всякий случай если никто больше ее не запустил 
+												//поэтому в основной версии на всякий случай пусть будет здесь, 
+												//но для animation movement controllr он должен быть в конце чтобы знать что он создался на споне
+#endif
 
 	R_ASSERT2								(ai().get_level_graph() && ai().get_cross_table() && (ai().level_graph().level_id() != u32(-1)),"There is no AI-Map, level graph, cross table, or graph is not compiled into the game graph!");
 
 	monster_squad().register_member			((u8)g_Team(),(u8)g_Squad(),(u8)g_Group(), this);
 
 	settings_overrides						();
+
+#ifdef PRIQUEL
+	if (GetScriptControl()) {
+		m_control_manager->animation().reset_data	();
+		ProcessScripts						();
+	}
+	m_pPhysics_support->in_NetSpawn			(e);
+#endif
+
 
 	// spawn inventory item
 //	if (ai().get_alife()) {
@@ -361,8 +375,8 @@ void CBaseMonster::fill_bones_body_parts	(LPCSTR body_part, CriticalWoundType wo
 	VERIFY					(kinematics);
 
 	CInifile::Sect			&body_part_section = pSettings->r_section(body_parts_section);
-	CInifile::SectIt		I = body_part_section.begin();
-	CInifile::SectIt		E = body_part_section.end();
+	CInifile::SectCIt		I = body_part_section.Data.begin();
+	CInifile::SectCIt		E = body_part_section.Data.end();
 	for ( ; I != E; ++I)
 		m_bones_body_parts.insert	(
 			std::make_pair(

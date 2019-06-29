@@ -46,7 +46,7 @@ IC BOOL dBodyStateValide(const dBodyID body)
 	Msg(" %s	\n", msg);\
 	Msg(" pos: %f,%f,%f, seems to be invalid", pos.x,pos.y,pos.z);\
 	Msg("Level box: %f,%f,%f-%f,%f,%f,",bounds.x1,bounds.y1,bounds.z1,bounds.x2,bounds.y2,bounds.z2);\
-	Msg("Object: %s",obj->Name());\
+	Msg("Object: %s",*(obj->Name()));\
 	Msg("Visual: %s",*(obj->cNameVisual()));\
 	VERIFY(0);\
 }\

@@ -6,9 +6,8 @@
 //	Description : Game graph class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "game_graph.h"
-#include "script_space.h"
 #include "ai_space.h"
 
 using namespace luabind;

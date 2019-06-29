@@ -12,10 +12,11 @@ class CBlend;
 typedef void	( * PlayCallback)		(CBlend*		P);
 
 const	u32		MAX_PARTS			=	4;
+const	u32		MAX_CHANNELS		=	4;
 const	f32		SAMPLE_FPS			=	30.f;
 const	f32		SAMPLE_SPF			=	(1.f/SAMPLE_FPS);
-const	f32		KEY_Quant			= 32767.f;
-const	f32		KEY_QuantI			= 1.f/KEY_Quant;
+const	f32		KEY_Quant			=	32767.f;
+const	f32		KEY_QuantI			=	1.f/KEY_Quant;
 
 //*** Key frame definition ************************************************************************
 enum{
@@ -53,10 +54,10 @@ public:
 public:    
     void				set_flags			(u8 val)			{_flags=val;}
     void				set_flag			(u8 mask, u8 val)	{if (val)_flags|=mask; else _flags&=~mask;}
-    BOOL				test_flag			(u8 mask)			{return BOOL(_flags&mask);}
+    BOOL				test_flag			(u8 mask) const		{return BOOL(_flags&mask);}
 
     void				set_count			(u32 cnt){VERIFY(cnt); _count=cnt;}
-    u32					get_count			(){return (u32(_count)&0x00FFFFFF);}
+    u32					get_count			() const {return (u32(_count)&0x00FFFFFF);}
 
 	float				GetLength			(){ return float(_count)*SAMPLE_SPF; }
 
@@ -67,29 +68,56 @@ public:
 		return			sz;
 	}
 };
+
+class ENGINE_API motion_marks
+{
+public:
+	typedef					std::pair<  float, float > 				interval;
+#ifdef _EDITOR
+public:
+#else
+private:
+#endif
+	typedef xr_vector< interval >									STORAGE;
+	typedef STORAGE::iterator										ITERATOR;
+	typedef STORAGE::const_iterator									C_ITERATOR;
+
+	STORAGE			intervals;	
+public:
+	shared_str		name;
+	void			Load			(IReader*);
+
+#ifdef _EDITOR
+	void			Save			(IWriter*);
+#endif
+	bool			pick_mark		(const float& t) const;
+};
+
+
 const float	fQuantizerRangeExt	= 1.5f;
 class ENGINE_API		CMotionDef
 {
 public:
-    u16					bone_or_part;
-	u16					motion;
-	u16					speed;				// quantized: 0..10
-	u16					power;				// quantized: 0..10
-	u16					accrue;				// quantized: 0..10
-	u16					falloff;			// quantized: 0..10
-    u16					flags;
+    u16						bone_or_part;
+	u16						motion;
+	u16						speed;				// quantized: 0..10
+	u16						power;				// quantized: 0..10
+	u16						accrue;				// quantized: 0..10
+	u16						falloff;			// quantized: 0..10
+    u16						flags;
+	xr_vector<motion_marks>	marks;
 
-	IC float			Dequantize			(u16 V)		{	return  float(V)/655.35f; }
-	IC u16				Quantize			(float V)	{	s32		t = iFloor(V*655.35f); clamp(t,0,65535); return u16(t); }
+	IC float				Dequantize			(u16 V)		{	return  float(V)/655.35f; }
+	IC u16					Quantize			(float V)	{	s32		t = iFloor(V*655.35f); clamp(t,0,65535); return u16(t); }
 
-	void				Load				(IReader* MP, u32 fl);
-	u32					mem_usage			(){ return sizeof(*this);}
+	void					Load				(IReader* MP, u32 fl, u16 vers);
+	u32						mem_usage			(){ return sizeof(*this);}
 
-    ICF float			Accrue				(){return fQuantizerRangeExt*Dequantize(accrue);}
-    ICF float			Falloff				(){return fQuantizerRangeExt*Dequantize(falloff);}
-    ICF float			Speed				(){return Dequantize(speed);}
-    ICF float			Power				(){return Dequantize(power);}
-    bool				StopAtEnd			();
+    ICF float				Accrue				(){return fQuantizerRangeExt*Dequantize(accrue);}
+    ICF float				Falloff				(){return fQuantizerRangeExt*Dequantize(falloff);}
+    ICF float				Speed				(){return Dequantize(speed);}
+    ICF float				Power				(){return Dequantize(power);}
+    bool					StopAtEnd			();
 };
 struct accel_str_pred : public std::binary_function<shared_str, shared_str, bool>	{	
 	IC bool operator()(const shared_str& x, const shared_str& y) const	{	return xr_strcmp(x,y)<0;	}
@@ -130,9 +158,9 @@ struct ENGINE_API		motions_value
 	u32					m_dwReference;
 	BoneMotionMap		m_motions;
     MotionDefVec		m_mdefs;
-#ifdef DEBUG
+
 	shared_str			m_id;
-#endif // DEBUG
+
 
 	BOOL				load				(LPCSTR N, IReader *data, vecBones* bones);
 	MotionVec*			bone_motions		(shared_str bone_name);
@@ -191,9 +219,9 @@ public:
 	CPartition*			partition		()							{	VERIFY(p_); return &p_->m_partition;			}
     MotionDefVec*		motion_defs		()							{	VERIFY(p_); return &p_->m_mdefs;				}
     CMotionDef*			motion_def		(u16 idx)					{	VERIFY(p_); return &p_->m_mdefs[idx];			}
-#ifdef DEBUG
+
 	const shared_str	&id				() const					{	VERIFY(p_); return p_->m_id;					}
-#endif // DEBUG
+
 };
 //---------------------------------------------------------------------------
 #endif

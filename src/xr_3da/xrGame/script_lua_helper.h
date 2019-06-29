@@ -11,9 +11,9 @@ class CDbgLuaHelper
 public:
 	void		RestoreGlobals				();
 	void		CoverGlobals				();
-	void		Describe					(char* szRet, int nIndex);
-	bool		Eval						(const char* szCode, char* szRet);
-	bool		GetCalltip					(const char *szWord, char *szCalltip);
+	void		Describe					(char* szRet, int nIndex, int szRet_size);
+	bool		Eval						(const char* szCode, char* szRet, int szret_size);
+	bool		GetCalltip					(const char *szWord, char *szCalltip, int sz_calltip);
 	void		DrawGlobalVariables			();
 	void		DrawLocalVariables			();
 	const char* GetSource					();

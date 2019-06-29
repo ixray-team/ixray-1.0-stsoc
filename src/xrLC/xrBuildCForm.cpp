@@ -149,8 +149,8 @@ void CBuild::BuildCForm	()
 		BB.modify( CL.getV()[it] );
 
 	// Saving
-	string512		fn;
-	IWriter*		MFS	= FS.w_open	(strconcat(fn,pBuild->path,"level.cform"));
+	string_path		fn;
+	IWriter*		MFS	= FS.w_open	(strconcat(sizeof(fn),fn,pBuild->path,"level.cform"));
 	Status			("Saving...");
 
 	// Header

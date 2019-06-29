@@ -17,6 +17,5 @@ public:
 	LPCSTR		 GetHost			();
 	LPCSTR		 GetPassword		();
 
-protected:			
     CUIMessageBox*	m_pMessageBox;
 };

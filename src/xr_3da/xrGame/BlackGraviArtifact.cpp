@@ -68,12 +68,12 @@ BOOL CBlackGraviArtefact::net_Spawn(CSE_Abstract* DC)
 }
 struct SRP
 {
-	CPhysicsShellHolder* obj;
-		SRP(CPhysicsShellHolder* O)
+	const CPhysicsShellHolder* obj;
+		SRP(const CPhysicsShellHolder* O)
 		{
 			obj=O;
 		}
-	bool operator	() (const CPhysicsShellHolder* &O)
+	bool operator	() (CPhysicsShellHolder* O) const
 	{
 		return obj==O;
 	}

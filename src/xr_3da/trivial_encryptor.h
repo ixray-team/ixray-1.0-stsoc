@@ -13,7 +13,9 @@
 
 //#define trivial_encryptor	temp_stuff
 
-//#define RUSSIAN_BUILD
+/**/
+#define RUSSIAN_BUILD
+/**/
 
 class trivial_encryptor {
 private:

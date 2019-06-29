@@ -7,11 +7,13 @@
 #define EOBJ_OMOTION   			0x1100
 #define EOBJ_SMOTION   			0x1200
 #define EOBJ_OMOTION_VERSION   	0x0005
-#define EOBJ_SMOTION_VERSION   	0x0006
+#define EOBJ_SMOTION_VERSION   	0x0007
 
 #ifdef _LW_EXPORT
 	extern void ReplaceSpaceAndLowerCase(shared_str& s);
 #endif
+
+
 //------------------------------------------------------------------------------------------
 // CCustomMotion
 //------------------------------------------------------------------------------------------
@@ -240,6 +242,8 @@ BOOL COMotion::NormalizeKeys(float from_time, float to_time, float speed)
 //------------------------------------------------------------------------------------------
 // Skeleton Motion
 //------------------------------------------------------------------------------------------
+#ifdef _EDITOR
+
 //#include "SkeletonCustom.h"
 CSMotion::CSMotion():CCustomMotion()
 {
@@ -358,6 +362,12 @@ void CSMotion::Save(IWriter& F)
 		for (int ch=0; ch<ctMaxChannel; ch++)
 			bm_it->envs[ch]->Save(F);
 	}
+
+    u32 sz			= marks.size();
+    F.w_u32			(sz);
+    for(u32 i=0; i<sz; ++i)
+      marks[i].Save(&F);
+
 }
 
 bool CSMotion::Load(IReader& F)
@@ -402,26 +412,38 @@ bool CSMotion::Load(IReader& F)
                 }
             }
         }else{
-            if (vers!=EOBJ_SMOTION_VERSION) return false;
-            m_Flags.assign	(F.r_u8());
-            m_BoneOrPart= F.r_u16();
-            fSpeed		= F.r_float();
-            fAccrue		= F.r_float();
-            fFalloff	= F.r_float();
-            fPower		= F.r_float();
-            bone_mots.resize(F.r_u16());
-            string64 	buf;
-            for(BoneMotionIt bm_it=bone_mots.begin(); bm_it!=bone_mots.end(); bm_it++){
-                F.r_stringZ		(buf,sizeof(buf));
-                bm_it->SetName	(buf);
-                bm_it->m_Flags.assign(F.r_u8());
-                for (int ch=0; ch<ctMaxChannel; ch++){
-                    bm_it->envs[ch] = xr_new<CEnvelope> ();
-                    bm_it->envs[ch]->Load_2(F);
+            if (vers>=0x0006)
+            {
+                m_Flags.assign	(F.r_u8());
+                m_BoneOrPart= F.r_u16();
+                fSpeed		= F.r_float();
+                fAccrue		= F.r_float();
+                fFalloff	= F.r_float();
+                fPower		= F.r_float();
+                bone_mots.resize(F.r_u16());
+                string64 	buf;
+                for(BoneMotionIt bm_it=bone_mots.begin(); bm_it!=bone_mots.end(); bm_it++){
+                    F.r_stringZ		(buf,sizeof(buf));
+                    bm_it->SetName	(buf);
+                    bm_it->m_Flags.assign(F.r_u8());
+                    for (int ch=0; ch<ctMaxChannel; ch++){
+                        bm_it->envs[ch] = xr_new<CEnvelope> ();
+                        bm_it->envs[ch]->Load_2(F);
+                    }
                 }
             }
         }
 	}
+    if(vers>=0x0007)
+    {
+    	u32 sz 			= F.r_u32();
+        if(sz>0)
+        {
+        	marks.resize	(sz);
+            for(u32 i=0; i<sz; ++i)
+              marks[i].Load(&F);
+        }
+    }
 	for(BoneMotionIt bm_it=bone_mots.begin(); bm_it!=bone_mots.end(); bm_it++)
     	xr_strlwr		(bm_it->name);
 	return true;
@@ -445,6 +467,7 @@ void CSMotion::SortBonesBySkeleton(BoneVec& bones)
     bone_mots.clear	();
     bone_mots 		= new_bone_mots;
 }
+#endif
 
 void SAnimParams::Set(float start_frame, float end_frame, float fps)
 {
@@ -465,11 +488,13 @@ void SAnimParams::Update(float dt, float speed, bool loop)
 	t			+=speed*dt;
     if (t>max_t){
 		bWrapped= true;
-		if (loop){ 
+		if (loop)
+        {
         	float len = max_t-min_t;
         	float k = float(iFloor((t-min_t)/len));
-        	t	= t-k*len; 
-        }
+        	t	= t-k*len;
+        }else
+            t   = max_t;
 	}
 }
 

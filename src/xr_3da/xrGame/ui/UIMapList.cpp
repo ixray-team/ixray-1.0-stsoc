@@ -172,12 +172,14 @@ const char* CUIMapList::GetCommandLine(LPCSTR player_name){
 	m_command += GetCLGameModeName();
 	m_command += m_srv_params;
 	m_command += "/estime=";
-	const char* weather = m_pWeatherSelector->GetText();
-	int estime = (*m_mapWeather.find(weather)).second;	
-	m_command += itoa(estime/60,buf,10);
-	m_command += ":";
-	m_command += itoa(estime%60,buf,10);
-	m_command += ")";
+	
+	u32 id		= m_pWeatherSelector->GetListWnd()->GetSelectedItem()->GetTAG();
+
+	int estime  = m_mapWeather[id].weather_time;
+	m_command	+= itoa(estime/60,buf,10);
+	m_command	+= ":";
+	m_command	+= itoa(estime%60,buf,10);
+	m_command	+= ")";
 
 
 	m_command +=" client(localhost/name=";
@@ -189,54 +191,26 @@ const char* CUIMapList::GetCommandLine(LPCSTR player_name){
 
     return m_command.c_str();
 }
-
+#include "../UIGameCustom.h"
 void CUIMapList::LoadMapList()
 {
-	string_path				fn;
-	FS.update_path			(fn, "$game_config$", MAP_LIST);
-	CInifile map_list_cfg	(fn);
 
-	// maps
-	for (int k=0; game_types[k].name; ++k)
-	{
-		EGameTypes _id			= (EGameTypes)game_types[k].id;
-		LPCSTR _name			= game_types[k].name;
-
-		if( !map_list_cfg.section_exist(_name) ) continue;
-
-		CInifile::Sect& S		= map_list_cfg.r_section(_name);
-		CInifile::SectIt it		= S.begin(), end = S.end();
-		
-		for (;it!=end; ++it){
-			shared_str _map_name = it->first;
-			m_maps[_id].push_back	(_map_name);
-		}
-	}
-
-	//weather
-	shared_str				weather_sect = "weather";
-	CInifile::Sect& S		= map_list_cfg.r_section(weather_sect);
-	CInifile::SectIt it		= S.begin(), end = S.end();
+	GAME_WEATHERS game_weathers = gMapListHelper.GetGameWeathers();
+	GAME_WEATHERS_CIT it		= game_weathers.begin();
+	GAME_WEATHERS_CIT it_e		= game_weathers.end();
 	
-	shared_str				WeatherType;
-	shared_str				WeatherTime;
-
-		
-	for (u32 cnt=0; it!=end; ++it, ++cnt)
+	u32 cnt=0;
+	for( ;it!=it_e; ++it, ++cnt)
 	{
-		WeatherType			= it->first;
-		WeatherTime			= map_list_cfg.r_string(weather_sect, *WeatherType);
-
-		AddWeather			(WeatherType, WeatherTime, cnt);
+		AddWeather			( (*it).m_weather_name, (*it).m_start_time, cnt);
 	}
-
-	if(S.size())
+	if( game_weathers.size() )
 		m_pWeatherSelector->SetItem(0);
 }
 
 void	CUIMapList::SaveMapList()
 {
-	string256					temp;
+	string_path					temp;
 	FS.update_path				(temp,"$app_data_root$", MAP_ROTATION_LIST);
 
 	if(m_pList2->GetSize()<=1){
@@ -257,7 +231,7 @@ void	CUIMapList::SaveMapList()
 		u32 _idx						= (u32)(__int64)(itm->GetData());
 		const shared_str& _map_name		= GetMapNameInt(GetCurGameType(), _idx);
 
-		sprintf							(map_name, "sv_addmap %s", _map_name.c_str() );
+		sprintf_s							(map_name, "sv_addmap %s", _map_name.c_str() );
 
 		pW->w_string					(map_name);
 	}
@@ -289,41 +263,46 @@ void CUIMapList::SetServerParams(LPCSTR params){
 void CUIMapList::AddWeather(const shared_str& WeatherType, const shared_str& WeatherTime, u32 _id)
 {
 	R_ASSERT2					(m_pWeatherSelector, "m_pWeatherSelector == NULL");
-	m_pWeatherSelector->AddItem_	(*WeatherType, 0)->SetID(_id);
+	m_pWeatherSelector->AddItem_	(*WeatherType, 0)->SetTAG(_id);
 
 	int	w_time;
 	int hour = 0, min = 0;
 
 	sscanf(*WeatherTime, "%d:%d", &hour, &min);
 	w_time = hour*60+min;
-
-	m_mapWeather.insert(mk_pair(WeatherType, w_time));
+	
+	m_mapWeather.resize(m_mapWeather.size()+1);
+	m_mapWeather.back().weather_name = WeatherType;
+	m_mapWeather.back().weather_time = w_time;
 }
 
 void CUIMapList::InitFromXml(CUIXml& xml_doc, const char* path){
 	CUIXmlInit::InitWindow(xml_doc, path, 0, this);
 	string256 buf;
-	CUIXmlInit::InitLabel		(xml_doc, strconcat(buf, path, ":header_1"),	0, m_pLbl1);
-	CUIXmlInit::InitLabel		(xml_doc, strconcat(buf, path, ":header_2"),	0, m_pLbl2);
-	CUIXmlInit::InitFrameWindow	(xml_doc, strconcat(buf, path, ":frame_1"),		0, m_pFrame1);
-	CUIXmlInit::InitFrameWindow	(xml_doc, strconcat(buf, path, ":frame_2"),		0, m_pFrame2);
-	CUIXmlInit::InitListBox		(xml_doc, strconcat(buf, path, ":list_1"),		0, m_pList1);
-	CUIXmlInit::InitListBox		(xml_doc, strconcat(buf, path, ":list_2"),		0, m_pList2);
-	CUIXmlInit::Init3tButton	(xml_doc, strconcat(buf, path, ":btn_left"),	0, m_pBtnLeft);
-	CUIXmlInit::Init3tButton	(xml_doc, strconcat(buf, path, ":btn_right"),	0, m_pBtnRight);
-	CUIXmlInit::Init3tButton	(xml_doc, strconcat(buf, path, ":btn_up"),		0, m_pBtnUp);
-	CUIXmlInit::Init3tButton	(xml_doc, strconcat(buf, path, ":btn_down"),	0, m_pBtnDown);
+	CUIXmlInit::InitLabel		(xml_doc, strconcat(sizeof(buf),buf, path, ":header_1"),	0, m_pLbl1);
+	CUIXmlInit::InitLabel		(xml_doc, strconcat(sizeof(buf),buf, path, ":header_2"),	0, m_pLbl2);
+	CUIXmlInit::InitFrameWindow	(xml_doc, strconcat(sizeof(buf),buf, path, ":frame_1"),		0, m_pFrame1);
+	CUIXmlInit::InitFrameWindow	(xml_doc, strconcat(sizeof(buf),buf, path, ":frame_2"),		0, m_pFrame2);
+	CUIXmlInit::InitListBox		(xml_doc, strconcat(sizeof(buf),buf, path, ":list_1"),		0, m_pList1);
+	CUIXmlInit::InitListBox		(xml_doc, strconcat(sizeof(buf),buf, path, ":list_2"),		0, m_pList2);
+	CUIXmlInit::Init3tButton	(xml_doc, strconcat(sizeof(buf),buf, path, ":btn_left"),	0, m_pBtnLeft);
+	CUIXmlInit::Init3tButton	(xml_doc, strconcat(sizeof(buf),buf, path, ":btn_right"),	0, m_pBtnRight);
+	CUIXmlInit::Init3tButton	(xml_doc, strconcat(sizeof(buf),buf, path, ":btn_up"),		0, m_pBtnUp);
+	CUIXmlInit::Init3tButton	(xml_doc, strconcat(sizeof(buf),buf, path, ":btn_down"),	0, m_pBtnDown);
 }
 
-void CUIMapList::UpdateMapList(EGameTypes GameType){
+void CUIMapList::UpdateMapList(EGameTypes GameType)
+{
 	m_pList1->Clear				();
 	m_pList2->Clear				();
 
-	for (u32 i=0; i<m_maps[GameType].size(); ++i)
+	const SGameTypeMaps& M		= gMapListHelper.GetMapListFor(GameType);
+	u32 cnt						= M.m_map_names.size();
+	for (u32 i=0; i<cnt; ++i)
 	{
-		CUIListBoxItem* itm		= m_pList1->AddItem( CStringTable().translate(m_maps[GameType][i]).c_str() );
+		CUIListBoxItem* itm		= m_pList1->AddItem( CStringTable().translate(M.m_map_names[i]).c_str() );
 		itm->SetData			( (void*)(__int64)i );
-		itm->Enable(m_pExtraContentFilter->IsDataEnabled(m_maps[GameType][i].c_str()));
+		itm->Enable(m_pExtraContentFilter->IsDataEnabled(M.m_map_names[i].c_str()));
 	}
 }
 
@@ -357,7 +336,7 @@ bool CUIMapList::IsEmpty(){
 
 const shared_str& CUIMapList::GetMapNameInt(EGameTypes _type, u32 idx)
 {
-	shared_str_vec_it it = m_maps[_type].begin();
-	std::advance(it, idx);
-	return *it;
+	const SGameTypeMaps& M		= gMapListHelper.GetMapListFor(_type);
+	R_ASSERT					(M.m_map_names.size()>idx);
+	return						M.m_map_names[idx];
 }

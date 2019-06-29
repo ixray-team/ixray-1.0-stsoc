@@ -20,8 +20,13 @@ public:
 	bool					m_bVisible;
 	int						m_blockCounter;
 };
+enum EActivationReason{
+	eGeneral,
+	eKeyAction,
+	eImportUpdate,
+};
 
-typedef svector<CInventorySlot,SLOTS_TOTAL> TISlotArr;
+typedef xr_vector<CInventorySlot> TISlotArr;
 
 
 class CInventory
@@ -34,8 +39,7 @@ public:
 	float 					CalcTotalWeight		();
 
 	void					Take				(CGameObject *pObj, bool bNotActivate, bool strict_placement);
-	bool					Drop				(CGameObject *pObj, bool call_drop = true);							// Выбросить объект
-	bool					DropAll				();	
+	bool					DropItem			(CGameObject *pObj);
 	void					Clear				();
 
 	
@@ -54,18 +58,17 @@ public:
 	bool					CanTakeItem			(CInventoryItem *inventory_item) const;
 
 
-	bool					Activate			(u32 slot, bool force=false);
+	bool					Activate			(u32 slot, EActivationReason reason=eGeneral, bool bForce=false);
 	void					Activate_deffered	(u32 slot, u32 _frame);
 	PIItem					ActiveItem			()const					{return m_iActiveSlot==NO_ACTIVE_SLOT ? NULL :m_slots[m_iActiveSlot].m_pIItem;}
 	PIItem					ItemFromSlot		(u32 slot) const;
-
+	void					ActivateNextItemInActiveSlot();
 	bool					Action				(s32 cmd, u32 flags);
 	void					Update				();
-
 	// Ищет на поясе аналогичный IItem
 	PIItem					Same				(const PIItem pIItem, bool bSearchRuck) const;
 	// Ищет на поясе IItem для указанного слота
-	PIItem					SameSlot			(const PIItem pIItem,	 bool bSearchRuck) const;
+	PIItem					SameSlot			(const u32 slot, PIItem pIItem, bool bSearchRuck) const;
 	// Ищет на поясе или в рюкзаке IItem с указанным именем (cName())
 	PIItem					Get					(const char *name, bool bSearchRuck) const;
 	// Ищет на поясе или в рюкзаке IItem с указанным именем (id)
@@ -130,6 +133,9 @@ public:
 	void				Items_SetCurrentEntityHud	(bool current_entity);
 	bool				isBeautifulForActiveSlot	(CInventoryItem *pIItem);
 protected:
+	void					UpdateDropTasks		();
+	void					UpdateDropItem		(PIItem pIItem);
+
 	// Активный слот и слот который станет активным после смены
     //значения совпадают в обычном состоянии (нет смены слотов)
 	u32 				m_iActiveSlot;
@@ -137,6 +143,7 @@ protected:
 	u32 				m_iPrevActiveSlot;
 	u32 				m_iLoadActiveSlot;
 	u32 				m_iLoadActiveSlotFrame;
+	EActivationReason	m_ActivationSlotReason;
 
 	CInventoryOwner*	m_pOwner;
 
@@ -159,9 +166,6 @@ protected:
 	//кадр на котором произошло последнее изменение в инвенторе
 	u32					m_dwModifyFrame;
 
-//.	int					m_bDoBlockAllSlots;
-	
-	xr_vector<PIItem>	m_drop_tasks;
 	bool				m_drop_last_frame;
 
 	void				SendActionEvent		(s32 cmd, u32 flags);

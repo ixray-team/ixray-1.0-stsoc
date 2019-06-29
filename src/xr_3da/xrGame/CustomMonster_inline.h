@@ -91,4 +91,12 @@ IC void CCustomMonster::critical_wounded_state_stop	()
 	m_critical_wound_type = u32(-1);
 }
 
+IC		void CCustomMonster::invulnerable			(const bool &invulnerable)
+{
+	m_invulnerable	= invulnerable;
+}
 
+IC		bool CCustomMonster::invulnerable			() const
+{
+	return			(m_invulnerable);
+}

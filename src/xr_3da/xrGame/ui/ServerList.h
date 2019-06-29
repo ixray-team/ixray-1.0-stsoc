@@ -6,7 +6,7 @@
 #include "UIFrameWindow.h"
 #include "UIEditBox.h"
 #include "UI3tButton.h"
-
+#include "../battleye.h"
 
 
 class CUIXml;
@@ -29,7 +29,7 @@ public:
 	bool	with_pass;
 	bool	without_pass;
 	bool	without_ff;
-	bool	without_pb;
+	bool	with_battleye;
 	bool	listen_servers;
 };
 
@@ -41,7 +41,7 @@ public:
 	virtual void 	Init				(float x, float y, float width, float height);
 	virtual void 	Update				();
 	virtual void 	SendMessage			(CUIWindow* pWnd, s16 msg, void* pData = NULL);
-			void 	InitFromXml			(CUIXml& xml_doc, const char* path);
+			void 	InitFromXml			(CUIXml& xml_doc, LPCSTR path);
 			void 	InitHeader			();
 			void 	InitSeparator		();
 			void 	AddServerToList		(ServerInfo* pServerInfo);
@@ -49,8 +49,8 @@ public:
 			void 	UpdateServerInList	(ServerInfo* pServerInfo, CUIListItemServer* pItem);
 			void 	ConnectToSelected	();
 			void 	SetFilters			(SServerFilters& sf);
-			void 	SetPlayerName		(const char* name);
-			void 	SetSortFunc			(const char* func_name, bool make_sort);
+			void 	SetPlayerName		(LPCSTR name);
+			void 	SetSortFunc			(LPCSTR func_name, bool make_sort);
 			void	NetRadioChanged		(bool Local);
 	virtual void	RefreshGameSpyList	(bool Local);
 			void	RefreshQuick();

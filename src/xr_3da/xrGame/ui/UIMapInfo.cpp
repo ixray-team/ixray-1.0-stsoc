@@ -58,7 +58,7 @@ void CUIMapInfo::InitMap(const char* map_name){
 
 	if (FS.exist("$game_config$", info_path.c_str()))
 	{
-		string256				ltxPath;
+		string_path				ltxPath;
 		FS.update_path			(ltxPath, CONFIG_PATH, info_path.c_str());
 		CInifile ltx			(ltxPath);
 		xr_string				text;
@@ -79,7 +79,7 @@ void CUIMapInfo::InitMap(const char* map_name){
 		CUIXmlInit::InitFont	(xml_doc,"header",0,header_color, txt_font);
 		txt_color				= CUIXmlInit::GetColor(xml_doc,"txt:text", 0, 0x00);
 		string64				txt_color_tag;
-		sprintf					(txt_color_tag, "%s[%u,%u,%u,%u]", "%c", 
+		sprintf_s					(txt_color_tag, "%s[%u,%u,%u,%u]", "%c", 
 								(txt_color & 0xff000000)>>24, 
 								(txt_color & 0x00ff0000)>>16, 
 								(txt_color & 0x0000ff00) >> 8, 
@@ -91,7 +91,7 @@ void CUIMapInfo::InitMap(const char* map_name){
 		
 		shared_str _modes = ltx.r_string_wb("map_info", "modes");
 
-			text = *str_tbl.translate("modes");
+			text = *str_tbl.translate("mm_mp_gamemode");
 			text += ": ";
 			text += txt_color_tag;
 			bool b_ = false;

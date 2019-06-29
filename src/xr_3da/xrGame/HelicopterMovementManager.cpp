@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "Helicopter.h"
 #include "level.h"
 #include "patrol_path.h"
@@ -24,9 +24,15 @@ void SHeliMovementState::net_Destroy()
 void SHeliMovementState::Load(LPCSTR section)
 {
 	float angularSpeedPitch		= pSettings->r_float(section,"path_angular_sp_pitch");
+	AngSP					= angularSpeedPitch;
 	float angularSpeedHeading	= pSettings->r_float(section,"path_angular_sp_heading");
+	AngSH					= angularSpeedHeading;
 	LinearAcc_fw			= pSettings->r_float(section,"path_linear_acc_fw");
 	LinearAcc_bk			= pSettings->r_float(section,"path_linear_acc_bk");
+	if(pSettings->line_exist(section,"flag_by_new_acc"))
+		isAdnAcc				= pSettings->r_float(section,"flag_by_new_acc");		
+	else
+		isAdnAcc				= 0;
 	onPointRangeDist		= pSettings->r_float(section,"on_point_range_dist");
 	maxLinearSpeed			= pSettings->r_float(section,"velocity");
 	min_altitude			= pSettings->r_float(section,"min_altitude");
@@ -44,12 +50,18 @@ void SHeliMovementState::Load(LPCSTR section)
 
 float SHeliMovementState::GetAngSpeedPitch(float speed)
 {
-	return PitchSpK*speed+PitchSpB;// angularSpeedPitch; // linear
+	return PitchSpK*speed+PitchSpB;
+		//PitchSpK*speed+PitchSpB;
+		//(AngSP - PitchSpB)*speed*AngSP + PitchSpB;
+		//PitchSpB/(1 + speed * AngSP); //+-0.10
 }
 
 float SHeliMovementState::GetAngSpeedHeading(float speed)
 {
-	return HeadingSpK*speed+HeadingSpB;
+	if (isAdnAcc==0) return HeadingSpK*speed+HeadingSpB;
+
+	else return AngSH/(2*HeadingSpB-AngSH + speed * (HeadingSpB-AngSH) / 2);
+		//HeadingSpK*speed+HeadingSpB; old veersion
 }
 
 void SHeliMovementState::Update()
@@ -356,7 +368,7 @@ void SHeliMovementState::goByRoundPath(Fvector center_, float radius_, bool cloc
 	it_e = round_points.end();
 	for(;it!=it_e;++it,++pt_idx){
 		string128 pt_name;
-		sprintf(pt_name,"heli_round_path_pt_%d",pt_idx);
+		sprintf_s(pt_name,"heli_round_path_pt_%d",pt_idx);
 		CPatrolPoint pt = CPatrolPoint((CLevelGraph*)0,(CGameLevelCrossTable*)0,(CGameGraph*)0,pp,(*it).point,u32(-1),0,pt_name);
 		pp->add_vertex(pt,pt_idx);
 		if (pt_idx)

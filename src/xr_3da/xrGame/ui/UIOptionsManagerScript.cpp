@@ -1,9 +1,6 @@
-#include "StdAfx.h"
+#include "pch_script.h"
 #include "UIOptionsItem.h"
 #include "UIOptionsManagerScript.h"
-
-#include "../script_space.h"
-#include <luabind\adopt_policy.hpp>
 
 using namespace luabind;
 
@@ -41,14 +38,14 @@ void CUIOptionsManagerScript::script_register(lua_State *L)
 	module(L)
 		[
 			class_<CUIOptionsManagerScript>("COptionsManager")
-			.def(							constructor<>())
-			.def("SaveBackupValues",	CUIOptionsManagerScript::SaveBackupValues )
-			.def("SetCurrentValues",	CUIOptionsManagerScript::SetCurrentValues )
-			.def("SaveValues",			CUIOptionsManagerScript::SaveValues )
-			.def("IsGroupChanged",		CUIOptionsManagerScript::IsGroupChanged )
-			.def("UndoGroup",			CUIOptionsManagerScript::UndoGroup )
-			.def("OptionsPostAccept",	CUIOptionsManagerScript::OptionsPostAccept )
-			.def("SendMessage2Group",	CUIOptionsManagerScript::SendMessage2Group )
+			.def(						constructor<>())
+			.def("SaveBackupValues",	&CUIOptionsManagerScript::SaveBackupValues )
+			.def("SetCurrentValues",	&CUIOptionsManagerScript::SetCurrentValues )
+			.def("SaveValues",			&CUIOptionsManagerScript::SaveValues )
+			.def("IsGroupChanged",		&CUIOptionsManagerScript::IsGroupChanged )
+			.def("UndoGroup",			&CUIOptionsManagerScript::UndoGroup )
+			.def("OptionsPostAccept",	&CUIOptionsManagerScript::OptionsPostAccept )
+			.def("SendMessage2Group",	&CUIOptionsManagerScript::SendMessage2Group )
 			
 		];
 }

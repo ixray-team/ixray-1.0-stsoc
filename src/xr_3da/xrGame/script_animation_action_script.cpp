@@ -6,9 +6,8 @@
 //	Description : Script animation action class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_animation_action.h"
-#include "script_space.h"
 
 using namespace luabind;
 
@@ -47,6 +46,6 @@ void CScriptAnimationAction::script_register(lua_State *L)
 			
 			.def("anim",						&CScriptAnimationAction::SetAnimation)
 			.def("type",						&CScriptAnimationAction::SetMentalState)
-			.def("completed",					(bool (CScriptAnimationAction::*)())(CScriptAnimationAction::completed))
+			.def("completed",					(bool (CScriptAnimationAction::*)())(&CScriptAnimationAction::completed))
 	];
 }

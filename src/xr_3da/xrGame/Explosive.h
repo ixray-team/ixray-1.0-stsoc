@@ -63,7 +63,7 @@ public:
 	virtual	void				GetExplosionBox			(Fvector &size);
 	virtual void				ActivateExplosionBox	(const Fvector &size,Fvector &in_out_pos);
 			void				SetExplosionSize		(const Fvector &new_size);
-	virtual bool				Useful					();
+	virtual bool				Useful					() const;
 protected:
 			bool				IsSoundPlaying			(){return !!sndExplode._feedback();}
 			bool				IsExploded				(){return !!m_explosion_flags.test(flExploded);}

@@ -35,9 +35,29 @@ void CLevel::ClientReceive()
 		P->r_begin	(m_type);
 		switch (m_type)
 		{
+		case M_MAP_SYNC:
+			{
+				shared_str map_name;
+				P->r_stringZ(map_name);
+
+				shared_str _name		= net_Hosts.size() ? net_Hosts.front().dpSessionName:"";
+
+				if(_name.size() && _name!=map_name && OnClient())
+				{
+					Msg("!!! map sync failed. current is[%s] server is[%s]",m_name.c_str(), map_name.c_str());
+					Engine.Event.Defer	("KERNEL:disconnect");
+					Engine.Event.Defer	("KERNEL:start",m_caServerOptions.size() ? size_t( xr_strdup(*m_caServerOptions)) : 0, m_caClientOptions.size() ? size_t(xr_strdup(*m_caClientOptions)) : 0);
+				}
+			}break;
 		case M_SPAWN:			
 			{
-				if (!m_bGameConfigStarted) break;
+				if (!m_bGameConfigStarted || !bReady) 
+				{
+					Msg ("Unconventional M_SPAWN received : cgf[%s] | bReady[%s]",
+						(m_bGameConfigStarted) ? "true" : "false",
+						(bReady) ? "true" : "false");
+					break;
+				}
 				/*/
 				cl_Process_Spawn(*P);
 				/*/
@@ -64,12 +84,14 @@ void CLevel::ClientReceive()
 			break;
 		case M_UPDATE:
 			{
-//				if (m_dwPingLastSendTime == 0) m_dwPingLastSendTime = timeServer_Async();
-
 				game->net_import_update	(*P);
 				//-------------------------------------------
 				if (OnServer()) break;
 				//-------------------------------------------
+			};	// ни в коем случае нельз€ здесь ставить break, т.к. в случае если все объекты не влаз€т в пакет M_UPDATE,
+				// они досылаютс€ через M_UPDATE_OBJECTS
+		case M_UPDATE_OBJECTS:
+			{
 				Objects.net_Import		(P);
 
 				if (OnClient()) UpdateDeltaUpd(timeServer());
@@ -78,9 +100,6 @@ void CLevel::ClientReceive()
 				
 				if ((Level().timeServer() + pStat.getPing()) < P->timeReceive)
 				{
-#ifdef DEBUG
-//					Msg("! TimeServer[%d] < TimeReceive[%d]", Level().timeServer(), P->timeReceive);
-#endif
 					dTime = pStat.getPing();
 				}
 				else
@@ -89,10 +108,10 @@ void CLevel::ClientReceive()
 				u32 NumSteps = ph_world->CalcNumSteps(dTime);
 				SetNumCrSteps(NumSteps);
 			}break;
-		case M_UPDATE_OBJECTS:
-			{
-				Objects.net_Import		(P);
-			}break;
+//		case M_UPDATE_OBJECTS:
+//			{
+//				Objects.net_Import		(P);
+//			}break;
 		//----------- for E3 -----------------------------
 		case M_CL_UPDATE:
 			{
@@ -154,22 +173,6 @@ void CLevel::ClientReceive()
 				O->net_ImportInput(*P);
 			}break;
 		//---------------------------------------------------
-		case M_CL_PING_CHALLENGE:
-			{
-				NET_Packet NewP;
-				NewP.w_begin(m_type+1);//M_CL_PING_CHALLENGE_RESPOND);
-				NewP.w_u32(P->r_u32());
-				NewP.w_u32(P->r_u32());
-				NewP.w_u32(P->r_u32());
-				Send(NewP, net_flags(TRUE, TRUE));
-			}break;
-		case M_CL_PING_CHALLENGE_RESPOND:
-			{
-				u32 Time = P->r_u32();
-				u32 Ping = timeServer_Async() - Time;
-				m_dwRealPing = (m_dwRealPing*9+Ping)/10;
-			}break;
-		//---------------------------------------------------
 		case 	M_SV_CONFIG_NEW_CLIENT:
 			InitializeClientGame(*P);
 			break;
@@ -178,6 +181,7 @@ void CLevel::ClientReceive()
 			break;
 		case M_SV_CONFIG_FINISHED:
 			game_configured			= TRUE;
+			Msg("- Game configuring : Finished ");
 			break;		
 		case M_MIGRATE_DEACTIVATE:	// TO:   Changing server, just deactivate
 			{
@@ -252,8 +256,20 @@ void CLevel::ClientReceive()
 				if (!game) break;
 				Game().OnChatMessage(P);
 			}break;
+		case M_CLIENT_WARN:
+			{
+				if (!game) break;
+				Game().OnWarnMessage(P);
+			}break;
+		case M_REMOTE_CONTROL_AUTH:
+		case M_REMOTE_CONTROL_CMD:
+			{
+				Game().OnRadminMessage(m_type, P);
+			}break;
 		case M_CHANGE_LEVEL_GAME:
 			{
+				Msg("- M_CHANGE_LEVEL_GAME Received");
+
 				if (OnClient())
 				{
 					Engine.Event.Defer	("KERNEL:disconnect");
@@ -274,7 +290,7 @@ void CLevel::ClientReceive()
 					P->r_stringZ(GameType);
 
 					string4096 NewServerOptions = "";
-					sprintf(NewServerOptions, "%s/%s", LevelName, GameType);
+					sprintf_s(NewServerOptions, "%s/%s", LevelName, GameType);
 
 					if (m_SO) strcat(NewServerOptions, m_SO);
 					m_caServerOptions = NewServerOptions;
@@ -286,12 +302,6 @@ void CLevel::ClientReceive()
 		case M_CHANGE_SELF_NAME:
 			{
 				net_OnChangeSelfName(P);
-			}break;
-		case M_PAUSE_GAME:
-			{
-				if (!net_IsSyncronised()) break;
-				u8 Pause		= P->r_u8();
-				Device.Pause	(!(Pause == 0), TRUE, TRUE, "on_event");
 			}break;
 		case M_BULLET_CHECK_RESPOND:
 			{
@@ -310,6 +320,12 @@ void CLevel::ClientReceive()
 				if (!game) break;
 				if (GameID() != GAME_SINGLE)
 					Game().m_WeaponUsageStatistic->OnUpdateRespond(P);
+			}break;
+		case M_BATTLEYE:
+			{
+#ifdef BATTLEYE
+			battleye_system.ReadPacketClient( P );
+#endif // BATTLEYE
 			}break;
 		}
 

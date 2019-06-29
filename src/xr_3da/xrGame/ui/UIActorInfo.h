@@ -20,7 +20,7 @@ public:
 	virtual void			Show				(bool status);
 	CUIScrollView&			DetailList			()				{return *UIDetailList;}
 	CUIScrollView&			MasterList			()				{return *UIMasterList;}
-	void					FillPointsDetail	(int idx);
+	void					FillPointsDetail	(const shared_str& idx);
 	virtual void			Reset				();
 
 protected:
@@ -37,6 +37,7 @@ protected:
 	CUIScrollView*			UIDetailList;
 	void					FillPointsInfo				();
 	void					FillReputationDetails		(CUIXml* xml, LPCSTR path);
+	void					FillMasterPart				(CUIXml* xml, const shared_str& key_name);
 };
 
 class CUIActorStaticticHeader :public CUIWindow, public CUISelectable
@@ -49,11 +50,11 @@ public:
 	CUIStatic*		m_text2;
 public:
 					CUIActorStaticticHeader	(CUIActorInfoWnd* w);
-	void			Init					(CUIXml* xml, LPCSTR path, int idx);
+	void			Init					(CUIXml* xml, LPCSTR path, int idx_in_xml);
 	virtual bool	OnMouseDown				(int mouse_btn);
 	virtual void	SetSelected				(bool b);
 
-	int										m_index;
+	shared_str								m_id;
 };
 
 class CUIActorStaticticDetail :public CUIWindow
@@ -65,5 +66,5 @@ public:
 	CUIStatic*		m_text2;
 	CUIStatic*		m_text3;
 public:
-	void			Init					(CUIXml* xml, LPCSTR path, int idx);
+	void			Init					(CUIXml* xml, LPCSTR path, int xml_idx);
 };

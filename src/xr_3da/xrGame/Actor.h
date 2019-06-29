@@ -133,7 +133,7 @@ protected:
 struct SDefNewsMsg{
 		GAME_NEWS_DATA*	news_data;
 		u32				time;
-		bool operator < (const SDefNewsMsg& other){return time>other.time;}
+		bool operator < (const SDefNewsMsg& other) const {return time>other.time;}
 	};
 	xr_vector<SDefNewsMsg> m_defferedMessages;
 	void UpdateDefferedMessages();	
@@ -145,16 +145,13 @@ protected:
 	CActorStatisticMgr*				m_statistic_manager;
 public:
 	virtual void StartTalk			(CInventoryOwner* talk_partner);
-//.	virtual	void UpdateContact		(u16 contact_id);
 	virtual	void RunTalkDialog		(CInventoryOwner* talk_partner);
 	CGameTaskManager&				GameTaskManager() const {return *m_game_task_manager;}
 	CActorStatisticMgr&				StatisticMgr()	{return *m_statistic_manager;}
-//.	CKnownContactsRegistryWrapper	*contacts_registry;
 	CEncyclopediaRegistryWrapper	*encyclopedia_registry;
-//	CGameTaskRegistryWrapper		*game_task_registry;
 	CGameNewsRegistryWrapper		*game_news_registry;
 	CCharacterPhysicsSupport		*m_pPhysics_support;
-	//игровое имя 
+
 	virtual LPCSTR	Name        () const {return CInventoryOwner::Name();}
 
 public:
@@ -180,8 +177,7 @@ public:
 
 	virtual	void OnPlayHeadShotParticle (NET_Packet P);
 
-	/////////////////////////////////////////////////////////////////
-	// condition and hits
+
 	virtual void						Die				(CObject* who);
 	virtual	void						Hit				(SHit* pHDS);
 	virtual	void						PHHit			(float P,Fvector &dir, CObject *who,s16 element,Fvector p_in_object_space, float impulse, ALife::EHitType hit_type /* = ALife::eHitTypeWound */);
@@ -189,8 +185,6 @@ public:
 			void						HitSector		(CObject* who, CObject* weapon);
 			void						HitMark			(float P, Fvector dir,			CObject* who, s16 element, Fvector position_in_bone_space, float impulse,  ALife::EHitType hit_type);
 
-	/////////////////////////////////////////////////////////////////
-	// misc properties
 	virtual float						GetMass				() ;
 	virtual float						Radius				() const;
 	virtual void						g_PerformDrop		();
@@ -200,9 +194,6 @@ public:
 	virtual ALife::_TIME_ID				TimePassedAfterDeath() const;
 
 
-	////////////////////////////////////////////////////////////////////
-	//Actor condition
-	////////////////////////////////////////////////////////////////////
 public:
 	//сон
 //			void		UpdateSleep			();
@@ -272,9 +263,7 @@ public:
 	////////////////////////////////////////////////////////
 	void					SetShotRndSeed			(s32 Seed = 0);
 	s32						GetShotRndSeed			()	{ return m_ShotRndSeed;	};
-	/////////////////////////////////////////////////////////
-	// car usage
-	/////////////////////////////////////////////////////////
+
 public:
 	void					detach_Vehicle			();
 	void					steer_Vehicle			(float angle);

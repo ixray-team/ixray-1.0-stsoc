@@ -1,10 +1,3 @@
-// -- cool defines --------------------------------------------------
-#define _MANOWAR_SUPER_PROGRAMMER_
-#define _TOP_SECRET_
-#define _COOL_
-#define _AMD_RULEZ_FOREVER_
-#define _MS_BUGS_OFF_
-
 // --  includes -----------------------------------------------------
 #include "stdafx.h"
 #include "..\skeletonanimated.h"

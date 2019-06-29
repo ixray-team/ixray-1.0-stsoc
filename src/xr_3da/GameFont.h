@@ -2,6 +2,8 @@
 #define GameFontH
 #pragma once
 
+#include "MbHelpers.h"
+
 class ENGINE_API CGameFont
 #ifndef M_BORLAND
 	: public pureRender
@@ -16,7 +18,7 @@ public:
 private:
 	struct String
 	{
-		string128	string;
+		string512	string;
 		float		x,y;
 		float		height;
 		u32			c;
@@ -32,16 +34,20 @@ protected:
 	float					fCurrentX, fCurrentY;
 	Fvector2				vInterval;
 
-	int						CharMap	[256];
-	Fvector 				TCMap	[256];
+	Fvector 				*TCMap;
 	float					fHeight;
+	float					fXStep;
+	float					fYStep;
 	float					fTCHeight;
 	xr_vector<String>		strings;
 
 	ref_shader				pShader;
 	ref_geom				pGeom;
 
+	u32						nNumChars;
+
 	u32						uFlags;
+
 public:
 	enum
 	{
@@ -49,12 +55,13 @@ public:
 		fsDeviceIndependent	= (1<<1),
 		fsValid 			= (1<<2),
 
+		fsMultibyte			= (1<<3),
+
 		fsForceDWORD		= u32(-1)
 	};
 
 protected:
-	IC int					GetCharRM		(u8 c)		{return CharMap[c];}
-	IC const Fvector&		GetCharTC		(u8 c)		{return TCMap[c];}
+	IC const Fvector&		GetCharTC		(u16 c)		{return TCMap[c];}
 
 public:
 							CGameFont		(LPCSTR section, u32 flags=0);
@@ -66,29 +73,41 @@ public:
 	IC void					SetColor		(u32 C)		{dwCurrentColor=C;};
 
 	IC void					SetHeightI		(float S);
-	IC void					SetHeight			(float S);
+	IC void					SetHeight		(float S);
 
-	IC float				GetHeight		()					{return fCurrentHeight;};
+	IC float				GetHeight		(){return fCurrentHeight;};
 	IC void					SetInterval		(float x, float y) {vInterval.set(x,y);};
 	IC void					SetInterval		(const Fvector2& v) {vInterval.set(v);};
 	IC void					SetAligment		(EAligment aligment){ eCurrentAlignment=aligment; }
-	float					SizeOf_			(char c, float size);
-	float					SizeOf_			(char c){return SizeOf_(c,fCurrentHeight);}
-	float					SizeOf_			(LPCSTR s, float size);
-	float					SizeOf_			(LPCSTR s){return SizeOf_(s,fCurrentHeight);}
+
+	float					SizeOf_			( LPCSTR s );
+	float					SizeOf_			( const wide_char *wsStr );
+
+	float					SizeOf_			( const char cChar );
+
 	float					CurrentHeight_	();
 
 	void					OutSetI			(float x, float y);
 	void					OutSet			(float x, float y);
-	void __cdecl            OutNext			(LPCSTR fmt, ...);
-	void __cdecl            OutPrev			(LPCSTR fmt, ...);
-	void __cdecl 			OutI			(float _x, float _y, LPCSTR fmt, ...);
-	void __cdecl 			Out				(float _x, float _y, LPCSTR fmt, ...);
+
+	void 					MasterOut( 	BOOL bCheckDevice , BOOL bUseCoords , BOOL bScaleCoords , BOOL bUseSkip ,
+										float _x , float _y , float _skip , LPCSTR fmt , va_list p );
+
+	u32						smart_strlen( const char* S );
+	BOOL					IsMultibyte() { return ( uFlags & fsMultibyte ); };
+	u16						SplitByWidth( u16 * puBuffer , u16 uBufferSize , float fTargetWidth , const char * pszText );
+	u16						GetCutLengthPos( float fTargetWidth , const char * pszText );
+
+	void  					OutI			( float _x , float _y , LPCSTR fmt , ... );
+	void  					Out				( float _x , float _y , LPCSTR fmt , ... );
+	void             		OutNext			( LPCSTR fmt , ... );
+	void             		OutPrev			( LPCSTR fmt , ... );
+
 	void					OutSkip			(float val=1.f);
 
 	virtual void			OnRender		();
 
-	IC	void				Clear			()  { strings.clear(); }
+	IC	void				Clear			()  { strings.clear(); };
 
 #ifdef DEBUG
 	shared_str				m_font_name;

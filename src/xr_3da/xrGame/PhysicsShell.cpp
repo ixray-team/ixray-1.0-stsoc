@@ -62,7 +62,24 @@ CPhysicsShell*				P_build_Shell			(CGameObject* obj,bool not_active_state,BONE_P
 	return pPhysicsShell;
 }
 
-
+void	fix_bones(LPCSTR	fixed_bones,CPhysicsShell* shell )
+{
+		VERIFY(fixed_bones);
+		VERIFY(shell);
+		CKinematics	*pKinematics = shell->PKinematics();
+		VERIFY(pKinematics);
+		int count =					_GetItemCount(fixed_bones);
+		for (int i=0 ;i<count; ++i) 
+		{
+			string64					fixed_bone							;
+			_GetItem					(fixed_bones,i,fixed_bone)			;
+			u16 fixed_bone_id=pKinematics->LL_BoneID(fixed_bone)			;
+			R_ASSERT2(BI_NONE!=fixed_bone_id,"wrong fixed bone")			;
+			CPhysicsElement* E = shell->get_Element(fixed_bone_id)			;
+			if(E)
+				E->Fix();
+		}
+}
 CPhysicsShell*				P_build_Shell			(CGameObject* obj,bool not_active_state,BONE_P_MAP* p_bone_map,LPCSTR	fixed_bones)
 {
 	CPhysicsShell* pPhysicsShell;
@@ -157,12 +174,21 @@ CPhysicsShell*	P_build_SimpleShell(CGameObject* obj,float mass,bool not_active_s
 
 void ApplySpawnIniToPhysicShell(CInifile* ini,CPhysicsShell* physics_shell,bool fixed)
 {
-
-	{
-
-		if(ini&&ini->section_exist("collide"))
+		if(!ini)
+			return;
+		if(ini->section_exist("physics_common"))
 		{
+			fixed = fixed || (ini->line_exist("physics_common","fixed_bones")) ;
+#pragma todo("not ignore static if non realy fixed! ")
+			fix_bones(ini->r_string("physics_common","fixed_bones"),physics_shell);
+		}
+		if(ini->section_exist("collide"))
+		{
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+			if((ini->line_exist("collide","ignore_static")&&fixed)||(ini->line_exist("collide","ignore_static")&&ini->section_exist("animated_object")))
+#else
 			if(ini->line_exist("collide","ignore_static")&&fixed)
+#endif
 			{
 				physics_shell->SetIgnoreStatic();
 			}
@@ -178,8 +204,28 @@ void ApplySpawnIniToPhysicShell(CInifile* ini,CPhysicsShell* physics_shell,bool 
 			{
 				physics_shell->SetIgnoreRagDoll();
 			}
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+			//If need, then show here that it is needed to ignore collisions with "animated_object"
+			if (ini->line_exist("collide","ignore_animated_objects"))
+			{
+				physics_shell->SetIgnoreAnimated();
+			}
+#endif
+
 		}
-	}
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+		//If next section is available then given "PhysicShell" is classified
+		//as animated and we read options for his animation
+		
+		if (ini->section_exist("animated_object"))
+		{
+			//Show that given "PhysicShell" animated
+			physics_shell->SetAnimated();
+		}
+#endif
+	
 }
 
 void	get_box(CPhysicsShell*	shell,const	Fmatrix& form,	Fvector&	sz,Fvector&	c)

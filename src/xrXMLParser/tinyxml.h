@@ -40,15 +40,15 @@ distribution.
 
 // Help out windows:
 #if defined( _DEBUG ) && !defined( DEBUG )
-#define DEBUG
+#	define DEBUG
 #endif
 
 #define TIXML_USE_STL
 
 #ifdef TIXML_USE_STL
 	#include <string>
- 	#include <iostream>
-	#include <sstream>
+// 	#include <iostream>
+//	#include <sstream>
 	#define TIXML_STRING		xr_string
 #else
 	#include "tinystr.h"
@@ -292,8 +292,8 @@ protected:
 	}
 
 	#ifdef TIXML_USE_STL
-	static bool	StreamWhiteSpace( std::istream * in, TIXML_STRING * tag );
-	static bool StreamTo( std::istream * in, int character, TIXML_STRING * tag );
+//	static bool	StreamWhiteSpace( std::istream * in, TIXML_STRING * tag );
+//	static bool StreamTo( std::istream * in, int character, TIXML_STRING * tag );
 	#endif
 
 	/*	Reads an XML name into the string provided. Returns
@@ -428,7 +428,7 @@ public:
 	    /** An input stream operator, for every class. Tolerant of newlines and
 		    formatting, but doesn't expect them.
 	    */
-	    friend std::istream& operator >> (std::istream& in, TiXmlNode& base);
+//	    friend std::istream& operator >> (std::istream& in, TiXmlNode& base);
 
 	    /** An output stream operator, for every class. Note that this outputs
 		    without any newlines or formatting, as opposed to Print(), which
@@ -446,7 +446,7 @@ public:
 		    A TiXmlDocument will read nodes until it reads a root element, and
 			all the children of that root element.
 	    */	
-	    friend std::ostream& operator<< (std::ostream& out, const TiXmlNode& base);
+//	    friend std::ostream& operator<< (std::ostream& out, const TiXmlNode& base);
 
 		/// Appends the XML node or attribute to a xr_string.
 		friend xr_string& operator<< (xr_string& out, const TiXmlNode& base );
@@ -741,7 +741,7 @@ protected:
 
 	#ifdef TIXML_USE_STL
 	    // The real work of the input operator.
-	virtual void StreamIn( std::istream* in, TIXML_STRING* tag ) = 0;
+//	virtual void StreamIn( std::istream* in, TIXML_STRING* tag ) = 0;
 	#endif
 
 	// Figure out what is at *p, and parse it. Returns null if it is not an xml node.
@@ -1111,7 +1111,7 @@ protected:
 
 	// Used to be public [internal use]
 	#ifdef TIXML_USE_STL
-	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
+//	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
 	#endif
 	/*	[internal use]
 		Reads the "value" of the element -- another element, or text.
@@ -1163,7 +1163,7 @@ protected:
 
 	// used to be public
 	#ifdef TIXML_USE_STL
-	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
+//	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
 	#endif
 //	virtual void StreamOut( TIXML_OSTREAM * out ) const;
 
@@ -1229,7 +1229,7 @@ protected :
 	bool Blank() const;	// returns true if all white space and new lines
 	// [internal use]
 	#ifdef TIXML_USE_STL
-	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
+//	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
 	#endif
 
 private:
@@ -1301,7 +1301,7 @@ protected:
 	void CopyTo( TiXmlDeclaration* target ) const;
 	// used to be public
 	#ifdef TIXML_USE_STL
-	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
+//	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
 	#endif
 
 private:
@@ -1346,7 +1346,7 @@ protected:
 	void CopyTo( TiXmlUnknown* target ) const;
 
 	#ifdef TIXML_USE_STL
-	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
+//	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
 	#endif
 
 private:
@@ -1512,7 +1512,7 @@ protected :
 	// [internal use]
 	virtual TiXmlNode* Clone() const;
 	#ifdef TIXML_USE_STL
-	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
+//	virtual void StreamIn( std::istream * in, TIXML_STRING * tag );
 	#endif
 
 private:

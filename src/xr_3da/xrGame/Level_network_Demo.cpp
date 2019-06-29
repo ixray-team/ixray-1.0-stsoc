@@ -118,7 +118,7 @@ void						CLevel::Demo_PrepareToStore			()
 	GetComputerName(CName, (DWORD*)&CNameSize);
 	SYSTEMTIME Time;
 	GetLocalTime(&Time);
-	sprintf(m_sDemoName, "xray_%s_%02d-%02d-%02d_%02d-%02d-%02d.tdemo", CName, Time.wMonth, Time.wDay, Time.wYear, Time.wHour, Time.wMinute, Time.wSecond);
+	sprintf_s(m_sDemoName, "xray_%s_%02d-%02d-%02d_%02d-%02d-%02d.tdemo", CName, Time.wMonth, Time.wDay, Time.wYear, Time.wHour, Time.wMinute, Time.wSecond);
 	Msg("Tech Demo would be stored in - %s", m_sDemoName);
 	
 	FS.update_path      (m_sDemoName,"$logs$",m_sDemoName);
@@ -163,7 +163,7 @@ void						CLevel::Demo_Clear				()
 
 void						CLevel::Demo_Load				(LPCSTR DemoName)
 {	
-	string1024	DemoFileName;
+	string_path			DemoFileName;
 	FS.update_path      (DemoFileName,"$logs$",DemoName);
 	//-----------------------------------------------------
 	HANDLE hDemoFile = CreateFile(DemoFileName, FILE_ALL_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -233,7 +233,7 @@ void						CLevel::Demo_Load_toFrame	(LPCSTR FileName, DWORD toFrame, long &ofs)
 	if (ofs == 1) g_dwDemoDeltaFrame = 1;
 
 	m_sDemoFileName = FileName;
-	string1024	DemoFileName;
+	string_path	DemoFileName;
 	FS.update_path      (DemoFileName,"$logs$",FileName);
 	//-----------------------------------------------------
 	FILE* fTDemo = fopen(DemoFileName, "rb");
@@ -254,7 +254,6 @@ void						CLevel::Demo_Load_toFrame	(LPCSTR FileName, DWORD toFrame, long &ofs)
 		m_sDemoHeader.ServerOptions = ServerOptions;
 		ofs = ftell(fTDemo);
 		//------------- replace server and client options -----
-//		m_caServerOptions.sprintf("%s/%s", m_sDemoHeader.LevelName, m_sDemoHeader.GameType);
 		m_caServerOptions = m_sDemoHeader.ServerOptions;
 		m_caClientOptions = "localhost";
 		//-----------------------------------------------------
@@ -401,17 +400,17 @@ void						CLevel::Demo_Update				()
 				string1024 tmp;
 				if (m_bDemoPlayByFrame)
 				{
-//					sprintf(tmp, "Demo Playing. %d perc.", u32(float(m_dwCurDemoFrame)/m_dwLastDemoFrame*100.0f));
+//					sprintf_s(tmp, "Demo Playing. %d perc.", u32(float(m_dwCurDemoFrame)/m_dwLastDemoFrame*100.0f));
 					if (float(m_lDemoOfs)/lFileSize > 0.9)
 					{
 						int x=0;
 						x=x;
 					}
-					sprintf(tmp, "Demo Playing. %d perc.", u32(float(m_lDemoOfs)/lFileSize*100.0f));
+					sprintf_s(tmp, "Demo Playing. %d perc.", u32(float(m_lDemoOfs)/lFileSize*100.0f));
 				}
 				else
 				{
-					sprintf(tmp, "Demo Playing. %d perc.", u32(float(Pos)/m_aDemoData.size()*100.0f));
+					sprintf_s(tmp, "Demo Playing. %d perc.", u32(float(Pos)/m_aDemoData.size()*100.0f));
 				}
 				game_dm_ui->SetDemoPlayCaption(tmp);
 			}

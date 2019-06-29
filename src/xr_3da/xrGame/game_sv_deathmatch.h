@@ -4,8 +4,9 @@
 #include "inventory_space.h"
 #include "../../xrNetServer/client_id.h"
 #include "Hit.h"
+#include "../pure_relcase.h"
 
-class	game_sv_Deathmatch			: public game_sv_mp
+class	game_sv_Deathmatch			: public game_sv_mp,private pure_relcase
 {
 	typedef game_sv_mp inherited;
 protected:
@@ -17,20 +18,21 @@ protected:
 
 		RPointData(u32 ID, float Dist, bool Freezed):
 		PointID(ID),MinEnemyDist(Dist), bFreezed(Freezed){};
-		bool operator<(const RPointData &x)	
+		IC	bool operator<(const RPointData &x) const
 		{
 			if (bFreezed && !x.bFreezed) return false;
 			if (!bFreezed && x.bFreezed) return true;
 			return MinEnemyDist < x.MinEnemyDist;
 		};
 	};
-	//---------------------------------------------------
 	xr_vector<u32>					m_vFreeRPoints;
 	u32								m_dwLastRPoint;
-	//---------------------------------------------------
 
 	BOOL							m_delayedRoundEnd;
 	u32								m_roundEndDelay;
+
+	BOOL							m_delayedTeamEliminated;
+	u32								m_TeamEliminatedDelay;
 
 	shared_str							m_sBaseWeaponCostSection;
 		
@@ -55,14 +57,14 @@ protected:
 	DEF_VECTOR(ANOMALY_SETS_ID, ANOMALIES_ID);
 
 	ANOMALY_SETS_ID					m_AnomalyIDSetsList;
-	//--------------------------------------------------
+
 	bool							m_bSpectatorMode;
 	u32								m_dwSM_SwitchDelta;
 	u32								m_dwSM_LastSwitchTime;
 	u32								m_dwSM_CurViewEntity;
 	CObject	*						m_pSM_CurViewEntity;
 	void							SM_SwitchOnNextActivePlayer			();
-	void							SM_SwitchOnPlayer		(CObject* pNewObject);//(game_PlayerState* ps);
+	void							SM_SwitchOnPlayer		(CObject* pNewObject);
 
 	BOOL							Is_Anomaly_InLists		(CSE_Abstract* E);
 
@@ -79,15 +81,9 @@ protected:
 				void				Send_Anomaly_States		(ClientID id_who);
 				void				Send_EventPack_for_AnomalySet	(u32 AnomalySet, u8 Event);
 
-//	virtual		void				OnPlayerChangeSkin		(ClientID id_who, u8 skin);
-//	virtual		void				OnPlayerWantsDie		(ClientID id_who);
 	virtual		void				OnPlayerBuyFinished		(ClientID id_who, NET_Packet& P);
 
-//	void							SpawnWeapon4Actor		(u32 actorId,  LPCSTR N, u8 Addons = 0);
-//	void							KillPlayer				(ClientID id_who);
-
-
-	virtual		void				CheckItem				(game_PlayerState*	ps, PIItem pItem, xr_vector<s16> *pItemsDesired, xr_vector<u16> *pItemsToDelete);
+	virtual		void				CheckItem				(game_PlayerState*	ps, PIItem pItem, xr_vector<s16> *pItemsDesired, xr_vector<u16> *pItemsToDelete, bool ExactMatch);
 	virtual		bool				HasChampion				();
 
 	virtual		void				check_Player_for_Invincibility	(game_PlayerState* ps);
@@ -96,9 +92,12 @@ protected:
 
 	u32								m_dwWarmUp_CurTime;
 	bool							m_bInWarmUp;
+
+				void	__stdcall	net_Relcase				(CObject* O);
+
 public:
 									game_sv_Deathmatch		();
-									~game_sv_Deathmatch		();
+				virtual				~game_sv_Deathmatch		();
 	virtual		void				Create					(shared_str &options);
 
 	virtual		LPCSTR				type_name				() const { return "deathmatch";};
@@ -111,14 +110,15 @@ public:
 
 	// Events
 	virtual		void				OnRoundStart			();												// старт раунда
-	virtual		void				OnRoundEnd				(LPCSTR reason);								// конец раунда
-	virtual		void				OnDelayedRoundEnd		(LPCSTR /**reason/**/);
+	virtual		void				OnRoundEnd				();	// round_end_reason							// конец раунда
+	virtual		void				OnDelayedRoundEnd		( ERoundEnd_Result reason );
+	virtual		void				OnDelayedTeamEliminated();
 
 	virtual		void				OnPlayerHitPlayer		(u16 id_hitter, u16 id_hitted, NET_Packet& P); //игрок получил Hit
 	virtual		void				OnPlayerHitPlayer_Case	(game_PlayerState* ps_hitter, game_PlayerState* ps_hitted, SHit* pHitS);	
 
 	virtual		BOOL				OnTouch					(u16 eid_who, u16 eid_what, BOOL bForced = FALSE);
-	virtual		BOOL				OnDetach				(u16 eid_who, u16 eid_what);
+	virtual		void				OnDetach				(u16 eid_who, u16 eid_what);
 
 	virtual		BOOL				OnPreCreate				(CSE_Abstract* E);
 	virtual		void				OnCreate				(u16 eid_who);
@@ -152,11 +152,10 @@ public:
 
 	virtual		void				assign_RP				(CSE_Abstract* E, game_PlayerState* ps_who);
 	virtual		u32					RP_2_Use				(CSE_Abstract* E);
-	//  [7/5/2005]
+
 #ifdef DEBUG
 	virtual		void				OnRender				();
 #endif
-	//  [7/5/2005]
 
 	virtual		void				SetSkin					(CSE_Abstract* E, u16 Team, u16 ID);//	{};
 
@@ -165,8 +164,6 @@ public:
 	
 	virtual		void				LoadTeams				();
 	virtual		void				LoadTeamData			(const shared_str& caSection);
-//	virtual		void				FillWeaponData			(WeaponDataStruct* NewWpnData, const shared_str& wpnSingleName, const shared_str& caSection);
-//	virtual		void				LoadWeaponsForTeam		(const shared_str& caSection, TEAM_WPN_LIST *pTeamWpnList);
 	virtual		void				LoadSkinsForTeam		(const shared_str& caSection, TEAM_SKINS_NAMES* pTeamSkins);
 	virtual		void				LoadDefItemsForTeam		(const shared_str& caSection, /*TEAM_WPN_LIST *pWpnList,*/ DEF_ITEMS_LIST* pDefItems);
 
@@ -175,12 +172,9 @@ public:
 	virtual		void				StartAnomalies			(int AnomalySet = -1);
 
 	virtual		bool				IsBuyableItem			(LPCSTR	ItemName);
-//	virtual		bool				GetBuyableItemCost		(LPCSTR	ItemName, u16* pCost);
-	void							RemoveItemFromActor		(CSE_Abstract* pItem);
 	//----- Money routines -----------------------------------------------------------------
 	virtual		void				Money_SetStart			(ClientID	id_who);
 	virtual		s32					GetMoneyAmount			(const shared_str& caSection, char* caMoneyStr);
-//	virtual		s16					GetItemCost				(u32 id_who, s16 ItemID);
 				int					GetTeamScore			(u32 idx);
 				void				SetTeamScore			(u32 idx, int val);
 				game_PlayerState*	GetWinningPlayer		();
@@ -200,7 +194,9 @@ public:
 	virtual		u32					GetAnomaliesTime		();
 
 	virtual		u32					GetNumTeams				() {return teams.size();};
-		
+protected:
+	virtual		void				WriteGameState			(CInifile& ini, LPCSTR sect, bool bRoundResult);
+public:		
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 add_to_type_list(game_sv_Deathmatch)

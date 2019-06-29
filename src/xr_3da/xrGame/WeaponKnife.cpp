@@ -224,6 +224,7 @@ void CWeaponKnife::switch2_Hiding	()
 void CWeaponKnife::switch2_Hidden()
 {
 	signal_HideComplete		();
+	m_bPending = false;
 }
 
 void CWeaponKnife::switch2_Showing	()
@@ -274,7 +275,7 @@ void CWeaponKnife::LoadFireParams(LPCSTR section, LPCSTR prefix)
 	m_eHitType_1		= ALife::g_tfString2HitType(pSettings->r_string(section, "hit_type"));
 
 	//fHitPower_2			= pSettings->r_float	(section,strconcat(full_name, prefix, "hit_power_2"));
-	s_sHitPower_2		= pSettings->r_string_wb	(section,strconcat(full_name, prefix, "hit_power_2"));
+	s_sHitPower_2		= pSettings->r_string_wb	(section,strconcat(sizeof(full_name),full_name, prefix, "hit_power_2"));
 	fvHitPower_2[egdMaster]	= (float)atof(_GetItem(*s_sHitPower_2,0,buffer));//первый параметр - это хит для уровня игры мастер
 
 	fvHitPower_2[egdVeteran]	= fvHitPower_2[egdMaster];//изначально параметры для других уровней
@@ -295,7 +296,7 @@ void CWeaponKnife::LoadFireParams(LPCSTR section, LPCSTR prefix)
 		fvHitPower_2[egdNovice]	= (float)atof(_GetItem(*s_sHitPower_2,3,buffer));//то вычитываем его для уровня новичка
 	}
 
-	fHitImpulse_2		= pSettings->r_float	(section,strconcat(full_name, prefix, "hit_impulse_2"));
+	fHitImpulse_2		= pSettings->r_float	(section,strconcat(sizeof(full_name),full_name, prefix, "hit_impulse_2"));
 	m_eHitType_2		= ALife::g_tfString2HitType(pSettings->r_string(section, "hit_type_2"));
 }
 
@@ -308,18 +309,4 @@ void CWeaponKnife::GetBriefInfo(xr_string& str_name, xr_string& icon_sect_name, 
 	str_name		= NameShort();
 	str_count		= "";
 	icon_sect_name	= *cNameSect();
-}
-
-#include "script_space.h"
-
-using namespace luabind;
-
-#pragma optimize("s",on)
-void CWeaponKnife::script_register	(lua_State *L)
-{
-	module(L)
-	[
-		class_<CWeaponKnife,CGameObject>("CWeaponKnife")
-			.def(constructor<>())
-	];
 }

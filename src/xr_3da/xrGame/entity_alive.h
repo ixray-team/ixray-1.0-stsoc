@@ -13,7 +13,7 @@ class CWound;
 class CCharacterPhysicsSupport;
 class CMaterialManager;
 class CVisualMemoryManager;
-
+class CBlend;
 class CEntityAlive : public CEntity {
 private:
 	typedef	CEntity			inherited;			
@@ -48,7 +48,8 @@ public:
 	virtual	BOOL			net_SaveRelevant		();
 
 	virtual void			shedule_Update			(u32 dt);
-
+	virtual	void			create_anim_mov_ctrl	( CBlend* b );
+	virtual	void			destroy_anim_mov_ctrl	( );
 
 	virtual void			HitImpulse				(float amount, Fvector& vWorldDir, Fvector& vLocalDir);
 	virtual	void			Hit						(SHit* pHDS);
@@ -81,6 +82,7 @@ public:
 
 	virtual void							PHGetLinearVell				(Fvector& velocity)		;
 	virtual CPHSoundPlayer*					ph_sound_player				()						;
+	virtual	CIKLimbsController				*character_ik_controller	()						;
 	virtual SCollisionHitCallback			*get_collision_hit_callback	()						;
 	virtual bool							set_collision_hit_callback	(SCollisionHitCallback *cc);
 protected:

@@ -67,7 +67,7 @@ void CUIAmmoCellItem::UpdateItemText()
 			total				= total + ((CUIAmmoCellItem*)(*it))->object()->m_boxCurr;
 
 		string32				str;
-		sprintf					(str,"%d",total);
+		sprintf_s					(str,"%d",total);
 
 		SetText					(str);
 	}else

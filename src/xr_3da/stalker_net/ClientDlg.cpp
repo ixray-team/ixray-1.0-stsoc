@@ -392,7 +392,7 @@ void CClientDlg::RemoveServerFromList	(SBServer server)
 	};
 };
 
-static inAdd = false;
+static bool inAdd = false;
 void CClientDlg::AddServerToList		(SBServer server)
 {
 	if (!server) return;

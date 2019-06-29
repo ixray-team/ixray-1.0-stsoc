@@ -14,7 +14,7 @@ CContextMenu::~CContextMenu(){
 }
 void CContextMenu::Load(CInifile* INI, LPCSTR SECT){
 	CInifile::Sect& S = INI->r_section(SECT);
-	for (CInifile::SectIt I=S.begin(); S.end()!=I; ++I){
+	for (CInifile::SectCIt I=S.Data.begin(); S.Data.end()!=I; ++I){
 		char	Event[128],Param[128];
 		Event[0]=0; Param[0]=0;
 		sscanf		(*I->second,"%[^,],%s",Event,Param);

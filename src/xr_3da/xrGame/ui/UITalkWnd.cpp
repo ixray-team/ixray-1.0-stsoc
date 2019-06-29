@@ -105,15 +105,14 @@ void CUITalkWnd::InitOthersStartDialog()
 		
 		//сказать фразу
 		CStringTable stbl;
-		AddAnswer(m_pCurrentDialog->GetPhraseText(0), m_pOthersInvOwner->Name());
-		m_pOthersDialogManager->SayPhrase(m_pCurrentDialog, 0);
+		AddAnswer(m_pCurrentDialog->GetPhraseText("0"), m_pOthersInvOwner->Name());
+		m_pOthersDialogManager->SayPhrase(m_pCurrentDialog, "0");
 
 		//если диалог завершился, перейти в режим выбора темы
 		if(!m_pCurrentDialog || m_pCurrentDialog->IsFinished()) ToTopicMode();
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
 void CUITalkWnd::NeedUpdateQuestions()
 {
 	m_bNeedToUpdateQuestions = true;
@@ -128,10 +127,10 @@ void CUITalkWnd::UpdateQuestions()
 	if(!m_pCurrentDialog)
 	{
 		m_pOurDialogManager->UpdateAvailableDialogs(m_pOthersDialogManager);
-		for(u32 i=0; i< m_pOurDialogManager->AvailableDialogs().size(); i++)
+		for(u32 i=0; i< m_pOurDialogManager->AvailableDialogs().size(); ++i)
 		{
 			const DIALOG_SHARED_PTR& phrase_dialog = m_pOurDialogManager->AvailableDialogs()[i];
-			AddQuestion(phrase_dialog->DialogCaption(), (int)i);
+			AddQuestion(phrase_dialog->DialogCaption(), phrase_dialog->GetDialogID());
 		}
 	}
 	else
@@ -142,7 +141,7 @@ void CUITalkWnd::UpdateQuestions()
 			//сказать (игрок сам не производит никаких действий)
 			if( !m_pCurrentDialog->PhraseList().empty() && m_pCurrentDialog->allIsDummy() ){
 				CPhrase* phrase = m_pCurrentDialog->PhraseList()[Random.randI(m_pCurrentDialog->PhraseList().size())];
-				SayPhrase(phrase->GetIndex());
+				SayPhrase(phrase->GetID());
 			};
 
 			//выбор доступных фраз из активного диалога
@@ -153,7 +152,7 @@ void CUITalkWnd::UpdateQuestions()
 					it++)
 				{
 					CPhrase* phrase = *it;
-					AddQuestion(phrase->GetText(), (int)phrase->GetIndex());
+					AddQuestion(phrase->GetText(), phrase->GetID());
 				}
 			}
 			else
@@ -282,36 +281,37 @@ void  CUITalkWnd::ToTopicMode		()
 void CUITalkWnd::AskQuestion()
 {
 	if(m_bNeedToUpdateQuestions) return;//quick dblclick:(
-	int phrase_id;
+	shared_str					phrase_id;
 
 	//игрок выбрал тему разговора
 	if(TopicMode())
 	{
-		if ( (UITalkDialogWnd->m_iClickedQuestion < 0) ||
-			(UITalkDialogWnd->m_iClickedQuestion >= (int)m_pOurDialogManager->AvailableDialogs().size()) ) {
+		if ( (UITalkDialogWnd->m_ClickedQuestionID =="") ||
+			(!m_pOurDialogManager->HaveAvailableDialog(UITalkDialogWnd->m_ClickedQuestionID)) ) 
+		{
 
 			string128	s;
-			sprintf		(s,"ID = [%i] of selected question is out of range of available dialogs ",UITalkDialogWnd->m_iClickedQuestion);
+			sprintf_s		(s,"ID = [%s] of selected question is out of range of available dialogs ",UITalkDialogWnd->m_ClickedQuestionID);
 			VERIFY2(FALSE, s);
 		}
 
-		m_pCurrentDialog = m_pOurDialogManager->AvailableDialogs()[UITalkDialogWnd->m_iClickedQuestion];
+		m_pCurrentDialog = m_pOurDialogManager->GetDialogByID( UITalkDialogWnd->m_ClickedQuestionID);
 		
 		m_pOurDialogManager->InitDialog(m_pOthersDialogManager, m_pCurrentDialog);
-		phrase_id = 0;
+		phrase_id = "0";
 	}
 	else
 	{
-		phrase_id = (int)UITalkDialogWnd->m_iClickedQuestion;
+		phrase_id = UITalkDialogWnd->m_ClickedQuestionID;
 	}
 
-	SayPhrase(phrase_id);
-	NeedUpdateQuestions();
+	SayPhrase				(phrase_id);
+	NeedUpdateQuestions		();
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void CUITalkWnd::SayPhrase(int phrase_id)
+void CUITalkWnd::SayPhrase(const shared_str& phrase_id)
 {
 
 	AddAnswer(m_pCurrentDialog->GetPhraseText(phrase_id), m_pOurInvOwner->Name());
@@ -327,19 +327,19 @@ void CUITalkWnd::SayPhrase(int phrase_id)
 
 //////////////////////////////////////////////////////////////////////////
 
-void CUITalkWnd::AddQuestion(LPCSTR text, int value)
+void CUITalkWnd::AddQuestion(const shared_str& text, const shared_str& value)
 {
-	if(xr_strlen(text) == 0) return;
-	UITalkDialogWnd->AddQuestion(*CStringTable().translate(text),value);
+	if(text.size() == 0) return;
+	UITalkDialogWnd->AddQuestion(*CStringTable().translate(text),value.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void CUITalkWnd::AddAnswer(LPCSTR text, const char* SpeakerName)
+void CUITalkWnd::AddAnswer(const shared_str& text, LPCSTR SpeakerName)
 {
 	//для пустой фразы вообще ничего не выводим
-	if(xr_strlen(text) == 0) return;
-	PlaySnd			(text);
+	if(text.size() == 0) return;
+	PlaySnd			(text.c_str());
 
 	bool i_am = (0 == xr_strcmp(SpeakerName, m_pOurInvOwner->Name()));
 	UITalkDialogWnd->AddAnswer(SpeakerName,*CStringTable().translate(text),i_am);
@@ -392,7 +392,7 @@ void CUITalkWnd::PlaySnd(LPCSTR text)
 	StopSnd						();
 	
 	string_path	fn;
-	strconcat(fn, "characters_voice\\dialogs\\", text, ".ogg");
+	strconcat(sizeof(fn),fn, "characters_voice\\dialogs\\", text, ".ogg");
 	if(FS.exist("$game_sounds$",fn)){
 		VERIFY(m_pActor);
 		if (!m_pActor->OnDialogSoundHandlerStart(m_pOthersInvOwner,fn)) {

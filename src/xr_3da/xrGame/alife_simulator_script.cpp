@@ -6,9 +6,8 @@
 //	Description : ALife Simulator script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "alife_simulator.h"
-#include "script_space.h"
 #include "ai_space.h"
 #include "alife_object_registry.h"
 #include "alife_story_registry.h"
@@ -19,7 +18,6 @@
 #include "alife_spawn_registry.h"
 #include "alife_registry_container.h"
 #include "xrServer.h"
-
 #include "level.h"
 
 using namespace luabind;
@@ -343,9 +341,9 @@ void CALifeSimulator::script_register			(lua_State *L)
 			.def("object",					(CSE_ALifeDynamicObject *(*) (const CALifeSimulator *,LPCSTR))(alife_object))
 			.def("object",					(CSE_ALifeDynamicObject *(*) (const CALifeSimulator *,ALife::_OBJECT_ID, bool))(alife_object))
 			.def("story_object",			(CSE_ALifeDynamicObject *(*) (const CALifeSimulator *,ALife::_STORY_ID))(alife_story_object))
-			.def("set_switch_online",		(void (CALifeSimulator::*) (ALife::_OBJECT_ID,bool))(CALifeSimulator::set_switch_online))
-			.def("set_switch_offline",		(void (CALifeSimulator::*) (ALife::_OBJECT_ID,bool))(CALifeSimulator::set_switch_offline))
-			.def("set_interactive",			(void (CALifeSimulator::*) (ALife::_OBJECT_ID,bool))(CALifeSimulator::set_interactive))
+			.def("set_switch_online",		(void (CALifeSimulator::*) (ALife::_OBJECT_ID,bool))(&CALifeSimulator::set_switch_online))
+			.def("set_switch_offline",		(void (CALifeSimulator::*) (ALife::_OBJECT_ID,bool))(&CALifeSimulator::set_switch_offline))
+			.def("set_interactive",			(void (CALifeSimulator::*) (ALife::_OBJECT_ID,bool))(&CALifeSimulator::set_interactive))
 			.def("kill_entity",				&CALifeSimulator::kill_entity)
 			.def("kill_entity",				&kill_entity0)
 			.def("kill_entity",				&kill_entity1)
@@ -413,3 +411,38 @@ void CALifeSimulator::script_register			(lua_State *L)
 		luabind::module			(L)[instance];
 	}
 }
+
+#if 0//def DEBUG
+struct dummy {
+    int count;
+    lua_State* state;
+    int ref;
+};
+
+void CALifeSimulator::validate			()
+{
+	typedef CALifeSpawnRegistry::SPAWN_GRAPH::const_vertex_iterator	const_vertex_iterator;
+	const_vertex_iterator		I = spawns().spawns().vertices().begin();
+	const_vertex_iterator		E = spawns().spawns().vertices().end();
+	for ( ; I != E; ++I) {
+		luabind::wrap_base		*base = smart_cast<luabind::wrap_base*>(&(*I).second->data()->object());
+		if (!base)
+			continue;
+
+		if (!base->m_self.m_impl)
+			continue;
+
+		dummy					*_dummy = (dummy*)((void*)base->m_self.m_impl);
+		lua_State				**_state = &_dummy->state;
+		VERIFY2					(
+			base->m_self.state(),
+			make_string(
+				"0x%08x name[%s] name_replace[%s]",
+				*(int*)&_state,
+				(*I).second->data()->object().name(),
+				(*I).second->data()->object().name_replace()
+			)
+		);
+	}
+}
+#endif //DEBUG

@@ -46,5 +46,5 @@ public:
 	bool					MoveUp				();
 	bool					MoveDown			(u32 idx);
 	item*					FindItem			(const shared_str& name_sect, item* recurse_from=NULL);
-	int						TeamIdx			() const	{return m_team_idx;}
+	int						TeamIdx				() const	{return m_team_idx;}
 };

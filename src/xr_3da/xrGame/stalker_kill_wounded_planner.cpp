@@ -6,7 +6,7 @@
 //	Description : Stalker kill wounded planner
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "stalker_kill_wounded_planner.h"
 #include "stalker_kill_wounded_actions.h"
 #include "ai/stalker/ai_stalker_space.h"

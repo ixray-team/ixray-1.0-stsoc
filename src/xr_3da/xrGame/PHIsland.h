@@ -3,8 +3,8 @@
 
 #pragma warning(disable:4995)
 #pragma warning(disable:4267)
-#include <../ode/src/objects.h>
-#include <../ode/src/joint.h>
+#include "../../xrODE/ode/src/objects.h"
+#include "../../xrODE/ode/src/joint.h"
 #pragma warning(default:4995)
 #pragma warning(default:4267)
 #include "PhysicsCommon.h"
@@ -12,10 +12,10 @@
 
 class CPHIslandFlags
 {
-	static const	base				=8		;
-	static const	shift_to_variable	=base/2	;
-	static const	mask_static			=0xf	;
-	Flags8			flags						;
+	static const	int base				=	8		;
+	static const	int shift_to_variable	=	base/2	;
+	static const	int mask_static			=	0xf		;
+	Flags8			flags								;
 
 	enum 
 	{

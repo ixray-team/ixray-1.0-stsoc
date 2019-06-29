@@ -6,9 +6,8 @@
 //	Description : ALife human brain class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "alife_human_brain.h"
-#include "script_space.h"
 
 using namespace luabind;
 

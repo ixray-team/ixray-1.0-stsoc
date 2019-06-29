@@ -108,13 +108,13 @@ LPCSTR CSINI_IdToIndex::line_name = NULL;
 
 
 TEMPLATE_SPECIALIZATION
-CSINI_IdToIndex::CSINI_IdToIndex()
+CSINI_IdToIndex::CIni_IdToIndex()
 {
 }
 
 
 TEMPLATE_SPECIALIZATION
-CSINI_IdToIndex::~CSINI_IdToIndex()
+CSINI_IdToIndex::~CIni_IdToIndex()
 {
 }
 

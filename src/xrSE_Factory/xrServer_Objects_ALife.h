@@ -88,9 +88,6 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeObject,CSE_Abstract,CRandom)
 		flVisibleForMap		= u32(1) << 10,
 		flUseSmartTerrains	= u32(1) << 11,
 		flCheckForSeparator	= u32(1) << 12,
-		flCorpseRemoval		= u32(1) << 13,
-
-		flCustom			= u32(1) << 23,
 	};
 
 public:
@@ -132,6 +129,7 @@ public:
 	virtual void					spawn_supplies		();
 			CALifeSimulator			&alife				() const;
 	virtual Fvector					draw_level_position	() const;
+	virtual	bool					keep_saved_data_anyway	() const;
 #endif
 SERVER_ENTITY_DECLARE_END
 add_to_type_list(CSE_ALifeObject)
@@ -283,6 +281,8 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeDynamicObject,CSE_ALifeObject)
 	virtual	void					add_online				(const bool &update_registries);
 	virtual	void					add_offline				(const xr_vector<ALife::_OBJECT_ID> &saved_children, const bool &update_registries);
 	virtual	bool					redundant				() const;
+			void					attach					(CSE_ALifeInventoryItem *tpALifeInventoryItem,	bool		bALifeRequest,	bool bAddChildren = true);
+			void					detach					(CSE_ALifeInventoryItem *tpALifeInventoryItem,	ALife::OBJECT_IT	*I = 0,	bool bALifeRequest = true,	bool bRemoveChildren = true);
 #endif
 	virtual CSE_ALifeDynamicObject	*cast_alife_dynamic_object	() {return this;}
 SERVER_ENTITY_DECLARE_END

@@ -1,20 +1,18 @@
-// stdafx.h : include file for standard system include files,
-//  or project specific include files that are used frequently, but
-//      are changed infrequently
-//
-// 15th generation by Oles.
-
-#if !defined(AFX_STDAFX_H__A9DB83DB_A9FD_11D0_BFD1_444553540000__INCLUDED_)
-#define AFX_STDAFX_H__A9DB83DB_A9FD_11D0_BFD1_444553540000__INCLUDED_
+#ifndef	STDAFX_3DA
+#define STDAFX_3DA
 
 #pragma once
 
-#include <xrCore.h>
+#ifdef _EDITOR
+	#include "..\editors\ECore\stdafx.h"
+#else
 
-// Include DX
+#include "../xrCore/xrCore.h"
+
 #ifdef _DEBUG
 	#define D3D_DEBUG_INFO
 #endif
+
 #pragma warning(disable:4995)
 #include <d3d9.h>
 #include <dplay8.h>
@@ -45,14 +43,13 @@
 #endif
 #include "device.h"
 #include "fs.h"
-// ..
+
 #include "xrXRC.h"
 
 #include "../xrSound/sound.h"
 
 extern ENGINE_API CInifile *pGameIni;
 
-// TODO: reference additional headers your program requires here
 #pragma comment( lib, "xrCore.lib"	)
 #pragma comment( lib, "xrCDB.lib"	)
 #pragma comment( lib, "xrSound.lib"	)
@@ -72,11 +69,10 @@ extern ENGINE_API CInifile *pGameIni;
 	// release: no error checking, no exceptions
 	#define LUABIND_NO_EXCEPTIONS
 	#define BOOST_THROW_EXCEPTION_HPP_INCLUDED
+	namespace std	{	class exception; }
 	namespace boost {	ENGINE_API	void throw_exception(const std::exception &A);	};
 #endif
 #define LUABIND_DONT_COPY_STRINGS
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_STDAFX_H__A9DB83DB_A9FD_11D0_BFD1_444553540000__INCLUDED_)
+#endif // !M_BORLAND
+#endif // !defined STDAFX_3DA

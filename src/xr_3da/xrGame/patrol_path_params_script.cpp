@@ -6,9 +6,8 @@
 //	Description : Patrol path parameters class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "patrol_path_params.h"
-#include "script_space.h"
 
 using namespace luabind;
 
@@ -49,8 +48,8 @@ void CPatrolPathParams::script_register(lua_State *L)
 			.def("game_vertex_id",				&CPatrolPathParams::game_vertex_id)
 			.def("point",						&CPatrolPathParams__point)
 			.def("name",						&CPatrolPathParams::name)
-			.def("index",						(u32			(CPatrolPathParams::*)(LPCSTR)			const)	(CPatrolPathParams::point))
-			.def("get_nearest",					(u32			(CPatrolPathParams::*)(const Fvector &) const)	(CPatrolPathParams::point))
+			.def("index",						(u32			(CPatrolPathParams::*)(LPCSTR)			const)	(&CPatrolPathParams::point))
+			.def("get_nearest",					(u32			(CPatrolPathParams::*)(const Fvector &) const)	(&CPatrolPathParams::point))
 			.def("flag",						&CPatrolPathParams::flag)
 			.def("flags",						&CPatrolPathParams::flags)
 			.def("terminal",					&CPatrolPathParams::terminal)

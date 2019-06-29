@@ -9,7 +9,9 @@
 #include <d3dx9.h>
 #pragma warning(default:4995)
 
-#include "Render.h"
+#ifndef _EDITOR
+    #include	"Render.h"
+#endif
 #include "SkeletonX.h"
 #include "SkeletonCustom.h"
 #include "fmesh.h"
@@ -21,6 +23,7 @@
 shared_str	s_bones_array_const;
 
 #pragma pack(push,1)
+/*
 float u_P	(s16 v)
 {
 	return	float(v)/(32767.f/12.f);
@@ -416,6 +419,8 @@ BOOL	CSkeletonX::has_visible_bones		()
 	return	FALSE;
 }
 
+
+
 //-----------------------------------------------------------------------------------------------------
 // Wallmarks
 //-----------------------------------------------------------------------------------------------------
@@ -441,6 +446,7 @@ BOOL	CSkeletonX::_PickBoneSoft1W	(Fvector& normal, float& dist, const Fvector& S
 	}
 	return intersect;
 }
+
 BOOL CSkeletonX::_PickBoneSoft2W	(Fvector& normal, float& dist, const Fvector& S, const Fvector& D, u16* indices, CBoneData::FacesVec& faces)
 {
 	VERIFY				(*Vertices2W);

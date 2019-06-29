@@ -13,6 +13,11 @@
 #include "stalker_movement_manager.h"
 #include "stalker_animation_data.h"
 
+#include "weapon.h"
+#include "missile.h"
+#include "inventory.h"
+#include "stalker_animation_manager_impl.h"
+
 const float right_forward_angle			= PI_DIV_4;
 const float left_forward_angle			= PI_DIV_4;
 const float standing_turn_angle			= PI_DIV_6;

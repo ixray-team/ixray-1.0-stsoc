@@ -29,7 +29,7 @@ void CWeaponRPG7::Load	(LPCSTR section)
 }
 
 
-void CWeaponRPG7::UpdateGrenadeVisibility(bool visibility)
+void CWeaponRPG7::UpdateMissileVisibility()
 {
 	bool vis_hud,vis_weap;
 	vis_hud		= (!!iAmmoElapsed || GetState() == eReload);
@@ -52,8 +52,8 @@ BOOL CWeaponRPG7::net_Spawn(CSE_Abstract* DC)
 {
 	BOOL l_res = inherited::net_Spawn(DC);
 
-	UpdateGrenadeVisibility(!!iAmmoElapsed);
-	if(iAmmoElapsed && !/*m_pRocket*/getCurrentRocket())
+	UpdateMissileVisibility();
+	if(iAmmoElapsed && !getCurrentRocket())
 	{
 		CRocketLauncher::SpawnRocket(*m_sRocketSection, this);
 	}
@@ -64,7 +64,13 @@ BOOL CWeaponRPG7::net_Spawn(CSE_Abstract* DC)
 void CWeaponRPG7::OnStateSwitch(u32 S) 
 {
 	inherited::OnStateSwitch(S);
-	UpdateGrenadeVisibility(!!iAmmoElapsed || S == eReload);
+	UpdateMissileVisibility();
+}
+
+void CWeaponRPG7::UnloadMagazine(bool spawn_ammo)
+{
+	inherited::UnloadMagazine	(spawn_ammo);
+	UpdateMissileVisibility		();
 }
 
 void CWeaponRPG7::ReloadMagazine() 
@@ -133,7 +139,7 @@ void CWeaponRPG7::switch2_Fire	()
 		if (OnServer())
 		{
 			NET_Packet						P;
-			u_EventGen						(P,GE_OWNERSHIP_REJECT,ID());
+			u_EventGen						(P,GE_LAUNCH_ROCKET,ID());
 			P.w_u16							(u16(getCurrentRocket()->ID()));
 			u_EventSend						(P);
 		}
@@ -149,29 +155,18 @@ void CWeaponRPG7::OnEvent(NET_Packet& P, u16 type)
 			P.r_u16(id);
 			CRocketLauncher::AttachRocket(id, this);
 		} break;
-		case GE_OWNERSHIP_REJECT : {
+		case GE_OWNERSHIP_REJECT:
+		case GE_LAUNCH_ROCKET	: 
+			{
+			bool bLaunch = (type==GE_LAUNCH_ROCKET);
 			P.r_u16(id);
-			CRocketLauncher::DetachRocket(id);
+			CRocketLauncher::DetachRocket(id, bLaunch);
 		} break;
 	}
 }
 
-void CWeaponRPG7::net_Import			( NET_Packet& P)
+void CWeaponRPG7::net_Import( NET_Packet& P)
 {
-	inherited::net_Import(P);
-	UpdateGrenadeVisibility(!!iAmmoElapsed || GetState() == eReload);
-}
-
-#include "script_space.h"
-
-using namespace luabind;
-
-#pragma optimize("s",on)
-void CWeaponRPG7::script_register	(lua_State *L)
-{
-	module(L)
-	[
-		class_<CWeaponRPG7,CGameObject>("CWeaponRPG7")
-			.def(constructor<>())
-	];
+	inherited::net_Import		(P);
+	UpdateMissileVisibility		();
 }

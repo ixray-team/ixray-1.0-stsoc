@@ -37,7 +37,7 @@ public:
 	virtual void			OnScreenRatioChanged	()=0;
 	virtual void			OnDisconnected			()=0;
 	virtual void			OnConnected				()=0;
-
+	virtual void			net_Relcase				(CObject *object) = 0;
 };
 
 extern ENGINE_API CCustomHUD* g_hud;

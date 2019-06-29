@@ -10,9 +10,10 @@
 #include "../../xrNetServer/net_server.h"
 #include "game_sv_base.h"
 #include "id_generator.h"
+#include "battleye.h"
 
 #ifdef DEBUG
-//#	define SLOW_VERIFY_ENTITIES
+//. #define SLOW_VERIFY_ENTITIES
 #endif
 
 
@@ -30,16 +31,22 @@ public:
 	BOOL					net_Ready;
 	BOOL					net_Accepted;
 	
-	u32						game_replicate_id;
-
 	BOOL					net_PassUpdates;
 	u32						net_LastMoveUpdateTime;
-
+	
 	game_PlayerState*		ps;
+	struct{
+		u8						m_maxPingWarnings;
+		u32						m_dwLastMaxPingWarningTime;
+	}m_ping_warn;
+	struct{
+		BOOL					m_has_admin_rights;
+		u32						m_dwLoginTime;
+	}m_admin_rights;
 
-	xrClientData			();
-	virtual void			Clear();
-	virtual ~xrClientData	();
+							xrClientData			();
+	virtual					~xrClientData			();
+	virtual void			Clear					();
 };
 
 
@@ -57,6 +64,26 @@ private:
 	xrS_entities				entities;
 	xr_multiset<svs_respawn>	q_respawn;
 
+	u16							m_iCurUpdatePacket;
+	xr_vector<NET_Packet>		m_aUpdatePackets;
+
+	struct DelayedPacket
+	{
+		ClientID		SenderID;
+		NET_Packet		Packet;
+		bool operator == (const DelayedPacket& other)
+		{
+			return SenderID == other.SenderID;
+		}
+	};
+
+	xrCriticalSection			DelayedPackestCS;
+	xr_deque<DelayedPacket>		m_aDelayedPackets;
+	void						ProceedDelayedPackets	();
+	void						AddDelayedPacket		(NET_Packet& Packet, ClientID Sender);
+	u32							OnDelayedMessage		(NET_Packet& P, ClientID sender);			// Non-Zero means broadcasting with "flags" as returned
+
+	void						SendUpdatesToAll		();
 private:
 	typedef 
 		CID_Generator<
@@ -72,14 +99,13 @@ private:
 		> id_generator_type;
 
 private:
-	id_generator_type			m_tID_Generator;
+	id_generator_type		m_tID_Generator;
 
 protected:
-	void						Server_Client_Check (IClient* CL);
-	virtual	void				BannedList_Load		();
-
+	void					Server_Client_Check				(IClient* CL);
+	void					PerformCheckClientsForMaxPing	();
 public:
-	game_sv_GameState*			game;
+	game_sv_GameState*		game;
 
 	void					Export_game_type		(IClient* CL);
 	void					Perform_game_export		();
@@ -109,7 +135,7 @@ public:
 	void					Process_save			(NET_Packet& P, ClientID sender);
 	void					Process_event			(NET_Packet& P, ClientID sender);
 	void					Process_event_ownership	(NET_Packet& P, ClientID sender, u32 time, u16 ID, BOOL bForced = FALSE);
-	bool					Process_event_reject	(NET_Packet& P, ClientID sender, u32 time, u16 ID, u16 id_entity, bool send_message = true);
+	bool					Process_event_reject	(NET_Packet& P, const ClientID sender, const u32 time, const u16 id_parent, const u16 id_entity, bool send_message = true);
 	void					Process_event_destroy	(NET_Packet& P, ClientID sender, u32 time, u16 ID, NET_Packet* pEPack);
 	
 	xrClientData*			SelectBestClientToMigrateTo		(CSE_Abstract* E, BOOL bForceAnother=FALSE);
@@ -118,9 +144,12 @@ public:
 	void					AttachNewClient			(IClient* CL);
 	virtual void			OnBuildVersionRespond				(IClient* CL, NET_Packet& P);
 protected:
-	virtual void			new_client				(ClientID clientID, LPCSTR name, bool bLocal);
+	bool					CheckAdminRights		(const shared_str& user, const shared_str& pass, string512 reason);
+	virtual IClient*		new_client				( SClientConnectData* cl_data );
 	
-	virtual bool			NeedToCheckClient_GameSpy_CDKey		(IClient* CL)	{ return false; };
+	virtual bool			Check_ServerAccess( IClient* CL, string512& reason )	{ return true; }
+
+	virtual bool			NeedToCheckClient_GameSpy_CDKey		(IClient* CL)	{ return false; }
 	virtual void			Check_GameSpy_CDKey_Success			(IClient* CL);
 	
 	virtual bool			NeedToCheckClient_BuildVersion		(IClient* CL);
@@ -155,11 +184,11 @@ public:
 	IC void					clients_Lock		()			{	csPlayers.Enter();	}
 	IC void					clients_Unlock		()			{   csPlayers.Leave();	}
 
-	xrClientData*			ID_to_client		(ClientID ID);
+	xrClientData*			ID_to_client		(ClientID ID, bool ScanAll = false ) { return (xrClientData*)(IPureServer::ID_to_client( ID, ScanAll)); }
 	CSE_Abstract*			ID_to_entity		(u16 ID);
 
 	// main
-	virtual BOOL			Connect				(shared_str& session_name);
+	virtual EConnect		Connect				(shared_str& session_name);
 	virtual void			Disconnect			();
 	virtual void			Update				();
 	void					SLS_Default			();
@@ -171,7 +200,14 @@ public:
 	void					create_direct_client();
 	BOOL					IsDedicated			() const	{return m_bDedicated;};
 
+	virtual void			Assign_ServerType	( string512& res ) {};
+	virtual bool			HasPassword			()	{ return false; }
+	virtual bool			HasProtected		()	{ return false; }
+			bool			HasBattlEye			();
+
+	virtual void			GetServerInfo		( CServerInfo* si );
 public:
+	xr_string				ent_name_safe		(u16 eid);
 #ifdef DEBUG
 			bool			verify_entities		() const;
 			void			verify_entity		(const CSE_Abstract *entity) const;

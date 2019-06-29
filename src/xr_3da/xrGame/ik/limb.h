@@ -69,36 +69,36 @@ private:
     AngleIntList PSI[4]; 
 
     // The euler convention fors the first and second S joints 
-
+public:
     AngleInt jt_limits[7];
+private:
     float min[7], max[7]; 
 
     int check_r_joint(float &val);
     
-    void extract_s1(const Matrix R1,  float s1[3]);
-    void extract_s1s2(const Matrix R1, const Matrix R2,  float s1[3], float s2[3]);
+    void	extract_s1(const Matrix R1,  float s1[3]);
+    void	extract_s1s2(const Matrix R1, const Matrix R2,  float s1[3], float s2[3]);
 
-    void extract_s1_family(const Matrix R1, int family, float s1[3]);
-    void extract_s1s2_family(const Matrix R1, const Matrix R2, 
-			     int family1, int family2,
-			     float s1[3], float s2[3]);
+    void	extract_s1_family(const Matrix R1, int family, float s1[3]);
+    void	extract_s1s2_family(const Matrix R1, const Matrix R2, 
+				     int family1, int family2,
+					 float s1[3], float s2[3]);
+    int		set_goal(const Matrix G);
+    int		set_goal_pos(const float g[3], const Matrix E);
 
-    int set_goal(const Matrix G);
-    int set_goal_pos(const float g[3], const Matrix E);
+    void	solve_aux(float swivel_angle, float x[]);
+    void	solve_aux_family(int family_set, float swivel_angle, float x[]);
 
-    void solve_aux(float swivel_angle, float x[]);
-    void solve_aux_family(int family_set, float swivel_angle, float x[]);
+    void	solve_pos_aux(float swivel_angle, float x[]);
+    void	solve_pos_aux_family(int family, float swivel_angle, float x[]);
 
-    void  solve_pos_aux(float swivel_angle, float x[]);
-    void solve_pos_aux_family(int family, float swivel_angle, float x[]);
-
-    int try_swivel_angle(int solve, float swivel_angle, float x[]);
-    int try_singularities(int solve, float &swivel_angle, float x[]);
-    int try_closeby_singularity(int solve, float &swivel_angle, float x[]);
+    int		try_swivel_angle(int solve, float swivel_angle, float x[]);
+    int		try_singularities(int solve, float &swivel_angle, float x[]);
+    int		try_closeby_singularity(int solve, float &swivel_angle, float x[]);
 
 public:
-    void get_R1R2psi(AngleIntList psi[]);
-    void get_R1psi(AngleIntList psi[]);
+    void	get_R1R2psi(AngleIntList psi[]);
+    void	get_R1psi(AngleIntList psi[]);
 
     Limb() {}
 
@@ -136,17 +136,17 @@ public:
     int SetGoalPos(const float g[3], const Matrix E, int limits_on);
     int SetGoal(const Matrix G, int limits_on);
 
-#if 0
+
     int SetAimGoal(const float goal[3], const float axis[3], float flex_angle)
     {
-	solver.SetAimGoal(goal, axis, flex_angle);
+		solver.SetAimGoal(goal, axis, flex_angle);
     }
 
     int SolveAim(float x[3], float psi_angle); 
-#endif
+
     
     float PosToAngle(const float p[3]);
-
+	float KneeAngle( const float goal_pos[3], const float knee_pos[3] ); 
 
  
     int Solve(float x[7], float *new_psi = 0, float *new_pos = 0);

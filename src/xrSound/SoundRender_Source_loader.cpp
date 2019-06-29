@@ -119,14 +119,14 @@ void CSoundRender_Source::LoadWave	(LPCSTR pName)
 
 void CSoundRender_Source::load(LPCSTR name)
 {
-	string256			fn,N;
+	string_path			fn,N;
 	strcpy				(N,name);
 	strlwr				(N);
 	if (strext(N))		*strext(N) = 0;
 
 	fname				= N;
 
-	strconcat			(fn,N,".ogg");
+	strconcat			(sizeof(fn),fn,N,".ogg");
 	if (!FS.exist("$level$",fn))	FS.update_path	(fn,"$game_sounds$",fn);
 
 #ifdef _EDITOR

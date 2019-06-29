@@ -105,7 +105,7 @@ struct border_merge_predicate {
 			m_restriction->m_internal.push_back	(m_level_graph->vertex_id(&vertex));
 	}
 
-	IC	bool operator()					(u32 level_vertex_id) const
+	IC	bool operator()					(const u32 &level_vertex_id) const
 	{
 		return						(m_restriction->inside(level_vertex_id,false));
 	}
@@ -201,7 +201,7 @@ void CSpaceRestrictorWrapper::build_border			()
 		fill_shape					(*I);
 	
 	{
-		BORDER::iterator			I = remove_if(m_border.begin(),m_border.end(),border_merge_predicate(this,m_level_graph));
+		BORDER::iterator			I = std::remove_if(m_border.begin(),m_border.end(),border_merge_predicate(this,m_level_graph));
 		m_border.erase				(I,m_border.end());
 	}
 

@@ -148,28 +148,22 @@ void CRenderTarget::accum_direct		(u32 sub_phase)
 		RCache.set_c				("m_sunmask",			m_clouds_shadow					);
 		
 		// nv-DBT
-		if (RImplementation.o.nvdbt && ps_r2_ls_flags.test(R2FLAG_USE_NVDBT))	{
-			float zMin,zMax;
-			if (SE_SUN_NEAR==sub_phase)	{
-				zMin = 0;
-				zMax = ps_r2_sun_near;
-			} else {
-				extern float	OLES_SUN_LIMIT_27_01_07;
-				zMin = ps_r2_sun_near;
-				zMax = OLES_SUN_LIMIT_27_01_07;
-			}
+		float zMin,zMax;
+		if (SE_SUN_NEAR==sub_phase)	{
+			zMin = 0;
+			zMax = ps_r2_sun_near;
+		} else {
+			extern float	OLES_SUN_LIMIT_27_01_07;
+			zMin = ps_r2_sun_near;
+			zMax = OLES_SUN_LIMIT_27_01_07;
+		}
+		center_pt.mad(Device.vCameraPosition,Device.vCameraDirection,zMin);	Device.mFullTransform.transform	(center_pt);
+		zMin = center_pt.z	;
 
-			center_pt.mad(Device.vCameraPosition,Device.vCameraDirection,zMin);	Device.mFullTransform.transform	(center_pt);
-			zMin = center_pt.z	;
+		center_pt.mad(Device.vCameraPosition,Device.vCameraDirection,zMax);	Device.mFullTransform.transform	(center_pt);
+		zMax = center_pt.z	;
 
-			center_pt.mad(Device.vCameraPosition,Device.vCameraDirection,zMax);	Device.mFullTransform.transform	(center_pt);
-			zMax = center_pt.z	;
-
-			// enable cheat
-			HW.pDevice->SetRenderState(D3DRS_ADAPTIVETESS_X,MAKEFOURCC('N','V','D','B'));
-			HW.pDevice->SetRenderState(D3DRS_ADAPTIVETESS_Z,*(DWORD*)&zMin);
-			HW.pDevice->SetRenderState(D3DRS_ADAPTIVETESS_W,*(DWORD*)&zMax); 
-
+		if (u_DBT_enable(zMin,zMax))	{
 			// z-test always
 			HW.pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 			HW.pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
@@ -194,7 +188,7 @@ void CRenderTarget::accum_direct		(u32 sub_phase)
 		}
 
 		// disable depth bounds
-		if (RImplementation.o.nvdbt && ps_r2_ls_flags.test(R2FLAG_USE_NVDBT))	HW.pDevice->SetRenderState(D3DRS_ADAPTIVETESS_X,0);
+		u_DBT_disable	();
 	}
 }
 

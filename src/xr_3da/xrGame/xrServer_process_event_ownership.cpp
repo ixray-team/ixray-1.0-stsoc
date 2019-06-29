@@ -11,22 +11,34 @@ void ReplaceOwnershipHeader	(NET_Packet& P)
 
 void xrServer::Process_event_ownership(NET_Packet& P, ClientID sender, u32 time, u16 ID, BOOL bForced)
 {
-	u32				MODE		= net_flags		(TRUE,TRUE);
+	u32 MODE			= net_flags(TRUE,TRUE, FALSE, TRUE);
 
-	// Parse message
 	u16					id_parent=ID,id_entity;
 	P.r_u16				(id_entity);
 	CSE_Abstract*		e_parent	= game->get_entity_from_eid	(id_parent);
 	CSE_Abstract*		e_entity	= game->get_entity_from_eid	(id_entity);
-	if (0		==	e_parent)				return;
-	if (0		==	e_entity)				return;
-	if (0xffff	!=	e_entity->ID_Parent)	return;
-	xrClientData*		c_parent	= e_parent->owner;
-	xrClientData*		c_entity	= e_entity->owner;
-	xrClientData*		c_from		= ID_to_client	(sender);
-	if ((GetServerClient() != c_from) && (c_parent != c_from))					return;	//. hack
-	//R_ASSERT			(c_parent == c_from);		// assure client only send request for local units
-	
+
+	#ifdef DEBUG
+	Msg("sv ownership id_parent %s id_entity %s [%d]",ent_name_safe(id_parent).c_str(), ent_name_safe(id_entity).c_str(), Device.dwFrame);
+	#endif
+
+	if(!e_entity)		return;
+	R_ASSERT			(/*e_entity &&*/ e_parent);
+	if (0xffff != e_entity->ID_Parent)
+	{
+		Msg("sv !ownership (entity already has parent) new_parent %s id_parent %s id_entity %s [%d]",ent_name_safe(e_entity->ID_Parent).c_str(), ent_name_safe(id_parent).c_str(), ent_name_safe(id_entity).c_str(), Device.dwFrame);
+		return;
+	}
+
+	xrClientData*		c_parent		= e_parent->owner;
+	xrClientData*		c_entity		= e_entity->owner;
+	xrClientData*		c_from			= ID_to_client	(sender);
+
+	if ( (GetServerClient() != c_from) && (c_parent != c_from) )
+	{
+		// trust only ServerClient or new_ownerClient
+		return;
+	}
 
 	// Game allows ownership of entity
 	if (game->OnTouch	(id_parent,id_entity, bForced))
@@ -44,8 +56,7 @@ void xrServer::Process_event_ownership(NET_Packet& P, ClientID sender, u32 time,
 			ReplaceOwnershipHeader(P);
 		}
 		// Signal to everyone (including sender)
-		ClientID clientID;clientID.setBroadcast();
-		SendBroadcast		(clientID,P,MODE);
+		SendBroadcast		(BroadcastCID,P,MODE);
 	}
 
 }

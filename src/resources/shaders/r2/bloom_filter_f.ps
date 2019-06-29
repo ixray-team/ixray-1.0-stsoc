@@ -18,5 +18,5 @@ half4	main        ( v2p I )	: COLOR
         half4        t_3        = tex2D                (s_bloom,I.tc3);
 
         // out
-        return  (t_0+t_1+t_2+t_3)/4;
+        return  (t_0+t_1+t_2+t_3)/2;
 }

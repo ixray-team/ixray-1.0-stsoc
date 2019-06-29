@@ -129,8 +129,8 @@ void CWeaponRG6::FireStart ()
 		if (OnServer())
 		{
 			NET_Packet P;
-			u_EventGen(P,GE_OWNERSHIP_REJECT,ID());
-			P.w_u16(u16(/*m_pRocket->ID()*/getCurrentRocket()->ID()));
+			u_EventGen(P,GE_LAUNCH_ROCKET,ID());
+			P.w_u16(u16(getCurrentRocket()->ID()));
 			u_EventSend(P);
 		}
 		dropCurrentRocket();
@@ -159,23 +159,12 @@ void CWeaponRG6::OnEvent(NET_Packet& P, u16 type)
 			P.r_u16(id);
 			inheritedRL::AttachRocket(id, this);
 		} break;
-		case GE_OWNERSHIP_REJECT : {
-			P.r_u16(id);
-			inheritedRL::DetachRocket(id);
+		case GE_OWNERSHIP_REJECT : 
+		case GE_LAUNCH_ROCKET : 
+			{
+			bool bLaunch = (type==GE_LAUNCH_ROCKET);
+			P.r_u16						(id);
+			inheritedRL::DetachRocket	(id, bLaunch);
 		} break;
 	}
-}
-
-#include "script_space.h"
-
-using namespace luabind;
-
-#pragma optimize("s",on)
-void CWeaponRG6::script_register	(lua_State *L)
-{
-	module(L)
-	[
-		class_<CWeaponRG6,CGameObject>("CWeaponRG6")
-			.def(constructor<>())
-	];
 }

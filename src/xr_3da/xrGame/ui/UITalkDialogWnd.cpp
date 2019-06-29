@@ -16,8 +16,9 @@
 CUITalkDialogWnd::CUITalkDialogWnd()
 	:	m_pNameTextFont		(NULL)
 {
-	m_iClickedQuestion = -1;
+	m_ClickedQuestionID = "";
 }
+
 CUITalkDialogWnd::~CUITalkDialogWnd()
 {
 	xr_delete(m_uiXml);
@@ -113,7 +114,7 @@ void CUITalkDialogWnd::Hide()
 
 void CUITalkDialogWnd::OnQuestionClicked(CUIWindow* w, void*)
 {
-		m_iClickedQuestion = ((CUIQuestionItem*)w)->m_value;
+		m_ClickedQuestionID = ((CUIQuestionItem*)w)->m_s_value;
 		GetMessageTarget()->SendMessage(this, TALK_DIALOG_QUESTION_CLICKED);
 }
 
@@ -141,7 +142,7 @@ void CUITalkDialogWnd::ClearQuestions()
 }
 
 
-void CUITalkDialogWnd::AddQuestion(const char* str, int value)
+void CUITalkDialogWnd::AddQuestion(LPCSTR str, LPCSTR value)
 {
 	CUIQuestionItem* itm			= xr_new<CUIQuestionItem>(m_uiXml,"question_item");
 	itm->Init						(value, str);
@@ -153,7 +154,7 @@ void CUITalkDialogWnd::AddQuestion(const char* str, int value)
 #include "../level.h"
 #include "../actor.h"
 #include "../alife_registry_wrappers.h"
-void CUITalkDialogWnd::AddAnswer(const char* SpeakerName, const char* str, bool bActor)
+void CUITalkDialogWnd::AddAnswer(LPCSTR SpeakerName, LPCSTR str, bool bActor)
 {
 	CUIAnswerItem* itm				= xr_new<CUIAnswerItem>(m_uiXml,bActor?"actor_answer_item":"other_answer_item");
 	itm->Init						(str, SpeakerName);
@@ -218,7 +219,7 @@ CUIQuestionItem::CUIQuestionItem			(CUIXml* xml_doc, LPCSTR path)
 
 	m_min_height					= xml_doc->ReadAttribFlt(path,0,"min_height",15.0f);
 
-	strconcat						(str,path,":content_text");
+	strconcat						(sizeof(str),str,path,":content_text");
 	xml_init.Init3tButton			(*xml_doc, str, 0, m_text);
 
 	Register						(m_text);
@@ -227,9 +228,9 @@ CUIQuestionItem::CUIQuestionItem			(CUIXml* xml_doc, LPCSTR path)
 
 }
 
-void CUIQuestionItem::Init			(int val, LPCSTR text)
+void CUIQuestionItem::Init			(LPCSTR val, LPCSTR text)
 {
-	m_value							= val;
+	m_s_value						= val;
 	m_text->SetText					(text);
 	m_text->AdjustHeightToText		();
 	float new_h						= _max(m_min_height, m_text->GetWndPos().y+m_text->GetHeight());
@@ -257,10 +258,10 @@ CUIAnswerItem::CUIAnswerItem			(CUIXml* xml_doc, LPCSTR path)
 
 	m_min_height					= xml_doc->ReadAttribFlt(path,0,"min_height",15.0f);
 	m_bottom_footer					= xml_doc->ReadAttribFlt(path,0,"bottom_footer",0.0f);
-	strconcat						(str,path,":content_text");
+	strconcat						(sizeof(str),str,path,":content_text");
 	xml_init.InitStatic				(*xml_doc, str, 0, m_text);
 
-	strconcat						(str,path,":name_caption");
+	strconcat						(sizeof(str),str,path,":name_caption");
 	xml_init.InitStatic				(*xml_doc, str, 0, m_name);
 	SetAutoDelete					(true);
 }
@@ -284,7 +285,7 @@ CUIAnswerItemIconed::CUIAnswerItemIconed		(CUIXml* xml_doc, LPCSTR path)
 	string512						str;
 	CUIXmlInit						xml_init;
 
-	strconcat						(str,path,":msg_icon");
+	strconcat						(sizeof(str),str,path,":msg_icon");
 	xml_init.InitStatic				(*xml_doc, str, 0, m_icon);
 }
 

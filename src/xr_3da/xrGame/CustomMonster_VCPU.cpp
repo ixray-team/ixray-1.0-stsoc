@@ -29,6 +29,9 @@ void CCustomMonster::mk_rotation	(Fvector &dir, SRotation &R)
 
 void CCustomMonster::Exec_Look		( float dt )
 {
+	if (animation_movement_controlled())
+		return;
+
 	movement().m_body.current.yaw	= angle_normalize_signed	(movement().m_body.current.yaw);
 	movement().m_body.current.pitch	= angle_normalize_signed	(movement().m_body.current.pitch);
 	movement().m_body.target.yaw	= angle_normalize_signed	(movement().m_body.target.yaw);

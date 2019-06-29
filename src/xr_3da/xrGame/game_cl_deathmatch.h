@@ -15,10 +15,6 @@ class CUIMapDesc;
 class game_cl_Deathmatch :public game_cl_mp
 {
 typedef game_cl_mp inherited;
-/*
-protected:
-	virtual			void				TranslateGameMessage	(u32 msg, NET_Packet& P);
-*/
 	CUIGameDM*						m_game_ui;
 	shared_str						Actor_Spawn_Effect;
 public :
@@ -26,7 +22,6 @@ public :
 	virtual							~game_cl_Deathmatch();
 	s32								m_s32FragLimit; //dm,tdm,ah
 	s32								m_s32TimeLimit; //dm
-//	u32								damageblocklimit;//dm,tdm
 	bool							m_bDamageBlockIndicators;
 	xr_vector<game_TeamState>		teams;//dm,tdm,ah
 	u32								m_u32ForceRespawn;
@@ -38,13 +33,10 @@ public :
 	virtual		void				net_import_state		(NET_Packet& P);
 	virtual		void				net_import_update		(NET_Packet& P);	
 	virtual		void				Init					();
-//	virtual		CUIInventoryWnd*	GetInventoryWnd			() {return pInventoryMenu;};
 
 	virtual		void				LoadSndMessages				();
 
-// from UIGameDM
 protected:
-//	DEF_VECTOR						(TEAMS_LIST, xr_string);
 	struct PresetItem
 	{
 		u8	SlotID;
@@ -54,14 +46,7 @@ protected:
 		PresetItem (s16 Big) { set(Big); };
 		bool	operator ==		(const s16& ID) 
 		{ 
-/*
-#ifdef	_new_buy_wnd
-			s16 mask = 0xffff;
-#else
-			s16 mask = 0xff1f;
-#endif
-			*/
-			return (BigID/* & mask*/) == (ID/* & mask*/);
+			return (BigID) == (ID);
 		}
 		void		set(s16 Big) { SlotID = u8((Big>>0x08) & 0x00ff); ItemID = u8(Big & 0x00ff); BigID = Big;}
 		void		set(u8 Slot, u8 Item) { SlotID = Slot; ItemID = Item; BigID = (s16(SlotID) << 0x08) | s16(ItemID); };
@@ -76,12 +61,6 @@ protected:
 	IBuyWnd*						pCurBuyMenu;
 
 	CUISkinSelectorWnd*				pCurSkinMenu;
-//	CUIInventoryWnd*				pInventoryMenu;
-
-//	CUIMapDesc*						pMapDesc;
-	//-------------------------------------------------
-//	CUIPdaWnd*						pPdaMenu;
-	//-------------------------------------------------	
 	BOOL							m_bFirstRun;
 	BOOL							m_bMenuCalledFromReady;
 	BOOL							m_bSkinSelected;

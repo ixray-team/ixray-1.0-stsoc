@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "PhysicsShellHolder.h"
 #include "PhysicsShell.h"
 #include "xrMessages.h"
@@ -370,3 +370,12 @@ bool CPhysicsShellHolder::register_schedule	() const
 	return					(b_sheduled);
 }
 
+void CPhysicsShellHolder::on_physics_disable()
+{
+	if (IsGameTypeSingle())
+		return;
+
+	NET_Packet			net_packet;
+	u_EventGen			(net_packet,GE_FREEZE_OBJECT,ID());
+	Level().Send		(net_packet,net_flags(TRUE,TRUE));
+}

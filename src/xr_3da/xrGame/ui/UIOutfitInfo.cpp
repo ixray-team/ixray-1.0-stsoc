@@ -54,7 +54,7 @@ void CUIOutfitInfo::InitFromXml(CUIXml& xml_doc)
 
 	m_listWnd					= xr_new<CUIScrollView>(); m_listWnd->SetAutoDelete(true);
 	AttachChild					(m_listWnd);
-	strconcat					(_buff, _base, ":scroll_view");
+	strconcat					(sizeof(_buff),_buff, _base, ":scroll_view");
 	CUIXmlInit::InitScrollView	(xml_doc, _buff, 0, m_listWnd);
 
 	for(u32 i=ALife::eHitTypeBurn; i<= ALife::eHitTypeFireWound; ++i)
@@ -62,7 +62,7 @@ void CUIOutfitInfo::InitFromXml(CUIXml& xml_doc)
 		m_items[i]				= xr_new<CUIStatic>();
 		CUIStatic* _s			= m_items[i];
 		_s->SetAutoDelete		(false);
-		strconcat				(_buff, _base, ":static_", _imm_names[i]);
+		strconcat				(sizeof(_buff),_buff, _base, ":static_", _imm_names[i]);
 		CUIXmlInit::InitStatic	(xml_doc, _buff,	0, _s);
 	}
 
@@ -108,12 +108,12 @@ void CUIOutfitInfo::SetItem(u32 hitType, bool force_add)
 //	LPCSTR			_clr_outfit, _clr_af;
 	LPCSTR			_imm_name	= *CStringTable().translate(_imm_st_names[hitType]);
 
-	int _sz			= sprintf	(_buff,"%s ", _imm_name);
-	_sz				+= sprintf	(_buff+_sz,"%s %+3.0f%%", (_val_outfit>0.0f)?"%c[green]":"%c[red]", _val_outfit*100.0f);
+	int _sz			= sprintf_s	(_buff,sizeof(_buff),"%s ", _imm_name);
+	_sz				+= sprintf_s	(_buff+_sz,sizeof(_buff)-_sz,"%s %+3.0f%%", (_val_outfit>0.0f)?"%c[green]":"%c[red]", _val_outfit*100.0f);
 
 	if( !fsimilar(_val_af, 0.0f) )
 	{
-		_sz		+= sprintf	(_buff+_sz,"%s %+3.0f%%", (_val_af>0.0f)?"%c[green]":"%c[red]", _val_af*100.0f);
+		_sz		+= sprintf_s	(_buff+_sz,sizeof(_buff)-_sz,"%s %+3.0f%%", (_val_af>0.0f)?"%c[green]":"%c[red]", _val_af*100.0f);
 	}
 	_s->SetText			(_buff);
 

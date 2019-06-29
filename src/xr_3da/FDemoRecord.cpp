@@ -97,13 +97,10 @@ void CDemoRecord::MakeScreenshotFace()
 	m_Stage++;
 }
 
-#ifdef DEBUG
 INT	g_bDR_LM_UsePointsBBox = 0;
 INT	g_bDR_LM_4Steps = 0;
 INT g_iDR_LM_Step = 0;
 Fvector	g_DR_LM_Min, g_DR_LM_Max;
-
-#endif
 
 void GetLM_BBox(Fbox &bb, INT Step)
 {
@@ -154,7 +151,7 @@ void CDemoRecord::MakeLevelMapProcess()
 
 		Fbox bb								= g_pGameLevel->ObjectSpace.GetBoundingVolume();
 
-#ifdef DEBUG
+
 		if (g_bDR_LM_UsePointsBBox)
 		{
 			bb.max.x = g_DR_LM_Max.x;
@@ -164,7 +161,6 @@ void CDemoRecord::MakeLevelMapProcess()
 			bb.min.z = g_DR_LM_Min.z;			
 		}
 		if (g_bDR_LM_4Steps) GetLM_BBox(bb, g_iDR_LM_Step);
-#endif
 		// build camera matrix
 		bb.getcenter						(Device.vCameraPosition);
 
@@ -182,7 +178,7 @@ void CDemoRecord::MakeLevelMapProcess()
 		m_bOverlapped				= FALSE;
 		string_path tmp;
 		Fbox bb						= g_pGameLevel->ObjectSpace.GetBoundingVolume();
-#ifdef DEBUG
+
 		if (g_bDR_LM_UsePointsBBox)
 		{
 			bb.max.x = g_DR_LM_Max.x;
@@ -192,8 +188,8 @@ void CDemoRecord::MakeLevelMapProcess()
 			bb.min.z = g_DR_LM_Min.z;			
 		}
 		if (g_bDR_LM_4Steps) GetLM_BBox(bb, g_iDR_LM_Step);
-#endif
-		sprintf(tmp,"%s_[%3.3f, %3.3f]-[%3.3f, %3.3f]",*g_pGameLevel->name(),bb.min.x,bb.min.z,bb.max.x,bb.max.z);
+
+		sprintf_s					(tmp,sizeof(tmp),"%s_[%3.3f, %3.3f]-[%3.3f, %3.3f]",*g_pGameLevel->name(),bb.min.x,bb.min.z,bb.max.x,bb.max.z);
 		Render->Screenshot			(IRender_interface::SM_FOR_LEVELMAP,tmp);
 		psHUD_Flags.assign			(s_hud_flag);
 		BOOL bDevReset				= !psDeviceFlags.equal(s_dev_flags,rsFullscreen);
@@ -327,6 +323,9 @@ BOOL CDemoRecord::Process(Fvector &P, Fvector &D, Fvector &N, float& fFov, float
 
 void CDemoRecord::IR_OnKeyboardPress	(int dik)
 {
+	if (dik == DIK_GRAVE)
+							Console->Show			();
+
 	if (dik == DIK_SPACE)	RecordKey				();
 	if (dik == DIK_BACK)	MakeCubemap				();
 	if (dik == DIK_F11)		MakeLevelMapScreenshot	();
@@ -336,7 +335,9 @@ void CDemoRecord::IR_OnKeyboardPress	(int dik)
 	{	
 		if (g_pGameLevel->CurrentEntity())
 		{
+#ifndef NDEBUG
 			g_pGameLevel->CurrentEntity()->ForceTransform(m_Camera);
+#endif
 			fLifeTime		= -1; 
 		}
 	}

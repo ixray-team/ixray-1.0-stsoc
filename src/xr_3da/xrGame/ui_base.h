@@ -28,7 +28,7 @@ struct S2DVert{
 				S2DVert		(float pX, float pY, float tU, float tV){pt.set(pX,pY);uv.set(tU,tV);}
 	void		set			(float pt_x, float pt_y, float uv_x, float uv_y){pt.set(pt_x,pt_y);uv.set(uv_x,uv_y);}
 	void		set			(const Fvector2& _pt, const Fvector2& _uv){pt.set(_pt);uv.set(_uv);}
-	void		rotate_pt	(const Fvector2& pivot, float cosA, float sinA);
+	void		rotate_pt	(const Fvector2& pivot, float cosA, float sinA, float kx);
 };
 #define UI_FRUSTUM_MAXPLANES	12
 #define UI_FRUSTUM_SAFE			(UI_FRUSTUM_MAXPLANES*4)

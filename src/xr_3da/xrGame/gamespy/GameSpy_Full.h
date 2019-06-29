@@ -5,6 +5,8 @@ class CGameSpy_Patching;
 class CGameSpy_HTTP;
 class CGameSpy_Browser;
 
+#include "GameSpy_FuncDefs.h"
+
 class CGameSpy_Full
 {
 	HMODULE	m_hGameSpyDLL;
@@ -22,4 +24,7 @@ public:
 	CGameSpy_Browser*	m_pGS_SB;
 
 	void		Update	();
+	const char*	GetGameVersion		(const	char*result);
+private:
+	GAMESPY_FN_VAR_DECL(const char*, GetGameVersion, (const	char*));
 };

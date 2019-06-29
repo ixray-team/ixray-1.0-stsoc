@@ -92,15 +92,27 @@ void CAgentCorpseManager::react_on_member_death			()
 			reaction.m_processing	= true;
 		}
 
-		I							= remove_if(m_corpses.begin(),m_corpses.end(),CRemoveMemberCorpsesPredicate());
-		m_corpses.erase				(I,m_corpses.end());
+		m_corpses.erase				(
+			std::remove_if(
+				m_corpses.begin(),
+				m_corpses.end(),
+				CRemoveMemberCorpsesPredicate()
+			),
+			m_corpses.end()
+		);
 	}
 }
 
 void CAgentCorpseManager::remove_links	(CObject *object)
 {
-	MEMBER_CORPSES::iterator	I = remove_if(m_corpses.begin(),m_corpses.end(),CRemoveOfflineCorpsesPredicate(object));
-	m_corpses.erase				(I,m_corpses.end());
+	m_corpses.erase				(
+		std::remove_if(
+			m_corpses.begin(),
+			m_corpses.end(),
+			CRemoveOfflineCorpsesPredicate(object)
+		),
+		m_corpses.end()
+	);
 }
 
 void CAgentCorpseManager::update		()

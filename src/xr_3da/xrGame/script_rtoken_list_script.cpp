@@ -6,9 +6,8 @@
 //	Description : Script rtoken list class export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_rtoken_list.h"
-#include "script_space.h"
 
 using namespace luabind;
 

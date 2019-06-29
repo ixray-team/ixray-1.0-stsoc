@@ -1,5 +1,6 @@
 #pragma once
 #include "XR_IOConsole.h"
+#include "IGame_Level.h"
 
 class ENGINE_API CTextConsole :
 	public CConsole
@@ -17,6 +18,7 @@ private:
 	bool	m_bScrollLog;
 	u32		m_dwStartLine;
 	void	DrawLog(HDC hDC, RECT* pRect);
+
 private:
 	HFONT	m_hLogWndFont;
 	HFONT	m_hPrevFont;
@@ -28,6 +30,9 @@ private:
 
 	bool	m_bNeedUpdate;
 	u32		m_dwLastUpdateTime;
+
+	CServerInfo server_info;
+
 public:
 	CTextConsole();
 	virtual ~CTextConsole();

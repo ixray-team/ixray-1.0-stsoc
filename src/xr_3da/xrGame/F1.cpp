@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "f1.h"
 
 CF1::CF1(void) {
@@ -6,8 +6,6 @@ CF1::CF1(void) {
 
 CF1::~CF1(void) {
 }
-
-#include "script_space.h"
 
 using namespace luabind;
 

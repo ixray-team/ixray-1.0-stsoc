@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "space_restriction_bridge.h"
 #include "space_restriction_composition.h"
 #include "space_restriction_holder.h"
 #include "space_restriction_bridge.h"
@@ -134,8 +135,14 @@ void CSpaceRestrictionComposition::initialize	()
 
 	m_initialized				= true;
 
-	xr_vector<u32>::iterator	I = remove_if(m_border.begin(),m_border.end(),CMergePredicate(this));
-	m_border.erase				(I,m_border.end());
+	m_border.erase				(
+		std::remove_if(
+			m_border.begin(),
+			m_border.end(),
+			CMergePredicate(this)
+		),
+		m_border.end()
+	);
 
 	process_borders				();
 
@@ -159,8 +166,13 @@ void CSpaceRestrictionComposition::test_correctness()
 
 	{
 		std::sort					(m_test_storage.begin(),m_test_storage.end());
-		xr_vector<u32>::iterator	I = unique(m_test_storage.begin(),m_test_storage.end());
-		m_test_storage.erase		(I,m_test_storage.end());
+		m_test_storage.erase		(
+			std::unique(	
+				m_test_storage.begin(),
+				m_test_storage.end()
+			),
+			m_test_storage.end()
+		);
 	}
 
 	if (m_test_storage.empty()) {

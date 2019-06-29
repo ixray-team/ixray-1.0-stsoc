@@ -6,9 +6,8 @@
 //	Description : Script movement action class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_movement_action.h"
-#include "script_space.h"
 #include "script_game_object.h"
 #include "patrol_path_manager_space.h"
 #include "detail_path_manager_space.h"
@@ -104,6 +103,6 @@ void CScriptMovementAction::script_register(lua_State *L)
 			.def("patrol",						&CScriptMovementAction::SetPatrolPath)
 			.def("position",					&CScriptMovementAction::SetPosition)
 			.def("input",						&CScriptMovementAction::SetInputKeys)
-			.def("completed",					(bool (CScriptMovementAction::*)())(CScriptMovementAction::completed))
+			.def("completed",					(bool (CScriptMovementAction::*)())(&CScriptMovementAction::completed))
 	];
 }

@@ -381,7 +381,7 @@ void CUIMainIngameWnd::Update()
 			u32 _cn		= 0;
 			if(_pda && 0!= (_cn=_pda->ActiveContactsNum()) )
 			{
-				sprintf(text_str, "%d", _cn);
+				sprintf_s(text_str, "%d", _cn);
 				UIPdaOnline.SetText(text_str);
 			}
 			else
@@ -573,19 +573,19 @@ bool CUIMainIngameWnd::OnKeyboardPress(int dik)
 				// output coordinate info to the console
 			case DIK_P:
 				string256 tmpStr;
-				sprintf(tmpStr, "%s",
+				sprintf_s(tmpStr, "%s",
 					*m_pWeapon->cNameSect());
 				Log(tmpStr);
 
-					sprintf(tmpStr, "zoom_offset\t\t\t= %f,%f,%f",
+					sprintf_s(tmpStr, "zoom_offset\t\t\t= %f,%f,%f",
 						pWpnHud->ZoomOffset().x,
 						pWpnHud->ZoomOffset().y,
 						pWpnHud->ZoomOffset().z);
 				Log(tmpStr);
-				sprintf(tmpStr, "zoom_rotate_x\t\t= %f",
+				sprintf_s(tmpStr, "zoom_rotate_x\t\t= %f",
 					pWpnHud->ZoomRotateX());
 				Log(tmpStr);
-				sprintf(tmpStr, "zoom_rotate_y\t\t= %f",
+				sprintf_s(tmpStr, "zoom_rotate_y\t\t= %f",
 					pWpnHud->ZoomRotateY());
 				Log(tmpStr);
 				flag = true;
@@ -640,7 +640,7 @@ bool CUIMainIngameWnd::OnKeyboardPress(int dik)
 				string256 tmpStr;
 				if (m_pWeapon)
 				{
-					sprintf(tmpStr, "%s",
+					sprintf_s(tmpStr, "%s",
 						*m_pWeapon->cNameSect());
 					Log(tmpStr);
 				}
@@ -650,7 +650,7 @@ bool CUIMainIngameWnd::OnKeyboardPress(int dik)
 			else
 				Msg("weapon section:");
 
-				sprintf(tmpStr, "fire_point\t\t\t= %f,%f,%f",
+				sprintf_s(tmpStr, "fire_point\t\t\t= %f,%f,%f",
 					tmpV.x,
 					tmpV.y,
 					tmpV.z);
@@ -713,7 +713,7 @@ bool CUIMainIngameWnd::OnKeyboardPress(int dik)
 				string256 tmpStr;
 				if (m_pWeapon)
 				{
-					sprintf(tmpStr, "%s",
+					sprintf_s(tmpStr, "%s",
 						*m_pWeapon->cNameSect());
 					Log(tmpStr);
 				}
@@ -723,7 +723,7 @@ bool CUIMainIngameWnd::OnKeyboardPress(int dik)
 			else
 				Msg("weapon section:");
 
-				sprintf(tmpStr, "shell_point\t\t\t= %f,%f,%f",
+				sprintf_s(tmpStr, "shell_point\t\t\t= %f,%f,%f",
 					tmpV.x,
 					tmpV.y,
 					tmpV.z);
@@ -785,12 +785,12 @@ bool CUIMainIngameWnd::OnKeyboardPress(int dik)
 				string256 tmpStr;
 				if (m_pWeapon)
 				{
-					sprintf(tmpStr, "%s",
+					sprintf_s(tmpStr, "%s",
 						*m_pWeapon->cNameSect());
 					Log(tmpStr);
 				}
 
-				sprintf(tmpStr, "missile_throw_offset\t\t\t= %f,%f,%f",
+				sprintf_s(tmpStr, "missile_throw_offset\t\t\t= %f,%f,%f",
 					pActor->GetMissileOffset().x,
 					pActor->GetMissileOffset().y,
 					pActor->GetMissileOffset().z);
@@ -1151,6 +1151,11 @@ void CUIMainIngameWnd::OnConnected()
 
 void CUIMainIngameWnd::reset_ui()
 {
+	m_pActor						= NULL;
+	m_pWeapon						= NULL;
+	m_pGrenade						= NULL;
+	m_pItem							= NULL;
+	m_pPickUpItem					= NULL;
 	UIMotionIcon.ResetVisibility	();
 }
 

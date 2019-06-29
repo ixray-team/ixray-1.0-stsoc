@@ -6,7 +6,7 @@
 //	Description : Object handler
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "object_handler.h"
 #include "object_handler_space.h"
 #include "object_handler_planner.h"
@@ -122,11 +122,6 @@ void CObjectHandler::OnItemDrop		(CInventoryItem *inventory_item)
 	planner().remove_item		(inventory_item);
 
 	switch_torch				(inventory_item,false);
-}
-
-void CObjectHandler::OnItemDropUpdate	()
-{
-	inherited::OnItemDropUpdate	();
 }
 
 CInventoryItem *CObjectHandler::best_weapon() const

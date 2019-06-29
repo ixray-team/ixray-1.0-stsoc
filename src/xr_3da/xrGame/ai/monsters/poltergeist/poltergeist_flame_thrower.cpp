@@ -234,8 +234,14 @@ void CPolterFlame::update_schedule()
 	// remove all flames in state stop
 	
 	// удалить все элементы, выполнение которых закончено
-	FLAME_ELEMS_IT I = remove_if(m_flames.begin(), m_flames.end(), remove_predicate());
-	m_flames.erase(I,m_flames.end());
+	m_flames.erase	(
+		std::remove_if(
+			m_flames.begin(),
+			m_flames.end(),
+			remove_predicate()
+		),
+		m_flames.end()
+	);
 	
 	// check if we can create another flame
 	if (m_object->g_Alive() && m_object->EnemyMan.get_enemy() && (m_flames.size() < m_count)) {

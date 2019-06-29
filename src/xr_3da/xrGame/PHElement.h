@@ -8,6 +8,7 @@
 #include "PHSynchronize.h"
 #include "PHDisabling.h"
 #include "PHGeometryOwner.h"
+#include "PHInterpolation.h"
 #ifndef PH_ELEMENT
 #define PH_ELEMENT
 class CPHElement;
@@ -143,6 +144,11 @@ public:																																				//
 	virtual bool						EnabledStateOnStep						()  {return dBodyIsEnabled(m_body)||m_flags.test(flEnabledOnStep);}							//
 ////////////////////////////////////////////////Updates///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			bool						AnimToVel								( float dt, float l_limit,float a_limit );
+			void						BoneGlPos								(Fmatrix &m,CBoneInstance* B);
+			void						ToBonePos								(CBoneInstance* B);
+
+			void						SetBoneCallbackOverwrite				(bool v);
 			void						BonesCallBack							(CBoneInstance* B);																//called from updateCL visual influent
 			void						StataticRootBonesCallBack				(CBoneInstance* B);
 			void						PhDataUpdate							(dReal step);																	//ph update
@@ -241,6 +247,7 @@ IC			void						MulB43InverceLocalForm			(Fmatrix&)	;
 			void						RunSimulation							();																		//called anywhere ph state influent
 			void						RunSimulation							(const Fmatrix& start_from);											//
 			void						ClearDestroyInfo						();
+			void						GetAnimBonePos							(Fmatrix &bp);
 	//		bool						CheckBreakConsistent					()
 	CPHElement										();																						//aux
 	virtual ~CPHElement								();																						//aux

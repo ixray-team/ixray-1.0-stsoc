@@ -14,6 +14,7 @@
 #include "MathUtils.h"
 #include "characterphysicssupport.h"
 #include "inventory.h"
+#include "../IGame_Persistent.h"
 #ifdef DEBUG
 #	include "phdebug.h"
 #endif
@@ -136,7 +137,7 @@ void CMissile::spawn_fake_missile()
 		CSE_Abstract		*object = Level().spawn_item(
 			*cNameSect(),
 			Position(),
-			ai_location().level_vertex_id(),
+			(g_dedicated_server)?u32(-1):ai_location().level_vertex_id(),
 			ID(),
 			true
 		);
@@ -204,7 +205,7 @@ void CMissile::shedule_Update(u32 dt)
 		if(m_dwDestroyTime <= Level().timeServer()) 
 		{
 			m_dwDestroyTime = 0xffffffff;
-			VERIFY	(!m_pInventory);
+			VERIFY	(!m_pCurrentInventory);
 			Destroy	();
 			return;
 		}
@@ -303,8 +304,16 @@ void CMissile::OnAnimationEnd(u32 state)
 		} break;
 	case MS_THREATEN:
 		{
-			if(!m_fake_missile && !smart_cast<CMissile*>(H_Parent())) 
-				spawn_fake_missile	();
+			if (!m_fake_missile) {
+				CMissile				*missile = smart_cast<CMissile*>(H_Parent());
+				if (!missile) {
+					CEntityAlive		*entity_alive = smart_cast<CEntityAlive*>(H_Parent());
+					if (!entity_alive || entity_alive->g_Alive())
+					{
+						spawn_fake_missile	();
+					}
+				}
+			}
 
 			if(m_throw) 
 				SwitchState(MS_THROW); 
@@ -445,7 +454,8 @@ void CMissile::Throw()
 	
 	m_fThrowForce						= m_fMinForce;
 
-	if (Local() && H_Parent()) {
+	if (Local() && H_Parent()) 
+	{
 		NET_Packet						P;
 		u_EventGen						(P,GE_OWNERSHIP_REJECT,ID());
 		P.w_u16							(u16(m_fake_missile->ID()));
@@ -694,3 +704,7 @@ void CMissile::GetBriefInfo(xr_string& str_name, xr_string& icon_sect_name, xr_s
 	icon_sect_name	= "";
 }
 
+u16 CMissile::bone_count_to_synchronize	() const
+{
+	return CInventoryItem::object().PHGetSyncItemsNumber();
+}

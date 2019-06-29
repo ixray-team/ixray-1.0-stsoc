@@ -8,6 +8,8 @@
 #include "UIChangeWeather.h"
 #include "UITextVote.h"
 
+#include "../game_sv_mp_vote_flags.h"
+
 
 CUIVotingCategory::CUIVotingCategory()
 {
@@ -26,6 +28,7 @@ CUIVotingCategory::CUIVotingCategory()
 		btn[i] = xr_new<CUI3tButton>();
 		btn[i]->SetAutoDelete(true);
 		AttachChild(btn[i]);
+
 
 		txt[i] = xr_new<CUIStatic>();
 		txt[i]->SetAutoDelete(true);
@@ -58,9 +61,9 @@ void CUIVotingCategory::Init()
 
 	string256 _path;
 	for (int i = 0; i<7; i++){
-		sprintf(_path, "category:btn_%d", i + 1);
+		sprintf_s(_path, "category:btn_%d", i + 1);
 		CUIXmlInit::Init3tButton(*xml_doc, _path, 0, btn[i]);
-		sprintf(_path, "category:txt_%d", i + 1);
+		sprintf_s(_path, "category:txt_%d", i + 1);
 		CUIXmlInit::InitStatic(*xml_doc, _path, 0, txt[i]);
 	}
 
@@ -107,7 +110,12 @@ bool CUIVotingCategory::OnKeyboard(int dik, EUIMessages keyboard_action)
 void CUIVotingCategory::OnBtn(int i)
 {
 	game_cl_mp* game = smart_cast<game_cl_mp*>(&Game());
-	switch (i){
+
+	//check buttons state, based on voting mask
+	u16 flag = 1<<(u16(i+1) & 0xff);
+	if (Game().IsVotingEnabled(flag))
+	{
+		switch (i){
 		case 0:
 			Console->Execute("cl_votestart restart");
 			game->StartStopMenu(this, true);
@@ -153,6 +161,7 @@ void CUIVotingCategory::OnBtn(int i)
 			break;
 		case 7:
 			break;
+		}
 	}
 }
 
@@ -160,4 +169,18 @@ void CUIVotingCategory::OnBtnCancel()
 {
 	game_cl_mp* game = smart_cast<game_cl_mp*>(&Game());
 	game->StartStopMenu(this, true);
+}
+
+void CUIVotingCategory::Update				()
+{
+	//check buttons state, based on voting mask
+	for (int i = 0; i<7; i++)
+	{
+		u16 flag = 1<<(u16(i+1) & 0xff);
+		
+		btn[i]->Enable((i==6)?false:Game().IsVotingEnabled(flag));
+		txt[i]->Enable((i==6)?false:Game().IsVotingEnabled(flag));		
+	}
+
+	inherited::Update();
 }

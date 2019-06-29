@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <xrCore.h>
+#include "../xrCore/xrCore.h"
 
 //#include <errno.h>
 #include <locale.h>
@@ -36,7 +36,9 @@
 	// release: no error checking, no exceptions
 	#define LUABIND_NO_EXCEPTIONS
 	#define BOOST_THROW_EXCEPTION_HPP_INCLUDED
-	namespace boost {	void  throw_exception(const std::exception &A);	};
+
+	namespace std	{	class exception; }
+//	namespace boost {	void  throw_exception(const std::exception &A);	};
 #endif
 #define LUABIND_DONT_COPY_STRINGS
 

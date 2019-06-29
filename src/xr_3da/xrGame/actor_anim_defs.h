@@ -88,7 +88,7 @@ struct	SVehicleAnimCollection
 };
 struct SActorVehicleAnims
 {
-	static const TYPES_NUMBER=2;
+	static const int TYPES_NUMBER=2;
 	SVehicleAnimCollection m_vehicles_type_collections	[TYPES_NUMBER];
 						SActorVehicleAnims				();
 	void				Create							(CKinematicsAnimated* K);

@@ -47,10 +47,15 @@ private:
 	CGameSpawnConstructor				*m_game_spawn_constructor;
 	CSE_ALifeCreatureActor				*m_actor;
 	CLevelGraph							*m_level_graph;
-	CGameLevelCrossTable				*m_cross_table;
 	CGraphEngine						*m_graph_engine;
 	LEVEL_CHANGER_STORAGE				m_level_changers;
 	bool								m_no_separator_check;
+
+private:
+#ifdef PRIQUEL
+	const
+#endif // PRIQUEL
+	CGameLevelCrossTable				*m_cross_table;
 
 protected:
 			void						init								();

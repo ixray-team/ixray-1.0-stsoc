@@ -23,10 +23,11 @@ class CPHMovementControl
 {
 	collide::rq_results		storage;
 
-static const path_few_point=10;
+static const int path_few_point=10;
 
 public:
 CElevatorState			*ElevatorState  ();
+void 					in_shedule_Update( u32 DT );
 void					PHCaptureObject(CPhysicsShellHolder* object);
 void					PHCaptureObject(CPhysicsShellHolder* object,u16 element);
 CPHCapture*				PHCapture		(){return m_capture;}

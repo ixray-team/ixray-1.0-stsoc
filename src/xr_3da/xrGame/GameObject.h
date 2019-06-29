@@ -38,7 +38,8 @@ class CAttachmentOwner;
 class CBaseMonster;
 class CSpaceRestrictor;
 class CAttachableItem;
-
+class animation_movement_controller;
+class CBlend;
 namespace GameObject {
 	enum ECallbackType;
 };
@@ -52,15 +53,17 @@ class CGameObject :
 	public CScriptBinder
 {
 	typedef CObject inherited;
-	bool					m_spawned;
-	Flags32					m_server_flags;
-	CAI_ObjectLocation		*m_ai_location;
-	ALife::_STORY_ID		m_story_id;
-
+	bool							m_spawned;
+	Flags32							m_server_flags;
+	CAI_ObjectLocation				*m_ai_location;
+	ALife::_STORY_ID				m_story_id;
+	animation_movement_controller	*m_anim_mov_ctrl;
 protected:
 	//время удаления объекта
 	bool					m_bObjectRemoved;
-
+public:
+	CGameObject();
+	virtual ~CGameObject();
 public:
 	//functions used for avoiding most of the smart_cast
 	virtual CAttachmentOwner*			cast_attachment_owner		()						{return NULL;}
@@ -94,14 +97,15 @@ public:
 
 	// Utilities
 	static void				u_EventGen			(NET_Packet& P, u32 type, u32 dest	);
-	static void				u_EventSend			(NET_Packet& P, BOOL sync=TRUE		);
+	static void				u_EventSend			(NET_Packet& P, u32 dwFlags = DPNSEND_GUARANTEED	);
 	
 	// Methods
 	virtual void			Load				(LPCSTR section);
 	virtual BOOL			net_Spawn			(CSE_Abstract* DC);
 	virtual void			net_Destroy			();
-	virtual	void			net_Relcase			( CObject* O );					//
-	
+	virtual	void			net_Relcase			( CObject* O );	
+	virtual void			UpdateCL			( );
+	virtual void			OnChangeVisual		( );
 	//object serialization
 	virtual void			net_Save			(NET_Packet &net_packet);
 	virtual void			net_Load			(IReader	&ireader);
@@ -143,11 +147,16 @@ public:
 			void			setup_parent_ai_locations(bool assign_position = true);
 			void			validate_ai_locations(bool decrement_reference = true);
 
+	//animation_movement_controller
+	virtual	void			create_anim_mov_ctrl			( CBlend* b );
+	virtual	void			destroy_anim_mov_ctrl			( );
+			void			update_animation_movement_controller();
+	IC		bool			animation_movement_controlled	( ) const	{ return	!!animation_movement(); }
+const animation_movement_controller*animation_movement		( ) const	{ return	m_anim_mov_ctrl; }
 	// Game-specific events
-	CGameObject();
-	virtual ~CGameObject();
 
 	virtual BOOL			UsedAI_Locations				();
+			BOOL			TestServerFlag					(u32 Flag) const;
 	virtual	bool			can_validate_position_on_spawn	(){return true;}
 #ifdef DEBUG
 	virtual void			OnRender			();

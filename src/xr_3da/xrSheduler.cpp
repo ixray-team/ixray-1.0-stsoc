@@ -31,10 +31,10 @@ void CSheduler::Destroy			()
 	if (!Items.empty())
 	{
 		string1024		_objects; _objects[0]=0;
-		for (u32 it=0; it<Items.size(); it++)
-			strconcat	(_objects,*Items[it].Object->shedule_Name(),",");
 
-		Msg				("! Sheduler work-list is not empty\n%s",_objects);
+		Msg				("! Sheduler work-list is not empty");
+		for (u32 it=0; it<Items.size(); it++)
+			Msg("%s",*Items[it].Object->shedule_Name().c_str());
 	}
 #endif // DEBUG
 	ItemsRT.clear		();

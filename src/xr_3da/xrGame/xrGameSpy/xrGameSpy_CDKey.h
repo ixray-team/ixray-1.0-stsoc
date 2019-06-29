@@ -13,4 +13,5 @@ extern "C"
 	EXPORT_FN_DECL(void, gcd_reauthenticate_user, (int localid, int hint, const char *response));
 	EXPORT_FN_DECL(void, gcd_disconnect_user, (int localid));
 	EXPORT_FN_DECL(void, gcd_think, (void));
+	EXPORT_FN_DECL(char*, gcd_getkeyhash, (int localid));
 }

@@ -12,6 +12,8 @@ class CUITextVote;
 
 class CUIVotingCategory : public CUIDialogWnd 
 {
+private:
+	typedef CUIDialogWnd inherited;
 public:
 	using CUIDialogWnd::Init;
 
@@ -23,6 +25,8 @@ public:
 
 	void				OnBtn				(int i);
 	void				OnBtnCancel			();
+
+	virtual void		Update				();
 
 protected:
 	void				Init				();

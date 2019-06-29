@@ -6,7 +6,7 @@
 //	Description : Hit memory manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "hit_memory_manager.h"
 #include "memory_space_impl.h"
 #include "custommonster.h"
@@ -21,6 +21,7 @@
 #include "profiler.h"
 #include "client_spawn_manager.h"
 #include "memory_manager.h"
+#include "../IGame_Persistent.h"
 
 #ifndef MASTER_GOLD
 #	include "clsid_game.h"
@@ -195,10 +196,14 @@ void CHitMemoryManager::update()
 	clear_delayed_objects		();
 
 	VERIFY						(m_hits);
-	{
-		HITS::iterator			I = remove_if(m_hits->begin(),m_hits->end(),CRemoveOfflinePredicate());
-		m_hits->erase			(I,m_hits->end());
-	}
+	m_hits->erase				(
+		std::remove_if(	
+			m_hits->begin(),
+			m_hits->end(),
+			CRemoveOfflinePredicate()
+		),
+		m_hits->end()
+	);
 
 #ifdef USE_SELECTED_HIT
 	xr_delete					(m_selected_hit);
@@ -349,7 +354,8 @@ void CHitMemoryManager::load	(IReader &packet)
 
 		const CClientSpawnManager::CSpawnCallback	*spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id,m_object->ID());
 		if (!spawn_callback || !spawn_callback->m_object_callback)
-			Level().client_spawn_manager().add	(delayed_object.m_object_id,m_object->ID(),callback);
+			if(!g_dedicated_server)
+				Level().client_spawn_manager().add	(delayed_object.m_object_id,m_object->ID(),callback);
 #ifdef DEBUG
 		else {
 			if (spawn_callback && spawn_callback->m_object_callback) {

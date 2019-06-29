@@ -62,6 +62,7 @@ const	float		PI_DIV_8	= 0.3926990816987241548078304229099f;
 #define				PI_DIV_8	0.3926990816987241548078304229099f
 #endif
 
+
 // Define types and namespaces (CPU & FPU)
 #include	"_types.h"
 #include	"_math.h"

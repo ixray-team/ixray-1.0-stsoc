@@ -19,6 +19,7 @@
 #include "DamageSource.h"
 #include "PHCollideValidator.h"
 #include "CalculateTriangle.h"
+#include "game_base_space.h"
 //#include "phvalide.h"
 
 
@@ -1745,7 +1746,8 @@ ALife::EHitType	CPHSimpleCharacter:: HitType	()const
 	if(GMLib.GetMaterialByIdx(LastMaterialIDX())->Flags.test(SGameMtl::flInjurious)&&IsGameTypeSingle())
 		return ALife::eHitTypeRadiation;
 	else									
-		return ALife::eHitTypeStrike;
+//		return ALife::eHitTypeStrike;
+	return (GameID() == GAME_SINGLE) ? ALife::eHitTypeStrike : ALife::eHitTypePhysicStrike;
 }//
 CElevatorState*	CPHSimpleCharacter::ElevatorState()
 {

@@ -125,8 +125,14 @@ void CSoundPlayer::update			(float time_delta)
 
 void CSoundPlayer::remove_inappropriate_sounds(u32 sound_mask)
 {
-	xr_vector<CSoundSingle>::iterator	I = remove_if(m_playing_sounds.begin(),m_playing_sounds.end(),CInappropriateSoundPredicate(sound_mask));
-	m_playing_sounds.erase				(I,m_playing_sounds.end());
+	m_playing_sounds.erase				(
+		std::remove_if(
+			m_playing_sounds.begin(),
+			m_playing_sounds.end(),
+			CInappropriateSoundPredicate(sound_mask)
+		),
+		m_playing_sounds.end()
+	);
 }
 
 void CSoundPlayer::update_playing_sounds()
@@ -237,10 +243,10 @@ CSoundPlayer::CSoundCollection::CSoundCollection	(const CSoundCollectionParams &
 	seed								(u32(CPU::QPC() & 0xffffffff));
 	m_sounds.clear						();
 	for (int j=0, N = _GetItemCount(*params.m_sound_prefix); j<N; ++j) {
-		string256						fn, s, temp;
+		string_path						fn, s, temp;
 		LPSTR							S = (LPSTR)&s;
 		_GetItem						(*params.m_sound_prefix,j,temp);
-		strconcat						(S,*params.m_sound_player_prefix,temp);
+		strconcat						(sizeof(s),S,*params.m_sound_player_prefix,temp);
 		if (FS.exist(fn,"$game_sounds$",S,".ogg")) {
 			ref_sound					*temp = add(params.m_type,S);
 			if (temp)
@@ -248,7 +254,7 @@ CSoundPlayer::CSoundCollection::CSoundCollection	(const CSoundCollectionParams &
 		}
 		for (u32 i=0; i<params.m_max_count; ++i){
 			string256					name;
-			sprintf						(name,"%s%d",S,i);
+			sprintf_s						(name,"%s%d",S,i);
 			if (FS.exist(fn,"$game_sounds$",name,".ogg")) {
 				ref_sound				*temp = add(params.m_type,name);
 				if (temp)

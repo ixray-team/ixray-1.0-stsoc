@@ -16,21 +16,11 @@
 #include "UIListBoxItem.h"
 #include "../CustomOutfit.h"
 
-void	CUIInventoryWnd::Activate_Artefact()
-{
-	CActor *pActor							= smart_cast<CActor*>(Level().CurrentEntity());
-	if(!pActor)								return;
-
-	SendEvent_ActivateArtefact				(CurrentIItem());
-};
 
 void CUIInventoryWnd::EatItem(PIItem itm)
 {
 	SetCurrentItem							(NULL);
 	if(!itm->Useful())						return;
-	CActor *pActor							= smart_cast<CActor*>(Level().CurrentEntity());
-	if(!pActor)								return;
-
 
 	SendEvent_Item_Eat						(itm);
 
@@ -51,7 +41,6 @@ void CUIInventoryWnd::ActivatePropertiesBox()
 	CAntirad*			pAntirad			= smart_cast<CAntirad*>			(CurrentIItem());
 	CEatableItem*		pEatableItem		= smart_cast<CEatableItem*>		(CurrentIItem());
 	CCustomOutfit*		pOutfit				= smart_cast<CCustomOutfit*>	(CurrentIItem());
-//.	CArtefact*			pArtefact			= smart_cast<CArtefact*>		(CurrentIItem());
 	CWeapon*			pWeapon				= smart_cast<CWeapon*>			(CurrentIItem());
 	CScope*				pScope				= smart_cast<CScope*>			(CurrentIItem());
 	CSilencer*			pSilencer			= smart_cast<CSilencer*>		(CurrentIItem());
@@ -194,10 +183,13 @@ void CUIInventoryWnd::ActivatePropertiesBox()
 		UIPropertiesBox.AddItem(_action,  NULL, INVENTORY_EAT_ACTION);
 		b_show			= true;
 	}
-//.	if(pArtefact&&pArtefact->CanBeActivated())
-//.		UIPropertiesBox.AddItem("st_activate_artefact",  NULL, INVENTORY_ACTIVATE_ARTEFACT_ACTION);
 
-	if(!CurrentIItem()->IsQuestItem()){
+	bool disallow_drop	= (pOutfit&&bAlreadyDressed);
+	disallow_drop		|= !!CurrentIItem()->IsQuestItem();
+
+	if(!disallow_drop)
+	{
+
 		UIPropertiesBox.AddItem("st_drop", NULL, INVENTORY_DROP_ACTION);
 		b_show			= true;
 
@@ -213,7 +205,7 @@ void CUIInventoryWnd::ActivatePropertiesBox()
 		Fvector2						cursor_pos;
 		Frect							vis_rect;
 		GetAbsoluteRect					(vis_rect);
-		GetUICursor()->GetPos			(cursor_pos.x, cursor_pos.y);
+		cursor_pos						= GetUICursor()->GetCursorPosition();
 		cursor_pos.sub					(vis_rect.lt);
 		UIPropertiesBox.Show			(vis_rect, cursor_pos);
 		PlaySnd							(eInvProperties);
@@ -224,7 +216,7 @@ void CUIInventoryWnd::ProcessPropertiesBoxClicked	()
 {
 	if(UIPropertiesBox.GetClickedItem())
 	{
-		switch(UIPropertiesBox.GetClickedItem()->GetID())
+		switch(UIPropertiesBox.GetClickedItem()->GetTAG())
 		{
 		case INVENTORY_TO_SLOT_ACTION:	
 			ToSlot(CurrentItem(), true);
@@ -256,9 +248,6 @@ void CUIInventoryWnd::ProcessPropertiesBoxClicked	()
 			break;
 		case INVENTORY_DETACH_GRENADE_LAUNCHER_ADDON:
 			DetachAddon(*(smart_cast<CWeapon*>(CurrentIItem()))->GetGrenadeLauncherName());
-			break;
-		case INVENTORY_ACTIVATE_ARTEFACT_ACTION:
-			Activate_Artefact();
 			break;
 		case INVENTORY_RELOAD_MAGAZINE:
 			(smart_cast<CWeapon*>(CurrentIItem()))->Action(kWPN_RELOAD, CMD_START);
@@ -296,8 +285,16 @@ bool CUIInventoryWnd::DropItem(PIItem itm, CUIDragDropListEx* lst)
 {
 	if(lst==m_pUIOutfitList)
 	{
-		EatItem				(CurrentIItem());
+		return TryUseItem			(itm);
+/*
+		CCustomOutfit*		pOutfit		= smart_cast<CCustomOutfit*>	(CurrentIItem());
+		if(pOutfit)
+			ToSlot			(CurrentItem(), true);
+		else
+			EatItem				(CurrentIItem());
+
 		return				true;
+*/
 	}
 	CUICellItem*	_citem	= lst->ItemsCount() ? lst->GetItemIdx(0) : NULL;
 	PIItem _iitem	= _citem ? (PIItem)_citem->m_pData : NULL;
@@ -305,7 +302,6 @@ bool CUIInventoryWnd::DropItem(PIItem itm, CUIDragDropListEx* lst)
 	if(!_iitem)						return	false;
 	if(!_iitem->CanAttach(itm))		return	false;
 	AttachAddon						(_iitem);
-
 
 	return							true;
 }

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "weaponvintorez.h"
 
 CWeaponVintorez::CWeaponVintorez(void) : CWeaponMagazined("VINTOREZ",SOUND_TYPE_WEAPON_SNIPERRIFLE)
@@ -10,8 +10,6 @@ CWeaponVintorez::CWeaponVintorez(void) : CWeaponMagazined("VINTOREZ",SOUND_TYPE_
 CWeaponVintorez::~CWeaponVintorez(void)
 {
 }
-
-#include "script_space.h"
 
 using namespace luabind;
 

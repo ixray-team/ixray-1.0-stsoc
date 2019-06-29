@@ -9,6 +9,10 @@
 #include "../game_cl_teamdeathmatch.h"
 #include "../../xr_ioconsole.h"
 #include "UIMapList.h"
+#include "CExtraContentFilter.h"
+
+#include "../object_broker.h"
+#include "../UIGameCustom.h"
 
 xr_token	game_types		[];
 
@@ -43,9 +47,12 @@ CUIChangeMap::CUIChangeMap()
 	btn_cancel = xr_new<CUI3tButton>(); btn_cancel->SetAutoDelete(true);
 	AttachChild(btn_cancel);
 
-	selected_item = u32(-1);
+	m_pExtraContentFilter = xr_new<CExtraContentFilter>();
 }
-
+CUIChangeMap::~CUIChangeMap()
+{
+	delete_data(m_pExtraContentFilter);
+}
 void CUIChangeMap::Init(CUIXml& xml_doc)
 {
 	CUIXmlInit::InitWindow				(xml_doc,			"change_map", 0, this);
@@ -77,10 +84,14 @@ bool CUIChangeMap::OnKeyboard(int dik, EUIMessages keyboard_action)
 
 void CUIChangeMap::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 {
-	if (LIST_ITEM_SELECT == msg && pWnd == lst)
+	if (LIST_ITEM_SELECT==msg && pWnd==lst)
 	{		
-		selected_item = *static_cast<u32*>(pData);
 		OnItemSelect();
+	}else
+	if (LIST_ITEM_DB_CLICKED==msg && pWnd==lst)
+	{		
+		OnItemSelect();
+		OnBtnOk();
 	}
 	else if (BUTTON_CLICKED == msg)
 	{
@@ -96,7 +107,8 @@ void CUIChangeMap::OnItemSelect()
 	u32 idx					= lst->GetSelectedIDX();
 	if(idx==u32(-1))		return;
 
-	const shared_str& name	= maps[idx];
+	const SGameTypeMaps& M	= gMapListHelper.GetMapListFor( (EGameTypes)GameID() );
+	const shared_str& name	= M.m_map_names[idx];
 
 	xr_string map_name		= "intro\\intro_map_pic_";
 	map_name				+=	name.c_str();
@@ -110,12 +122,14 @@ void CUIChangeMap::OnItemSelect()
 
 void CUIChangeMap::OnBtnOk()
 {
-	u32 idx					= lst->GetSelectedIDX();
-	const shared_str& name	= maps[idx];
+	u32 idx						= lst->GetSelectedIDX();
+	const SGameTypeMaps& M		= gMapListHelper.GetMapListFor( (EGameTypes)GameID() );
+	if (idx>=0 && idx<M.m_map_names.size())
+	{	
+		const shared_str& name		= M.m_map_names[idx];
 
-	{
 		string512					command;
-        sprintf						(command, "cl_votestart changemap %s", name.c_str());
+        sprintf_s						(command, "cl_votestart changemap %s", name.c_str());
 		Console->Execute			(command);
 		GetHolder()->StartStopMenu	(this, true);
 	}
@@ -124,25 +138,18 @@ void CUIChangeMap::OnBtnOk()
 void CUIChangeMap::FillUpList()
 {
 	lst->Clear				();
-	maps.clear_not_free		();
-	string_path				fn;
-	FS.update_path			(fn, "$game_config$", MAP_LIST);
-	CInifile map_list_cfg	(fn);
 
-	LPCSTR sect_name		= get_token_name( game_types, GameID() );
-
-	CInifile::Sect& S		= map_list_cfg.r_section(sect_name);
-	CInifile::SectIt it		= S.begin(), end = S.end();
-	
-	for (;it!=end; ++it)
+	const SGameTypeMaps& M		= gMapListHelper.GetMapListFor( (EGameTypes)GameID() );
+	u32 cnt						= M.m_map_names.size();
+	for (u32 i=0; i<cnt; ++i)
 	{
-		shared_str _map_name = it->first;
-		maps.push_back		(_map_name);
-		lst->AddItem		( CStringTable().translate(_map_name).c_str() );
+		CUIListBoxItem* itm		= lst->AddItem( CStringTable().translate(M.m_map_names[i]).c_str() );
+		itm->Enable				(m_pExtraContentFilter->IsDataEnabled(M.m_map_names[i].c_str()));
 	}
+
 }
 
 void CUIChangeMap::OnBtnCancel()
 {
-		GetHolder()->StartStopMenu	(this, true);
+	GetHolder()->StartStopMenu	(this, true);
 }

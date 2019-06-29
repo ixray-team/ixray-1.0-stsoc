@@ -35,11 +35,6 @@ void CObject::cNameVisual_set	(shared_str N)
 	{
 		IRender_Visual			*old_v = renderable.visual;
 		
-#ifdef DEBUG
-		if(NameVisual.size())
-			Msg("---change NameVisual from[%s] to [%s]",NameVisual.c_str(), N.c_str());
-#endif // DEBUG
-
 		NameVisual				= N;
 		renderable.visual		= Render->model_Create	(*N);
 		
@@ -135,7 +130,7 @@ void CObject::Load				(LPCSTR section )
 	// Visual and light-track
 	if (pSettings->line_exist(section,"visual")){
 		string_path					tmp;
-		strcpy					(tmp, pSettings->r_string(section,"visual"));
+		strcpy_s					(tmp, pSettings->r_string(section,"visual"));
 		if(strext(tmp)) 
 			*strext(tmp)			=0;
 		xr_strlwr					(tmp);
@@ -156,7 +151,6 @@ BOOL CObject::net_Spawn			(CSE_Abstract* data)
 
 	if (0==collidable.model) 	{
 		if (pSettings->line_exist(cNameSect(),"cform")) {
-			//LPCSTR cf			= pSettings->r_string	(*cNameSect(), "cform");
 			VERIFY3				(*NameVisual, "Model isn't assigned for object, but cform requisted",*cName());
 			collidable.model	= xr_new<CCF_Skeleton>	(this);
 		}
@@ -167,9 +161,8 @@ BOOL CObject::net_Spawn			(CSE_Abstract* data)
 		shedule_register		();
 
 	// reinitialize flags
-//.	Props.bActiveCounter		= 0;	
 	processing_activate			();
-	setDestroy					(false);
+	setDestroy					(FALSE);
 
 	MakeMeCrow					();
 
@@ -358,7 +351,11 @@ void CObject::setDestroy			(BOOL _destroy)
 
 	Props.bDestroy	= _destroy?1:0;
 	if (_destroy)
+	{
 		g_pGameLevel->Objects.register_object_to_destroy	(this);
-	else
+#ifdef DEBUG
+		Msg("cl setDestroy [%d][%d]",ID(),Device.dwFrame);
+#endif
+	}else
 		VERIFY		(!g_pGameLevel->Objects.registered_object_to_destroy(this));
 }

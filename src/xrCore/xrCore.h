@@ -2,6 +2,8 @@
 #define xrCoreH
 #pragma once
 
+#pragma warning(disable:4996)
+
 #if (defined(_DEBUG) || defined(MIXED) || defined(DEBUG)) && !defined(FORCE_NO_EXCEPTIONS)
 	// "debug" or "mixed"
 	#if !defined(_CPPUNWIND)
@@ -14,9 +16,10 @@
 	#if defined(_CPPUNWIND)
 		#error Please disable exceptions...
 	#endif
-	#define _HAS_EXCEPTIONS		1	// STL
+//	#define _HAS_EXCEPTIONS		1	// STL
 	#define XRAY_EXCEPTIONS		0	// XRAY
 	#define LUABIND_NO_EXCEPTIONS
+	#define BOOST_NO_EXCEPTIONS
 	#pragma warning(disable:4530)
 #endif
 
@@ -55,7 +58,10 @@
 #include <stdarg.h>
 #include <math.h>
 #include <string.h>
-#include <typeinfo.h>
+
+#include <typeinfo>
+//#include <typeinfo.h>
+
 //#include <process.h>
 
 #ifndef DEBUG
@@ -152,7 +158,7 @@
 #ifdef _M_AMD64
 #pragma warning (disable : 4512 )
 #endif
-
+       
 // stl
 #pragma warning (push)
 #pragma warning (disable:4702)

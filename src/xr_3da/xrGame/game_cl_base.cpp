@@ -1,17 +1,18 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "hudmanager.h"
 #include "game_cl_base.h"
 #include "level.h"
 #include "GamePersistent.h"
 #include "UIGameCustom.h"
 #include "script_engine.h"
-#include "script_space.h"
 #include "xr_Level_controller.h"
 #include "ui/UIMainIngameWnd.h"
 #include "UI/UIGameTutorial.h"
 #include "UI/UIMessagesWindow.h"
 #include "string_table.h"
 #include "game_cl_base_weapon_usage_statistic.h"
+
+#include "game_sv_mp_vote_flags.h"
 
 game_cl_GameState::game_cl_GameState()
 {
@@ -25,7 +26,7 @@ game_cl_GameState::game_cl_GameState()
 	m_game_ui_custom			= NULL;
 	shedule_register			();
 
-	m_bVotingEnabled			= false;
+	m_u16VotingEnabled			= 0;
 	m_bServerControlHits		= true;
 }
 
@@ -67,7 +68,7 @@ void	game_cl_GameState::net_import_state	(NET_Packet& P)
 {
 	// Generic
 	P.r_clientID	(local_svdpnid);
-	P.r_s32			(type);
+	P.r_s32			(m_type);
 	
 	u16 ph;
 	P.r_u16			(ph);
@@ -75,9 +76,9 @@ void	game_cl_GameState::net_import_state	(NET_Packet& P)
 	if(Phase()!=ph)
 		switch_Phase(ph);
 
-	P.r_s32			(round);
-	P.r_u32			(start_time);
-	m_bVotingEnabled = !!P.r_u8();
+	P.r_s32			(m_round);
+	P.r_u32			(m_start_time);
+	m_u16VotingEnabled = u16(P.r_u8());
 	m_bServerControlHits = !!P.r_u8();	
 	m_WeaponUsageStatistic->SetCollectData(!!P.r_u8());
 
@@ -102,12 +103,12 @@ void	game_cl_GameState::net_import_state	(NET_Packet& P)
 		{
 			IP = I->second;
 			//***********************************************
-			u16 OldFlags = IP->flags;
+			u16 OldFlags = IP->flags__;
 			u8 OldVote = IP->m_bCurrentVoteAgreed;
 			//-----------------------------------------------
 			IP->net_Import(P);
 			//-----------------------------------------------
-			if (OldFlags != IP->flags)
+			if (OldFlags != IP->flags__)
 				if (Type() != GAME_SINGLE) OnPlayerFlagsChanged(IP);
 			if (OldVote != IP->m_bCurrentVoteAgreed)
 				OnPlayerVoted(IP);
@@ -124,13 +125,6 @@ void	game_cl_GameState::net_import_state	(NET_Packet& P)
 			players_new.insert(mk_pair(ID,IP));
 		}
 		if (IP->testFlag(GAME_PLAYER_FLAG_LOCAL) ) local_player = IP;
-
-
-/*		game_PlayerState*	IP = createPlayerState();
-		IP->net_Import		(P);
-		players.insert(mk_pair(ID,IP));
-		if (IP->testFlag(GAME_PLAYER_FLAG_LOCAL) ) local_player = IP;
-*/
 	}
 
 	I	= players.begin();
@@ -156,12 +150,12 @@ void	game_cl_GameState::net_import_update(NET_Packet& P)
 		game_PlayerState* IP		= I->second;
 //		CopyMemory	(&IP,&PS,sizeof(PS));		
 		//***********************************************
-		u16 OldFlags = IP->flags;
+		u16 OldFlags = IP->flags__;
 		u8 OldVote = IP->m_bCurrentVoteAgreed;
 		//-----------------------------------------------
 		IP->net_Import(P);
 		//-----------------------------------------------
-		if (OldFlags != IP->flags)
+		if (OldFlags != IP->flags__)
 			if (Type() != GAME_SINGLE) OnPlayerFlagsChanged(IP);
 		if (OldVote != IP->m_bCurrentVoteAgreed)
 			OnPlayerVoted(IP);
@@ -174,8 +168,6 @@ void	game_cl_GameState::net_import_update(NET_Packet& P)
 		if (Type() != GAME_SINGLE) OnPlayerFlagsChanged(PS);
 		xr_delete(PS);
 	};
-
-//	if (OnServer())		return;
 
 	//Syncronize GameTime
 	net_import_GameTime (P);
@@ -197,10 +189,19 @@ void game_cl_GameState::TranslateGameMessage	(u32 msg, NET_Packet& P)
 	{
 	case GAME_EVENT_PLAYER_CONNECTED:
 		{
+
+#ifdef BATTLEYE
+			if ( g_pGameLevel && Level().battleye_system.GetTestClient() )
+			{
+				bool res_battleye = Level().battleye_system.LoadClient();
+				VERIFY( res_battleye );
+			}
+#endif // BATTLEYE
+
 			string64 PlayerName;
 			P.r_stringZ(PlayerName);
 			
-			sprintf(Text, "%s%s %s%s",Color_Teams[0],PlayerName,Color_Main,*st.translate("mp_connected"));
+			sprintf_s(Text, "%s%s %s%s",Color_Teams[0],PlayerName,Color_Main,*st.translate("mp_connected"));
 			CommonMessageOut(Text);
 			//---------------------------------------
 			Msg("%s connected", PlayerName);
@@ -210,7 +211,7 @@ void game_cl_GameState::TranslateGameMessage	(u32 msg, NET_Packet& P)
 			string64 PlayerName;
 			P.r_stringZ(PlayerName);
 
-			sprintf(Text, "%s%s %s%s",Color_Teams[0],PlayerName,Color_Main,*st.translate("mp_disconnected"));
+			sprintf_s(Text, "%s%s %s%s",Color_Teams[0],PlayerName,Color_Main,*st.translate("mp_disconnected"));
 			CommonMessageOut(Text);
 			//---------------------------------------
 			Msg("%s disconnected", PlayerName);
@@ -220,7 +221,7 @@ void game_cl_GameState::TranslateGameMessage	(u32 msg, NET_Packet& P)
 			string64 PlayerName;
 			P.r_stringZ(PlayerName);
 
-			sprintf(Text, "%s%s %s%s",Color_Teams[0],PlayerName,Color_Main,*st.translate("mp_entered_game"));
+			sprintf_s(Text, "%s%s %s%s",Color_Teams[0],PlayerName,Color_Main,*st.translate("mp_entered_game"));
 			CommonMessageOut(Text);
 		}break;
 	default:
@@ -281,22 +282,10 @@ float game_cl_GameState::shedule_Scale		()
 	return 1.0f;
 }
 
-extern CUISequencer * g_tutorial;
-extern CUISequencer * g_tutorial2;
 
 void game_cl_GameState::shedule_Update		(u32 dt)
 {
 	ISheduled::shedule_Update	(dt);
-
-	if(g_tutorial2){ 
-		g_tutorial2->Destroy	();
-		xr_delete				(g_tutorial2);
-	}
-
-	if(g_tutorial && !g_tutorial->IsActive()){
-		//g_tutorial->Destroy	();
-		xr_delete(g_tutorial);
-	}
 
 	if(!m_game_ui_custom){
 		if( HUD().GetUI() )
@@ -307,7 +296,7 @@ void game_cl_GameState::shedule_Update		(u32 dt)
 	{
 	case GAME_PHASE_INPROGRESS:
 		{
-			if (Type() != GAME_SINGLE)
+			if (!IsGameTypeSingle())
 				m_WeaponUsageStatistic->Update();
 		}break;
 	default:
@@ -336,12 +325,18 @@ void	game_cl_GameState::sv_EventSend(NET_Packet& P)
 
 bool game_cl_GameState::IR_OnKeyboardPress		(int dik)
 {
-	return OnKeyboardPress( get_binded_action(dik) );
+	if(local_player && !local_player->IsSkip())
+		return OnKeyboardPress( get_binded_action(dik) );
+	else
+		return false;
 }
 
 bool game_cl_GameState::IR_OnKeyboardRelease	(int dik)
 {
-	return OnKeyboardRelease( get_binded_action(dik) );
+	if(local_player && !local_player->IsSkip())
+		return OnKeyboardRelease( get_binded_action(dik) );
+	else
+		return false;
 }
 
 bool game_cl_GameState::IR_OnMouseMove			(int dx, int dy)
@@ -408,6 +403,8 @@ void game_cl_GameState::set_type_name(LPCSTR s)
 };
 void game_cl_GameState::reset_ui()
 {
+	if(g_dedicated_server)	return;
+
 	if(!m_game_ui_custom)
 		m_game_ui_custom = HUD().GetUI()->UIGame();
 

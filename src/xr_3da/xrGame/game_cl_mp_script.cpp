@@ -1,7 +1,5 @@
-#include "stdafx.h"
-
+#include "pch_script.h"
 #include "game_cl_mp_script.h"
-#include "script_space.h"
 #include "xrServer_script_macroses.h"
 #include "UIGameCustom.h"
 #include "level.h"
@@ -10,7 +8,6 @@
 #include "xrmessages.h"
 #include "date_time.h"
 #include "ui/UIDialogWnd.h"
-#include <luabind/adopt_policy.hpp>
 
 using namespace luabind;
 
@@ -78,7 +75,7 @@ LPCSTR game_cl_mp_script::GetRoundTime()
 
 	split_time(dt, year, month, day, hours, mins, secs, milisecs);
 
-	sprintf(bufTime, "%02i:%02i", mins, secs);
+	sprintf_s(bufTime, "%02i:%02i", mins, secs);
 
 	return bufTime;
 }

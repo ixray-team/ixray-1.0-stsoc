@@ -10,6 +10,7 @@
 #include "xrmessages.h"
 #include "xr_level_controller.h"
 #include "game_cl_base.h"
+#include "xrserver_objects_alife.h"
 
 #define GRENADE_REMOVE_TIME		30000
 const float default_grenade_detonation_threshold_hit=100;
@@ -55,7 +56,7 @@ BOOL CGrenade::net_Spawn(CSE_Abstract* DC)
 	m_dwGrenadeIndependencyTime			= 0;
 	BOOL ret= inherited::net_Spawn		(DC);
 	Fvector box;BoundingBox().getsize	(box);
-	float max_size						=max(max(box.x,box.y),box.z);
+	float max_size						= _max(_max(box.x,box.y),box.z);
 	box.set								(max_size,max_size,max_size);
 	box.mul								(3.f);
 	CExplosive::SetExplosionSize		(box);
@@ -104,29 +105,27 @@ void CGrenade::State(u32 state)
 				if (m_pPhysicsShell)	m_pPhysicsShell->Deactivate();
 				xr_delete				(m_pPhysicsShell);
 				m_dwDestroyTime			= 0xffffffff;
-				PutNextToSlot			();
-				if (Local())			DestroyObject		();
+				
+				if(H_Parent())
+					PutNextToSlot		();
+
+				if (Local())
+				{
+					#ifdef DEBUG
+					Msg("Destroying local grenade[%d][%d]",ID(),Device.dwFrame);
+					#endif
+					DestroyObject		();
+				}
 				
 			};
 		}break;
 	};
 	inherited::State(state);
 }
-/*
-bool CGrenade::Activate() 
-{
-	Show								();
-	return								true;
-}
 
-void CGrenade::Deactivate() 
-{
-	Hide								();
-}
-*/
 void CGrenade::Throw() 
 {
-	if (!m_fake_missile)
+	if (!m_fake_missile || m_thrown)
 		return;
 
 	CGrenade					*pGrenade = smart_cast<CGrenade*>(m_fake_missile);
@@ -154,9 +153,12 @@ void CGrenade::Destroy()
 
 
 
-bool CGrenade::Useful()
+bool CGrenade::Useful() const
 {
-	return (m_dwDestroyTime == 0xffffffff && CExplosive::Useful());
+
+	bool res = (/* !m_throw && */ m_dwDestroyTime == 0xffffffff && CExplosive::Useful() && TestServerFlag(CSE_ALifeObject::flCanSave));
+
+	return res;
 }
 
 void CGrenade::OnEvent(NET_Packet& P, u16 type) 
@@ -168,39 +170,32 @@ void CGrenade::OnEvent(NET_Packet& P, u16 type)
 void CGrenade::PutNextToSlot()
 {
 	if (OnClient()) return;
-//	Msg ("* PutNextToSlot : %d", ID());	
 	VERIFY									(!getDestroy());
+
 	//выкинуть гранату из инвентаря
-	NET_Packet						P;
-	if (m_pInventory)
+	if (m_pCurrentInventory)
 	{
-		m_pInventory->Ruck					(this);
-//.		m_pInventory->SetActiveSlot			(NO_ACTIVE_SLOT);
+		NET_Packet						P;
+		m_pCurrentInventory->Ruck		(this);
 
 		this->u_EventGen				(P, GEG_PLAYER_ITEM2RUCK, this->H_Parent()->ID());
 		P.w_u16							(this->ID());
 		this->u_EventSend				(P);
-	}
-	else
-		Msg ("! PutNextToSlot : m_pInventory = 0");	
 
-	if (smart_cast<CInventoryOwner*>(H_Parent()) && m_pInventory)
-	{
-		CGrenade *pNext						= smart_cast<CGrenade*>(	m_pInventory->Same(this,true)		);
-		if(!pNext) pNext					= smart_cast<CGrenade*>(	m_pInventory->SameSlot(this,true)	);
+		CGrenade *pNext					= smart_cast<CGrenade*>(	m_pCurrentInventory->Same(this,true)		);
+		if(!pNext) 
+			pNext						= smart_cast<CGrenade*>(	m_pCurrentInventory->SameSlot(GRENADE_SLOT, this, true)	);
 
-		VERIFY								(pNext != this);
+		VERIFY							(pNext != this);
 
-		if(pNext && m_pInventory->Slot(pNext) ){
-
-			pNext->u_EventGen				(P, GEG_PLAYER_ITEM2SLOT, pNext->H_Parent()->ID());
-			P.w_u16							(pNext->ID());
-			pNext->u_EventSend				(P);
-//			if(IsGameTypeSingle())			
-				m_pInventory->SetActiveSlot			(pNext->GetSlot());
+		if(pNext && m_pCurrentInventory->Slot(pNext) )
+		{
+			pNext->u_EventGen			(P, GEG_PLAYER_ITEM2SLOT, pNext->H_Parent()->ID());
+			P.w_u16						(pNext->ID());
+			pNext->u_EventSend			(P);
+			m_pCurrentInventory->SetActiveSlot(pNext->GetSlot());
 		}
-
-		m_thrown				= false;
+/////	m_thrown				= false;
 	}
 }
 
@@ -234,18 +229,18 @@ bool CGrenade::Action(s32 cmd, u32 flags)
 		{
             if(flags&CMD_START) 
 			{
-				if(m_pInventory)
+				if(m_pCurrentInventory)
 				{
-					TIItemContainer::iterator it = m_pInventory->m_ruck.begin();
-					TIItemContainer::iterator it_e = m_pInventory->m_ruck.end();
+					TIItemContainer::iterator it = m_pCurrentInventory->m_ruck.begin();
+					TIItemContainer::iterator it_e = m_pCurrentInventory->m_ruck.end();
 					for(;it!=it_e;++it) 
 					{
 						CGrenade *pGrenade = smart_cast<CGrenade*>(*it);
 						if(pGrenade && xr_strcmp(pGrenade->cNameSect(), cNameSect())) 
 						{
-							m_pInventory->Ruck(this);
-							m_pInventory->SetActiveSlot(NO_ACTIVE_SLOT);
-							m_pInventory->Slot(pGrenade);
+							m_pCurrentInventory->Ruck(this);
+							m_pCurrentInventory->SetActiveSlot(NO_ACTIVE_SLOT);
+							m_pCurrentInventory->Slot(pGrenade);
 							return true;
 						}
 					}
@@ -261,12 +256,7 @@ bool CGrenade::Action(s32 cmd, u32 flags)
 
 bool CGrenade::NeedToDestroyObject()	const
 {
-	if ( IsGameTypeSingle()			) return false;
-	if ( Remote()					) return false;
-	if ( TimePassedAfterIndependant() > m_dwGrenadeRemoveTime)
-		return true;
-
-	return false;
+	return ( TimePassedAfterIndependant() > m_dwGrenadeRemoveTime);
 }
 
 ALife::_TIME_ID	 CGrenade::TimePassedAfterIndependant()	const
@@ -289,20 +279,20 @@ void CGrenade::net_Relcase(CObject* O )
 	inherited::net_Relcase(O);
 }
 
-void CGrenade::Deactivate			()
+void CGrenade::Deactivate()
 {
 	//Drop grenade if primed
 	m_pHUD->StopCurrentAnimWithoutCallback();
-	if (Local() && (GetState() == MS_THREATEN || GetState() == MS_READY || GetState() == MS_THROW))
+	if (!GetTmpPreDestroy() && Local() && (GetState() == MS_THREATEN || GetState() == MS_READY || GetState() == MS_THROW))
 	{
 		if (m_fake_missile)
 		{
 			CGrenade*		pGrenade	= smart_cast<CGrenade*>(m_fake_missile);
 			if (pGrenade)
 			{
-				if (m_pInventory->GetOwner())
+				if (m_pCurrentInventory->GetOwner())
 				{
-					CActor* pActor = smart_cast<CActor*>(m_pInventory->GetOwner());
+					CActor* pActor = smart_cast<CActor*>(m_pCurrentInventory->GetOwner());
 					if (pActor)
 					{
 						if (!pActor->g_Alive())
@@ -311,10 +301,8 @@ void CGrenade::Deactivate			()
 							m_fThrowForce			= 0;
 						}
 					}
-					
 				}				
 				Throw					();
-//				m_dwDestroyTime			= 0xffffffff;
 			};
 		};
 	};
@@ -325,9 +313,9 @@ void CGrenade::Deactivate			()
 void CGrenade::GetBriefInfo(xr_string& str_name, xr_string& icon_sect_name, xr_string& str_count)
 {
 	str_name				= NameShort();
-	u32 ThisGrenadeCount	= m_pInventory->dwfGetSameItemCount(*cNameSect(), true);
+	u32 ThisGrenadeCount	= m_pCurrentInventory->dwfGetSameItemCount(*cNameSect(), true);
 	string16				stmp;
-	sprintf					(stmp, "%d", ThisGrenadeCount);
+	sprintf_s					(stmp, "%d", ThisGrenadeCount);
 	str_count				= stmp;
 	icon_sect_name			= *cNameSect();
 }

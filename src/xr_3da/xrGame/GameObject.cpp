@@ -1,8 +1,4 @@
-// GameObject.cpp: implementation of the CGameObject class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#include "stdafx.h"
+#include "pch_script.h"
 #include "GameObject.h"
 #include "../fbasicvisual.h"
 #include "PhysicsShell.h"
@@ -13,7 +9,6 @@
 #include "PhysicsShell.h"
 #include "game_sv_single.h"
 #include "level_graph.h"
-#include "game_level_cross_table.h"
 #include "ph_shell_interface.h"
 #include "script_game_object.h"
 #include "xrserver_objects_alife.h"
@@ -30,16 +25,17 @@
 #include "script_callback_ex.h"
 #include "MathUtils.h"
 #include "game_cl_base_weapon_usage_statistic.h"
+#include "game_level_cross_table.h"
+#include "animation_movement_controller.h"
+#include "game_object_space.h"
 
 #ifdef DEBUG
 #	include "debug_renderer.h"
 #	include "PHDebug.h"
 #endif
 
-#define OBJECT_REMOVE_TIME 180000
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+ENGINE_API bool g_dedicated_server;
+
 CGameObject::CGameObject		()
 {
 	init						();
@@ -47,14 +43,16 @@ CGameObject::CGameObject		()
 	m_bCrPr_Activated			= false;
 	m_dwCrPr_ActivationStep		= 0;
 	m_spawn_time				= 0;
-	m_ai_location				= xr_new<CAI_ObjectLocation>();
+	m_ai_location				= !g_dedicated_server ? xr_new<CAI_ObjectLocation>() : 0;
 	m_server_flags.one			();
 
 	m_callbacks					= xr_new<CALLBACK_MAP>();
+	m_anim_mov_ctrl				= 0;
 }
 
 CGameObject::~CGameObject		()
 {
+	VERIFY						( !animation_movement( ) );
 	VERIFY						(!m_ini_file);
 	VERIFY						(!m_lua_game_object);
 	VERIFY						(!m_spawned);
@@ -84,7 +82,8 @@ void CGameObject::Load(LPCSTR section)
 void CGameObject::reinit	()
 {
 	m_visual_callback.clear	();
-	ai_location().reinit	();
+	if (!g_dedicated_server)
+        ai_location().reinit	();
 
 	// clear callbacks	
 	for (CALLBACK_MAP_IT it = m_callbacks->begin(); it != m_callbacks->end(); ++it) it->second.clear();
@@ -103,6 +102,8 @@ void CGameObject::net_Destroy	()
 #endif
 
 	VERIFY					(m_spawned);
+	if(animation_movement_controlled())
+					destroy_anim_mov_ctrl	();
 
 	xr_delete				(m_ini_file);
 
@@ -122,7 +123,7 @@ void CGameObject::net_Destroy	()
 
 	Level().RemoveObject_From_4CrPr(this);
 
-	Parent									= 0;
+//.	Parent									= 0;
 
 	CScriptBinder::net_Destroy				();
 
@@ -183,12 +184,6 @@ void CGameObject::OnEvent		(NET_Packet& P, u16 type)
 				{
 				}break;
 			}
-			//-------------------------------------------------------
-			/*
-			SetHitInfo(Hitter, Weapon, element, position_in_bone_space, dir);
-			Hit				(power,dir,Hitter,element,
-							position_in_bone_space, impulse, (ALife::EHitType)hit_type);
-							*/
 			SetHitInfo(Hitter, Weapon, HDS.bone(), HDS.p_in_bone_space, HDS.dir);
 			Hit				(&HDS);
 			//---------------------------------------------------------------------------
@@ -199,9 +194,14 @@ void CGameObject::OnEvent		(NET_Packet& P, u16 type)
 		break;
 	case GE_DESTROY:
 		{
-//			Msg				("- [%x] CL_destroy %s[%d] frame [%d]",this, cName().c_str(), ID(), Device.dwFrame);
+			if(H_Parent())
+			{
+				Msg("GE_DESTROY arrived, but H_Parent() exist. object[%d][%s] parent[%d][%s] [%d]", 
+					ID(), cName().c_str(),
+					H_Parent()->ID(), H_Parent()->cName().c_str(),
+					Device.dwFrame);
+			}
 			setDestroy		(TRUE);
-//			MakeMeCrow		();
 		}
 		break;
 	}
@@ -233,7 +233,8 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 		cName_set					(E->name_replace());
 
 	setID							(E->ID);
-//	Msg ("object[%x] setID [%d]", this, E->ID);
+//	if (GameID() != GAME_SINGLE)
+//		Msg ("CGameObject::net_Spawn -- object %s[%x] setID [%d]", *(E->s_name), this, E->ID);
 //	R_ASSERT(Level().Objects.net_Find(E->ID) == NULL);
 	
 	// XForm
@@ -285,10 +286,12 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	}
 
 	reload						(*cNameSect());
-	CScriptBinder::reload		(*cNameSect());
+	if(!g_dedicated_server)
+		CScriptBinder::reload	(*cNameSect());
 	
 	reinit						();
-	CScriptBinder::reinit		();
+	if(!g_dedicated_server)
+		CScriptBinder::reinit	();
 #ifdef DEBUG
 	if(ph_dbg_draw_mask1.test(ph_m1_DbgTrackObject)&&stricmp(PH_DBG_ObjectTrack(),*cName())==0)
 	{
@@ -664,13 +667,10 @@ void CGameObject::u_EventGen(NET_Packet& P, u32 type, u32 dest)
 	P.w_u16		(u16(dest&0xffff));
 }
 
-void CGameObject::u_EventSend(NET_Packet& P, BOOL /**sync/**/)
+void CGameObject::u_EventSend(NET_Packet& P, u32 dwFlags )
 {
-	Level().Send(P,net_flags(TRUE,TRUE));
+	Level().Send(P, dwFlags);
 }
-
-
-
 
 #include "bolt.h"
 void CGameObject::OnH_B_Chield()
@@ -709,6 +709,11 @@ void CGameObject::OnRender()
 BOOL CGameObject::UsedAI_Locations()
 {
 	return					(m_server_flags.test(CSE_ALifeObject::flUsedAI_Locations));
+}
+
+BOOL CGameObject::TestServerFlag(u32 Flag) const
+{
+	return					(m_server_flags.test(Flag));
 }
 
 void CGameObject::add_visual_callback		(visual_callback *callback)
@@ -765,19 +770,18 @@ CScriptGameObject *CGameObject::lua_game_object		() const
 
 bool CGameObject::NeedToDestroyObject()	const
 {
-	if (GameID() == GAME_SINGLE) return false;
 	return false;
 }
 
 void CGameObject::DestroyObject()			
 {
 	
-	if(m_bObjectRemoved)return;
-	m_bObjectRemoved	= true;
-	if (getDestroy())	return;
+	if(m_bObjectRemoved)	return;
+	m_bObjectRemoved		= true;
+	if (getDestroy())		return;
 
-	//Msg					("DestroyObject: ge_destroy: [%d] - %s",ID(),*cName());
-	if (Local()){	
+	if (Local())
+	{	
 		NET_Packet		P;
 		u_EventGen		(P,GE_DESTROY,ID());
 		u_EventSend		(P);
@@ -787,12 +791,20 @@ void CGameObject::DestroyObject()
 void CGameObject::shedule_Update	(u32 dt)
 {
 	//уничтожить
-	if(NeedToDestroyObject())
-		DestroyObject();
+	if(!IsGameTypeSingle() && OnServer() && NeedToDestroyObject())
+	{
+#ifdef DEBUG
+		Msg("--NeedToDestroyObject for [%d][%d]", ID(), Device.dwFrame);
+#endif
+		DestroyObject			();
+
+	}
 
 	// Msg							("-SUB-:[%x][%s] CGameObject::shedule_Update",smart_cast<void*>(this),*cName());
 	inherited::shedule_Update	(dt);
-	CScriptBinder::shedule_Update(dt);
+	
+	if(!g_dedicated_server)
+		CScriptBinder::shedule_Update(dt);
 }
 
 BOOL CGameObject::net_SaveRelevant	()
@@ -854,7 +866,8 @@ u32	CGameObject::ef_detector_type		() const
 void CGameObject::net_Relcase			(CObject* O)
 {
 	inherited::net_Relcase		(O);
-	CScriptBinder::net_Relcase	(O);
+	if(!g_dedicated_server)
+		CScriptBinder::net_Relcase	(O);
 }
 
 CGameObject::CScriptCallbackExVoid &CGameObject::callback(GameObject::ECallbackType type) const
@@ -869,9 +882,49 @@ LPCSTR CGameObject::visual_name			(CSE_Abstract *server_entity)
 	return						(visual->get_visual());
 }
 
-
-bool CGameObject::shedule_Needed()
+void CGameObject::update_animation_movement_controller	()
 {
-	return						(!getDestroy());
+	if (!animation_movement_controlled())
+		return;
+
+	m_anim_mov_ctrl->OnFrame	();
+
+	if (m_anim_mov_ctrl->isActive())
+		return;
+
+	destroy_anim_mov_ctrl		();
+}
+
+void	CGameObject::		UpdateCL			( )
+{
+	inherited::UpdateCL			();
+}
+
+void	CGameObject::OnChangeVisual	( )
+{
+	inherited::OnChangeVisual( );
+	if( animation_movement_controlled( ) )
+	{
+		destroy_anim_mov_ctrl( );
+	}
+}
+bool CGameObject::shedule_Needed( )
+{
+	return						( !getDestroy( ) );
 //	return						(processing_enabled() || CScriptBinder::object());
 };
+
+void	CGameObject::		create_anim_mov_ctrl( CBlend* b )
+{
+	//if(m_anim_mov_ctrl)
+		//destroy_anim_mov_ctrl( );
+	VERIFY( !animation_movement() );
+	VERIFY(Visual());
+	CKinematics *K = Visual( )->dcast_PKinematics( );
+	VERIFY( K );
+	m_anim_mov_ctrl = xr_new<animation_movement_controller>( &XFORM(), K, b ); 
+}
+void	CGameObject::		destroy_anim_mov_ctrl()
+{
+	xr_delete( m_anim_mov_ctrl );
+}

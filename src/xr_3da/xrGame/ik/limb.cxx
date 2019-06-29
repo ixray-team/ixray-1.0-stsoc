@@ -149,16 +149,16 @@ inline float put_angle_in_range(float low, float high, float v)
     float d1, d2, v2;
 
     if (low <= v && v <= high)
-	return v;
+		return v;
     else
-	d1 = min(_abs(v-low),_abs(v-high));
+		d1 = min(_abs(v-low),_abs(v-high));
 
     v2 = v - 2*M_PI;
 
     if (low <= v2 && v2 <= high)
-	return v2;
+		return v2;
     else
-	d2 = min(_abs(v2-low),_abs(v2-high));
+		d2 = min(_abs(v2-low),_abs(v2-high));
     
     return (_abs(d1) < _abs(d2)) ? v : v2;
 }
@@ -375,6 +375,8 @@ void Limb::get_R1R2psi(AngleIntList psi[])
     psi[1].Clear();
     psi[2].Clear();
     psi[3].Clear();
+	if(ff1.IsEmpty() && ff2.IsEmpty())
+		return;
 
     Intersect(ff1, gg1, psi[0]);
     Intersect(ff1, gg2, psi[1]);
@@ -462,11 +464,23 @@ static void init_error(char *msg)
 float Limb::PosToAngle(const float elbow[3])
 {
     if (!solve)
-	init_error("Limb::PosToAngle");
+		init_error("Limb::PosToAngle");
 
     return solver.PosToAngle(elbow);
 }
 
+//
+// Calculates the swivel angle based on the elbow position and goal position
+//
+float Limb::KneeAngle( const float goal_pos[3], const float knee_pos[3] )
+{
+	 solver.EvaluateCircle( goal_pos );
+	 short sv_solve = solve;
+	 solve = SolvePosOnly;//any !=0
+	 float swivel = PosToAngle( knee_pos );
+	 solve = sv_solve;
+	 return swivel;
+}
 
 //
 // Returns the index of the smallest element in a float array
@@ -886,37 +900,37 @@ int Limb::SolveByAngle(float swivel_angle, float x[7],
 
     if (check_limits)
     {
-	int f_set;
+		int f_set;
 
-	switch (solve)
-	{
-	case SolvePosOnly:
-	    f_set = try_closeby_singularity(solve, swivel_angle, x);
-	    if (!f_set)
-	    {
-		f_set = choose_closest_range(swivel_angle, PSI, PSI+1);
-		if (f_set)
-		    solve_pos_aux_family(f_set, swivel_angle, x);
-	    }
-	    break;
+		switch (solve)
+		{
+		case SolvePosOnly:
+			f_set = try_closeby_singularity(solve, swivel_angle, x);
+			if (!f_set)
+			{
+				f_set = choose_closest_range(swivel_angle, PSI, PSI+1);
+				if (f_set)
+					solve_pos_aux_family(f_set, swivel_angle, x);
+			}
+			break;
 
-	case SolvePosAndOrientation:
-	    f_set = try_closeby_singularity(solve, swivel_angle, x);
-	    if (!f_set)
-	    {
-			f_set = choose_closest_range(swivel_angle, 
-				PSI, PSI+1, PSI+2, PSI+3);
-		if (f_set)
-		    solve_aux_family(f_set, swivel_angle, x);
-	    }
-	    break;
+		case SolvePosAndOrientation:
+			f_set = try_closeby_singularity(solve, swivel_angle, x);
+			if (!f_set)
+			{
+				f_set = choose_closest_range(swivel_angle, 
+					PSI, PSI+1, PSI+2, PSI+3);
+				if (f_set)
+					solve_aux_family(f_set, swivel_angle, x);
+			}
+			break;
 
-	default:
-	    f_set = 0;
-	    init_error("Limb::Solve");
-	    break;
-	}
-	success = f_set != 0;
+		default:
+			f_set = 0;
+			init_error("Limb::Solve");
+			break;
+		}
+		success = f_set != 0;
     }
     else
     {
@@ -1022,15 +1036,16 @@ void Limb::ForwardKinematics(float x[7], Matrix  R)
 }
 
 
-#if 0
+
 int Limb::SolveAim(float x[3], float psi_angle)
 {
-    if (check_limits)
-	printf("warning limits for solveaim not yet implemented\n");
+ //   if (check_limits)
+	//printf("warning limits for solveaim not yet implemented\n");
 
     Matrix R1; 
 
     solver.SolveAim(psi_angle, R1);
     extract_s1(R1, x);
+	return 1;
 }
-#endif
+

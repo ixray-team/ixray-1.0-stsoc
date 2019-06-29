@@ -43,10 +43,10 @@ void CStringTable::Init		()
 void CStringTable::Load	(LPCSTR xml_file)
 {
 	CUIXml						uiXml;
-	string128					xml_file_full;
-	strconcat					(xml_file_full, xml_file, ".xml");
+	string_path					xml_file_full;
+	strconcat					(sizeof(xml_file_full),xml_file_full, xml_file, ".xml");
 	string_path					_s;
-	strconcat					(_s, STRING_TABLE_PATH, "\\", *(pData->m_sLanguage) );
+	strconcat					(sizeof(_s),_s, STRING_TABLE_PATH, "\\", *(pData->m_sLanguage) );
 
 	bool xml_result				= uiXml.Init(CONFIG_PATH, _s, xml_file_full);
 	if(!xml_result)
@@ -97,9 +97,10 @@ STRING_VALUE CStringTable::ParseLine(LPCSTR str, LPCSTR skey, bool bFirst)
 //.	int LEN				= (int)xr_strlen(ACTION_STR);
 	#define LEN			9
 
-	char buff[64];
-	char srcbuff[64];
-	bool	b_hit = false;
+	string256				buff;
+	string256				srcbuff;
+	bool	b_hit			= false;
+
 	while( (b = strstr( str+k,ACTION_STR)) !=0 )
 	{
 		buff[0]				= 0;
@@ -111,7 +112,7 @@ STRING_VALUE CStringTable::ParseLine(LPCSTR str, LPCSTR skey, bool bFirst)
 
 		strncpy				(srcbuff,b+LEN, len);
 		srcbuff[len]		= 0;
-		GetActionAllBinding	(srcbuff, buff);
+		GetActionAllBinding	(srcbuff, buff, sizeof(buff) );
 		res.append			(buff, xr_strlen(buff) );
 
 		k					= (int)(b-str);

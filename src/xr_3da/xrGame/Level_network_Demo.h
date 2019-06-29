@@ -1,5 +1,5 @@
 private:
-	string1024					m_sDemoName;
+	string_path					m_sDemoName;
 
 	//------------- Demo Play	---------------------------------------
 	BOOL						m_bDemoPlayMode;

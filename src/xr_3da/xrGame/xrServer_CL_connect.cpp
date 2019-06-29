@@ -5,8 +5,16 @@
 #include "xrserver_objects.h"
 #include "Level.h"
 
+xr_vector<u16> g_perform_spawn_ids;
+
 void xrServer::Perform_connect_spawn(CSE_Abstract* E, xrClientData* CL, NET_Packet& P)
 {
+	xr_vector<u16>::iterator it = std::find(g_perform_spawn_ids.begin(), g_perform_spawn_ids.end(), E->ID);
+	if(it!=g_perform_spawn_ids.end())
+		return;
+	
+	g_perform_spawn_ids.push_back(E->ID);
+
 	if (E->net_Processed)						return;
 	if (E->s_flags.is(M_SPAWN_OBJECT_PHANTOM))	return;
 
@@ -24,7 +32,7 @@ void xrServer::Perform_connect_spawn(CSE_Abstract* E, xrClientData* CL, NET_Pack
 		if (E->s_flags.is(M_SPAWN_OBJECT_ASPLAYER))
 		{
 			CL->owner		= E;
-			E->set_name_replace	(*CL->Name);
+			E->set_name_replace	(*CL->name);
 		}
 
 		// Associate
@@ -46,6 +54,7 @@ void xrServer::Perform_connect_spawn(CSE_Abstract* E, xrClientData* CL, NET_Pack
 
 void xrServer::SendConnectionData(IClient* _CL)
 {
+	g_perform_spawn_ids.clear_not_free();
 	xrClientData*	CL				= (xrClientData*)_CL;
 	NET_Packet		P;
 	u32			mode				= net_flags(TRUE,TRUE);
@@ -111,11 +120,9 @@ BOOL	g_SV_Disable_Auth_Check = FALSE;
 
 bool xrServer::NeedToCheckClient_BuildVersion		(IClient* CL)	
 {
-#ifdef DEBUG
-
-	return false; 
-
-#else
+//#ifdef DEBUG
+	//return false; 
+//#else
 
 	if (g_SV_Disable_Auth_Check) return false;
 	CL->flags.bVerified = FALSE;
@@ -124,24 +131,52 @@ bool xrServer::NeedToCheckClient_BuildVersion		(IClient* CL)
 	SendTo		(CL->ID, P);
 	return true;
 
-#endif
+//#endif
 };
 
-void xrServer::OnBuildVersionRespond				(IClient* CL, NET_Packet& P)
+void xrServer::OnBuildVersionRespond				( IClient* CL, NET_Packet& P )
 {
 	u16 Type;
-	P.r_begin(Type);
-	u64 _our		=	FS.auth_get			();
-	u64 _him		=	P.r_u64	();
+	P.r_begin( Type );
+	u64 _our		=	FS.auth_get();
+	u64 _him		=	P.r_u64();
+
 #ifdef DEBUG
-	Msg("_our - %d", _our);
-	Msg("_him - %d", _him);
+	Msg("_our = %d", _our);
+	Msg("_him = %d", _him);
 #endif // DEBUG
-	if (_our != _him)	SendConnectResult	(CL, 0, 0, "Data verification failed. Cheater?");
-	else				Check_BuildVersion_Success (CL);
+
+	if ( _our != _him )
+	{
+		SendConnectResult( CL, 0, 0, "Data verification failed. Cheater? [3]" );
+	}
+	else
+	{				
+		bool bAccessUser = false;
+		string512 res_check;
+		
+		if ( !CL->flags.bLocal )
+		{
+			bAccessUser	= Check_ServerAccess( CL, res_check );
+		}
+				
+		if( CL->flags.bLocal || bAccessUser )
+		{
+			Check_BuildVersion_Success( CL );
+		}
+		else
+		{
+			Msg( res_check );
+			strcat_s( res_check, "Invalid login/password. Client \"" );
+			strcat_s( res_check, CL->name.c_str() );
+			strcat_s( res_check, "\" disconnected." );
+
+			SendConnectResult( CL, 0, 2, res_check );
+		}
+	}
 };
 
-void xrServer::Check_BuildVersion_Success			(IClient* CL)
+void xrServer::Check_BuildVersion_Success			( IClient* CL )
 {
 	CL->flags.bVerified = TRUE;
 	SendConnectResult(CL, 1, 0, "All Ok");

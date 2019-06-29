@@ -9,6 +9,7 @@
 #include "hud_item_object.h"
 #include "Actor_Flags.h"
 #include "../SkeletonAnimated.h"
+#include "game_cl_single.h"
 
 
 // refs
@@ -135,7 +136,7 @@ public:
 
 	IC BOOL					IsValid				()	const		{	return iAmmoElapsed;						}
 	// Does weapon need's update?
-	IC BOOL					IsUpdating			()	const		{	return bWorking || m_bPending || getVisible();}	
+	BOOL					IsUpdating			();
 
 
 	BOOL					IsMisfire			() const;
@@ -430,7 +431,6 @@ public:
 protected:
 	int						iAmmoElapsed;		// ammo in magazine, currently
 	int						iMagazineSize;		// size (in bullets) of magazine
-	int						iBuckShot;
 
 	//для подсчета в GetAmmoCurrent
 	mutable int				iAmmoCurrent;
@@ -480,4 +480,10 @@ public:
 			bool			show_indicators				();
 	virtual BOOL			ParentMayHaveAimBullet		();
 	virtual BOOL			ParentIsActor				();
+
+private:
+	float					m_hit_probability[egdCount];
+
+public:
+	const float				&hit_probability			() const;
 };

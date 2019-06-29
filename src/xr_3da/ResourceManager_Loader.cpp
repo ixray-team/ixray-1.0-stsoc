@@ -4,23 +4,12 @@
 #include "ResourceManager.h"
 #include "blenders\blender.h"
 
-// eye-params
-float					r__dtex_range	= 50;
-class cl_dt_scaler		: public R_constant_setup {
-public:
-	float				scale;
-
-	cl_dt_scaler		(float s) : scale(s)	{};
-	virtual void setup	(R_constant* C)
-	{
-		RCache.set_c	(C,scale,scale,scale,1/r__dtex_range);
-	}
-};
 
 void	CResourceManager::OnDeviceDestroy(BOOL )
 {
-	if (Device.b_is_Ready)	return;
-	xr_delete			(m_description);
+	if (Device.b_is_Ready)				return;
+	m_textures_description.UnLoad		();
+//.	xr_delete			(m_description);
 
 	// Matrices
 	for (map_Matrix::iterator m=m_matrices.begin(); m!=m_matrices.end(); m++)	{
@@ -126,6 +115,8 @@ void	CResourceManager::OnDeviceCreate	(IReader* F)
 		fs->close();
 	}
 
+	m_textures_description.Load				();
+/*
 	// Load detail textures association
 	string256		fname;		
 	FS.update_path	(fname,"$game_textures$","textures.ltx");
@@ -135,9 +126,11 @@ void	CResourceManager::OnDeviceCreate	(IReader* F)
 		xr_delete		(m_description);
 		m_description	= xr_new<CInifile>	(Iname);
 		CInifile&	ini	= *m_description;
-		if (ini.section_exist("association")){
+		if (ini.section_exist("association"))
+		{
 			CInifile::Sect& 	data = ini.r_section("association");
-			for (CInifile::SectIt I=data.begin(); I!=data.end(); I++)	{
+			for (CInifile::SectIt I=data.begin(); I!=data.end(); I++)	
+			{
 				texture_detail			D;
 				string256				T;
 				float					s;
@@ -153,6 +146,7 @@ void	CResourceManager::OnDeviceCreate	(IReader* F)
 			}
 		}
 	}
+*/
 }
 
 void	CResourceManager::OnDeviceCreate	(LPCSTR shName)

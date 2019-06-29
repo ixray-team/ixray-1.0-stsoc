@@ -98,6 +98,7 @@ void CRenderDevice::End		(void)
 	g_bRendering		= FALSE;
 	// end scene
 	RCache.OnFrameEnd	();
+	Memory.dbg_check		();
     CHK_DX				(HW.pDevice->EndScene());
 
 	HRESULT _hr		= HW.pDevice->Present( NULL, NULL, NULL, NULL );
@@ -120,6 +121,7 @@ void 			mt_Thread	(void *ptr)	{
 		}
 		// we has granted permission to execute
 		mt_Thread_marker			= Device.dwFrame;
+ 
 		for (u32 pit=0; pit<Device.seqParallel.size(); pit++)
 			Device.seqParallel[pit]	();
 		Device.seqParallel.clear_not_free	();
@@ -210,9 +212,11 @@ void CRenderDevice::Run			()
 #endif
 				if (psDeviceFlags.test(rsStatistic))	g_bEnableStatGather	= TRUE;
 				else									g_bEnableStatGather	= FALSE;
-				if(g_loading_events.size()){
-					if( g_loading_events.front()() )
+				if(g_loading_events.size())
+				{
+					if( g_loading_events.front() () )
 						g_loading_events.pop_front();
+					
 					pApp->LoadDraw				();
 					continue;
 				}else
@@ -248,6 +252,7 @@ void CRenderDevice::Run			()
 				Statistic->RenderTOTAL_Real.Begin		();
 				if (b_is_Active)							{
 					if (Begin())				{
+
 						seqRender.Process						(rp_Render);
 						if (psDeviceFlags.test(rsCameraPos) || psDeviceFlags.test(rsStatistic) || Statistic->errors.size())	
 							Statistic->Show						();
@@ -361,20 +366,27 @@ void ProcessLoading				(RP_FUNC *f)
 }
 
 ENGINE_API BOOL bShowPauseString = TRUE;
+#include "IGame_Persistent.h"
 
 void CRenderDevice::Pause(BOOL bOn, BOOL bTimer, BOOL bSound, LPCSTR reason)
 {
 	static int snd_emitters_ = -1;
+
 	if (g_bBenchmark)	return;
+
+
 #ifdef DEBUG
 	Msg("pause [%s] timer=[%s] sound=[%s] reason=%s",bOn?"ON":"OFF", bTimer?"ON":"OFF", bSound?"ON":"OFF", reason);
 #endif // DEBUG
+
+#ifndef DEDICATED_SERVER	
+
 	if(bOn)
 	{
 		if(!Paused())						
 			bShowPauseString				= TRUE;
 
-		if(bTimer)
+		if( bTimer && g_pGamePersistent->CanBePaused() )
 			g_pauseMngr.Pause				(TRUE);
 	
 		if(bSound){
@@ -385,7 +397,7 @@ void CRenderDevice::Pause(BOOL bOn, BOOL bTimer, BOOL bSound, LPCSTR reason)
 		}
 	}else
 	{
-		if(bTimer)
+		if( bTimer && /*g_pGamePersistent->CanBePaused() &&*/ g_pauseMngr.Paused() )
 			g_pauseMngr.Pause				(FALSE);
 		
 		if(bSound)
@@ -403,6 +415,9 @@ void CRenderDevice::Pause(BOOL bOn, BOOL bTimer, BOOL bSound, LPCSTR reason)
 			}
 		}
 	}
+
+#endif
+
 }
 
 BOOL CRenderDevice::Paused()

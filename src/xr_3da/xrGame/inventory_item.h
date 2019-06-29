@@ -45,7 +45,7 @@ class CInventoryItem :
 private:
 	typedef CAttachableItem inherited;
 protected:
-	enum EIIFlags{				Fdrop				=(1<<0),
+	enum EIIFlags{				FdropManual			=(1<<0),
 								FCanTake			=(1<<1),
 								FCanTrade			=(1<<2),
 								Fbelt				=(1<<3),
@@ -107,15 +107,18 @@ public:
 
 	virtual	void				Hit					(SHit* pHDS);
 
-			void				Drop				();		// Если объект в инвенторе, то он будет выброшен
-			BOOL				GetDrop				() const	{ return m_flags.test(Fdrop);}
-			void				SetDrop				(BOOL val)	{ m_flags.set(Fdrop, val);}
-			BOOL				IsQuestItem			()	const		{return m_flags.test(FIsQuestItem);}			
+			BOOL				GetDropManual		() const	{ return m_flags.test(FdropManual);}
+			void				SetDropManual		(BOOL val)	{ m_flags.set(FdropManual, val);}
+
+			BOOL				IsInvalid			() const;
+
+			BOOL				IsQuestItem			()	const	{return m_flags.test(FIsQuestItem);}			
 			u32					Cost				() const	{ return m_cost; }
 	virtual float				Weight				() 			{ return m_weight;}		
 
 public:
-	CInventory*					m_pInventory;
+	CInventory*					m_pCurrentInventory;
+
 	shared_str					m_name;
 	shared_str					m_nameShort;
 	shared_str					m_nameComplex;
@@ -180,12 +183,10 @@ public:
 
 	virtual void				net_Import			(NET_Packet& P);					// import from server
 	virtual void				net_Export			(NET_Packet& P);					// export to server
-private:
-template	<typename strm>			
-			void				position_Import		(strm& P,net_update_IItem &N);					// import from server
-			void				position_Export		(NET_Packet& P,SPHNetState	&State);					// export to server
+
 public:
 	virtual void				activate_physic_shell		();
+	virtual u16					bone_count_to_synchronize	() const;
 
 	virtual bool				NeedToDestroyObject			() const;
 	virtual ALife::_TIME_ID		TimePassedAfterIndependant	() const;
@@ -220,7 +221,7 @@ public:
 public:
 	virtual DLL_Pure*			_construct					();
 	IC	CPhysicsShellHolder&	object						() const{ VERIFY		(m_object); return		(*m_object);}
-	virtual void				on_activate_physic_shell	() = 0;
+	virtual void				on_activate_physic_shell	() { R_ASSERT(0); } //sea
 
 protected:
 	float						m_holder_range_modifier;

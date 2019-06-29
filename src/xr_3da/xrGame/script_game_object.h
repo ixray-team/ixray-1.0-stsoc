@@ -437,7 +437,7 @@ public:
 			u32					level_vertex_id			() const;
 			float				level_vertex_light		(const u32 &level_vertex_id) const;
 			u32					game_vertex_id			() const;
-			void				add_animation			(LPCSTR animation, bool hand_usage = true);
+			void				add_animation			(LPCSTR animation, bool hand_usage, bool use_movement_controller);
 			void				clear_animations		();
 			int					animation_count			() const;
 			int					animation_slot			() const;
@@ -553,6 +553,9 @@ public:
 			bool				movement_enabled					();
 
 			bool				critically_wounded					();
+
+			bool				invulnerable						() const;
+			void				invulnerable						(bool invulnerable);
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

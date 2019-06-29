@@ -6,6 +6,8 @@
 
 #pragma pack(push,1)
 
+
+
 //for presentation
 const	u32			NET_PacketSizeLimit	= 8192; //16384;//8192;
 // const	u32			NET_PacketSizeLimit	= 16384; 
@@ -19,6 +21,13 @@ struct	NET_Buffer
 class	NET_Packet
 {
 public:
+
+    void            construct( const void* data, unsigned size )
+                    {
+                        memcpy( B.data, data, size );
+                        B.count = size;
+                    }
+                    
 	NET_Buffer		B;
 	u32				r_pos;
 	u32				timeReceive;

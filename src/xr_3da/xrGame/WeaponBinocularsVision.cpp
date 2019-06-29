@@ -13,6 +13,7 @@
 #include "Level.h"
 #include "game_cl_base.h"
 #include "AI/Monsters/BaseMonster/base_monster.h"
+#include "../igame_persistent.h"
 
 #define RECT_SIZE	16
 
@@ -66,16 +67,6 @@ void SBinocVisibleObj::Update()
 {
 	m_flags.set		(	flVisObjNotValid,TRUE);
 
-	VERIFY2			(
-		m_object->Visual(),
-		make_string(
-			"SBinocVisibleObj::Update object [0x%08x][%d][%s][%s] has no Visual",
-			m_object,
-			m_object->ID(),
-			*m_object->cNameSect(),
-			*m_object->cName()
-		)
-	);
 
 	Fbox		b		= m_object->Visual()->vis.box;
 
@@ -120,33 +111,48 @@ void SBinocVisibleObj::Update()
 			m_flags.set(flTargetLocked,TRUE);
 			u32 clr	= subst_alpha(m_lt.GetColor(),255);
 
-			CInventoryOwner* our_inv_owner		= smart_cast<CInventoryOwner*>(Actor());
-			CInventoryOwner* others_inv_owner	= smart_cast<CInventoryOwner*>(m_object);
-			CBaseMonster	*monster			= smart_cast<CBaseMonster*>(m_object);
-
-			if(our_inv_owner && others_inv_owner && !monster){
-				if (IsGameTypeSingle())
+			//-----------------------------------------------------
+			CActor* pActor = NULL;
+			if (IsGameTypeSingle()) pActor = Actor();
+			else
+			{
+				if (Level().CurrentViewEntity())
 				{
-					switch(RELATION_REGISTRY().GetRelationType(others_inv_owner, our_inv_owner))
-					{
-					case ALife::eRelationTypeEnemy:
-						clr = C_ON_ENEMY; break;
-					case ALife::eRelationTypeNeutral:
-						clr = C_ON_NEUTRAL; break;
-					case ALife::eRelationTypeFriend:
-						clr = C_ON_FRIEND; break;
-					}
+					pActor = smart_cast<CActor*> (Level().CurrentViewEntity());
 				}
-				else
-				{
-					CEntityAlive* our_ealive		= smart_cast<CEntityAlive*>(Actor());
-					CEntityAlive* others_ealive		= smart_cast<CEntityAlive*>(m_object);
-					if (our_ealive && others_ealive)
+			}
+			if (pActor) 
+			{
+				//-----------------------------------------------------
+
+				CInventoryOwner* our_inv_owner		= smart_cast<CInventoryOwner*>(pActor);
+				CInventoryOwner* others_inv_owner	= smart_cast<CInventoryOwner*>(m_object);
+				CBaseMonster	*monster			= smart_cast<CBaseMonster*>(m_object);
+
+				if(our_inv_owner && others_inv_owner && !monster){
+					if (IsGameTypeSingle())
 					{
-						if (Game().IsEnemy(our_ealive, others_ealive))
-							clr = C_ON_ENEMY;
-						else
-							clr = C_ON_FRIEND;
+						switch(RELATION_REGISTRY().GetRelationType(others_inv_owner, our_inv_owner))
+						{
+						case ALife::eRelationTypeEnemy:
+							clr = C_ON_ENEMY; break;
+						case ALife::eRelationTypeNeutral:
+							clr = C_ON_NEUTRAL; break;
+						case ALife::eRelationTypeFriend:
+							clr = C_ON_FRIEND; break;
+						}
+					}
+					else
+					{
+						CEntityAlive* our_ealive		= smart_cast<CEntityAlive*>(pActor);
+						CEntityAlive* others_ealive		= smart_cast<CEntityAlive*>(m_object);
+						if (our_ealive && others_ealive)
+						{
+							if (Game().IsEnemy(our_ealive, others_ealive))
+								clr = C_ON_ENEMY;
+							else
+								clr = C_ON_FRIEND;
+						}
 					}
 				}
 			}
@@ -180,7 +186,21 @@ CBinocularsVision::~CBinocularsVision()
 
 void CBinocularsVision::Update()
 {
-	const CVisualMemoryManager::VISIBLES& vVisibles = Actor()->memory().visual().objects();
+	if (g_dedicated_server)
+		return;
+	//-----------------------------------------------------
+	const CActor* pActor = NULL;
+	if (IsGameTypeSingle()) pActor = Actor();
+	else
+	{
+		if (Level().CurrentViewEntity())
+		{
+			pActor = smart_cast<const CActor*> (Level().CurrentViewEntity());
+		}
+	}
+	if (!pActor) return;
+	//-----------------------------------------------------
+	const CVisualMemoryManager::VISIBLES& vVisibles = pActor->memory().visual().objects();
 
 	VIS_OBJECTS_IT	it = m_active_objects.begin();
 	for(;it!=m_active_objects.end();++it)
@@ -191,7 +211,7 @@ void CBinocularsVision::Update()
 	for (; v_it!=vVisibles.end(); ++v_it)
 	{
 		const CObject*	_object_			= (*v_it).m_object;
-		if (!Actor()->memory().visual().visible_now(smart_cast<const CGameObject*>(_object_)))
+		if (!pActor->memory().visual().visible_now(smart_cast<const CGameObject*>(_object_)))
 			continue;
 
 		CObject* object_ = const_cast<CObject*>(_object_);

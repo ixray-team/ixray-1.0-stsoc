@@ -109,9 +109,9 @@ typename CSIni_Table::ITEM_TABLE& CSIni_Table::table	()
 	string64 buffer;
 	CInifile::Sect&	table_ini = pSettings->r_section(table_sect);
 
-	R_ASSERT3(table_ini.size() == table_size, "wrong size for table in section", table_sect);
+	R_ASSERT3(table_ini.Data.size() == table_size, "wrong size for table in section", table_sect);
 
-	for (CInifile::SectIt i = table_ini.begin(); table_ini.end() != i; ++i)
+	for (CInifile::SectCIt i = table_ini.Data.begin(); table_ini.Data.end() != i; ++i)
 	{
 		T_INI_LOADER::index_type cur_index = T_INI_LOADER::IdToIndex((*i).first, type_max(T_INI_LOADER::index_type));
 

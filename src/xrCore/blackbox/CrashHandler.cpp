@@ -226,13 +226,13 @@ int __stdcall GetLimitModulesArray ( HMODULE * pahMod , UINT uiSize )
                                      uiSize * sizeof ( HMODULE ) ) )
         {
             iRet = GLMA_BADPARAM ;
-            __leave ;
+            return ( iRet ) ;
         }
 
         if ( uiSize < g_uiModCount )
         {
             iRet = GLMA_BUFFTOOSMALL ;
-            __leave ;
+            return ( iRet ) ;
         }
 
         CopyMemory ( pahMod     ,
@@ -476,7 +476,7 @@ LPCTSTR __stdcall GetFaultReason ( EXCEPTION_POINTERS * pExPtrs )
                            BUFF_SIZE - iCurr - 1  ) ;
                 // Gotta leave now
                 szRet = g_szBuff ;
-                __leave ;
+                return ( szRet ) ;
             }
             else
             {
@@ -500,7 +500,7 @@ LPCTSTR __stdcall GetFaultReason ( EXCEPTION_POINTERS * pExPtrs )
             // If the symbol wasn't found, the source and line won't
             // be found either, so leave now.
             szRet = g_szBuff ;
-            __leave ;
+            return ( szRet ) ;
         }
 
         ASSERT ( iCurr < ( BUFF_SIZE - 200 ) ) ;
@@ -531,7 +531,7 @@ LPCTSTR __stdcall GetFaultReason ( EXCEPTION_POINTERS * pExPtrs )
                            BUFF_SIZE - iCurr - 1  ) ;
                 // Gotta leave now
                 szRet = g_szBuff ;
-                __leave ;
+                return ( szRet ) ;
             }
             else
             {
@@ -582,7 +582,7 @@ BOOL __stdcall GetFaultReasonVB ( EXCEPTION_POINTERS * pExPtrs ,
         ASSERT ( NULL != szRet ) ;
         if ( NULL == szRet )
         {
-            __leave ;
+            return ( NULL != szRet ) ;
         }
         lstrcpyn ( szBuff   ,
                    szRet    ,
@@ -702,7 +702,7 @@ LPCTSTR __stdcall
         if ( ( FALSE == bSWRet ) || ( 0 == g_stFrame.AddrFrame.Offset ))
         {
             szRet = NULL ;
-            __leave ;
+            return ( szRet ) ;
         }
 
         // Before I get too carried away and start calculating
@@ -715,7 +715,7 @@ LPCTSTR __stdcall
         if ( 0 == dwModBase )
         {
             szRet = NULL ;
-            __leave ;
+            return ( szRet ) ;
         }
 
         int iCurr = 0 ;
@@ -787,7 +787,7 @@ LPCTSTR __stdcall
                                BUFF_SIZE - iCurr - 1  ) ;
                     // Gotta leave now
                     szRet = g_szBuff ;
-                    __leave ;
+                    return ( szRet ) ;
                 }
                 else
                 {
@@ -811,7 +811,7 @@ LPCTSTR __stdcall
                 // If the symbol wasn't found, the source file and line
                 // number won't be found either, so leave now.
                 szRet = g_szBuff ;
-                __leave ;
+                return ( szRet ) ;
             }
 
         }
@@ -844,7 +844,7 @@ LPCTSTR __stdcall
                                BUFF_SIZE - iCurr - 1  ) ;
                     // Gotta leave now
                     szRet = g_szBuff ;
-                    __leave ;
+                    return ( szRet ) ;
                 }
                 else
                 {
@@ -897,7 +897,7 @@ BOOL __stdcall
         szRet = GetFirstStackTraceString ( dwOpts , pExPtrs ) ;
         if ( NULL == szRet )
         {
-            __leave ;
+            return ( NULL != szRet ) ;
         }
         lstrcpyn ( szBuff   ,
                    szRet    ,
@@ -929,7 +929,7 @@ BOOL __stdcall
         szRet = GetNextStackTraceString ( dwOpts , pExPtrs ) ;
         if ( NULL == szRet )
         {
-            __leave ;
+            return ( NULL != szRet ) ;
         }
         lstrcpyn ( szBuff   ,
                    szRet    ,
@@ -1003,7 +1003,7 @@ BOOL __stdcall GetRegisterStringVB ( EXCEPTION_POINTERS * pExPtrs ,
         szRet = GetRegisterString ( pExPtrs ) ;
         if ( NULL == szRet )
         {
-            __leave ;
+            return ( NULL != szRet ) ;
         }
         lstrcpyn ( szBuff   ,
                    szRet    ,

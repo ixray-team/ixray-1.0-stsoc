@@ -1,9 +1,4 @@
-// exxZERO Time Stamp AddIn. Document modified at : Thursday, March 07, 2002 14:14:04 , by user : Oles , from computer : OLES
-// Level.cpp: implementation of the CLevel class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#include "stdafx.h"
+#include "pch_script.h"
 #include "../fdemorecord.h"
 #include "../fdemoplay.h"
 #include "../environment.h"
@@ -45,12 +40,17 @@
 #include "trade_parameters.h"
 #include "game_cl_base_weapon_usage_statistic.h"
 #include "clsid_game.h"
+#include "MainMenu.h"
+#include "..\XR_IOConsole.h"
 
 #ifdef DEBUG
 #	include "level_debug.h"
 #	include "ai/stalker/ai_stalker.h"
 #	include "debug_renderer.h"
+#	include "physicobject.h"
 #endif
+
+ENGINE_API bool g_dedicated_server;
 
 extern BOOL	g_bDebugDumpPhysicsStep;
 
@@ -85,7 +85,12 @@ CLevel::CLevel():IPureClient	(Device.GetTimerGlobal())
 	eEntitySpawn				= Engine.Event.Handler_Attach	("LEVEL:spawn",this);
 
 	m_pBulletManager			= xr_new<CBulletManager>();
-	m_map_manager				= xr_new<CMapManager>();
+
+	if(!g_dedicated_server)
+		m_map_manager				= xr_new<CMapManager>();
+	else
+		m_map_manager				= NULL;
+
 //	m_pFogOfWarMngr				= xr_new<CFogOfWarMngr>();
 //----------------------------------------------------
 	m_bNeed_CrPr				= false;
@@ -95,23 +100,37 @@ CLevel::CLevel():IPureClient	(Device.GetTimerGlobal())
 	m_dwLastNetUpdateTime		= 0;
 
 	physics_step_time_callback	= (PhysicsStepTimeCallback*) &PhisStepsCallback;
-
-	m_level_sound_manager		= xr_new<CLevelSoundManager>();
-
-	m_space_restriction_manager = xr_new<CSpaceRestrictionManager>();
-
 	m_seniority_hierarchy_holder= xr_new<CSeniorityHierarchyHolder>();
 
-	m_client_spawn_manager		= xr_new<CClientSpawnManager>();
+	if(!g_dedicated_server)
+	{
+		m_level_sound_manager		= xr_new<CLevelSoundManager>();
+		m_space_restriction_manager = xr_new<CSpaceRestrictionManager>();
+		m_client_spawn_manager		= xr_new<CClientSpawnManager>();
+		m_autosave_manager			= xr_new<CAutosaveManager>();
 
-	m_autosave_manager			= xr_new<CAutosaveManager>();
+	#ifdef DEBUG
+		m_debug_renderer			= xr_new<CDebugRenderer>();
+		m_level_debug				= xr_new<CLevelDebug>();
+	#endif
 
-#ifdef DEBUG
-	m_debug_renderer			= xr_new<CDebugRenderer>();
-#endif
+	}else
+	{
+		m_level_sound_manager		= NULL;
+		m_client_spawn_manager		= NULL;
+		m_autosave_manager			= NULL;
+		m_space_restriction_manager = NULL;
+	#ifdef DEBUG
+		m_debug_renderer			= NULL;
+		m_level_debug				= NULL;
+	#endif
+	}
+
+
 	
 	m_ph_commander				= xr_new<CPHCommander>();
 	m_ph_commander_scripts		= xr_new<CPHCommander>();
+
 #ifdef DEBUG
 	m_bSynchronization			= false;
 #endif	
@@ -124,9 +143,6 @@ CLevel::CLevel():IPureClient	(Device.GetTimerGlobal())
 	//---------------------------------------------------------
 	pCurrentControlEntity = NULL;
 
-#ifdef DEBUG
-	m_level_debug	= xr_new<CLevelDebug>();
-#endif
 	//---------------------------------------------------------
 	m_dwCL_PingLastSendTime = 0;
 	m_dwCL_PingDeltaSend = 1000;
@@ -139,7 +155,8 @@ CLevel::CLevel():IPureClient	(Device.GetTimerGlobal())
 	m_pStoredDemoData = NULL;
 	m_pOldCrashHandler = NULL;
 	m_we_used_old_crach_handler	= false;
-//	if (!strstr(Core.Params,"-tdemo ") && !strstr(Core.Params,"-tdemof "))
+
+//	if ( !strstr( Core.Params, "-tdemo " ) && !strstr(Core.Params,"-tdemof "))
 //	{
 //		Demo_PrepareToStore();
 //	};
@@ -222,7 +239,8 @@ CLevel::~CLevel()
 	xr_delete					(m_debug_renderer);
 #endif
 
-	ai().script_engine().remove_script_process(ScriptEngine::eScriptProcessorLevel);
+	if (!g_dedicated_server)
+		ai().script_engine().remove_script_process(ScriptEngine::eScriptProcessorLevel);
 
 	xr_delete					(game);
 	xr_delete					(game_events);
@@ -245,16 +263,6 @@ CLevel::~CLevel()
 	pActors4CrPr.clear();
 
 	ai().unload					();
-/*
-#ifdef DEBUG
-	CInifile					*old_settings = pSettings, *new_settings;
-	string256					file_name;
-	FS.update_path				(file_name,"$game_config$","system.ltx");
-	new_settings				= xr_new<CInifile>(file_name);
-	pSettings					= new_settings;
-	xr_delete					(old_settings);
-#endif
-*/
 	//-----------------------------------------------------------	
 #ifdef DEBUG	
 	xr_delete					(m_level_debug);
@@ -273,6 +281,7 @@ CLevel::~CLevel()
 
 	if (m_we_used_old_crach_handler)
 		Debug.set_crashhandler	(m_pOldCrashHandler);
+
 }
 
 shared_str	CLevel::name		() const
@@ -280,11 +289,17 @@ shared_str	CLevel::name		() const
 	return						(m_name);
 }
 
+void CLevel::GetLevelInfo( CServerInfo* si )
+{
+	Server->GetServerInfo( si );
+}
+
+
 void CLevel::PrefetchSound		(LPCSTR name)
 {
 	// preprocess sound name
 	string_path					tmp;
-	strcpy						(tmp,name);
+	strcpy_s					(tmp,name);
 	xr_strlwr					(tmp);
 	if (strext(tmp))			*strext(tmp)=0;
 	shared_str	snd_name		= tmp;
@@ -340,7 +355,7 @@ void CLevel::cl_Process_Event				(u16 dest, u16 type, NET_Packet& P)
 			Game().OnDestroy(GO);
 		GO->OnEvent		(P,type);
 	}
-	else {
+	else { // handle GE_DESTROY_REJECT here
 		u32				pos = P.r_tell();
 		u16				id = P.r_u16();
 		P.r_seek		(pos);
@@ -432,6 +447,8 @@ void CLevel::OnFrame	()
 	debug_memory_guard					__guard__;
 #endif // DEBUG_MEMORY_MANAGER
 
+	m_feel_deny.update					();
+
 	if (GameID()!=GAME_SINGLE)			psDeviceFlags.set(rsDisableObjectsAsCrows,true);
 	else								psDeviceFlags.set(rsDisableObjectsAsCrows,false);
 
@@ -443,6 +460,9 @@ void CLevel::OnFrame	()
 	// Client receive
 	if (net_isDisconnected())	
 	{
+		if (OnClient() && GameID() != GAME_SINGLE) 
+			ClearAllObjects();
+
 		Engine.Event.Defer				("kernel:disconnect");
 		return;
 	} else {
@@ -459,15 +479,17 @@ void CLevel::OnFrame	()
 
 	if (m_bNeed_CrPr)					make_NetCorrectionPrediction();
 
-	MapManager().Update		();
+	if(!g_dedicated_server)
+		MapManager().Update		();
 	// Inherited update
 	inherited::OnFrame		();
 
 	// Draw client/server stats
-	CGameFont* F = HUD().Font().pFontDI;
-	if (psDeviceFlags.test(rsStatistic))
+	if ( !g_dedicated_server && psDeviceFlags.test(rsStatistic))
 	{
-		if (!psNET_direct_connect) {
+		CGameFont* F = HUD().Font().pFontDI;
+		if (!psNET_direct_connect) 
+		{
 			if ( IsServer() )
 			{
 				const IServerStatistic* S = Server->GetStatistic();
@@ -481,11 +503,12 @@ void CLevel::OnFrame	()
 				F->OutNext	("sv_urate/cl_urate : %4d/%4d", psNET_ServerUpdate, psNET_ClientUpdate);
 
 				F->SetColor	(D3DCOLOR_XRGB(255,255,255));
-				for (u32 I=0; I<Server->client_Count(); ++I)	{
+				for (u32 I=0; I<Server->client_Count(); ++I)	
+				{
 					IClient*	C = Server->client_Get(I);
 					Server->UpdateClientStatistic(C);
-					F->OutNext("%10s: P(%d), BPS(%2.1fK), MRR(%2d), MSR(%2d), Retried(%2d), Blocked(%2d)",
-						Server->game->get_option_s(*C->Name,"name",*C->Name),
+					F->OutNext("P(%d), BPS(%2.1fK), MRR(%2d), MSR(%2d), Retried(%2d), Blocked(%2d)",
+						//Server->game->get_option_s(*C->Name,"name",*C->Name),
 						//					C->Name,
 						C->stats.getPing(),
 						float(C->stats.getBPS()),// /1024,
@@ -521,21 +544,14 @@ void CLevel::OnFrame	()
 					);
 			}
 		}
-	} else {
-		if (psDeviceFlags.test(rsStatistic))
-		{
-			F->SetHeightI(0.015f);
-			F->OutSetI	(0.0f,0.5f);
-			F->SetColor	(D3DCOLOR_XRGB(0,255,0));
-			F->OutNext	("client_2_sever ping: %d",	net_Statistic.getPing());
-		}
 	}
 	
 //	g_pGamePersistent->Environment().SetGameTime	(GetGameDayTimeSec(),GetGameTimeFactor());
 	g_pGamePersistent->Environment().SetGameTime	(GetEnvironmentGameDayTimeSec(),GetGameTimeFactor());
 
-	//Device.Statistic->Scripting.Begin	();
-	ai().script_engine().script_process	(ScriptEngine::eScriptProcessorLevel)->update();
+	//Device.Statistic->cripting.Begin	();
+	if (!g_dedicated_server)
+		ai().script_engine().script_process	(ScriptEngine::eScriptProcessorLevel)->update();
 	//Device.Statistic->Scripting.End	();
 	m_ph_commander->update				();
 	m_ph_commander_scripts->update		();
@@ -547,12 +563,19 @@ void CLevel::OnFrame	()
 	Device.Statistic->TEST0.End			();
 
 	// update static sounds
-	if (g_mt_config.test(mtLevelSounds)) Device.seqParallel.push_back	(fastdelegate::FastDelegate0<>(m_level_sound_manager,&CLevelSoundManager::Update));
-	else								m_level_sound_manager->Update	();
-
+	if(!g_dedicated_server)
+	{
+		if (g_mt_config.test(mtLevelSounds)) 
+			Device.seqParallel.push_back	(fastdelegate::FastDelegate0<>(m_level_sound_manager,&CLevelSoundManager::Update));
+		else								
+			m_level_sound_manager->Update	();
+	}
 	// deffer LUA-GC-STEP
-	if (g_mt_config.test(mtLUA_GC))		Device.seqParallel.push_back	(fastdelegate::FastDelegate0<>(this,&CLevel::script_gc));
-	else								script_gc	()	;
+	if (!g_dedicated_server)
+	{
+		if (g_mt_config.test(mtLUA_GC))	Device.seqParallel.push_back	(fastdelegate::FastDelegate0<>(this,&CLevel::script_gc));
+		else							script_gc	()	;
+	}
 	//-----------------------------------------------------
 	if (pStatGraphR)
 	{	
@@ -578,6 +601,8 @@ void test_precise_path	();
 extern	Flags32	dbg_net_Draw_Flags;
 #endif
 
+extern void draw_wnds_rects();
+
 void CLevel::OnRender()
 {
 	inherited::OnRender	();
@@ -589,6 +614,8 @@ void CLevel::OnRender()
 	//Device.Statistic->TEST1.End();
 	//отрисовать интерфейc пользователя
 	HUD().RenderUI();
+
+	draw_wnds_rects();
 
 
 #ifdef DEBUG
@@ -610,6 +637,11 @@ void CLevel::OnRender()
 	if (bDebug)	{
 		for (u32 I=0; I < Level().Objects.o_count(); I++) {
 			CObject*	_O		= Level().Objects.o_get_by_iterator(I);
+
+			CPhysicObject		*physic_object = smart_cast<CPhysicObject*>(_O);
+			if (physic_object)
+				physic_object->OnRender();
+
 			CSpaceRestrictor	*space_restrictor = smart_cast<CSpaceRestrictor*>	(_O);
 			if (space_restrictor)
 				space_restrictor->OnRender();
@@ -699,9 +731,9 @@ void CLevel::OnEvent(EVENT E, u64 P1, u64 /**P2/**/)
 	} else if (E==eChangeRP && P1) {
 	} else if (E==eDemoPlay && P1) {
 		char* name = (char*)P1;
-		char RealName [256];
-		strcpy(RealName,name);
-		strcat(RealName,".xrdemo");
+		string_path RealName;
+		strcpy_s		(RealName,name);
+		strcat			(RealName,".xrdemo");
 		Cameras().AddCamEffector(xr_new<CDemoPlay> (RealName,1.3f,0));
 	} else if (E==eChangeTrack && P1) {
 		// int id = atoi((char*)P1);
@@ -986,6 +1018,10 @@ bool CLevel::IsClient ()
 	return (Server->client_Count() == 0);
 }
 
+void CLevel::OnSessionTerminate		(LPCSTR reason)
+{
+	MainMenu()->OnSessionTerminate(reason);
+}
 
 u32	GameID()
 {
@@ -996,5 +1032,62 @@ u32	GameID()
 
 bool	IsGameTypeSingle()
 {
-	return g_pGamePersistent->GameType()==GAME_SINGLE;
+	return g_pGamePersistent->GameType()==GAME_SINGLE || g_pGamePersistent->GameType()==GAME_ANY;
+}
+
+#ifdef BATTLEYE
+
+bool CLevel::TestLoadBEClient()
+{
+	return battleye_system.TestLoadClient();
+}
+
+#endif // BATTLEYE
+
+GlobalFeelTouch::GlobalFeelTouch()
+{
+}
+
+GlobalFeelTouch::~GlobalFeelTouch()
+{
+}
+
+struct delete_predicate_by_time : public std::binary_function<Feel::Touch::DenyTouch, DWORD, bool>
+{
+	bool operator () (Feel::Touch::DenyTouch const & left, DWORD const expire_time) const
+	{
+		if (left.Expire <= expire_time)
+			return true;
+		return false;
+	};
+};
+struct objects_ptrs_equal : public std::binary_function<Feel::Touch::DenyTouch, CObject const *, bool>
+{
+	bool operator() (Feel::Touch::DenyTouch const & left, CObject const * const right) const
+	{
+		if (left.O == right)
+			return true;
+		return false;
+	}
+};
+
+void GlobalFeelTouch::update()
+{
+	//we ignore P and R arguments, we need just delete evaled denied objects...
+	xr_vector<Feel::Touch::DenyTouch>::iterator new_end = 
+		std::remove_if(feel_touch_disable.begin(), feel_touch_disable.end(), 
+			std::bind2nd(delete_predicate_by_time(), Device.dwTimeGlobal));
+	feel_touch_disable.erase(new_end, feel_touch_disable.end());
+}
+
+bool GlobalFeelTouch::is_object_denied(CObject const * O)
+{
+	/*Fvector temp_vector;
+	feel_touch_update(temp_vector, 0.f);*/
+	if (std::find_if(feel_touch_disable.begin(), feel_touch_disable.end(),
+		std::bind2nd(objects_ptrs_equal(), O)) == feel_touch_disable.end())
+	{
+		return false;
+	}
+	return true;
 }

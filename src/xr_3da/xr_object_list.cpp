@@ -9,6 +9,8 @@
 #include "xr_object.h"
 #include "../xrNetServer/net_utils.h"
 
+#include "CustomHUD.h"
+
 class fClassEQ {
 	CLASS_ID cls;
 public:
@@ -180,14 +182,17 @@ void CObjectList::Update		(bool bForce)
 
 		for (int it = destroy_queue.size()-1; it>=0; it--)	Sound->object_relcase	(destroy_queue[it]);
 		
+		CCustomHUD			&hud = *g_pGameLevel->pHUD;
 		RELCASE_CALLBACK_VEC::iterator It	= m_relcase_callbacks.begin();
 		RELCASE_CALLBACK_VEC::iterator Ite	= m_relcase_callbacks.end();
 		for(;It!=Ite; ++It)	{
 			VERIFY			(*(*It).m_ID==(It-m_relcase_callbacks.begin()));
 			xr_vector<CObject*>::iterator dIt	= destroy_queue.begin();
 			xr_vector<CObject*>::iterator dIte	= destroy_queue.end();
-			for (;dIt!=dIte; ++dIt)
+			for (;dIt!=dIte; ++dIt) {
 				(*It).m_Callback(*dIt);
+				hud.net_Relcase	(*dIt);
+			}
 		}
 
 		// Destroy
@@ -221,14 +226,11 @@ void CObjectList::net_Unregister	(CObject* O)
 	}
 }
 
-#ifdef DEBUG
-INT	g_Dump_Export_Obj = 0;
-#endif
+int	g_Dump_Export_Obj = 0;
+
 u32	CObjectList::net_Export			(NET_Packet* _Packet,	u32 start, u32 max_object_size	)
 {
-#ifdef DEBUG
 	if (g_Dump_Export_Obj) Msg("---- net_export --- ");
-#endif
 
 	NET_Packet& Packet	= *_Packet;
 	u32			position;
@@ -239,15 +241,19 @@ u32	CObjectList::net_Export			(NET_Packet* _Packet,	u32 start, u32 max_object_si
 			Packet.w_chunk_open8	(position);
 			//Msg						("cl_export: %d '%s'",P->ID(),*P->cName());
 			P->net_Export			(Packet);
+
 #ifdef DEBUG
 			u32 size				= u32		(Packet.w_tell()-position)-sizeof(u8);
 			if				(size>=256)			{
 				Debug.fatal	(DEBUG_INFO,"Object [%s][%d] exceed network-data limit\n size=%d, Pend=%d, Pstart=%d",
 					*P->cName(), P->ID(), size, Packet.w_tell(), position);
 			}
-			
-			if (g_Dump_Export_Obj) Msg("* %s : %d", *(P->cNameSect()), size);
 #endif
+			if (g_Dump_Export_Obj)
+			{
+				u32 size				= u32		(Packet.w_tell()-position)-sizeof(u8);
+				Msg("* %s : %d", *(P->cNameSect()), size);
+			}
 			Packet.w_chunk_close8	(position);
 //			if (0==(--count))		
 //				break;
@@ -255,20 +261,16 @@ u32	CObjectList::net_Export			(NET_Packet* _Packet,	u32 start, u32 max_object_si
 				break;
 		}
 	}
-#ifdef DEBUG
 	if (g_Dump_Export_Obj) Msg("------------------- ");
-#endif	
 	return	start+1;
 }
 
-#ifdef DEBUG
-INT	g_Dump_Import_Obj = 0;
-#endif
+int	g_Dump_Import_Obj = 0;
+
 void CObjectList::net_Import		(NET_Packet* Packet)
 {
-#ifdef DEBUG
 	if (g_Dump_Import_Obj) Msg("---- net_import --- ");
-#endif
+
 	while (!Packet->r_eof())
 	{
 		u16 ID;		Packet->r_u16	(ID);
@@ -276,20 +278,18 @@ void CObjectList::net_Import		(NET_Packet* Packet)
 		CObject* P  = net_Find		(u32(ID));
 		if (P)		
 		{
-#ifdef DEBUG
+
 			u32 rsize = Packet->r_tell();			
-#endif				
 			
 			P->net_Import	(*Packet);
-#ifdef DEBUG
+
 			if (g_Dump_Import_Obj) Msg("* %s : %d - %d", *(P->cNameSect()), size, Packet->r_tell() - rsize);
-#endif	
+
 		}
 		else		Packet->r_advance(size);
 	}
-#ifdef DEBUG
+
 	if (g_Dump_Import_Obj) Msg("------------------- ");
-#endif	
 }
 
 CObject* CObjectList::net_Find			(u32 ID)
@@ -313,7 +313,7 @@ void CObjectList::Unload	( )
 	{
 		CObject*	O	= objects_sleeping.back	();
 		Msg				("! [%x] s[%4d]-[%s]-[%s]", O, O->ID(), *O->cNameSect(), *O->cName());
-		O->setDestroy	( true );
+		O->setDestroy	( TRUE );
 		
 #ifdef DEBUG
 		Msg				("Destroying object [%d][%s]",O->ID(),*O->cName());
@@ -325,7 +325,7 @@ void CObjectList::Unload	( )
 	{
 		CObject*	O	= objects_active.back	();
 		Msg				("! [%x] a[%4d]-[%s]-[%s]", O, O->ID(), *O->cNameSect(), *O->cName());
-		O->setDestroy	( true );
+		O->setDestroy	( TRUE );
 
 #ifdef DEBUG
 		Msg				("Destroying object [%d][%s]",O->ID(),*O->cName());
@@ -363,6 +363,7 @@ void		CObjectList::Destroy			( CObject*	O		)
 		else	FATAL						("! Unregistered object being destroyed");
 	}
 	g_pGamePersistent->ObjectPool.destroy	(O);
+
 }
 
 void CObjectList::relcase_register		(RELCASE_CALLBACK cb, int *ID)
@@ -410,11 +411,34 @@ bool CObjectList::dump_all_objects()
 	return false;
 }
 
-void CObjectList::register_object_to_destroy	(CObject *object_to_destroy)
+void CObjectList::register_object_to_destroy(CObject *object_to_destroy)
 {
 	VERIFY					(!registered_object_to_destroy(object_to_destroy));
-//	Msg("CObjectList::register_object_to_destroy [%x]", object_to_destroy);
 	destroy_queue.push_back	(object_to_destroy);
+
+	xr_vector<CObject*>::iterator it	= objects_active.begin();
+	xr_vector<CObject*>::iterator it_e	= objects_active.end();
+	for(;it!=it_e;++it)
+	{
+		CObject* O = *it;
+		if(!O->getDestroy() && O->H_Parent()==object_to_destroy)
+		{
+			Msg("setDestroy called, but not-destroyed child found parent[%d] child[%d]",object_to_destroy->ID(), O->ID(), Device.dwFrame);
+			O->setDestroy(TRUE);
+		}
+	}
+
+	it		= objects_sleeping.begin();
+	it_e	= objects_sleeping.end();
+	for(;it!=it_e;++it)
+	{
+		CObject* O = *it;
+		if(!O->getDestroy() && O->H_Parent()==object_to_destroy)
+		{
+			Msg("setDestroy called, but not-destroyed child found parent[%d] child[%d]",object_to_destroy->ID(), O->ID(), Device.dwFrame);
+			O->setDestroy(TRUE);
+		}
+	}
 }
 
 #ifdef DEBUG

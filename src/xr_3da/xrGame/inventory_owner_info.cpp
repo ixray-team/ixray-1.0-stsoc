@@ -3,7 +3,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "InventoryOwner.h"
 #include "GameObject.h"
 #include "xrMessages.h"
@@ -13,7 +13,6 @@
 #include "alife_registry_container.h"
 #include "script_game_object.h"
 #include "level.h"
-#include "script_space.h"
 #include "infoportion.h"
 #include "alife_registry_wrappers.h"
 #include "script_callback_ex.h"

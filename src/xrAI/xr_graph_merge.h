@@ -28,4 +28,10 @@ struct CLevelInfo {
 	}
 };
 
-extern void xrMergeGraphs(LPCSTR name, bool rebuild);
+extern void xrMergeGraphs(
+#ifdef PRIQUEL
+	LPCSTR game_graph_id,
+#endif // PRIQUEL
+	LPCSTR name,
+	bool rebuild
+);

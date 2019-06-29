@@ -10,8 +10,11 @@
 
 #include "game_graph_space.h"
 #include "script_export_space.h"
+#include "game_level_cross_table.h"
 
-#define GRAPH_NAME			"game.graph"
+#ifndef PRIQUEL
+#	define GRAPH_NAME			"game.graph"
+#endif // PRIQUEL
 
 class CGameGraph {
 private:
@@ -33,19 +36,38 @@ public:
 	typedef xr_vector<CLevelPoint>	LEVEL_POINT_VECTOR;
 	typedef xr_vector<bool>			ENABLED;
 
-protected:
+private:
 	CHeader							m_header;
+#if defined(AI_COMPILER) || !defined(PRIQUEL)
 	IReader							*m_reader;
+#endif // defined(AI_COMPILER) || !defined(PRIQUEL)
 	CVertex							*m_nodes;
 	mutable ENABLED					m_enabled;
 	_GRAPH_ID						m_current_level_some_vertex_id;
 
+#ifdef PRIQUEL
+private:
+	u32								*m_cross_tables;
+	CGameLevelCrossTable			*m_current_level_cross_table;
+#endif // PRIQUEL
+
 public:
-#ifndef AI_COMPILER
+#if !defined(AI_COMPILER) && !defined(PRIQUEL)
 	IC 								CGameGraph				();
-#else
-	IC 								CGameGraph				(LPCSTR file_name, u32 current_version = XRAI_CURRENT_VERSION);
-#endif
+#else // !defined(AI_COMPILER) && !defined(PRIQUEL)
+#	ifdef AI_COMPILER
+		IC 							CGameGraph				(LPCSTR file_name, u32 current_version = XRAI_CURRENT_VERSION);
+#	endif // AI_COMPILER
+#endif // !defined(AI_COMPILER) && !defined(PRIQUEL)
+
+#ifdef PRIQUEL
+public:
+	IC								CGameGraph				(const IReader &stream);
+	IC		void					save					(IWriter &stream);
+	IC	const CGameLevelCrossTable	&cross_table			() const;
+#endif // PRIQUEL
+
+public:
 	IC virtual						~CGameGraph				();
 	IC		const CHeader			&header					() const;
 	IC		bool					mask					(const svector<_LOCATION_ID,GameGraph::LOCATION_TYPE_COUNT> &M, const _LOCATION_ID E[GameGraph::LOCATION_TYPE_COUNT]) const;
@@ -63,15 +85,10 @@ public:
 	IC		_GRAPH_ID				vertex_id				(const CVertex *vertex) const;
 	IC		void					set_current_level		(const u32 &level_id);
 	IC		const _GRAPH_ID			&current_level_vertex	() const;
-
-#if 0
-};
-#else
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 add_to_type_list(CGameGraph)
 #undef script_type_list
 #define script_type_list save_type_list(CGameGraph)
-#endif
 
 #include "game_graph_inline.h"

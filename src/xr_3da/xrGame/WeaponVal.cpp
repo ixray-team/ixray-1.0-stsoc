@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "weaponval.h"
 
 CWeaponVal::CWeaponVal(void) : CWeaponMagazined("VAL",SOUND_TYPE_WEAPON_SUBMACHINEGUN)
@@ -10,8 +10,6 @@ CWeaponVal::CWeaponVal(void) : CWeaponMagazined("VAL",SOUND_TYPE_WEAPON_SUBMACHI
 CWeaponVal::~CWeaponVal(void)
 {
 }
-
-#include "script_space.h"
 
 using namespace luabind;
 

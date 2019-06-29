@@ -5,11 +5,11 @@ class ENGINE_API pure_relcase{
 private:
 	int							m_ID;
 public:
-	template <typename _class_type>
-			pure_relcase		(void (xr_stdcall _class_type::* function_to_bind)(CObject*))
+	template <typename class_type>
+			pure_relcase		(void (xr_stdcall class_type::* function_to_bind)(CObject*))
 	{
-		VERIFY					(g_pGameLevel);
-		_class_type *self = static_cast<_class_type *>(this);
+		R_ASSERT				(g_pGameLevel);
+		class_type				*self = static_cast<class_type*>(this);
 		g_pGameLevel->Objects.relcase_register	(
 			CObjectList::RELCASE_CALLBACK (
 				self,
@@ -18,7 +18,7 @@ public:
 			&m_ID
 		);
 	}
-	virtual ~pure_relcase();
+	virtual ~pure_relcase		();
 };
 
-#endif //
+#endif // pure_relcaseH

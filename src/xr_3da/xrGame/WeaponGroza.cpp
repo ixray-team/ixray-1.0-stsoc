@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "weapongroza.h"
 #include "WeaponHUD.h"
 
@@ -10,8 +10,6 @@ CWeaponGroza::CWeaponGroza(void) : CWeaponMagazinedWGrenade("GROZA",SOUND_TYPE_W
 CWeaponGroza::~CWeaponGroza(void) 
 {
 }
-
-#include "script_space.h"
 
 using namespace luabind;
 

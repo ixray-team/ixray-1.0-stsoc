@@ -74,7 +74,7 @@ void CUIArtefactParams::InitFromXml(CUIXml& xml_doc)
 		m_info_items[i]			= xr_new<CUIStatic>();
 		CUIStatic* _s			= m_info_items[i];
 		_s->SetAutoDelete		(false);
-		strconcat				(_buff, _base, ":static_", af_item_sect_names[i]);
+		strconcat				(sizeof(_buff),_buff, _base, ":static_", af_item_sect_names[i]);
 		CUIXmlInit::InitStatic	(xml_doc, _buff,	0, _s);
 	}
 }
@@ -121,13 +121,14 @@ void CUIArtefactParams::SetInfo(const shared_str& af_section)
 
 		LPCSTR _color = (_val>0)?"%c[green]":"%c[red]";
 		
+		if(i==_item_bleeding_restore_speed)
+			_val		*=	-1.0f;
+
 		if(i==_item_bleeding_restore_speed || i==_item_radiation_restore_speed)
 			_color = (_val>0)?"%c[red]":"%c[green]";
 
-//.		if(i==_item_radiation_restore_speed /*|| i==_item_bleeding_restore_speed*/)
-//.			_val		*=	-1.0f;
 
-		sprintf					(	_buff, "%s %s %+.0f %s", 
+		sprintf_s					(	_buff, "%s %s %+.0f %s", 
 									CStringTable().translate(af_item_param_names[i]).c_str(), 
 									_color, 
 									_val, 

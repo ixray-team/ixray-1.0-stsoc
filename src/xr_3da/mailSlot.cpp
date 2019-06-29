@@ -10,7 +10,7 @@ extern	void msParse(LPCSTR cmd);
 void msCreate		(LPCSTR name)
 {
 	string256		fn;
-	sprintf			(fn,"\\\\.\\mailslot\\%s",name);
+	sprintf_s		(fn,sizeof(fn),"\\\\.\\mailslot\\%s",name);
     hLocalSlot = CreateMailslot(
 		fn,
         0,                             // no maximum message size
@@ -62,7 +62,7 @@ void	msWrite(char *name, char* dest, char *msg)
 	BOOL	fResult;
 	char    cName[256];
 
-	sprintf(cName,"\\\\%s\\mailslot\\%s",name,dest);
+	sprintf_s(cName,sizeof(cName),"\\\\%s\\mailslot\\%s",name,dest);
 	hFile = CreateFile(
 		cName, 
 		GENERIC_WRITE, 

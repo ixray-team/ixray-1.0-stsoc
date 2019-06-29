@@ -3,7 +3,6 @@
 #include "encyclopedia_article_defs.h"
 #include "GameTaskDefs.h"
 #include "script_export_space.h"
-#include "script_space.h"
 
 class CGameTaskManager;
 class CMapLocation;
@@ -43,10 +42,10 @@ private:
 	bool					CheckFunctions	(xr_vector<luabind::functor<bool> >& v);
 	void					SetTaskState	(ETaskState new_state);
 public:
+	SScriptObjectiveHelper	m_pScriptHelper;
 	virtual void			save			(IWriter &stream);
 	virtual void			load			(IReader &stream);
 	
-	SScriptObjectiveHelper	m_pScriptHelper;
 	SGameTaskObjective		(CGameTask* parent, int idx);
 	SGameTaskObjective		();
 	shared_str				description;
@@ -82,6 +81,8 @@ public:
 	void					SetMapLocation_script	(LPCSTR _str);
 	void					SetObjectID_script		(u16 id);
 	void					SetArticleKey_script	(LPCSTR _str);
+
+	void					SetIconName_script		(LPCSTR _str);
 
 	void					AddCompleteInfo_script	(LPCSTR _str);
 	void					AddFailInfo_script		(LPCSTR _str);
@@ -125,9 +126,12 @@ public:
 	void					Load_script				(LPCSTR _id);
 	void					SetTitle_script			(LPCSTR _title);
 	LPCSTR					GetTitle_script			()							{return *m_Title;};
+	void					SetPriority_script		(int _prio);
+	int						GetPriority_script		()							{return m_priority;};
 	void					AddObjective_script		(SGameTaskObjective* O);
 	SGameTaskObjective*		GetObjective_script		(int objective_id)			{return &(Objective(objective_id));}
 	LPCSTR					GetID_script			()							{return *m_ID;}
+	void					SetID_script			(LPCSTR _id)				{m_ID = _id;}
 	int						GetObjectiveSize_script	()							{return m_Objectives.size();}
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION

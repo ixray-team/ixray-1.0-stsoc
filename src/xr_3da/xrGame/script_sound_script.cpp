@@ -6,8 +6,7 @@
 //	Description : XRay Script sound class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "script_space.h"
+#include "pch_script.h"
 #include "script_sound.h"
 #include "script_game_object.h"
 
@@ -40,12 +39,12 @@ void CScriptSound::script_register(lua_State *L)
 			.def(								constructor<LPCSTR,ESoundTypes>())
 			.def("get_position",				&CScriptSound::GetPosition)
 			.def("set_position",				&CScriptSound::SetPosition)
-			.def("play",						(void (CScriptSound::*)(CScriptGameObject*))(CScriptSound::Play))
-			.def("play",						(void (CScriptSound::*)(CScriptGameObject*,float))(CScriptSound::Play))
-			.def("play",						(void (CScriptSound::*)(CScriptGameObject*,float,int))(CScriptSound::Play))
-			.def("play_at_pos",					(void (CScriptSound::*)(CScriptGameObject*,const Fvector &))(CScriptSound::PlayAtPos))
-			.def("play_at_pos",					(void (CScriptSound::*)(CScriptGameObject*,const Fvector &,float))(CScriptSound::PlayAtPos))
-			.def("play_at_pos",					(void (CScriptSound::*)(CScriptGameObject*,const Fvector &,float, int))(CScriptSound::PlayAtPos))
+			.def("play",						(void (CScriptSound::*)(CScriptGameObject*))(&CScriptSound::Play))
+			.def("play",						(void (CScriptSound::*)(CScriptGameObject*,float))(&CScriptSound::Play))
+			.def("play",						(void (CScriptSound::*)(CScriptGameObject*,float,int))(&CScriptSound::Play))
+			.def("play_at_pos",					(void (CScriptSound::*)(CScriptGameObject*,const Fvector &))(&CScriptSound::PlayAtPos))
+			.def("play_at_pos",					(void (CScriptSound::*)(CScriptGameObject*,const Fvector &,float))(&CScriptSound::PlayAtPos))
+			.def("play_at_pos",					(void (CScriptSound::*)(CScriptGameObject*,const Fvector &,float, int))(&CScriptSound::PlayAtPos))
 			.def("play_no_feedback",			&CScriptSound::PlayNoFeedback)
 			.def("stop",						&CScriptSound::Stop)
 			.def("stop_deffered",				&CScriptSound::StopDeffered)

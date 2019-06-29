@@ -105,17 +105,25 @@ void CBuild::BuildRapid		(BOOL bSaveForOtherCompilers)
 	
 	// save source SMF
 	string_path				fn;
-	
-	if (g_params.m_quality!=ebqDraft)
-		SaveAsSMF			(strconcat(fn,pBuild->path,"build_cform_source.smf"),CL);
+
+#ifdef PRIQUEL
+	bool					keep_temp_files = !!strstr(Core.Params,"-keep_temp_files");
+#endif // PRIQUEL
+
+	if (g_params.m_quality!=ebqDraft) {
+#ifdef PRIQUEL
+		if (keep_temp_files)
+#endif // PRIQUEL
+			SaveAsSMF		(strconcat(sizeof(fn),fn,pBuild->path,"build_cform_source.smf"),CL);
+	}
 
 	// Saving for AI/DO usage
 	if (bSaveForOtherCompilers)
 	{
 		Status					("Saving...");
-		string256				fn;
+		string_path				fn;
 
-		IWriter*		MFS		= FS.w_open	(strconcat(fn,pBuild->path,"build.cform"));
+		IWriter*		MFS		= FS.w_open	(strconcat(sizeof(fn),fn,pBuild->path,"build.cform"));
 		xr_vector<b_rc_face>	rc_faces;
 		rc_faces.resize			(CL.getTS());
 		// Prepare faces
@@ -130,8 +138,12 @@ void CBuild::BuildRapid		(BOOL bSaveForOtherCompilers)
 			cf.t[1].set			(cuv[1]);
 			cf.t[2].set			(cuv[2]);
 		}
-		if (g_params.m_quality!=ebqDraft)
-			SaveUVM				(strconcat(fn,pBuild->path,"build_cform_source.uvm"),rc_faces);
+		if (g_params.m_quality!=ebqDraft) {
+#ifdef PRIQUEL
+			if (keep_temp_files)
+#endif // PRIQUEL
+				SaveUVM			(strconcat(sizeof(fn),fn,pBuild->path,"build_cform_source.uvm"),rc_faces);
+		}
 
 		MFS->open_chunk			(0);
 

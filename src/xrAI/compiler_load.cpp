@@ -56,17 +56,17 @@ void xrLoad(LPCSTR name, bool draft_mode)
 	string256					N;
 	if (!draft_mode)	{
 		// shaders
-		string256				N;
+		string_path				N;
 		FS.update_path			(N,"$game_data$","shaders_xrlc.xr");
 		g_shaders_xrlc			= xr_new<Shader_xrLC_LIB> ();
 		g_shaders_xrlc->Load	(N);
 
 		// Load CFORM
 		{
-			strconcat			(N,name,"build.cform");
+			strconcat			(sizeof(N),N,name,"build.cform");
 			IReader*			fs = FS.r_open(N);
-
 			R_ASSERT			(fs->find_chunk(0));
+
 			hdrCFORM			H;
 			fs->r				(&H,sizeof(hdrCFORM));
 			R_ASSERT			(CFORM_CURRENT_VERSION==H.version);
@@ -85,57 +85,16 @@ void xrLoad(LPCSTR name, bool draft_mode)
 			FS.r_close			(fs);
 		}
 
-		// Load CFORM
-		/*
-		{
-			strconcat			(N,name,"level.cform");
-			IReader				*fs = FS.r_open(N);
-			R_ASSERT			(fs);
-			
-			hdrCFORM			H;
-			fs->r				(&H,sizeof(hdrCFORM));
-			R_ASSERT			(CFORM_CURRENT_VERSION==H.version);
-			
-			Fvector*	verts	= (Fvector*)fs->pointer();
-			CDB::TRI*	tris	= (CDB::TRI*)(verts+H.vertcount);
-			Level.build			( verts, H.vertcount, tris, H.facecount );
-			Msg("* Level CFORM: %dK",Level.memory()/1024);
-			fs->close			();
-
-			LevelBB.set			(H.aabb);
-		}
-
-		// Load CFORM ("lighting")
-		{
-			strconcat			(N,name,"build.cform");
-			IReader				*F = FS.r_open(N);
-			R_ASSERT2			(F,"There is no file 'build.cform'!");
-			
-			hdrCFORM			H;
-			IReader				*fs	= F->open_chunk(0);
-			fs->r				(&H,sizeof(hdrCFORM));
-			R_ASSERT			(CFORM_CURRENT_VERSION==H.version);
-			
-			//fs					= F->open_chunk(1);
-			Fvector*	verts	= (Fvector*)fs->pointer();
-			CDB::TRI*	tris	= (CDB::TRI*)(verts+H.vertcount);
-			Level.build	( verts, H.vertcount, tris, H.facecount );
-			fs->close			();
-			F->close			();
-			Msg("* Level CFORM-L: %dK",Level.memory()/1024);
-		}
-		*/
-
 		// Load level data
 		{
-			strconcat			(N,name,"build.prj");
+			strconcat			(sizeof(N),N,name,"build.prj");
 			IReader*	fs		= FS.r_open (N);
 			IReader*	F;
 
 			// Version
 			u32 version;
 			fs->r_chunk			(EB_Version,&version);
-			R_ASSERT(XRCL_CURRENT_VERSION==version);
+			R_ASSERT			(XRCL_CURRENT_VERSION==version);
 
 			// Header
 			fs->r_chunk			(EB_Parameters,&g_params);
@@ -173,7 +132,13 @@ void xrLoad(LPCSTR name, bool draft_mode)
 						BT.pSurface	= 0;
 					} else {
 						strcat			(N,".thm");
+#ifdef PRIQUEL
+						IReader* THM	= FS.r_open("$game_textures$",N);
+#else // PRIQUEL
 						IReader* THM	= FS.r_open("$textures$",N);
+#endif // PRIQUEL
+//						if (!THM)		continue;
+						
 						R_ASSERT2		(THM,	N);
 
 						// version
@@ -207,6 +172,8 @@ void xrLoad(LPCSTR name, bool draft_mode)
 								u32			w=0, h=0;
 								BT.pSurface = Surface_Load(N,w,h); 
 								R_ASSERT2	(BT.pSurface,"Can't load surface");
+								if ((w != BT.dwWidth) || (h != BT.dwHeight))
+									Msg		("! THM doesn't correspond to the texture: %dx%d -> %dx%d", BT.dwWidth, BT.dwHeight, w, h);
 								BT.Vflip	();
 							} else {
 								// Free surface memory
@@ -237,7 +204,7 @@ void xrLoad(LPCSTR name, bool draft_mode)
 //
 	// Load lights
 	{
-		strconcat				(N,name,"build.prj");
+		strconcat				(sizeof(N),N,name,"build.prj");
 
 		IReader*	F			= FS.r_open(N);
 		R_ASSERT2				(F,"There is no file 'build.prj'!");
@@ -297,8 +264,9 @@ void xrLoad(LPCSTR name, bool draft_mode)
 	
 	// Load initial map from the Level Editor
 	{
-		strconcat			(N,name,"build.aimap");
-		IReader				*F = FS.r_open(N);
+		string_path			file_name;
+		strconcat			(sizeof(file_name),file_name,name,"build.aimap");
+		IReader				*F = FS.r_open(file_name);
 
 		R_ASSERT			(F->open_chunk(E_AIMAP_CHUNK_VERSION));
 		R_ASSERT			(F->r_u16() == E_AIMAP_VERSION);
@@ -343,5 +311,10 @@ void xrLoad(LPCSTR name, bool draft_mode)
 		}
 
 		F->close			();
+
+#ifdef PRIQUEL
+		if (!strstr(Core.Params,"-keep_temp_files"))
+			DeleteFile		(file_name);
+#endif // PRIQUEL
 	}
 }

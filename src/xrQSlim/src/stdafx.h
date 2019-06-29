@@ -4,7 +4,7 @@
 #  pragma once
 #endif
 
-#include <xrCore.h>
+#include "../../xrCore/xrCore.h"
 
 /************************************************************************
 

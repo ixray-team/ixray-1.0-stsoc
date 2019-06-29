@@ -2,8 +2,11 @@
 #pragma hdrstop
 
 #include "ResourceManager.h"
-#include "render.h"
-//#include "xr_avi.h"
+
+#ifndef _EDITOR
+    #include "render.h"
+#endif
+    
 #include "tntQAVI.h"
 #include "xrTheora_Surface.h"
 
@@ -132,6 +135,7 @@ void CTexture::apply_normal	(u32 dwStage)	{
 void CTexture::Preload	()
 {
 	// Material
+/*
 	if (Device.Resources->m_description->line_exist("specification",*cName))	{
 //		if (strstr(*cName,"ston_stena"))	__asm int 3;
 		LPCSTR		descr			=	Device.Resources->m_description->r_string("specification",*cName);
@@ -144,22 +148,9 @@ void CTexture::Preload	()
 		}
 //		Msg	("mid[%f] : %s",m_material,*cName);
 	}
-	/*
-	// Material
-	if (Device.Resources->m_description->line_exist("specification",*cName))	{
-		if (strstr(*cName,"ston_stena"))	__asm int 3;
-		LPCSTR		descr			=	Device.Resources->m_description->r_string("specification",*cName);
-		string256	bmode,bparam;	float mid;
-		sscanf		(descr,"bump_mode[%[^:]:%[^]]], material[%f]",bmode,bparam,&mid);
-		m_material					=	mid;
-		if ((bmode[0]=='u')&&(bmode[1]=='s')&&(bmode[2]=='e')&&(bmode[3]==0))
-		{
-			// bump-map specified
-			m_bumpmap		=	bparam;
-		}
-		Msg	("mid[%f] : %s",m_material,*cName);
-	}
-	*/
+*/
+	m_bumpmap = Device.Resources->m_textures_description.GetBumpName(cName);
+	m_material = Device.Resources->m_textures_description.GetMaterial(cName);
 }
 
 void CTexture::Load		()
@@ -179,7 +170,7 @@ void CTexture::Load		()
 	Preload							();
 #ifndef		DEDICATED_SERVER
 	// Check for OGM
-	string256 fn;
+	string_path			fn;
 	if (FS.exist(fn,"$game_textures$",*cName,".ogm")){
 		// AVI
 		pTheora		= xr_new<CTheoraSurface>();
@@ -293,7 +284,7 @@ void CTexture::Unload	()
 {
 #ifdef DEBUG
 	string_path				msg_buff;
-	sprintf					(msg_buff,"* Unloading texture [%s] pSurface RefCount=",cName.c_str());
+	sprintf_s				(msg_buff,sizeof(msg_buff),"* Unloading texture [%s] pSurface RefCount=",cName.c_str());
 #endif // DEBUG
 
 //.	if (flags.bLoaded)		Msg		("* Unloaded: %s",cName.c_str());

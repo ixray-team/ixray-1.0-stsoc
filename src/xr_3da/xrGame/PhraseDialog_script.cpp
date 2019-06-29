@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "PhraseDialog_script.h"
-#include "script_space.h"
 #include "PhraseDialog.h"
 
 using namespace luabind;
@@ -37,10 +36,10 @@ void CPhraseDialogExporter::script_register(lua_State *L)
 	module(L)
 	[
 		class_<CPhrase>("CPhrase")
-		.def("GetPhraseScript",		CPhrase::GetPhraseScript),
+		.def("GetPhraseScript",		&CPhrase::GetPhraseScript),
 
 		class_<CPhraseDialog>("CPhraseDialog")
-		.def("AddPhrase",  (CPhrase*(CPhraseDialog::*)(LPCSTR text, int, int, int))CPhraseDialog::AddPhrase ),
+		.def("AddPhrase",			&CPhraseDialog::AddPhrase_script ),
 
 		class_<CPhraseScript>("CPhraseScript")
 		.def("AddPrecondition",		&CPhraseScript::AddPrecondition)

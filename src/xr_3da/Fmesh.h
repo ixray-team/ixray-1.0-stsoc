@@ -54,7 +54,7 @@ enum OGF_SkeletonVertType	{
 	OGF_VERTEXFORMAT_FVF_NL	= 3*0x12071980,
 };
 
-const u16	xrOGF_SMParamsVersion	= 3;
+const u16	xrOGF_SMParamsVersion	= 4;
 
 // OGF_DESC
 struct ECORE_API ogf_desc	{

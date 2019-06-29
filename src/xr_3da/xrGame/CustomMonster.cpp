@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "ai_debug.h"
 #include "CustomMonster.h"
 #include "hudmanager.h"
@@ -60,10 +60,10 @@ extern int g_AI_inactive_time;
 void CCustomMonster::SAnimState::Create(CKinematicsAnimated* K, LPCSTR base)
 {
 	char	buf[128];
-	fwd		= K->ID_Cycle_Safe(strconcat(buf,base,"_fwd"));
-	back	= K->ID_Cycle_Safe(strconcat(buf,base,"_back"));
-	ls		= K->ID_Cycle_Safe(strconcat(buf,base,"_ls"));
-	rs		= K->ID_Cycle_Safe(strconcat(buf,base,"_rs"));
+	fwd		= K->ID_Cycle_Safe(strconcat(sizeof(buf),buf,base,"_fwd"));
+	back	= K->ID_Cycle_Safe(strconcat(sizeof(buf),buf,base,"_back"));
+	ls		= K->ID_Cycle_Safe(strconcat(sizeof(buf),buf,base,"_ls"));
+	rs		= K->ID_Cycle_Safe(strconcat(sizeof(buf),buf,base,"_rs"));
 }
 
 //void __stdcall CCustomMonster::TorsoSpinCallback(CBoneInstance* B)
@@ -86,6 +86,7 @@ CCustomMonster::CCustomMonster()
 	m_movement_manager			= 0;
 	m_sound_player				= 0;
 	m_already_dead				= false;
+	m_invulnerable				= false;
 }
 
 CCustomMonster::~CCustomMonster	()
@@ -97,9 +98,11 @@ CCustomMonster::~CCustomMonster	()
 
 #ifdef DEBUG
 	Msg							("dumping client spawn manager stuff for object with id %d",ID());
-	Level().client_spawn_manager().dump	(ID());
+	if(!g_dedicated_server)
+		Level().client_spawn_manager().dump	(ID());
 #endif // DEBUG
-	Level().client_spawn_manager().clear(ID());
+	if(!g_dedicated_server)
+		Level().client_spawn_manager().clear(ID());
 }
 
 void CCustomMonster::Load		(LPCSTR section)
@@ -198,6 +201,8 @@ void CCustomMonster::reinit		()
 	if (m_critical_wound_threshold >= 0) 
 		load_critical_wound_bones	();
 	//////////////////////////////////////////////////////////////////////////
+	m_update_rotation_on_frame		= true;
+	m_movement_enabled_before_animation_controller	= true;
 }
 
 void CCustomMonster::reload		(LPCSTR section)
@@ -417,7 +422,10 @@ void CCustomMonster::UpdateCL	()
 	}
 
 	START_PROFILE("CustomMonster/client_update/network extrapolation")
-	if	(NET.empty())	return;
+	if (NET.empty()) {
+		update_animation_movement_controller	();
+		return;
+	}
 
 	m_dwCurrentTime		= Device.dwTimeGlobal;
 
@@ -470,21 +478,26 @@ void CCustomMonster::UpdateCL	()
 	}
 
 	// Use interpolated/last state
-	if(g_Alive()) {
-		XFORM().rotateY				(NET_Last.o_model);
+	if (g_Alive()) {
+		if (!animation_movement_controlled() && m_update_rotation_on_frame)
+			XFORM().rotateY			(NET_Last.o_model);
+
 		XFORM().translate_over		(NET_Last.p_pos);
 
-		if (use_model_pitch()) {
-			Fmatrix M;
-			M.setHPB (0.0f, -NET_Last.o_torso.pitch, 0.0f);
-			XFORM().mulB_43	(M);
+		if (!animation_movement_controlled() && m_update_rotation_on_frame) {
+			Fmatrix					M;
+			M.setHPB				(0.0f, -NET_Last.o_torso.pitch, 0.0f);
+			XFORM().mulB_43			(M);
 		}
 	}
 
 #ifdef DEBUG
-	// Camera
-	if (IsMyCamera()) UpdateCamera();
-#endif
+	if (IsMyCamera())
+		UpdateCamera				();
+#endif // DEBUG
+
+	update_animation_movement_controller	();
+
 	STOP_PROFILE
 }
 
@@ -697,8 +710,8 @@ BOOL CCustomMonster::net_Spawn	(CSE_Abstract* DC)
 	}
 
 	// Sheduler
-	shedule.t_min			= 100;
-	shedule.t_max			= 250; // This equaltiy is broken by Dima :-( // 30 * NET_Latency / 4;
+	shedule.t_min				= 100;
+	shedule.t_max				= 250; // This equaltiy is broken by Dima :-( // 30 * NET_Latency / 4;
 
 	return TRUE;
 }
@@ -716,7 +729,8 @@ void CCustomMonster::Exec_Action(float /**dt/**/)
 //void CCustomMonster::Hit(float P, Fvector &dir,CObject* who, s16 element,Fvector position_in_object_space, float impulse, ALife::EHitType hit_type)
 void			CCustomMonster::Hit					(SHit* pHDS)
 {
-	inherited::Hit			(pHDS);
+	if (!invulnerable())
+		inherited::Hit		(pHDS);
 }
 
 void CCustomMonster::OnEvent(NET_Packet& P, u16 type)
@@ -752,11 +766,6 @@ void CCustomMonster::net_Destroy()
 BOOL CCustomMonster::UsedAI_Locations()
 {
 	return					(TRUE);
-}
-
-bool CCustomMonster::use_model_pitch	() const
-{
-	return					(true);
 }
 
 void CCustomMonster::PitchCorrection() 
@@ -1125,3 +1134,30 @@ void CCustomMonster::OnRender()
 		smart_cast<CKinematics*>(Visual())->DebugRender(XFORM());
 }
 #endif // DEBUG
+
+void CCustomMonster::create_anim_mov_ctrl	(CBlend *b)
+{
+	inherited::create_anim_mov_ctrl	(b);
+
+	m_movement_enabled_before_animation_controller	= movement().enabled();
+	movement().enable_movement		(false);
+}
+
+void CCustomMonster::destroy_anim_mov_ctrl	()
+{
+	inherited::destroy_anim_mov_ctrl();
+	
+	movement().enable_movement		(m_movement_enabled_before_animation_controller);
+
+	float							roll;
+	XFORM().getHPB					(movement().m_body.current.yaw, movement().m_body.current.pitch, roll);
+
+	movement().m_body.current.yaw	*= -1.f;
+	movement().m_body.current.pitch	*= -1.f;
+
+	movement().m_body.target.yaw	= movement().m_body.current.yaw;
+	movement().m_body.target.pitch	= movement().m_body.current.pitch;
+
+	NET_Last.o_model				= movement().m_body.current.yaw;
+	NET_Last.o_torso.pitch			= movement().m_body.current.pitch;
+}

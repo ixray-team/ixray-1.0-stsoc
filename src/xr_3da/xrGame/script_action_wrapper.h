@@ -9,7 +9,6 @@
 #pragma once
 
 #include "action_base.h"
-#include "script_space.h"
 
 class CScriptActionWrapper : public CScriptActionBase, public luabind::wrap_base {
 public:

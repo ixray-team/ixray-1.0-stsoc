@@ -31,7 +31,7 @@ void	FillSecretKey(char* SecretKey)
 	SecretKey[7] = '\0';
 }
 
-XRGAMESPY_API const char* xrGS_GetGameVersion	(const char*KeyValue)
+const char* GetGameVersion	(const char*KeyValue)
 {
 	HKEY KeyCDKey = 0;
 	long res = RegOpenKeyEx(REGISTRY_BASE, 
@@ -52,7 +52,13 @@ XRGAMESPY_API const char* xrGS_GetGameVersion	(const char*KeyValue)
 	{
 		return GAME_VERSION;
 	};
-	return KeyValue;	
+//	return KeyValue;	
+	return GAME_VERSION;
+}
+
+XRGAMESPY_API const char* xrGS_GetGameVersion	(const char*KeyValue)
+{
+	return GetGameVersion(KeyValue);
 }
 
 XRGAMESPY_API void xrGS_GetGameID	(int* GameID, int verID)

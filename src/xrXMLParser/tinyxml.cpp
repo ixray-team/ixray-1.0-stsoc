@@ -26,8 +26,8 @@ distribution.
 #include <ctype.h>
 
 #ifdef TIXML_USE_STL
-#include <sstream>
-#include <iostream>
+//#	include <sstream>
+//#	include <iostream>
 #endif
 
 #include "tinyxml.h"
@@ -1581,7 +1581,7 @@ TiXmlAttribute*	TiXmlAttributeSet::Find( const char* name )
 }
 */
 
-#ifdef TIXML_USE_STL	
+#if 0//def TIXML_USE_STL	
 std::istream& operator>> (std::istream & in, TiXmlNode & base)
 {
 	TIXML_STRING tag;
@@ -1594,7 +1594,7 @@ std::istream& operator>> (std::istream & in, TiXmlNode & base)
 #endif
 
 
-#ifdef TIXML_USE_STL	
+#if 0//def TIXML_USE_STL	
 std::ostream& operator<< (std::ostream & out, const TiXmlNode & base)
 {
 	TiXmlPrinter printer;

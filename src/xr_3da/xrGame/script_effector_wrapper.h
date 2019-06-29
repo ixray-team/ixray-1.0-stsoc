@@ -9,7 +9,6 @@
 #pragma once
 
 #include "script_effector.h"
-#include "script_space.h"
 
 class CScriptEffectorWrapper : public CScriptEffector, public luabind::wrap_base {
 public:

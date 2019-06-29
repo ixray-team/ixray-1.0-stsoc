@@ -62,7 +62,7 @@ public:
 	virtual IInputReceiver*	cast_input_receiver		()						{return this;}
 
 	virtual void			net_Relcase				(CObject *O);
-	virtual void			GetSpectatorString		(LPTSTR pStr);
+			void			GetSpectatorString		(string1024& pStr);
 };
 
 #endif // __SPECTATOR_H__

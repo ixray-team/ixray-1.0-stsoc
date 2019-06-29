@@ -326,17 +326,17 @@ bool CWeaponShotgun::HaveCartridgeInInventory		(u8 cnt)
 {
 	if (unlimited_ammo()) return true;
 	m_pAmmo = NULL;
-	if(m_pInventory) 
+	if(m_pCurrentInventory) 
 	{
 		//попытатьс€ найти в инвентаре патроны текущего типа 
-		m_pAmmo = smart_cast<CWeaponAmmo*>(m_pInventory->GetAny(*m_ammoTypes[m_ammoType]));
+		m_pAmmo = smart_cast<CWeaponAmmo*>(m_pCurrentInventory->GetAny(*m_ammoTypes[m_ammoType]));
 		
 		if(!m_pAmmo )
 		{
 			for(u32 i = 0; i < m_ammoTypes.size(); ++i) 
 			{
 				//проверить патроны всех подход€щих типов
-				m_pAmmo = smart_cast<CWeaponAmmo*>(m_pInventory->GetAny(*m_ammoTypes[i]));
+				m_pAmmo = smart_cast<CWeaponAmmo*>(m_pCurrentInventory->GetAny(*m_ammoTypes[i]));
 				if(m_pAmmo) 
 				{ 
 					m_ammoType = i; 
@@ -384,7 +384,8 @@ u8 CWeaponShotgun::AddCartridge		(u8 cnt)
 	VERIFY((u32)iAmmoElapsed == m_magazine.size());
 
 	//выкинуть коробку патронов, если она пуста€
-	if(m_pAmmo && !m_pAmmo->m_boxCurr && OnServer()) m_pAmmo->Drop();
+	if(m_pAmmo && !m_pAmmo->m_boxCurr && OnServer()) 
+		m_pAmmo->SetDropManual(TRUE);
 
 	return cnt;
 }
@@ -416,19 +417,4 @@ void	CWeaponShotgun::net_Import	(NET_Packet& P)
 		l_cartridge.Load(*(m_ammoTypes[LocalAmmoType]), LocalAmmoType); 
 //		m_fCurrentCartirdgeDisp = m_DefaultCartridge.m_kDisp;		
 	}
-}
-
-
-#include "script_space.h"
-
-using namespace luabind;
-
-#pragma optimize("s",on)
-void CWeaponShotgun::script_register	(lua_State *L)
-{
-	module(L)
-	[
-		class_<CWeaponShotgun,CGameObject>("CWeaponShotgun")
-			.def(constructor<>())
-	];
 }

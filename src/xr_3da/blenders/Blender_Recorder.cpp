@@ -52,21 +52,39 @@ void	CBlender_Compile::_cpp_Compile	(ShaderElement* _SH)
 			if (id>=int(lst.size()))	Debug.fatal(DEBUG_INFO,"Not enought textures for shader. Base texture: '%s'.",*lst[0]);
 			base	=	*lst [id];
 		}
-		if (!Device.Resources->_GetDetailTexture(base,detail_texture,detail_scaler))	bDetail	= FALSE;
-	} else {
+//.		if (!Device.Resources->_GetDetailTexture(base,detail_texture,detail_scaler))	bDetail	= FALSE;
+		if (!Device.Resources->m_textures_description.GetDetailTexture(base,detail_texture,detail_scaler))	bDetail	= FALSE;
+	} else 
+	{
 		bDetail	= FALSE;
 	}
 
 	// Validate for R1 or R2
 	bDetail_Diffuse	= FALSE;
 	bDetail_Bump	= FALSE;
-	if (bDetail && Device.Resources->m_description->line_exist("association",base))	{
+	if(bDetail)
+		Device.Resources->m_textures_description.GetTextureUsage(base, bDetail_Diffuse, bDetail_Bump);
+/*
+	if (bDetail && Device.Resources->m_description->line_exist("association",base))	
+	{
 		LPCSTR		descr			=	Device.Resources->m_description->r_string("association",base);
-		if (strstr(descr,"usage[diffuse_or_bump]"))	{ bDetail_Diffuse	= TRUE; bDetail_Bump = TRUE; }
-		if (strstr(descr,"usage[diffuse]"))			{ bDetail_Diffuse	= TRUE; }
-		if (strstr(descr,"usage[bump]"))			{ bDetail_Bump		= TRUE; }
-	}
+		if (strstr(descr,"usage[diffuse_or_bump]"))	
+		{ 
+			bDetail_Diffuse	= TRUE; 
+			bDetail_Bump = TRUE; 
+		}
+		
+		if (strstr(descr,"usage[diffuse]"))			
+		{ 
+			bDetail_Diffuse	= TRUE; 
+		}
 
+		if (strstr(descr,"usage[bump]"))			
+		{ 
+			bDetail_Bump		= TRUE; 
+		}
+	}
+*/
 	// Compile
 	BT->Compile		(*this);
 }
@@ -95,8 +113,8 @@ void	CBlender_Compile::PassBegin		()
 	passTextures.clear		();
 	passMatrices.clear		();
 	passConstants.clear		();
-	strcpy					(pass_ps,"null");
-	strcpy					(pass_vs,"null");
+	strcpy_s					(pass_ps,"null");
+	strcpy_s					(pass_vs,"null");
 	dwStage					= 0;
 }
 
@@ -124,13 +142,13 @@ void	CBlender_Compile::PassEnd			()
 
 void	CBlender_Compile::PassSET_PS		(LPCSTR name)
 {
-	strcpy	(pass_ps,name);
+	strcpy_s	(pass_ps,name);
 	strlwr	(pass_ps);
 }
 
 void	CBlender_Compile::PassSET_VS		(LPCSTR name)
 {
-	strcpy	(pass_vs,name);
+	strcpy_s	(pass_vs,name);
 	strlwr	(pass_vs);
 }
 

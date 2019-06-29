@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "physicobject.h"
 #include "PhysicsShell.h"
 #include "Physics.h"
@@ -6,6 +6,10 @@
 #include "../skeletonanimated.h"
 #include "../xr_collide_form.h"
 #include "game_object_space.h"
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	#include "PhysicsShellAnimator.h"
+#endif
 
 
 CPhysicObject::CPhysicObject(void) 
@@ -45,6 +49,13 @@ BOOL CPhysicObject::net_Spawn(CSE_Abstract* DC)
 	if (!PPhysicsShell()->isBreakable()&&!CScriptBinder::object()&&!CPHSkeleton::IsRemoving())
 		SheduleUnregister();
 
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	if (PPhysicsShell()->Animated())
+	{
+		processing_activate();
+	}
+#endif
+
 	return TRUE;
 }
 
@@ -76,6 +87,13 @@ void CPhysicObject::RunStartupAnim(CSE_Abstract *D)
 }
 void CPhysicObject::net_Destroy()
 {
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	if (PPhysicsShell()->Animated())
+	{
+		processing_deactivate();
+	}
+#endif
+
 	inherited::net_Destroy	();
 	CPHSkeleton::RespawnInit();
 }
@@ -117,6 +135,16 @@ void CPhysicObject::shedule_Update		(u32 dt)
 void CPhysicObject::UpdateCL()
 {
 	inherited::UpdateCL();
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	//Если наш физический объект анимированный, то 
+	//двигаем объект за анимацией
+	if (m_pPhysicsShell->PPhysicsShellAnimator())
+	{
+		m_pPhysicsShell->PPhysicsShellAnimator()->OnFrame();
+	}
+#endif
+
 	PHObjectPositionUpdate();
 }
 void CPhysicObject::PHObjectPositionUpdate	()
@@ -287,17 +315,3 @@ Msg("%s",(*I).first);
 */
 
 //////////////////////////////////////////////////////////////////////////
-
-#include "script_space.h"
-
-using namespace luabind;
-
-#pragma optimize("s",on)
-void CPhysicObject::script_register(lua_State *L)
-{
-	module(L)
-	[
-		class_<CPhysicObject,CGameObject>("CPhysicObject")
-			.def(constructor<>())
-	];
-}

@@ -10,8 +10,13 @@ void CPHCollideValidator::Init()
 {
 	freeGroupID=0;
 	NonTypeFlags.set(cbNCGroupObject,TRUE);
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	ClassFlags.set(cbClassDynamic|cbClassCharacter|cbClassRagDoll|cbClassAnimated,TRUE);
+	ClassNCFlags.set(cbNCClassCharacter|cbNCClassDynamic|cbNCClassRagDoll|cbNCClassAnimated,TRUE);
+#else
 	ClassFlags.set(cbClassDynamic|cbClassCharacter|cbClassRagDoll,TRUE);
 	ClassNCFlags.set(cbNCClassCharacter|cbNCClassDynamic|cbNCClassRagDoll,TRUE);
+#endif
 }
 CGID CPHCollideValidator::RegisterGroup()
 {
@@ -35,6 +40,14 @@ bool CPHCollideValidator::IsGroupObject(const CPHObject& obj)
 {
 	return !!obj.collide_class_bits().test(cbNCGroupObject);
 }
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	bool CPHCollideValidator::IsAnimatedObject(const CPHObject& obj)
+	{
+		return !!obj.collide_class_bits().test(cbClassAnimated);
+	}
+#endif
+
 void CPHCollideValidator::RegisterObjToLastGroup(CPHObject& obj)
 {
 	RegisterObjToGroup(LastGroupRegistred(),obj);
@@ -82,6 +95,21 @@ void	CPHCollideValidator::SetRagDollClassNotCollide		(CPHObject& obj)
 {
 	obj.collide_class_bits().set(cbNCClassRagDoll,TRUE);
 }
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	//Относит физический объект к классу анимированных объектов
+	void	CPHCollideValidator::SetAnimatedClass				(CPHObject& obj)
+	{
+		obj.collide_class_bits().set(cbClassAnimated,TRUE);
+	}
+
+	//Задаёт игнорирование коллизий данного физического
+	//объекта с анимированными телами
+	void	CPHCollideValidator::SetAnimatedClassNotCollide		(CPHObject& obj)
+	{
+		obj.collide_class_bits().set(cbNCClassAnimated,TRUE);
+	}
+#endif
 
 void	CPHCollideValidator::		SetClassSmall				(CPHObject& obj)
 {

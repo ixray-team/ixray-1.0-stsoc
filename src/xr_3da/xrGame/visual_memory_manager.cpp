@@ -6,7 +6,7 @@
 //	Description : Visual memory manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "visual_memory_manager.h"
 #include "ai/stalker/ai_stalker.h"
 #include "memory_space_impl.h"
@@ -75,34 +75,52 @@ struct CNotYetVisibleObjectPredicate{
 	}
 };
 
-CVisualMemoryManager::CVisualMemoryManager		(CCustomMonster *object, CAI_Stalker *stalker, CActor *actor)
+CVisualMemoryManager::CVisualMemoryManager		(CCustomMonster *object)
 {
-	VERIFY				(!!object || !!actor);
-	VERIFY				(!object || !actor);
 	m_object			= object;
+	m_stalker			= 0;
+	m_client			= 0;
+	initialize			();
+}
+
+CVisualMemoryManager::CVisualMemoryManager		(CAI_Stalker *stalker)
+{
+	m_object			= stalker;
 	m_stalker			= stalker;
-	m_actor				= actor;
+	m_client			= 0;
+	initialize			();
+}
+
+CVisualMemoryManager::CVisualMemoryManager		(vision_client *client)
+{
+	m_object			= 0;
+	m_stalker			= 0;
+	m_client			= client;
+	initialize			();
+	
+	m_objects			= xr_new<VISIBLES>();
+}
+
+void CVisualMemoryManager::initialize			()
+{
 	m_max_object_count	= 1;
 	m_enabled			= true;
-	if (m_actor)
-		m_objects		= xr_new<VISIBLES>();
+	m_objects			= 0;
 }
 
 CVisualMemoryManager::~CVisualMemoryManager		()
 {
 	clear_delayed_objects	();
 
-	if (m_actor)
-		xr_delete		(m_objects);
-}
+	if (!m_client)
+		return;
 
-void CVisualMemoryManager::Load					(LPCSTR section)
-{
+	xr_delete			(m_objects);
 }
 
 void CVisualMemoryManager::reinit					()
 {
-	if (!m_actor)
+	if (!m_client)
 		m_objects						= 0;
 	else {
 		VERIFY							(m_objects);
@@ -130,7 +148,7 @@ void CVisualMemoryManager::reload				(LPCSTR section)
 		m_danger.Load	(pSettings->r_string(section,"vision_danger_section"),true);
 	}
 	else
-		m_free.Load		(section,!!m_actor);
+		m_free.Load		(section,!!m_client);
 }
 
 IC	const CVisionParameters &CVisualMemoryManager::current_state() const
@@ -180,6 +198,7 @@ float CVisualMemoryManager::object_visible_distance(const CGameObject *game_obje
 {
 	Fvector								eye_position = Fvector().set(0.f,0.f,0.f), eye_direction;
 	Fmatrix								eye_matrix;
+	float								object_range = flt_max, object_fov = flt_max;
 
 	if (m_object) {
 		eye_matrix						= 
@@ -202,8 +221,9 @@ float CVisualMemoryManager::object_visible_distance(const CGameObject *game_obje
 		}
 	} 
 	else {
-		Fvector							temp;
-		m_actor->cam_Active()->Get		(eye_position,eye_direction,temp);
+		Fvector							dummy;
+		float							_0,_1;
+		m_client->camera				(eye_position,eye_direction,dummy,object_fov,_0,_1,object_range);
 	}
 
 	Fvector								object_direction;
@@ -212,13 +232,8 @@ float CVisualMemoryManager::object_visible_distance(const CGameObject *game_obje
 	object_direction.sub				(eye_position);
 	object_direction.normalize_safe		();
 	
-	float								object_range, object_fov;
 	if (m_object)
 		m_object->update_range_fov		(object_range,object_fov,m_object->eye_range,deg2rad(m_object->eye_fov));
-	else {
-		object_fov						= deg2rad(m_actor->cam_Active()->f_fov);
-		object_range					= g_pGamePersistent->Environment().CurrentEnv.far_plane;
-	}
 
 	float								fov = object_fov*.5f;
 	float								cos_alpha = eye_direction.dotproduct(object_direction);
@@ -314,7 +329,7 @@ bool CVisualMemoryManager::visible				(const CGameObject *game_object, float tim
 		return					(false);
 
 #ifndef USE_STALKER_VISION_FOR_MONSTERS
-	if (!m_stalker && !m_actor)
+	if (!m_stalker && !m_client)
 		return					(true);
 #endif
 
@@ -555,8 +570,10 @@ void CVisualMemoryManager::update				(float time_delta)
 	START_PROFILE("Memory Manager/visuals/update/feel_vision_get")
 	if (m_object)
 		m_object->feel_vision_get		(m_visible_objects);
-	else
-		m_actor->memory().feel_vision_get(m_visible_objects);
+	else {
+		VERIFY							(m_client);
+		m_client->feel_vision_get		(m_visible_objects);
+	}
 	STOP_PROFILE
 
 	START_PROFILE("Memory Manager/visuals/update/make_invisible")
@@ -591,14 +608,26 @@ void CVisualMemoryManager::update				(float time_delta)
 	START_PROFILE("Memory Manager/visuals/update/removing_offline")
 	// verifying if object is online
 	{
-		xr_vector<CVisibleObject>::iterator	J = remove_if(m_objects->begin(),m_objects->end(),SRemoveOfflinePredicate());
-		m_objects->erase				(J,m_objects->end());
+		m_objects->erase				(
+			std::remove_if(
+				m_objects->begin(),
+				m_objects->end(),
+				SRemoveOfflinePredicate()
+			),
+			m_objects->end()
+		);
 	}
 
 	// verifying if object is online
 	{
-		xr_vector<CNotYetVisibleObject>::iterator	J = remove_if(m_not_yet_visible_objects.begin(),m_not_yet_visible_objects.end(),SRemoveOfflinePredicate());
-		m_not_yet_visible_objects.erase	(J,m_not_yet_visible_objects.end());
+		m_not_yet_visible_objects.erase	(
+			std::remove_if(
+				m_not_yet_visible_objects.begin(),
+				m_not_yet_visible_objects.end(),
+				SRemoveOfflinePredicate()
+			),
+			m_not_yet_visible_objects.end()
+		);
 	}
 	STOP_PROFILE
 
@@ -636,7 +665,7 @@ void CVisualMemoryManager::update				(float time_delta)
 
 void CVisualMemoryManager::save	(NET_Packet &packet) const
 {
-	if (m_actor)
+	if (m_client)
 		return;
 
 	if (!m_object->g_Alive())
@@ -680,7 +709,7 @@ void CVisualMemoryManager::save	(NET_Packet &packet) const
 
 void CVisualMemoryManager::load	(IReader &packet)
 {
-	if (m_actor)
+	if (m_client)
 		return;
 
 	if (!m_object->g_Alive())
@@ -739,7 +768,8 @@ void CVisualMemoryManager::load	(IReader &packet)
 
 		const CClientSpawnManager::CSpawnCallback	*spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id,m_object->ID());
 		if (!spawn_callback || !spawn_callback->m_object_callback)
-			Level().client_spawn_manager().add	(delayed_object.m_object_id,m_object->ID(),callback);
+			if(!g_dedicated_server)
+				Level().client_spawn_manager().add	(delayed_object.m_object_id,m_object->ID(),callback);
 #ifdef DEBUG
 		else {
 			if (spawn_callback && spawn_callback->m_object_callback) {
@@ -752,7 +782,7 @@ void CVisualMemoryManager::load	(IReader &packet)
 
 void CVisualMemoryManager::clear_delayed_objects()
 {
-	if (m_actor)
+	if (m_client)
 		return;
 
 	if (m_delayed_objects.empty())

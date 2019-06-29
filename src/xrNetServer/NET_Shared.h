@@ -2,7 +2,7 @@
 
 #include "net_utils.h"
 #include "net_messages.h"
-#include "net_compressor.h"
+
 
 #ifdef XR_NETSERVER_EXPORTS
 	#define XRNETSERVER_API __declspec(dllexport)
@@ -10,6 +10,10 @@
 	#define XRNETSERVER_API __declspec(dllimport)
 	#pragma comment(lib,	"xrNetServer"	)
 #endif
+
+#include "net_compressor.h"
+
+XRNETSERVER_API extern ClientID BroadcastCID;
 
 XRNETSERVER_API extern Flags32	psNET_Flags;
 XRNETSERVER_API extern int		psNET_ClientUpdate;

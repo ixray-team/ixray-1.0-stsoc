@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "UsableScriptObject.h"
-#include "script_space.h"
 #include "GameObject.h"
 #include "script_game_object.h"
 #include "script_callback_ex.h"

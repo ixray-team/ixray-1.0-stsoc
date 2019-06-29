@@ -27,7 +27,7 @@
 #define _ODE_ODECPP_COLLISION_H_
 #ifdef __cplusplus
 
-#include <ode/error.h>
+#include "../../include/ode/error.h"
 
 
 class dGeom {

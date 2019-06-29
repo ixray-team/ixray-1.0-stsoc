@@ -30,7 +30,7 @@ from ODE.
 #ifndef _ODE_SPACE_H_
 #define _ODE_SPACE_H_
 
-#include <ode/common.h>
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {

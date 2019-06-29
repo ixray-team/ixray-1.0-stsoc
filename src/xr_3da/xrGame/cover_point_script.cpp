@@ -6,9 +6,8 @@
 //	Description : Cover point class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "cover_point.h"
-#include "script_space.h"
 
 using namespace luabind;
 

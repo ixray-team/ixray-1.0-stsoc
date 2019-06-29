@@ -33,8 +33,10 @@ public:
 	bool						m_stack_is_ready	;
 #endif
 
+#ifdef DEBUG
 protected:
 	CMemoryWriter				m_output;
+#endif // DEBUG
 
 protected:
 	static	int					vscript_log					(ScriptStorage::ELuaMessageType tLuaMessageType, LPCSTR caFormat, va_list marker);
@@ -59,10 +61,14 @@ public:
 			bool				object						(LPCSTR	caIdentifier, int type);
 			bool				object						(LPCSTR	caNamespaceName, LPCSTR	caIdentifier, int type);
 			luabind::object		name_space					(LPCSTR	namespace_name);
-			void				flush_log					();
 	static	int		__cdecl		script_log					(ELuaMessageType message,	LPCSTR	caFormat, ...);
 	static	bool				print_output				(lua_State *L,		LPCSTR	caScriptName,		int		iErorCode = 0);
 	static	void				print_error					(lua_State *L,		int		iErrorCode);
+
+#ifdef DEBUG
+public:
+			void				flush_log					();
+#endif // DEBUG
 };
 
 #include "script_storage_inline.h"

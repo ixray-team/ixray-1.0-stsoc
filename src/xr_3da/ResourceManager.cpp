@@ -14,6 +14,7 @@
 #include "blenders\blender.h"
 #include "blenders\blender_recorder.h"
 
+
 void fix_texture_name(LPSTR fn)
 {
 	LPSTR _ext = strext(fn);
@@ -159,7 +160,8 @@ Shader*	CResourceManager::_cpp_Create	(IBlender* B, LPCSTR s_shader, LPCSTR s_te
 	// Compile element	(LOD0 - HQ)
 	{
 		C.iElement			= 0;
-		C.bDetail			= _GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
+		C.bDetail			= m_textures_description.GetDetailTexture(C.L_textures[0],C.detail_texture,C.detail_scaler);
+//.		C.bDetail			= _GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
 		ShaderElement		E;
 		C._cpp_Compile		(&E);
 		S.E[0]				= _CreateElement	(E);
@@ -168,7 +170,8 @@ Shader*	CResourceManager::_cpp_Create	(IBlender* B, LPCSTR s_shader, LPCSTR s_te
 	// Compile element	(LOD1)
 	{
 		C.iElement			= 1;
-		C.bDetail			= _GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
+//.		C.bDetail			= _GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
+		C.bDetail			= m_textures_description.GetDetailTexture(C.L_textures[0],C.detail_texture,C.detail_scaler);
 		ShaderElement		E;
 		C._cpp_Compile		(&E);
 		S.E[1]				= _CreateElement	(E);
@@ -223,21 +226,33 @@ Shader*	CResourceManager::_cpp_Create	(IBlender* B, LPCSTR s_shader, LPCSTR s_te
 
 Shader*	CResourceManager::_cpp_Create	(LPCSTR s_shader, LPCSTR s_textures, LPCSTR s_constants, LPCSTR s_matrices)
 {
+#ifndef DEDICATED_SERVER
 	return	_cpp_Create(_GetBlender(s_shader?s_shader:"null"),s_shader,s_textures,s_constants,s_matrices);
+#else
+	return NULL;
+#endif
 }
 
 Shader*		CResourceManager::Create	(IBlender*	B,		LPCSTR s_shader,	LPCSTR s_textures,	LPCSTR s_constants, LPCSTR s_matrices)
 {
+#ifndef DEDICATED_SERVER
 	return	_cpp_Create	(B,s_shader,s_textures,s_constants,s_matrices);
+#else
+	return NULL;
+#endif
 }
 
 Shader*		CResourceManager::Create	(LPCSTR s_shader,	LPCSTR s_textures,	LPCSTR s_constants,	LPCSTR s_matrices)
 {
-#ifndef _EDITOR
-	if	(_lua_HasShader(s_shader))		return	_lua_Create	(s_shader,s_textures);
-	else								
+#ifndef DEDICATED_SERVER
+	#ifndef _EDITOR
+		if	(_lua_HasShader(s_shader))		return	_lua_Create	(s_shader,s_textures);
+		else								
+	#endif
+		return	_cpp_Create	(s_shader,s_textures,s_constants,s_matrices);
+#else
+	return NULL;
 #endif
-    return	_cpp_Create	(s_shader,s_textures,s_constants,s_matrices);
 }
 
 void CResourceManager::Delete(const Shader* S)
@@ -251,7 +266,9 @@ void	CResourceManager::DeferredUpload	()
 {
 	if (!Device.b_is_Ready)				return;
 	for (map_TextureIt t=m_textures.begin(); t!=m_textures.end(); t++)
+	{
 		t->second->Load();
+	}
 }
 /*
 void	CResourceManager::DeferredUnload	()
@@ -329,7 +346,7 @@ void	CResourceManager::Evict()
 {
 	CHK_DX	(HW.pDevice->EvictManagedResources());
 }
-
+/*
 BOOL	CResourceManager::_GetDetailTexture(LPCSTR Name,LPCSTR& T, R_constant_setup* &CS)
 {
 	LPSTR N = LPSTR(Name);
@@ -342,4 +359,4 @@ BOOL	CResourceManager::_GetDetailTexture(LPCSTR Name,LPCSTR& T, R_constant_setup
 	} else {
 		return FALSE;
 	}
-}
+}*/

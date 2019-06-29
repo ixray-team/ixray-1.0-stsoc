@@ -6,11 +6,10 @@
 //	Description : AI Behaviour for monster "Stalker"
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "ai_stalker.h"
 #include "../ai_monsters_misc.h"
 #include "../../weapon.h"
-#include "../../script_space.h"
 #include "../../hit.h"
 #include "../../phdestroyable.h"
 #include "../../CharacterPhysicsSupport.h"
@@ -180,6 +179,9 @@ void CAI_Stalker::reinit			()
 		for (int i=0, n=_GetItemCount(weights); i<n; ++i)
 			m_critical_wound_weights.push_back((float)atof(_GetItem(weights,i,temp)));
 	}
+
+	m_sight_enabled_before_animation_controller		= true;
+	m_update_rotation_on_frame						= false;
 }
 
 void CAI_Stalker::LoadSounds		(LPCSTR section)
@@ -611,6 +613,26 @@ void CAI_Stalker::update_object_handler	()
 	}
 }
 
+void CAI_Stalker::create_anim_mov_ctrl	(CBlend *b)
+{
+	inherited::create_anim_mov_ctrl	(b);
+
+	m_sight_enabled_before_animation_controller		= sight().enabled();
+	sight().enable					(false);
+}
+
+void CAI_Stalker::destroy_anim_mov_ctrl	()
+{
+	inherited::destroy_anim_mov_ctrl();
+	
+	sight().enable					(m_sight_enabled_before_animation_controller);
+
+	movement().m_head.current.yaw	= movement().m_body.current.yaw;
+	movement().m_head.current.pitch	= movement().m_body.current.pitch;
+	movement().m_head.target.yaw	= movement().m_body.current.yaw;
+	movement().m_head.target.pitch	= movement().m_body.current.pitch;
+}
+
 void CAI_Stalker::UpdateCL()
 {
 	START_PROFILE("stalker")
@@ -839,11 +861,6 @@ float CAI_Stalker::Radius() const
 	return R;
 }
 
-bool CAI_Stalker::use_model_pitch	() const
-{
-	return					(false);
-}
-
 void CAI_Stalker::spawn_supplies	()
 {
 	inherited::spawn_supplies			();
@@ -968,7 +985,7 @@ DLL_Pure *CAI_Stalker::_construct			()
 		start							= Memory.mem_usage();
 #endif // DEBUG_MEMORY_MANAGER
 	
-	m_pPhysics_support					= xr_new<CCharacterPhysicsSupport>(CCharacterPhysicsSupport::EType::etStalker,this);
+	m_pPhysics_support					= xr_new<CCharacterPhysicsSupport>(CCharacterPhysicsSupport::etStalker,this);
 	CCustomMonster::_construct			();
 	CObjectHandler::_construct			();
 	CStepManager::_construct			();
@@ -1050,8 +1067,8 @@ void CAI_Stalker::fill_bones_body_parts	(LPCSTR bone_id, const ECriticalWoundTyp
 	VERIFY					(kinematics);
 
 	CInifile::Sect			&body_part_section = pSettings->r_section(body_part_section_id);
-	CInifile::SectIt		I = body_part_section.begin();
-	CInifile::SectIt		E = body_part_section.end();
+	CInifile::SectCIt		I = body_part_section.Data.begin();
+	CInifile::SectCIt		E = body_part_section.Data.end();
 	for ( ; I != E; ++I)
 		m_bones_body_parts.insert	(
 			std::make_pair(

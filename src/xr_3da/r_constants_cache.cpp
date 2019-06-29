@@ -38,7 +38,7 @@ void R_constants::flush_cache()
 						);
 				}
 				PGO		(Msg("PGO:V_CONST:%d",count));
-#endif				
+#endif				&
 				CHK_DX	(HW.pDevice->SetVertexShaderConstantF	(F.r_lo(), (float*)F.access(F.r_lo()),count));
 				F.flush	();
 			}

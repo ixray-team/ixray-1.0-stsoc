@@ -205,13 +205,14 @@ bool CUI::IR_OnMouseMove(int dx,int dy)
 	return false;
 }
 
-void CUI::AddInfoMessage			(LPCSTR message)
+SDrawStaticStruct* CUI::AddInfoMessage			(LPCSTR message)
 {
 	SDrawStaticStruct* ss	=	pUIGame->GetCustomStatic(message);
 	if(!ss)
 	{
 		ss					= pUIGame->AddCustomStatic(message, true);
 	}
+	return ss;
 }
 
 void CUI::ShowGameIndicators()

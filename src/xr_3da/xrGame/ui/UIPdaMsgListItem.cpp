@@ -59,7 +59,7 @@ void CUIPdaMsgListItem::InitCharacter(CInventoryOwner* pInvOwner)
 	VERIFY(pInvOwner);
 
 	string256 str;
-	sprintf(str, "name: %s", pInvOwner->Name());
+	sprintf_s(str, "name: %s", pInvOwner->Name());
 	UIName.SetText			(str);
 
 	UIIcon.InitTexture		( pInvOwner->CharacterInfo().IconName().c_str() );

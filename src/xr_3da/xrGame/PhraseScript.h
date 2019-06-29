@@ -25,11 +25,11 @@ public:
 	virtual void Load			(CUIXml* ui_xml, XML_NODE* phrase_node);
 
 	//вызов с одним параметром (info_portion)
-	virtual bool				Precondition	(const CGameObject* pSpeaker, LPCSTR dialog_id, int phrase_num) const;
-	virtual void				Action			(const CGameObject* pSpeaker, LPCSTR dialog_id, int phrase_num) const;
+	virtual bool				Precondition	(const CGameObject* pSpeaker, LPCSTR dialog_id, LPCSTR phrase_id) const;
+	virtual void				Action			(const CGameObject* pSpeaker, LPCSTR dialog_id, LPCSTR phrase_id) const;
 	//вызов с двумя параметрами (dialog, phrase)
-	virtual bool				Precondition	(const CGameObject* pSpeaker1, const CGameObject* pSpeaker2, LPCSTR dialog_id, int phrase_num, int next_phrase_num) const;
-	virtual void				Action			(const CGameObject* pSpeaker1, const CGameObject* pSpeaker2, LPCSTR dialog_id, int phrase_num) const;
+	virtual bool				Precondition	(const CGameObject* pSpeaker1, const CGameObject* pSpeaker2, LPCSTR dialog_id, LPCSTR phrase_id, LPCSTR next_phrase_id) const;
+	virtual void				Action			(const CGameObject* pSpeaker1, const CGameObject* pSpeaker2, LPCSTR dialog_id, LPCSTR phrase_id) const;
 	//текст из скриптовой функции
 //	virtual LPCSTR Text			(LPCSTR original_text, const CGameObject* pSpeaker1, const CGameObject* pSpeaker2, LPCSTR dialog_id, int phrase_num) const;
 //	virtual bool   HasText		() const {return *m_sScriptTextFunc!=NULL;}

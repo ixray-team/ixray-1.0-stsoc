@@ -1,10 +1,9 @@
-#include "stdafx.h"
+#include "pch_script.h"
 
 #include "script_ui_registrator.h"
 #include "UI\UIMultiTextStatic.h"
 #include "MainMenu.h"
 
-#include "script_space.h"
 using namespace luabind;
 
 CMainMenu*	MainMenu();
@@ -37,6 +36,7 @@ void UIRegistrator::script_register(lua_State *L)
 			.def("GetPatchProgress",		&CMainMenu::GetPatchProgress)
 			.def("CancelDownload",			&CMainMenu::CancelDownload)
 			.def("ValidateCDKey",			&CMainMenu::ValidateCDKey)
+			.def("GetGSVer",				&CMainMenu::GetGSVer)
 	],
 	module(L,"main_menu")
 	[

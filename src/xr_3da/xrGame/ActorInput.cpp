@@ -153,7 +153,7 @@ void CActor::IR_OnKeyboardPress(int cmd)
 					SDrawStaticStruct* _s		= HUD().GetUI()->UIGame()->AddCustomStatic("item_used", true);
 					_s->m_endTime				= Device.fTimeGlobal+3.0f;// 3sec
 					string1024					str;
-					strconcat					(str,*CStringTable().translate("st_item_used"),": ", itm->Name());
+					strconcat					(sizeof(str),str,*CStringTable().translate("st_item_used"),": ", itm->Name());
 					_s->wnd()->SetText			(str);
 				}
 			}
@@ -220,7 +220,7 @@ void CActor::IR_OnKeyboardHold(int cmd)
 	{
 	case kUP:
 	case kDOWN: 
-		cam_Active()->Move(cmd, 0, LookFactor);									break;
+		cam_Active()->Move( (cmd==kUP) ? kDOWN : kUP, 0, LookFactor);									break;
 	case kCAM_ZOOM_IN: 
 	case kCAM_ZOOM_OUT: 
 		cam_Active()->Move(cmd);												break;
@@ -255,7 +255,7 @@ void CActor::IR_OnMouseMove(int dx, int dy)
 	float LookFactor = GetLookFactor();
 
 	CCameraBase* C	= cameras	[cam_active];
-	float scale		= (C->f_fov/DEFAULT_FOV)*psMouseSens * psMouseSensScale/50.f  / LookFactor;
+	float scale		= (C->f_fov/g_fov)*psMouseSens * psMouseSensScale/50.f  / LookFactor;
 	if (dx){
 		float d = float(dx)*scale;
 		cam_Active()->Move((d<0)?kLEFT:kRIGHT, _abs(d));
@@ -420,8 +420,11 @@ static	u32 SlotsToCheck [] = {
 void	CActor::OnNextWeaponSlot()
 {
 	u32 ActiveSlot = inventory().GetActiveSlot();
-	if (ActiveSlot == NO_ACTIVE_SLOT) ActiveSlot = inventory().GetPrevActiveSlot();
-	if (ActiveSlot == NO_ACTIVE_SLOT) return;
+	if (ActiveSlot == NO_ACTIVE_SLOT) 
+		ActiveSlot = inventory().GetPrevActiveSlot();
+
+	if (ActiveSlot == NO_ACTIVE_SLOT) 
+		ActiveSlot = KNIFE_SLOT;
 	
 	u32 NumSlotsToCheck = sizeof(SlotsToCheck)/sizeof(u32);	
 	for (u32 CurSlot=0; CurSlot<NumSlotsToCheck; CurSlot++)
@@ -447,8 +450,11 @@ void	CActor::OnNextWeaponSlot()
 void	CActor::OnPrevWeaponSlot()
 {
 	u32 ActiveSlot = inventory().GetActiveSlot();
-	if (ActiveSlot == NO_ACTIVE_SLOT) ActiveSlot = inventory().GetPrevActiveSlot();
-	if (ActiveSlot == NO_ACTIVE_SLOT) return;
+	if (ActiveSlot == NO_ACTIVE_SLOT) 
+		ActiveSlot = inventory().GetPrevActiveSlot();
+
+	if (ActiveSlot == NO_ACTIVE_SLOT) 
+		ActiveSlot = KNIFE_SLOT;
 
 	u32 NumSlotsToCheck = sizeof(SlotsToCheck)/sizeof(u32);	
 	for (u32 CurSlot=0; CurSlot<NumSlotsToCheck; CurSlot++)

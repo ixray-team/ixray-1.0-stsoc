@@ -59,8 +59,8 @@ const	Fvector&					local_mass_Center						()		{return m_mass_center;}											
 		void						setStaticForm							(const Fmatrix& form);
 		void						setPosition								(const Fvector& pos);
 		void						clear_cashed_tries						();
-protected:
 		void						get_mc_vs_transform						(Fvector& mc,const Fmatrix& m);
+protected:
 		void						build									();
 		void						CreateSimulBase							();
 		void						destroy									();

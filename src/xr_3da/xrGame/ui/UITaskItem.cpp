@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "UITaskItem.h"
 #include "UIXmlInit.h"
 #include "UI3tButton.h"
@@ -162,7 +162,7 @@ void CUITaskRootItem::Update		()
 	{
 		string512									buff, buff2;
 		InventoryUtilities::GetTimePeriodAsString	(buff, sizeof(buff), Level().GetGameTime(), GameTask()->m_TimeToComplete);
-		sprintf										(buff2,"%s %s", *CStringTable().translate("ui_st_time_remains"), buff);
+		sprintf_s										(buff2,"%s %s", *CStringTable().translate("ui_st_time_remains"), buff);
 		m_remTimeStatic->SetText					(buff2);
 	
 	}
@@ -175,10 +175,10 @@ bool CUITaskRootItem::OnDbClick	()
 
 void CUITaskRootItem::OnSwitchDescriptionClicked	(CUIWindow*, void*)
 {
-	bool bPushed = 	m_switchDescriptionBtn->GetCheck	();
-	m_EventsWnd->SetDescriptionMode						(!bPushed);
+	m_switchDescriptionBtn->SetButtonMode(m_EventsWnd->GetDescriptionMode() ? CUIButton::BUTTON_PUSHED : CUIButton::BUTTON_NORMAL);
+
+	m_EventsWnd->SetDescriptionMode						(!m_EventsWnd->GetDescriptionMode());
 	OnItemClicked										(this, NULL);
-//	m_EventsWnd->ShowDescription						(GameTask(), ObjectiveIdx());
 }
 
 void CUITaskRootItem::MarkSelected (bool b)

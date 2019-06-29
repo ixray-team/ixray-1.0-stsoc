@@ -1,41 +1,29 @@
-// Actor.cpp: implementation of the CActor class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#include "stdafx.h"
+#include "pch_script.h"
 #include "Actor_Flags.h"
-
 #include "hudmanager.h"
 #ifdef DEBUG
-#include "ode_include.h"
-#include "../StatGraph.h"
-#include "PHDebug.h"
-#endif
+#	include "ode_include.h"
+#	include "../StatGraph.h"
+#	include "PHDebug.h"
+#endif // DEBUG
 #include "alife_space.h"
 #include "hit.h"
 #include "PHDestroyable.h"
 #include "Car.h"
 #include "xrserver_objects_alife_monsters.h"
-
 #include "CameraLook.h"
 #include "CameraFirstEye.h"
-
-
 #include "effectorfall.h"
 #include "EffectorBobbing.h"
 #include "clsid_game.h"
-
 #include "ActorEffector.h"
 #include "EffectorZoomInertion.h"
-
 #include "SleepEffector.h"
-
 #include "character_info.h"
 #include "CustomOutfit.h"
-
 #include "actorcondition.h"
 #include "UIGameCustom.h"
-
+#include "game_cl_base_weapon_usage_statistic.h"
 
 // breakpoints
 #include "../xr_input.h"
@@ -44,44 +32,31 @@
 #include "Actor.h"
 #include "ActorAnimation.h"
 #include "actor_anim_defs.h"
-
 #include "HudItem.h"
-
-
 #include "ai_sounds.h"
 #include "ai_space.h"
-
 #include "trade.h"
-//.#include "LevelFogOfWar.h"
-
 #include "inventory.h"
-
 #include "Physics.h"
 #include "level.h"
 #include "GamePersistent.h"
 #include "game_cl_base.h"
 #include "game_cl_single.h"
 #include "xrmessages.h"
-
 #include "string_table.h"
 #include "usablescriptobject.h"
 #include "../cl_intersect.h"
 #include "ExtendedGeom.h"
 #include "alife_registry_wrappers.h"
 #include "../skeletonanimated.h"
-
 #include "artifact.h"
 #include "CharacterPhysicsSupport.h"
-
 #include "material_manager.h"
 #include "IColisiondamageInfo.h"
 #include "ui/UIMainIngameWnd.h"
 #include "ui/UIArtefactPanel.h"
-
 #include "map_manager.h"
 #include "GameTaskManager.h"
-
-
 #include "actor_memory.h"
 #include "Script_Game_Object.h"
 #include "Game_Object_Space.h"
@@ -207,7 +182,7 @@ CActor::CActor() : CEntityAlive()
 	m_game_task_manager		= NULL;
 	m_statistic_manager		= NULL;
 	//-----------------------------------------------------------------------------------
-	m_memory				= xr_new<CActorMemory>(this);
+	m_memory				= g_dedicated_server ? 0 : xr_new<CActorMemory>(this);
 	m_bOutBorder			= false;
 	hit_probability			= 1.f;
 	m_feel_touch_characters = 0;
@@ -258,7 +233,8 @@ void CActor::reinit	()
 	material().reinit							();
 
 	m_pUsableObject								= NULL;
-	memory().reinit								();
+	if (!g_dedicated_server)
+		memory().reinit							();
 	
 	set_input_external_handler					(0);
 	m_time_lock_accel							= 0;
@@ -270,7 +246,8 @@ void CActor::reload	(LPCSTR section)
 	CInventoryOwner::reload		(section);
 	material().reload			(section);
 	CStepManager::reload		(section);
-	memory().reload				(section);
+	if (!g_dedicated_server)
+		memory().reload			(section);
 	m_location_manager->reload	(section);
 }
 
@@ -280,7 +257,6 @@ void CActor::Load	(LPCSTR section )
 	inherited::Load				(section);
 	material().Load				(section);
 	CInventoryOwner::Load		(section);
-	memory().Load				(section);
 	m_location_manager->Load	(section);
 
 	if (GameID() == GAME_SINGLE)
@@ -368,13 +344,13 @@ void CActor::Load	(LPCSTR section )
 
 	//Weapons				= xr_new<CWeaponList> (this);
 
-if(!g_pGamePersistent->bDedicatedServer)
+if(!g_dedicated_server)
 {
 	LPCSTR hit_snd_sect = pSettings->r_string(section,"hit_sounds");
 	for(int hit_type=0; hit_type<(int)ALife::eHitTypeMax; ++hit_type)
 	{
 		LPCSTR hit_name = ALife::g_cafHitType2String((ALife::EHitType)hit_type);
-		LPCSTR hit_snds = pSettings->r_string(hit_snd_sect, hit_name);
+		LPCSTR hit_snds = READ_IF_EXISTS(pSettings, r_string, hit_snd_sect, hit_name, "");
 		int cnt = _GetItemCount(hit_snds);
 		string128		tmp;
 		VERIFY			(cnt!=0);
@@ -385,10 +361,10 @@ if(!g_pGamePersistent->bDedicatedServer)
 		}
 		char buf[256];
 
-		::Sound->create		(sndDie[0],			strconcat(buf,*cName(),"\\die0"), st_Effect,SOUND_TYPE_MONSTER_DYING);
-		::Sound->create		(sndDie[1],			strconcat(buf,*cName(),"\\die1"), st_Effect,SOUND_TYPE_MONSTER_DYING);
-		::Sound->create		(sndDie[2],			strconcat(buf,*cName(),"\\die2"), st_Effect,SOUND_TYPE_MONSTER_DYING);
-		::Sound->create		(sndDie[3],			strconcat(buf,*cName(),"\\die3"), st_Effect,SOUND_TYPE_MONSTER_DYING);
+		::Sound->create		(sndDie[0],			strconcat(sizeof(buf),buf,*cName(),"\\die0"), st_Effect,SOUND_TYPE_MONSTER_DYING);
+		::Sound->create		(sndDie[1],			strconcat(sizeof(buf),buf,*cName(),"\\die1"), st_Effect,SOUND_TYPE_MONSTER_DYING);
+		::Sound->create		(sndDie[2],			strconcat(sizeof(buf),buf,*cName(),"\\die2"), st_Effect,SOUND_TYPE_MONSTER_DYING);
+		::Sound->create		(sndDie[3],			strconcat(sizeof(buf),buf,*cName(),"\\die3"), st_Effect,SOUND_TYPE_MONSTER_DYING);
 
 		m_HeavyBreathSnd.create	(pSettings->r_string(section,"heavy_breath_snd"), st_Effect,SOUND_TYPE_MONSTER_INJURING);
 		m_BloodSnd.create		(pSettings->r_string(section,"heavy_blood_snd"), st_Effect,SOUND_TYPE_MONSTER_INJURING);
@@ -456,23 +432,24 @@ void	CActor::Hit							(SHit* pHDS)
 	if( HDS.hit_type<ALife::eHitTypeBurn || HDS.hit_type >= ALife::eHitTypeMax )
 	{
 		string256	err;
-		sprintf		(err, "Unknown/unregistered hit type [%d]", HDS.hit_type);
+		sprintf_s		(err, "Unknown/unregistered hit type [%d]", HDS.hit_type);
 		R_ASSERT2	(0, err );
 	
 	}
 #ifdef DEBUG
-if(ph_dbg_draw_mask.test(phDbgCharacterControl))
-{
-	DBG_OpenCashedDraw();
-	Fvector to;to.add(Position(),Fvector().mul(HDS.dir,HDS.phys_impulse()));
-	DBG_DrawLine(Position(),to,D3DCOLOR_XRGB(124,124,0));
-	DBG_ClosedCashedDraw(500);
-}
-#endif
+	if(ph_dbg_draw_mask.test(phDbgCharacterControl)) 
+	{
+		DBG_OpenCashedDraw();
+		Fvector to;to.add(Position(),Fvector().mul(HDS.dir,HDS.phys_impulse()));
+		DBG_DrawLine(Position(),to,D3DCOLOR_XRGB(124,124,0));
+		DBG_ClosedCashedDraw(500);
+	}
+#endif // DEBUG
+
 	bool bPlaySound = true;
 	if (!g_Alive()) bPlaySound = false;
 
-	if (!IsGameTypeSingle() && !g_pGamePersistent->bDedicatedServer)
+	if (!IsGameTypeSingle() && !g_dedicated_server)
 	{
 		game_PlayerState* ps = Game().GetPlayerByGameID(ID());
 		if (ps && ps->testFlag(GAME_PLAYER_FLAG_INVINCIBLE))
@@ -503,7 +480,7 @@ if(ph_dbg_draw_mask.test(phDbgCharacterControl))
 		last_hit_frame = Device.dwFrame;
 	};
 
-	if(	!g_pGamePersistent->bDedicatedServer	&& 
+	if(	!g_dedicated_server	&& 
 		!sndHit[HDS.hit_type].empty()			&& 
 		(ALife::eHitTypeTelepatic != HDS.hit_type))
 	{
@@ -541,7 +518,7 @@ if(ph_dbg_draw_mask.test(phDbgCharacterControl))
 	else
 		hit_slowmo = 0.f;
 	//---------------------------------------------------------------
-	if (Level().CurrentViewEntity() == this && !g_pGamePersistent->bDedicatedServer && HDS.hit_type == ALife::eHitTypeFireWound)
+	if (Level().CurrentViewEntity() == this && !g_dedicated_server && HDS.hit_type == ALife::eHitTypeFireWound)
 	{
 		CObject* pLastHitter = Level().Objects.net_Find(m_iLastHitterID);
 		CObject* pLastHittingWeapon = Level().Objects.net_Find(m_iLastHittingWeaponID);
@@ -556,7 +533,7 @@ if(ph_dbg_draw_mask.test(phDbgCharacterControl))
 //		mstate_real	&=~mcSprint;
 		mstate_wishful	&=~mcSprint;
 	};
-	if(!g_pGamePersistent->bDedicatedServer)
+	if(!g_dedicated_server)
 	{
 		HitMark			(HDS.damage(), HDS.dir, HDS.who, HDS.bone(), HDS.p_in_bone_space, HDS.impulse, HDS.hit_type);
 	}
@@ -606,12 +583,17 @@ if(ph_dbg_draw_mask.test(phDbgCharacterControl))
 			
 			float hit_power = 0;
 
-			if (m_bWasBackStabbed) hit_power = 100000;
+			if (m_bWasBackStabbed) hit_power = (HDS.damage() == 0) ? 0 : 100000.0f;
 			else hit_power	= HitArtefactsOnBelt(HDS.damage(), HDS.hit_type);
 
-			HDS.power = hit_power;
-			inherited::Hit (&HDS);
-			//inherited::Hit	(hit_power,dir,who,element,position_in_bone_space, impulse, hit_type, 0.0f);
+			HDS.power			= hit_power;
+			inherited::Hit		(&HDS);
+
+			if(OnServer() && !g_Alive() && HDS.hit_type==ALife::eHitTypeExplosion)
+			{
+				game_PlayerState* ps							= Game().GetPlayerByGameID(ID());
+				Game().m_WeaponUsageStatistic->OnExplosionKill	(ps, HDS);
+			}
 		}		
 		break;
 	}
@@ -673,7 +655,7 @@ void CActor::HitMark	(float P,
 			}
 
 			string64 sect_name;
-			sprintf(sect_name,"effector_fire_hit_%d",id);
+			sprintf_s(sect_name,"effector_fire_hit_%d",id);
 			AddEffector(this, effFireHit, sect_name, P/100.0f);
 			}
 		}
@@ -710,54 +692,53 @@ void CActor::HitSignal(float perc, Fvector& vLocalDir, CObject* who, s16 element
 	}
 }
 void start_tutorial(LPCSTR name);
-void CActor::Die	(CObject* who)
+void CActor::Die(CObject* who)
 {
-	inherited::Die(who);
-	//-------------------------------------
+	inherited::Die		(who);
+
 	if (OnServer())
 	{	
-		xr_vector<CInventorySlot>::iterator I = inventory().m_slots.begin(), B = I;
+		xr_vector<CInventorySlot>::iterator I = inventory().m_slots.begin();
 		xr_vector<CInventorySlot>::iterator E = inventory().m_slots.end();
-		for ( ; I != E; ++I)
+
+
+		for (u32 slot_idx=0 ; I != E; ++I,++slot_idx)
 		{
-			if ((I - B) == (int)inventory().GetActiveSlot()) 
+			if (slot_idx == inventory().GetActiveSlot()) 
 			{
 				if((*I).m_pIItem)
 				{
-					if (OnServer())
+					if (IsGameTypeSingle())
+						(*I).m_pIItem->SetDropManual(TRUE);
+					else
 					{
-						if (GameID() == GAME_SINGLE)
-							(*I).m_pIItem->Drop();
-						else
+						if ((*I).m_pIItem->object().CLS_ID!=CLSID_OBJECT_W_KNIFE && slot_idx!=GRENADE_SLOT)
 						{
-							NET_Packet P;
-							(*I).m_pIItem->object().u_EventGen(P, GE_OWNERSHIP_REJECT, 
-								(*I).m_pIItem->object().H_Parent()->ID());
-							P.w_u16(u16((*I).m_pIItem->object().ID()));
-							(*I).m_pIItem->object().u_EventSend(P);
-						}
+							(*I).m_pIItem->SetDropManual(TRUE);
+						}							
 					}
 				};
+			continue;
 			}
 			else
 			{
 				CCustomOutfit *pOutfit = smart_cast<CCustomOutfit *> ((*I).m_pIItem);
 				if (pOutfit) continue;
-
-				if((*I).m_pIItem) inventory().Ruck((*I).m_pIItem);
 			};
+			if((*I).m_pIItem) 
+				inventory().Ruck((*I).m_pIItem);
 		};
 
 
 		///!!! чистка пояса
 		TIItemContainer &l_blist = inventory().m_belt;
-		while (!l_blist.empty())	inventory().Ruck(l_blist.front());
+		while (!l_blist.empty())	
+			inventory().Ruck(l_blist.front());
 
-		if (OnServer() && GameID() != GAME_SINGLE)
+		if (!IsGameTypeSingle())
 		{
-			//		bool MedKitDropped = false;
 			//if we are on server and actor has PDA - destroy PDA
-			TIItemContainer &l_rlist = inventory().m_ruck;
+			TIItemContainer &l_rlist	= inventory().m_ruck;
 			for(TIItemContainer::iterator l_it = l_rlist.begin(); l_rlist.end() != l_it; ++l_it)
 			{
 				if (GameID() == GAME_ARTEFACTHUNT)
@@ -765,36 +746,16 @@ void CActor::Die	(CObject* who)
 					CArtefact* pArtefact = smart_cast<CArtefact*> (*l_it);
 					if (pArtefact)
 					{
-						(*l_it)->Drop();
+						(*l_it)->SetDropManual(TRUE);
 						continue;
 					};
 				};
 
 				if ((*l_it)->object().CLS_ID == CLSID_OBJECT_PLAYERS_BAG)
 				{
-					(*l_it)->Drop();
+					(*l_it)->SetDropManual(TRUE);
 					continue;
 				};
-				/*
-				if ((*l_it)->object().CLS_ID == CLSID_IITEM_MEDKIT && !MedKitDropped)
-				{
-				MedKitDropped = true;
-				(*l_it)->Drop();
-				continue;
-				};
-
-				if ((*l_it)->object().CLS_ID == CLSID_DEVICE_PDA)
-				{
-				(*l_it)->Drop();
-				continue;
-				};
-
-				CCustomOutfit *pOutfit = smart_cast<CCustomOutfit *> (*l_it);
-				if (pOutfit) continue;
-
-				//пока у нас нельзя обыскивать трупы, удаляем все объекты из инвентаря
-				(*l_it)->object().DestroyObject();
-				*/
 			};
 		};
 	};
@@ -803,7 +764,7 @@ void CActor::Die	(CObject* who)
 	mstate_wishful	&=		~mcAnyMove;
 	mstate_real		&=		~mcAnyMove;
 
-	if(!g_pGamePersistent->bDedicatedServer)
+	if(!g_dedicated_server)
 	{
 		::Sound->play_at_pos	(sndDie[Random.randI(SND_DIE_COUNT)],this,Position());
 
@@ -815,8 +776,6 @@ void CActor::Die	(CObject* who)
 	{
 		start_tutorial		("game_over");
 	}
-//.		HUD().GetUI()->UIGame()->AddCustomStatic("game_over", true);
-
 	xr_delete				(m_sndShockEffector);
 }
 
@@ -824,7 +783,6 @@ void	CActor::SwitchOutBorder(bool new_border_state)
 {
 	if(new_border_state)
 	{
-//.		Msg("exit level border");
 		callback(GameObject::eExitLevelBorder)(lua_game_object());
 	}
 	else 
@@ -834,10 +792,11 @@ void	CActor::SwitchOutBorder(bool new_border_state)
 	}
 	m_bOutBorder=new_border_state;
 }
-void CActor::g_Physics			(Fvector& _accel, float jump, float dt)
+
+void CActor::g_Physics(Fvector& _accel, float jump, float dt)
 {
 	// Correct accel
-	Fvector		accel;
+	Fvector						accel;
 	accel.set					(_accel);
 	hit_slowmo					-=	dt;
 	if (hit_slowmo<0)			hit_slowmo = 0.f;
@@ -881,6 +840,7 @@ void CActor::g_Physics			(Fvector& _accel, float jump, float dt)
 		}
 	}
 }
+float g_fov = 67.5f;
 
 float CActor::currentFOV()
 {
@@ -889,9 +849,9 @@ float CActor::currentFOV()
 	if (eacFirstEye == cam_active && pWeapon &&
 		pWeapon->IsZoomed() && (!pWeapon->ZoomTexture() ||
 		(!pWeapon->IsRotatingToZoom() && pWeapon->ZoomTexture())))
-		return pWeapon->GetZoomFactor();
+		return pWeapon->GetZoomFactor() * (0.75f);
 	else
-		return DEFAULT_FOV;
+		return g_fov;
 }
 
 void CActor::UpdateCL	()
@@ -981,7 +941,7 @@ void CActor::UpdateCL	()
 		{
 			m_sndShockEffector->Update();
 
-			if(!m_sndShockEffector->InWork())
+			if(!m_sndShockEffector->InWork() || !g_Alive())
 				xr_delete(m_sndShockEffector);
 		}
 		else
@@ -996,7 +956,7 @@ void CActor::shedule_Update	(u32 DT)
 
 	//установить режим показа HUD для текущего активного слота
 	CHudItem* pHudItem = smart_cast<CHudItem*>(inventory().ActiveItem());	
-	if(pHudItem && !pHudItem->object().getDestroy()) 
+	if(pHudItem) 
 		pHudItem->SetHUDmode(HUDview());
 
 	//обновление инвентаря
@@ -1129,10 +1089,12 @@ void CActor::shedule_Update	(u32 DT)
 	pCamBobbing->SetState						(mstate_real, conditions().IsLimping(), IsZoomAimingMode());
 
 	//звук тяжелого дыхания при уталости и хромании
-	if(this==Level().CurrentControlEntity() && !g_pGamePersistent->bDedicatedServer )
+	if(this==Level().CurrentControlEntity() && !g_dedicated_server )
 	{
-		if(conditions().IsLimping() && g_Alive()){
-			if(!m_HeavyBreathSnd._feedback()){
+		if(conditions().IsLimping() && g_Alive())
+		{
+			if(!m_HeavyBreathSnd._feedback())
+			{
 				m_HeavyBreathSnd.play_at_pos(this, Fvector().set(0,ACTOR_HEIGHT,0), sm_Looped | sm_2D);
 			}else{
 				m_HeavyBreathSnd.set_position(Fvector().set(0,ACTOR_HEIGHT,0));
@@ -1159,6 +1121,8 @@ void CActor::shedule_Update	(u32 DT)
 				m_BloodSnd.stop();
 		}
 
+		if(!g_Alive()&&m_BloodSnd._feedback())
+				m_BloodSnd.stop();
 	}
 	
 	//если в режиме HUD, то сама модель актера не рисуется
@@ -1259,7 +1223,7 @@ void CActor::g_PerformDrop	( )
 	u32 s					= inventory().GetActiveSlot();
 	if(inventory().m_slots[s].m_bPersistent)	return;
 
-	pItem->Drop();
+	pItem->SetDropManual	(TRUE);
 }
 
 
@@ -1415,7 +1379,7 @@ void CActor::ForceTransform(const Fmatrix& m)
 	if(!g_Alive())				return;
 	XFORM().set					(m);
 	if(character_physics_support()->movement()->CharacterExist()) character_physics_support()->movement()->EnableCharacter	();
-	character_physics_support()->movement()->SetPosition		(m.c);
+	character_physics_support()->set_movement_position( m.c );
 	character_physics_support()->movement()->SetVelocity		(0,0,0);
 }
 
@@ -1435,24 +1399,14 @@ bool		CActor::use_bolts				() const
 	return CInventoryOwner::use_bolts();
 };
 
-INT		g_iCorpseRemove = 1;
+int		g_iCorpseRemove = 1;
 
 bool  CActor::NeedToDestroyObject() const
 {
-	if(GameID() == GAME_SINGLE)
-	{
-		return false;
-	}
-	else 
-	{
-		if (g_Alive()) return false;
-		if (g_iCorpseRemove == -1) return false;
-		if (g_iCorpseRemove == 0 && m_bAllowDeathRemove) return true;
-		if(TimePassedAfterDeath()>m_dwBodyRemoveTime && m_bAllowDeathRemove)
-			return true;
-		else
-			return false;
-	}
+	if(g_Alive())				return false;
+	if(g_iCorpseRemove == -1)	return false;
+	if(g_iCorpseRemove == 0 && m_bAllowDeathRemove) return true;
+	return (TimePassedAfterDeath()>m_dwBodyRemoveTime && m_bAllowDeathRemove);
 }
 
 ALife::_TIME_ID	 CActor::TimePassedAfterDeath()	const
@@ -1468,47 +1422,29 @@ void CActor::OnItemTake			(CInventoryItem *inventory_item)
 {
 	CInventoryOwner::OnItemTake(inventory_item);
 	if (OnClient()) return;
-
-///	if (GameID()==GAME_ARTEFACTHUNT)
-//			SpawnAmmoForWeapon(inventory_item);
 }
 
 void CActor::OnItemDrop			(CInventoryItem *inventory_item)
 {
 	CInventoryOwner::OnItemDrop(inventory_item);
-//	if (OnClient()) return;
 
 	CArtefact* artefact = smart_cast<CArtefact*>(inventory_item);
 	if(artefact && artefact->m_eItemPlace == eItemPlaceBelt)
 		MoveArtefactBelt(artefact, false);
-/*
-	switch (GameID())
-	{
-	case GAME_DEATHMATCH:
-	case GAME_TEAMDEATHMATCH:
-	case GAME_ARTEFACTHUNT:
-		{
-			RemoveAmmoForWeapon(inventory_item);
-		}break;
-	};
-*/	
 }
 
 
 void CActor::OnItemDropUpdate ()
 {
-	CInventoryOwner::OnItemDropUpdate ();
+	CInventoryOwner::OnItemDropUpdate		();
 
-	//на тот случай если была выкинута присоединяемая вещь (типа фонарика)
-	//а у нас есть еще одна
-	TIItemContainer::iterator					I = inventory().m_all.begin();
-	TIItemContainer::iterator					E = inventory().m_all.end();
+	TIItemContainer::iterator				I = inventory().m_all.begin();
+	TIItemContainer::iterator				E = inventory().m_all.end();
+	
 	for ( ; I != E; ++I)
-		if(!(*I)->GetDrop() && !attached(*I))
+		if( !(*I)->IsInvalid() && !attached(*I))
 			attach(*I);
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 
 void CActor::OnItemRuck		(CInventoryItem *inventory_item, EItemPlace previous_place)
@@ -1548,8 +1484,8 @@ void CActor::MoveArtefactBelt(const CArtefact* artefact, bool on_belt)
 	if (Level().CurrentViewEntity() && Level().CurrentViewEntity() == this)
 		HUD().GetUI()->UIMainIngameWnd->m_artefactPanel->InitIcons(m_ArtefactsOnBelt);
 }
+
 #define ARTEFACTS_UPDATE_TIME 0.100f
-//old==1000
 
 void CActor::UpdateArtefactsOnBelt()
 {
@@ -1698,7 +1634,7 @@ CEntityConditionSimple *CActor::create_entity_condition	(CEntityConditionSimple*
 
 DLL_Pure *CActor::_construct			()
 {
-	m_pPhysics_support				=	xr_new<CCharacterPhysicsSupport>(CCharacterPhysicsSupport::EType::etActor,this);
+	m_pPhysics_support				=	xr_new<CCharacterPhysicsSupport>(CCharacterPhysicsSupport::etActor,this);
 	CEntityAlive::_construct		();
 	CInventoryOwner::_construct		();
 	CStepManager::_construct		();
@@ -1736,10 +1672,10 @@ void CActor::OnDifficultyChanged	()
 	VERIFY(g_SingleGameDifficulty>=egdNovice && g_SingleGameDifficulty<=egdMaster); 
 	LPCSTR diff_name				= get_token_name(difficulty_type_token, g_SingleGameDifficulty);
 	string128						tmp;
-	strconcat						(tmp,"actor_immunities_",diff_name);
+	strconcat						(sizeof(tmp),tmp,"actor_immunities_",diff_name);
 	conditions().LoadImmunities		(tmp,pSettings);
 	// hit probability
-	strconcat						(tmp,"hit_probability_",diff_name);
+	strconcat						(sizeof(tmp),tmp,"hit_probability_",diff_name);
 	hit_probability					= pSettings->r_float(*cNameSect(),tmp);
 }
 

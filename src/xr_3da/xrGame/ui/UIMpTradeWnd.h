@@ -263,7 +263,7 @@ private:
 	void				CleanUserItems				();
 
 	void				ApplyPreset					(ETradePreset idx);
-	void				StorePreset					(ETradePreset idx, bool bSilent);
+	void				StorePreset					(ETradePreset idx, bool bSilent, bool check_allowed_items);
 };
 
 u8		GetItemAddonsState_ext		(SBuyItemInfo* item);

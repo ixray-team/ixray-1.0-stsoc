@@ -10,7 +10,7 @@ void CItemMgr::Load(const shared_str& sect_cost)
 	CInifile::Sect &sect = pSettings->r_section(sect_cost);
 
 	u32 idx	=0;
-	for (CInifile::SectIt it = sect.begin(); it != sect.end(); ++it,++idx)
+	for (CInifile::SectCIt it = sect.Data.begin(); it != sect.Data.end(); ++it,++idx)
 	{
 		_i&		val			= m_items[it->first]; 
 		val.slot_idx		= 0xff;
@@ -63,7 +63,9 @@ const u32 CItemMgr::GetItemIdx(const shared_str& sect_name) const
 	
 	if		(it==m_items.end())
 	{
+		#ifdef DEBUG
 		Msg("item not found in registry [%s]", sect_name.c_str());
+		#endif
 		return u32(-1);
 	}
 

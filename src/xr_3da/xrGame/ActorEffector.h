@@ -56,6 +56,8 @@ class CAnimatorCamEffectorScriptCB :public CAnimatorCamEffector
 public:
 	CAnimatorCamEffectorScriptCB	(LPCSTR _cb){cb_name =_cb;};
 	virtual	BOOL		Valid					();
+	virtual BOOL		AllowProcessingIfInvalid()	{return m_bAbsolutePositioning;}
+	virtual	void		ProcessIfInvalid		(Fvector &p, Fvector &d, Fvector &n, float& fFov, float& fFar, float& fAspect);
 };
 
 class CAnimatorCamLerpEffector :public CAnimatorCamEffector

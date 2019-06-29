@@ -119,7 +119,7 @@ void	CTextConsole::CreateLogWnd()
 	lf.lfClipPrecision = CLIP_STROKE_PRECIS;	
 	lf.lfQuality = DRAFT_QUALITY;
 	lf.lfPitchAndFamily = VARIABLE_PITCH | FF_SWISS;
-	sprintf(lf.lfFaceName,"");
+	sprintf_s(lf.lfFaceName,sizeof(lf.lfFaceName),"");
 
 	m_hLogWndFont = CreateFontIndirect(&lf);
 	R_ASSERT2(m_hLogWndFont, "Unable to Create Font for Log Window");
@@ -160,6 +160,7 @@ void	CTextConsole::Initialize	()
 	ShowWindow(m_hConsoleWnd, SW_SHOW); 
 	UpdateWindow(m_hConsoleWnd);	
 	//-----------------------------------
+	server_info.ResetData();
 };
 
 void	CTextConsole::Destroy		()
@@ -236,24 +237,26 @@ void	CTextConsole::DrawLog(HDC hDC, RECT* pRect)
 //	INT Width = wRC.right - wRC.left;
 	INT Height = wRC.bottom - wRC.top;
 	wRC = *pRect;
+	int y_top_max = (int)(0.3f * Height);
 	//---------------------------------------------------------------------------------
 	char		buf	[MAX_LEN+5];
-	strcpy		(buf,ioc_prompt);
+	strcpy_s		(buf,ioc_prompt);
 	strcat		(buf,editor);
-//	if (bCursor) 
+	//if (bCursor) 
 		strcat(buf,"|");
-	SetTextColor(hDC, RGB(128, 128, 255));
-	TextOut(hDC, 0, Height-tm.tmHeight, buf, xr_strlen(buf));
 
-	INT YPos = Height - tm.tmHeight - tm.tmHeight;
-	for (int i=LogFile.size()-1-scroll_delta; i>=0; i--) 
+	SetTextColor(hDC, RGB(128, 128, 255));
+	TextOut( hDC, 0, Height-tm.tmHeight, buf, xr_strlen(buf) );
+
+	int YPos = Height - tm.tmHeight - tm.tmHeight;
+	for ( int i = LogFile->size() - 1 - scroll_delta; i >= 0; i-- ) 
 	{
-		YPos-=tm.tmHeight;
-		if (YPos<0)	break;
-		LPCSTR Str = *LogFile[i];
+		YPos -= tm.tmHeight;
+		if ( YPos < y_top_max )	break;
+		LPCSTR Str = *(*LogFile)[i];
 		LPCSTR pOut = Str;
-		if (!Str) continue;
-		switch (Str[0])
+		if ( !Str ) continue;
+		switch ( Str[0] )
 		{
 		case '~':
 			SetTextColor(hDC, RGB(0, 0, 255));
@@ -271,17 +274,37 @@ void	CTextConsole::DrawLog(HDC hDC, RECT* pRect)
 			SetTextColor(hDC, RGB(0, 255, 0));
 			pOut = Str + 2;
 			break;
+		case '#':
+			SetTextColor(hDC, RGB(222, 205, 145));
+			pOut = Str + 2;
+			break;
 		default:
 			SetTextColor(hDC, RGB(255, 255, 255));
 			break;
 		}
-		BOOL res = TextOut(hDC, 0, YPos, pOut,xr_strlen(pOut));
-		if (!res)
+		BOOL res = TextOut( hDC, 10, YPos, pOut, xr_strlen(pOut) );
+		if ( !res )
 		{
 			R_ASSERT(0);
 		}
-	};	
-};
+	}
+
+	if ( g_pGameLevel && ( Device.dwFrame % 5 == 0 ) )
+	{
+		server_info.ResetData();
+		g_pGameLevel->GetLevelInfo( &server_info );
+	}
+
+	YPos = 5;
+	for ( u32 i = 0; i < server_info.Size(); ++i )
+	{
+		SetTextColor( hDC, server_info[i].color );
+		TextOut( hDC, 10, YPos, server_info[i].name, xr_strlen(server_info[i].name) );
+
+		YPos += tm.tmHeight;
+		if ( YPos > y_top_max )	break;
+	}
+}
 
 void	CTextConsole::OnRender			(void)
 {

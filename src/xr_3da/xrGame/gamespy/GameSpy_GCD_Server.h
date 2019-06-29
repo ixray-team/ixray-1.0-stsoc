@@ -21,6 +21,7 @@ class CGameSpy_GCD_Server
 		void	ReAuthUser(int localid, int hint, char *response);
 		void	DisconnectUser(int localid);
 		void	Think();
+		char*	GetKeyHash(int localid);
 private:
 	//--------------------- GCD_Server -------------------------------------------
 	GAMESPY_FN_VAR_DECL(int, gcd_init_qr2, (void* qrec));
@@ -30,5 +31,6 @@ private:
 	GAMESPY_FN_VAR_DECL(void, gcd_reauthenticate_user, (int localid, int hint, const char *response));
 	GAMESPY_FN_VAR_DECL(void, gcd_disconnect_user, (int localid));
 	GAMESPY_FN_VAR_DECL(void, gcd_think, (void));
+	GAMESPY_FN_VAR_DECL(char*,gcd_getkeyhash,(int localid));
 };
 

@@ -97,14 +97,16 @@ class ENGINE_API CCameraManager
 	Fvector					vRight;
 
 	EffectorCamVec			m_EffectorsCam;
+	EffectorCamVec			m_EffectorsCam_added_deffered;
+	EffectorCamVec			m_EffectorsCam_removed_deffered;
 	EffectorPPVec			m_EffectorsPP;
 
 	float					fFov;
 	float					fFar;
 	float					fAspect;
 	bool					m_bAutoApply;
-
 	SPPInfo					pp_affected;
+	void					UpdateDeffered();
 public:
 #ifdef DEBUG	
 	u32						dbg_upd_frame;

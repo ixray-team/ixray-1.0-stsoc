@@ -36,8 +36,13 @@ IC	const CALifeSpawnRegistry::SPAWN_GRAPH &CALifeSpawnRegistry::spawns	() const
 IC	void CALifeSpawnRegistry::process_spawns		(SPAWN_IDS &spawns)
 {
 	std::sort						(spawns.begin(),spawns.end());
-	SPAWN_IDS::iterator				I = unique(spawns.begin(),spawns.end());
-	spawns.erase					(I,spawns.end());
+	spawns.erase					(
+		std::unique(
+			spawns.begin(),
+			spawns.end()
+		),
+		spawns.end()
+	);
 }
 
 IC	const ALife::_SPAWN_ID &CALifeSpawnRegistry::spawn_id	(const ALife::_SPAWN_STORY_ID &spawn_story_id) const

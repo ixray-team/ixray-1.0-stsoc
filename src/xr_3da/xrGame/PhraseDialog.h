@@ -6,7 +6,7 @@
 #include "PhraseDialogDefs.h"
 #include "xml_str_id_loader.h"
 
-typedef CGraphAbstract<CPhrase*, float, int> CPhraseGraph;
+typedef CGraphAbstract<CPhrase*, float, shared_str> CPhraseGraph;
 
 
 struct SPhraseDialogData : CSharedResource
@@ -36,7 +36,8 @@ class CPhraseDialog;
 class CPhraseDialogManager;
 
 class CPhraseDialog	: public CSharedClass<SPhraseDialogData, shared_str, false>,
-					  public CXML_IdToIndex<CPhraseDialog>
+					  public CXML_IdToIndex<CPhraseDialog>,
+					  public intrusive_base
 {
 private:
 	typedef CSharedClass<SPhraseDialogData, shared_str, false>				inherited_shared;
@@ -56,7 +57,7 @@ public:
 	//связь диалога между двумя DialogManager
 	virtual void			Init				(CPhraseDialogManager* speaker_first, CPhraseDialogManager* speaker_second);
 
-	IC		bool			IsInit				() {return ((FirstSpeaker()!=NULL)&& (SecondSpeaker()!=NULL));}
+	IC		bool			IsInited			() const {return ((FirstSpeaker()!=NULL)&& (SecondSpeaker()!=NULL));}
 
 	//реинициализация диалога
 	virtual void			Reset				();
@@ -71,18 +72,19 @@ public:
 	//если вернули false, то считаем, что диалог закончился
 	//(сделано статическим, так как мы должны передавать имеенно DIALOG_SHARED_PTR&,
 	//а не обычный указатель)
-	static bool				SayPhrase			(DIALOG_SHARED_PTR& phrase_dialog, int phrase_id);
+	static bool				SayPhrase			(DIALOG_SHARED_PTR& phrase_dialog, const shared_str& phrase_id);
 
-	virtual LPCSTR			GetPhraseText		(int phrase_id, bool current_speaking = true);
-	virtual LPCSTR			GetLastPhraseText	() {return GetPhraseText(m_iSaidPhraseID, false);}
-	virtual int				GetLastPhraseID		() {return m_iSaidPhraseID;}
+		LPCSTR				GetPhraseText		(const shared_str& phrase_id, bool current_speaking = true);
+		LPCSTR				GetLastPhraseText	() {return GetPhraseText(m_SaidPhraseID, false);}
+		const shared_str&	GetDialogID			() const {return m_DialogId;}
 
 	//заголовок, диалога, если не задан, то 0-я фраза
-	virtual LPCSTR			DialogCaption		();
-	virtual int				Priority			();
+		const shared_str&	GetLastPhraseID		() {return m_SaidPhraseID;}
+			LPCSTR			DialogCaption		();
+			int				Priority			();
 
 
-	virtual bool			IsFinished			()	const {return m_bFinished;}
+			bool			IsFinished			()	const {return m_bFinished;}
 	
 	IC	CPhraseDialogManager* FirstSpeaker		()	const {return m_pSpeakerFirst;}
 	IC	CPhraseDialogManager* SecondSpeaker		()	const {return m_pSpeakerSecond;}
@@ -104,8 +106,8 @@ protected:
 	//идентификатор диалога
 	shared_str				m_DialogId;
 
-	//ID последней сказанной фразы в диалоге, -1 если такой не было
-	int						m_iSaidPhraseID;
+	//ID последней сказанной фразы в диалоге, "" если такой не было
+	shared_str				m_SaidPhraseID;
 	//диалог закончен
 	bool					m_bFinished;
 
@@ -124,9 +126,10 @@ protected:
 	virtual void			load_shared	(LPCSTR);
 	
 	//рекурсивное добавление фраз в граф
-	void					AddPhrase	(CUIXml* pXml, XML_NODE* phrase_node, int phrase_id, int prev_phrase_id);
+	void					AddPhrase	(CUIXml* pXml, XML_NODE* phrase_node, const shared_str& phrase_id, const shared_str& prev_phrase_id);
 public:
-	CPhrase*				AddPhrase	(LPCSTR text, int phrase_id, int prev_phrase_id, int goodwil_level);
+	CPhrase*				AddPhrase			(LPCSTR text, const shared_str& phrase_id, const shared_str& prev_phrase_id, int goodwil_level);
+	CPhrase*				AddPhrase_script	(LPCSTR text, LPCSTR phrase_id, LPCSTR prev_phrase_id, int goodwil_level){return AddPhrase(text, phrase_id, prev_phrase_id, goodwil_level);};
 	void					SetCaption	(LPCSTR str);
 	void					SetPriority	(int val);
 

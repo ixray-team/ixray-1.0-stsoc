@@ -50,7 +50,7 @@ struct CVertexManagerFixed {
 
 #pragma pack(push,1)
 		template <typename _path_id_type>
-		struct SGraphIndexVertex : public _index_vertex<CGraphVertex,SGraphIndexVertex> {
+		struct SGraphIndexVertex : public _index_vertex<CGraphVertex,SGraphIndexVertex<_path_id_type> > {
 			_path_id_type	m_path_id;
 			CGraphVertex	*m_vertex;
 		};

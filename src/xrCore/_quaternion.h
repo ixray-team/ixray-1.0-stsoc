@@ -175,13 +175,21 @@ public:
 
 	// multiplies q1 * q2, and places the result in *this.
 	// no failure. 	renormalization not automatic
+
+/*
+	q1*q2 = q3 =
+		(w1*w2 - x1*x2 - y1*y2 - z1*z2)     {w3}
+		(w1*x2 + x1*w2 + y1*z2 - z1*y2)i	{x3}
+		(w1*y2 - x1*z2 + y1*w2 + z1*x2)j    {y3}
+		(w1*z2 + x1*y2 - y1*x2 + z1*w2)k	{z3}
+*/
 	IC	SelfRef	mul(SelfCRef q1l, SelfCRef q2l)
 	{
 		VERIFY( q1l.isValid() );
 		VERIFY( q2l.isValid() );
 
 		w  =	(  (q1l.w*q2l.w) - (q1l.x*q2l.x)
-			- (q1l.y*q2l.y) - (q1l.z*q2l.z) );
+				- (q1l.y*q2l.y) - (q1l.z*q2l.z) );
 
 		x  =	(  (q1l.w*q2l.x) + (q1l.x*q2l.w)
 			+ (q1l.y*q2l.z) - (q1l.z*q2l.y) );
@@ -229,7 +237,7 @@ public:
 	}
 
 	// validates numerical stability
-	IC	const BOOL	isValid(void) 
+	IC	const BOOL	isValid(void) const 
 	{
 		if ((w * w) < 0.0f)	return false;
 		if ((x * x) < 0.0f)	return false;
@@ -256,7 +264,7 @@ public:
 		m =  _sqrt(magnitude());
 
 		if (( m < QZERO_TOLERANCE ) && ( m > -QZERO_TOLERANCE ))
-			return;
+			return *this;
 
 		one_over_magnitude = 1.0f / m;
 
@@ -269,17 +277,17 @@ public:
 
 	// inversion
 	IC	SelfRef	inverse(SelfCRef Q)
-	{	return set(-Q.x,-Q.y,-Q.z,Q.w);	}
+	{	return set(Q.w,-Q.x,-Q.y,-Q.z);	}
 	IC	SelfRef	inverse()
-	{	return set(-x,-y,-z,w);	}
+	{	return set(w,-x,-y,-z);	}
 	IC	SelfRef	inverse_with_w(SelfCRef Q)
-	{	return set(-Q.x,-Q.y,-Q.z,-Q.w);	}
+	{	return set(-Q.w,-Q.x,-Q.y,-Q.z);	}
 	IC	SelfRef	inverse_with_w()
-	{	return set(-x,-y,-z,-w);	}
+	{	return set(-w,-x,-y,-z);	}
 
 	// identity - no rotation
 	IC	SelfRef	identity(void)
-	{	return set(0.f,0.f,0.f,1.f);		}
+	{	return set(1.f,0.f,0.f,0.f);		}
 
 	// square length
 	IC	T	magnitude(void) {

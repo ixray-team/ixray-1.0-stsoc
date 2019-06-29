@@ -361,7 +361,7 @@ const char* TiXmlBase::SkipWhiteSpace( const char* p, TiXmlEncoding encoding )
 	return p;
 }
 
-#ifdef TIXML_USE_STL
+#if 0//def TIXML_USE_STL
 /*static*/ bool TiXmlBase::StreamWhiteSpace( std::istream * in, TIXML_STRING * tag )
 {
 	for( ;; )
@@ -636,7 +636,7 @@ const char* TiXmlBase::ReadText(	const char* p,
 	return p;
 }
 
-#ifdef TIXML_USE_STL
+#if 0//def TIXML_USE_STL
 
 void TiXmlDocument::StreamIn( std::istream * in, TIXML_STRING * tag )
 {
@@ -904,7 +904,7 @@ TiXmlNode* TiXmlNode::Identify( const char* p, TiXmlEncoding encoding )
 	return returnNode;
 }
 
-#ifdef TIXML_USE_STL
+#if 0//def TIXML_USE_STL
 
 void TiXmlElement::StreamIn (std::istream * in, TIXML_STRING * tag)
 {
@@ -1242,7 +1242,7 @@ const char* TiXmlElement::ReadValue( const char* p, TiXmlParsingData* data, TiXm
 }
 
 
-#ifdef TIXML_USE_STL
+#if 0//def TIXML_USE_STL
 void TiXmlUnknown::StreamIn( std::istream * in, TIXML_STRING * tag )
 {
 	while ( in->good() )
@@ -1300,7 +1300,7 @@ const char* TiXmlUnknown::Parse( const char* p, TiXmlParsingData* data, TiXmlEnc
 	return p;
 }
 
-#ifdef TIXML_USE_STL
+#if 0//def TIXML_USE_STL
 void TiXmlComment::StreamIn( std::istream * in, TIXML_STRING * tag )
 {
 	while ( in->good() )
@@ -1431,7 +1431,7 @@ const char* TiXmlAttribute::Parse( const char* p, TiXmlParsingData* data, TiXmlE
 	return p;
 }
 
-#ifdef TIXML_USE_STL
+#if 0//def TIXML_USE_STL
 void TiXmlText::StreamIn( std::istream * in, TIXML_STRING * tag )
 {
 	while ( in->good() )
@@ -1513,7 +1513,7 @@ const char* TiXmlText::Parse( const char* p, TiXmlParsingData* data, TiXmlEncodi
 	}
 }
 
-#ifdef TIXML_USE_STL
+#if 0//def TIXML_USE_STL
 void TiXmlDeclaration::StreamIn( std::istream * in, TIXML_STRING * tag )
 {
 	while ( in->good() )

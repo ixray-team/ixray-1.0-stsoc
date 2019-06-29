@@ -183,13 +183,13 @@ void CAI_Bloodsucker::reload(LPCSTR section)
 {
 	inherited::reload(section);
 
-	sound().add(pSettings->r_string(section,"Sound_Vampire_Grasp"),				DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eHighPriority + 4,	MonsterSound::eBaseChannel,	EBloodsuckerSounds::eVampireGrasp,		"bip01_head");
-	sound().add(pSettings->r_string(section,"Sound_Vampire_Sucking"),			DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eHighPriority + 3,	MonsterSound::eBaseChannel,	EBloodsuckerSounds::eVampireSucking,	"bip01_head");
-	sound().add(pSettings->r_string(section,"Sound_Vampire_Hit"),				DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eHighPriority + 2,	MonsterSound::eBaseChannel,	EBloodsuckerSounds::eVampireHit,		"bip01_head");
-	sound().add(pSettings->r_string(section,"Sound_Vampire_StartHunt"),			DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eHighPriority + 5,	MonsterSound::eBaseChannel,	EBloodsuckerSounds::eVampireStartHunt,	"bip01_head");
-	sound().add(pSettings->r_string(section,"Sound_Invisibility_Change_State"),	DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eNormalPriority,	MonsterSound::eChannelIndependent << 1,	EBloodsuckerSounds::eChangeVisibility, "bip01_head");
-	sound().add(pSettings->r_string(section,"Sound_Growl"),						DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eHighPriority + 6,	MonsterSound::eBaseChannel,	EBloodsuckerSounds::eGrowl,				"bip01_head");
-	sound().add(pSettings->r_string(section,"Sound_Alien"),						DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eCriticalPriority,	u32(MonsterSound::eCaptureAllChannels),	EBloodsuckerSounds::eAlien,		"bip01_head");
+	sound().add(pSettings->r_string(section,"Sound_Vampire_Grasp"),				DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eHighPriority + 4,	MonsterSound::eBaseChannel,	eVampireGrasp,					"bip01_head");
+	sound().add(pSettings->r_string(section,"Sound_Vampire_Sucking"),			DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eHighPriority + 3,	MonsterSound::eBaseChannel,	eVampireSucking,				"bip01_head");
+	sound().add(pSettings->r_string(section,"Sound_Vampire_Hit"),				DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eHighPriority + 2,	MonsterSound::eBaseChannel,	eVampireHit,					"bip01_head");
+	sound().add(pSettings->r_string(section,"Sound_Vampire_StartHunt"),			DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eHighPriority + 5,	MonsterSound::eBaseChannel,	eVampireStartHunt,				"bip01_head");
+	sound().add(pSettings->r_string(section,"Sound_Invisibility_Change_State"),	DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eNormalPriority,	MonsterSound::eChannelIndependent << 1,	eChangeVisibility,	"bip01_head");
+	sound().add(pSettings->r_string(section,"Sound_Growl"),						DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eHighPriority + 6,	MonsterSound::eBaseChannel,	eGrowl,							"bip01_head");
+	sound().add(pSettings->r_string(section,"Sound_Alien"),						DEFAULT_SAMPLE_COUNT,	SOUND_TYPE_MONSTER_ATTACKING, MonsterSound::eCriticalPriority,	u32(MonsterSound::eCaptureAllChannels),	eAlien,				"bip01_head");
 }
 
 
@@ -459,7 +459,7 @@ CBaseMonster::SDebugInfo CAI_Bloodsucker::show_debug_info()
 	if (!info.active) return CBaseMonster::SDebugInfo();
 
 	string128 text;
-	sprintf(text, "Vampire Want Value = [%f] Speed = [%f]", m_vampire_want_value, m_vampire_want_speed);
+	sprintf_s(text, "Vampire Want Value = [%f] Speed = [%f]", m_vampire_want_value, m_vampire_want_speed);
 	DBG().text(this).add_item(text, info.x, info.y+=info.delta_y, info.color);
 	DBG().text(this).add_item("---------------------------------------", info.x, info.y+=info.delta_y, info.delimiter_color);
 

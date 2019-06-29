@@ -32,7 +32,7 @@ FS_Path::FS_Path	(LPCSTR _Root, LPCSTR _Add, LPCSTR _DefExt, LPCSTR _FilterCapti
 {
 //	VERIFY			(_Root&&_Root[0]);
 	string_path		temp;
-    strcpy			(temp,_Root); 
+    strcpy_s		(temp,sizeof(temp),_Root); 
     if (_Add) 		strcat(temp,_Add);
 	if (temp[0] && temp[xr_strlen(temp)-1]!='\\') strcat(temp,"\\");
 	m_Path			= xr_strlwr(xr_strdup(temp));
@@ -65,7 +65,7 @@ void	FS_Path::_set	(LPSTR add)
 
 	// m_Path
 	string_path		temp;
-	strconcat		(temp,m_Root,m_Add);
+	strconcat		(sizeof(temp),temp,m_Root,m_Add);
 	if (temp[xr_strlen(temp)-1]!='\\') strcat(temp,"\\");
 	xr_free			(m_Path);
 	m_Path			= xr_strlwr(xr_strdup(temp));
@@ -81,27 +81,28 @@ void	FS_Path::_set_root	(LPSTR root)
 
 	// m_Path
 	string_path		temp;
-	strconcat		(temp,m_Root,m_Add ? m_Add : "");
+	strconcat		(sizeof(temp),temp,m_Root,m_Add ? m_Add : "");
 	if (*temp && temp[xr_strlen(temp)-1]!='\\') strcat(temp,"\\");
 	xr_free			(m_Path);
 	m_Path			= xr_strlwr(xr_strdup(temp));
 }
 
-LPCSTR FS_Path::_update(LPSTR dest, LPCSTR src)const
+LPCSTR FS_Path::_update(string_path& dest, LPCSTR src)const
 {
-	R_ASSERT(dest);
-    R_ASSERT(src);
-	string_path		temp;
-	strcpy			(temp,src);
-	return xr_strlwr(strconcat(dest,m_Path,temp));
+	R_ASSERT			(dest);
+    R_ASSERT			(src);
+	string_path			temp;
+	strcpy_s			(temp, sizeof(temp), src);
+	strconcat			(sizeof(dest), dest, m_Path, temp);
+	return xr_strlwr	(dest);
 }
-
+/*
 void FS_Path::_update(xr_string& dest, LPCSTR src)const
 {
     R_ASSERT(src);
     dest			= xr_string(m_Path)+src;
     xr_strlwr		(dest);
-}
+}*/
 void FS_Path::rescan_path_cb	()
 {
 	m_Flags.set(flNeedRescan,TRUE);

@@ -26,6 +26,8 @@ protected:
 	float			m_endMovingTime;
 	float			m_targetZoom;
 	Frect			m_desiredMapRect;
+	void			init_internal		();
+	void			update_target_state	();
 public:
 					CMapActionZoomControl	(LPCSTR action_name) : inherited(action_name) {}
 	virtual	void	execute				();
@@ -33,7 +35,8 @@ public:
 	virtual	void	finalize			();
 };
 
-class CMapActionResize : public CMapActionZoomControl {
+class CMapActionResize : public CMapActionZoomControl 
+{
 private:
 	typedef CMapActionZoomControl	inherited;
 public:
@@ -42,7 +45,8 @@ public:
 	virtual	void	finalize			();
 };
 
-class CMapActionMinimize : public CMapActionZoomControl {
+class CMapActionMinimize : public CMapActionZoomControl 
+{
 private:
 	typedef CMapActionZoomControl	inherited;
 public:
@@ -106,10 +110,6 @@ public:
 
 };
 
-//-----------------------------------------------------------------------------
-// action planner implementation
-//-----------------------------------------------------------------------------
-
 using namespace UIMapWndActionsSpace;
 
 CMapActionPlanner::CMapActionPlanner	(){}
@@ -158,10 +158,14 @@ void CMapActionPlanner::setup		(CUIMapWnd *object)
 	set_target_state			(target_state);
 }
 
-//-----------------------------------------------------------------------------
 void CMapActionZoomControl::initialize	()
 {
 	inherited::initialize		();
+	init_internal				();
+}
+
+void CMapActionZoomControl::init_internal()
+{
 	float dist					= m_object->GlobalMap()->CalcOpenRect(m_object->m_tgtCenter,m_desiredMapRect,m_targetZoom);
 	bool bMove					= !fis_zero(dist,EPS_L);
 	bool bZoom					= !fsimilar(m_targetZoom,m_object->GlobalMap()->GetCurrentZoom(),EPS_L);
@@ -169,52 +173,61 @@ void CMapActionZoomControl::initialize	()
 	if (bZoom&&bMove)			m_endMovingTime += _max(map_zoom_time,dist/map_resize_speed);
 	else if (bZoom)				m_endMovingTime += map_zoom_time;
 	else if (bMove)				m_endMovingTime += _max(dist/map_resize_speed, min_move_time);
-//	m_object->GlobalMap()->SetLocked	(true);
+}
+
+void CMapActionZoomControl::update_target_state()
+{
+	float cur_map_zoom			= m_object->GetZoom();
+	if(!fsimilar(cur_map_zoom,m_targetZoom))
+	{//re-init
+		m_targetZoom			= cur_map_zoom;
+		init_internal			();
+	}
 }
 
 void CMapActionZoomControl::finalize	()
 {
 	inherited::finalize					();
 	m_object->UpdateScroll				();
-//	m_object->GlobalMap()->SetLocked	(false);
 }
 
 void CMapActionZoomControl::execute		()
 {
-	inherited::execute();
-	CUIGlobalMap*			gm	= m_object->GlobalMap();
+	update_target_state		();
+	inherited::execute		();
+	CUIGlobalMap* gm		= m_object->GlobalMap();
 	float gt				= Device.fTimeGlobal;
 	float time_to			= m_endMovingTime-gt;
 	float dt				= _min(Device.fTimeDelta,time_to);
 
-	if(m_endMovingTime > Device.fTimeGlobal){
-		Frect current_rect	= gm->GetWndRect();
-		current_rect.x1		+= ((m_desiredMapRect.x1-current_rect.x1)/time_to)*dt;
-		current_rect.y1		+= ((m_desiredMapRect.y1-current_rect.y1)/time_to)*dt;
-		current_rect.x2		+= ((m_desiredMapRect.x2-current_rect.x2)/time_to)*dt;
-		current_rect.y2		+= ((m_desiredMapRect.y2-current_rect.y2)/time_to)*dt;
-		gm->SetWndRect		(current_rect);
-	}else{
-		gm->SetWndRect		(m_desiredMapRect);
+	if(m_endMovingTime > Device.fTimeGlobal)
+	{
+		Frect current_rect		= gm->GetWndRect();
+		current_rect.x1			+= ((m_desiredMapRect.x1-current_rect.x1)/time_to)*dt;
+		current_rect.y1			+= ((m_desiredMapRect.y1-current_rect.y1)/time_to)*dt;
+		current_rect.x2			+= ((m_desiredMapRect.x2-current_rect.x2)/time_to)*dt;
+		current_rect.y2			+= ((m_desiredMapRect.y2-current_rect.y2)/time_to)*dt;
+		gm->SetWndRect			(current_rect);
+	}else
+	{
+		gm->SetWndRect			(m_desiredMapRect);
 		m_storage->set_property	(3,true);
 	}	
 
-	gm->Update				();
-	m_object->UpdateScroll	();
+	gm->Update					();
+	m_object->UpdateScroll		();
 }
-//-----------------------------------------------------------------------------
 
 void CMapActionResize::initialize()
 {
 	m_targetZoom				= m_object->GetZoom();
-	inherited::initialize();
+	inherited::initialize		();
 }
 
-void CMapActionResize::finalize		()
+void CMapActionResize::finalize()
 {
-	inherited::finalize				();
+	inherited::finalize			();
 }
-//-----------------------------------------------------------------------------
 
 void CMapActionMinimize::initialize()
 {
@@ -228,16 +241,17 @@ void CMapActionMinimize::finalize()
 	inherited::finalize			();
 }
 
-//-----------------------------------------------------------------------------
 void CMapActionIdle::initialize	()
 {
 	inherited::initialize		();
 	m_object->UpdateScroll		();
 }
+
 void CMapActionIdle::finalize	()
 {
 	inherited::finalize			();
 }
+
 void CMapActionIdle::execute	()
 {
 	inherited::execute			();
@@ -245,7 +259,6 @@ void CMapActionIdle::execute	()
 	m_storage->set_property	(2,false);
 	m_storage->set_property	(3,false);
 }
-//-----------------------------------------------------------------------------
 
 bool CEvaluatorTargetMapShown::evaluate()
 {
@@ -264,7 +277,6 @@ bool CEvaluatorTargetMapShown::evaluate()
 	}
 	return false;
 }
-//-----------------------------------------------------------------------------
 
 bool CEvaluatorMapMinimized::evaluate	()
 {
@@ -272,11 +284,9 @@ bool CEvaluatorMapMinimized::evaluate	()
 	bool res = !!fsimilar(m_object->GlobalMap()->GetCurrentZoom(),m_object->GlobalMap()->GetMinZoom(),EPS_L );
 	return res;
 }
-//-----------------------------------------------------------------------------
 
 bool CEvaluatorMapResized::evaluate			()
 {
 	if(m_storage->property(1)) return true;
 	return m_storage->property(3);
 }
-//-----------------------------------------------------------------------------

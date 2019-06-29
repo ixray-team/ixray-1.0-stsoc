@@ -3,7 +3,7 @@
 #include "ogf_face.h"
 #include "std_classes.h"
 #include "fs.h"
-#include "fmesh.h"
+#include "..\xr_3da\fmesh.h"
 
 using namespace std;
 
@@ -143,7 +143,7 @@ void OGF::Save			(IWriter &fs)
 		Tname			+= t;
 	}
 	string1024			sid;
-	strconcat			(sid,
+	strconcat			(sizeof(sid),sid,
 		pBuild->shader_render[pBuild->materials[material].shader].name,
 		"/",
 		Tname.c_str()
@@ -194,7 +194,7 @@ void OGF_Reference::Save	(IWriter &fs)
 		Tname			+= t;
 	}
 	string1024			sid	;
-	strconcat			(sid,
+	strconcat			(sizeof(sid),sid,
 		pBuild->shader_render[pBuild->materials[material].shader].name,
 		"/",
 		Tname.c_str()

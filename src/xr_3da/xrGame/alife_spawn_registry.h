@@ -16,6 +16,7 @@
 #include "ai_debug.h"
 
 class CServerEntityWrapper;
+class CGameGraph;
 
 class CALifeSpawnRegistry : CRandom {
 public:
@@ -26,7 +27,7 @@ public:
 	typedef xr_vector<ALife::_SPAWN_ID>												SPAWN_IDS;
 	typedef associative_vector<ALife::_SPAWN_STORY_ID,ALife::_OBJECT_ID>			SPAWN_STORY_IDS;
 
-protected:
+private:
 	CALifeSpawnHeader						m_header;
 	SPAWN_GRAPH								m_spawns;
 	ARTEFACT_SPAWNS							m_artefact_spawn_positions;
@@ -35,6 +36,13 @@ protected:
 	SPAWN_IDS								m_temp0;
 	SPAWN_IDS								m_temp1;
 	SPAWN_STORY_IDS							m_spawn_story_ids;
+
+#ifdef PRIQUEL
+private:
+	IReader									*m_file;
+	IReader									*m_chunk;
+	CGameGraph								*m_game_graph;
+#endif // PRIQUEL
 
 protected:
 			void							save_updates				(IWriter &stream);

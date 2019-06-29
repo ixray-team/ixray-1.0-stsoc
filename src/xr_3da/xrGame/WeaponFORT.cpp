@@ -1,10 +1,6 @@
-#include "stdafx.h"
-
+#include "pch_script.h"
 #include "WeaponFORT.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 CWeaponFORT::CWeaponFORT() : CWeaponPistol("FORT")
 {
 }
@@ -12,8 +8,6 @@ CWeaponFORT::CWeaponFORT() : CWeaponPistol("FORT")
 CWeaponFORT::~CWeaponFORT()
 {
 }
-
-#include "script_space.h"
 
 using namespace luabind;
 

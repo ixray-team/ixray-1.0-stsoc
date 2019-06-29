@@ -6,10 +6,9 @@
 //	Description : Script Engine help
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "script_space.h"
+#include "pch_script.h"
 
-#ifdef DEBUG
+#if 0//def DEBUG
 
 #ifndef BOOST_NO_STRINGSTREAM
 #	include <sstream>
@@ -45,7 +44,7 @@ xr_string to_string					(luabind::object const& o)
 
 void strreplaceall						(xr_string &str, LPCSTR S, LPCSTR N)
 {
-	LPSTR	A;
+	LPCSTR	A;
 	int		S_len = xr_strlen(S);
 	while ((A = strstr(str.c_str(),S)) != 0)
 		str.replace(A - str.c_str(),S_len,N);

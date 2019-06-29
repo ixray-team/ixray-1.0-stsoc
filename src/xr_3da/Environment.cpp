@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "render.h"
+#ifndef _EDITOR
+    #include "render.h"
+#endif
 
 #include "Environment.h"
 #include "xr_efflensflare.h"
@@ -18,11 +20,14 @@
 	#include "IGame_Level.h"
 #endif
 
+#include "D3DUtils.h"
+#include "xrCore.h"
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 ENGINE_API	float			psVisDistance	= 1.f;
-static const float			MAX_NOISE_FREQ	= 0.3f;
+static const float			MAX_NOISE_FREQ	= 0.03f;
 
 //#define WEATHER_LOGGING
 
@@ -125,6 +130,11 @@ void CEnvironment::SetWeather(shared_str name, bool forced)
 	if (name.size())	{
 //.		bAlready = TRUE;
         EnvsMapIt it		= WeatherCycles.find(name);
+		if (it == WeatherCycles.end())
+		{
+			Msg("! Invalid weather name: %s", name.c_str());
+			return;
+		}
         R_ASSERT3			(it!=WeatherCycles.end(),"Invalid weather name.",*name);
 		CurrentCycleName	= it->first;
 		if (forced)			{Invalidate();			}

@@ -28,6 +28,8 @@ void CPHSimpleCharacter::UpdateStaticDamage(dContact* c,SGameMtl* tri_material,b
 void CPHSimpleCharacter::UpdateDynamicDamage(dContact* c,u16 obj_material_idx,dBodyID b,bool bo1)
 {
 	
+	//if(ph_world ->IsFreezed())
+							//return;
 	const dReal* vel=dBodyGetLinearVel(m_body);
 	dReal c_vel;
 	dMass m;

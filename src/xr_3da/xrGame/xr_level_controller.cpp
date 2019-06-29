@@ -95,6 +95,8 @@ _action  actions[]		= {
 																
 	{ "use_bandage",		kUSE_BANDAGE			,_sp},		
 	{ "use_medkit",			kUSE_MEDKIT				,_sp},		
+	{ "quick_save",			kQUICK_SAVE				,_sp},		
+	{ "quick_load",			kQUICK_LOAD				,_sp},		
 																
 	{ NULL, 				kLASTACTION				,_both}		
 };															
@@ -162,11 +164,34 @@ _keyboard keyboards[] = {
 	{ "kRWIN",			DIK_RWIN		},	{ "kAPPS",			DIK_APPS		},
 	{ "kPAUSE",			DIK_PAUSE		},	{ "mouse1",			MOUSE_1			},
 	{ "mouse2",			MOUSE_2			},	{ "mouse3",			MOUSE_3			},
-	{ NULL, 			0				}
+	{ "mouse4",			MOUSE_4			},	{ "mouse5",			MOUSE_5			},
+	{ "mouse6",			MOUSE_6			},	{ "mouse7",			MOUSE_7			},
+	{ "mouse8",			MOUSE_8			},	{ NULL, 			0				}
 };
 
 void initialize_bindings()
 {
+#ifdef DEBUG
+	int i1=0;
+	while(true)
+	{
+		_keyboard& _k1			= keyboards[i1];
+		if(_k1.key_name==NULL)	break;
+		int i2 = i1;
+		while (true)
+		{
+			_keyboard& _k2			= keyboards[i2];
+			if(_k2.key_name==NULL)	break;
+			if(_k1.dik==_k2.dik && i1!=i2)
+			{
+				Msg("%s==%s",_k1.key_name,_k2.key_name);
+			}
+			++i2;
+		}
+		++i1;
+	}
+#endif
+
 	for(int idx=0; idx<bindings_count; ++idx)
 		g_key_bindings[idx].m_action = &actions[idx];
 	
@@ -325,26 +350,26 @@ EGameActions get_binded_action(int _dik)
 	return kNOTBINDED;
 }
 
-void GetActionAllBinding		(LPCSTR _action, char* dst_buff)
+void GetActionAllBinding		(LPCSTR _action, char* dst_buff, int dst_buff_sz)
 {
 	int			action_id	= action_name_to_id(_action);
 	_binding*	pbinding	= &g_key_bindings[action_id];
 
-	string16	prim;
-	string16	sec;
+	string128	prim;
+	string128	sec;
 	prim[0]		= 0;
 	sec[0]		= 0;
 
 	if(pbinding->m_keyboard[0])
 	{
-		strcpy(prim, pbinding->m_keyboard[0]->key_local_name.c_str());
+		strcpy_s(prim, pbinding->m_keyboard[0]->key_local_name.c_str());
 	}
 	if(pbinding->m_keyboard[1])
 	{
-		strcpy(sec, pbinding->m_keyboard[1]->key_local_name.c_str());
+		strcpy_s(sec, pbinding->m_keyboard[1]->key_local_name.c_str());
 	}
 	
-	sprintf		(dst_buff,"%s%s%s", prim[0]?prim:"", (sec[0]&&prim[0])?" , ":"", sec[0]?sec:"");
+	sprintf_s		(dst_buff, dst_buff_sz, "%s%s%s", prim[0]?prim:"", (sec[0]&&prim[0])?" , ":"", sec[0]?sec:"");
 					
 }
 
@@ -482,7 +507,7 @@ public:
 		string_path				_cfg;
 		string_path				cmd;
 		FS.update_path			(_cfg,"$game_config$","default_controls.ltx");
-		strconcat				(cmd,"cfg_load", " ", _cfg);
+		strconcat				(sizeof(cmd),cmd,"cfg_load", " ", _cfg);
 		Console->Execute		(cmd);
 	}
 };
@@ -500,7 +525,7 @@ public:
 		for(int idx=0; idx<bindings_count;++idx)
 		{
 			_binding* pbinding		= &g_key_bindings[idx];
-			sprintf		(buff,"[%s] primary is[%s] secondary is[%s]",
+			sprintf_s		(buff,"[%s] primary is[%s] secondary is[%s]",
 						pbinding->m_action->action_name,
 						(pbinding->m_keyboard[0])?pbinding->m_keyboard[0]->key_local_name.c_str():"NULL",
 						(pbinding->m_keyboard[1])?pbinding->m_keyboard[1]->key_local_name.c_str():"NULL");

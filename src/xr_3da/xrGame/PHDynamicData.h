@@ -12,9 +12,11 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
+class PHDynamicData;
 
 class PHDynamicData  
 {
+#if 0
 public:
 dVector3 pos;
 dMatrix3 R;
@@ -26,7 +28,7 @@ CPHInterpolation body_interpolation;
 dGeomID geom;
 dGeomID transform;
 //PHDynamicData* Childs;
-xr_vector<PHDynamicData>  Childs;
+//xr_vector<PHDynamicData>  Childs;
 unsigned int numOfChilds;
 Fmatrix ZeroTransform;
 public:
@@ -84,7 +86,9 @@ public:
 			//meshTransform.PreTranslate(oVector3(dGeomGetPosition(dGeomTransformGetGeom(geom))));
 			//meshTransform.PostTranslate(oVector3(dBodyGetPosition(body)));
 			}
-	static inline DMXPStoFMX(const dReal* R,const dReal* pos,Fmatrix& aTransform){
+#endif // #if 0
+public:
+	static inline void DMXPStoFMX(const dReal* R,const dReal* pos,Fmatrix& aTransform){
 
 			CopyMemory(&aTransform,R,sizeof(dMatrix3));
 			aTransform.transpose();
@@ -94,7 +98,7 @@ public:
 			aTransform._34=0.f;
 			aTransform._44=1.f;
 		};
-	static inline DMXtoFMX(const dReal* R,Fmatrix& aTransform){
+	static inline void DMXtoFMX(const dReal* R,Fmatrix& aTransform){
 			aTransform._11=R[0];
 			aTransform._12=R[4];
 			aTransform._13=R[8];
@@ -111,7 +115,7 @@ public:
 			aTransform._34=0.f;
 			aTransform._44=1.f;
 	};
-	static inline FMX33toDMX(const Fmatrix33& aTransform,dReal* R){	
+	static inline void FMX33toDMX(const Fmatrix33& aTransform,dReal* R){	
 		R[0]=aTransform._11;
 		R[4]=aTransform._12;
 		R[8]=aTransform._13;
@@ -124,7 +128,7 @@ public:
 		R[6]=aTransform._32;
 		R[10]=aTransform._33;
 		};
-	static inline FMXtoDMX(const Fmatrix& aTransform,dReal* R){	
+	static inline void FMXtoDMX(const Fmatrix& aTransform,dReal* R){	
 		R[0]=aTransform._11;
 		R[4]=aTransform._12;
 		R[8]=aTransform._13;
@@ -137,11 +141,13 @@ public:
 		R[6]=aTransform._32;
 		R[10]=aTransform._33;
 	};
+#if 0
 private:
 	void CalculateR_N_PosOfChilds(dBodyID parent);
 public:
 	bool SetGeom(dGeomID ageom);
 	bool SetTransform(dGeomID ageom);
+#endif // #if 0
 };
 
 #endif // !defined(AFX_PHDynamicData_H__ACC01646_B581_4639_B78C_30311432021B__INCLUDED_)

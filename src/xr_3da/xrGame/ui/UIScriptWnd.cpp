@@ -1,8 +1,6 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "UIScriptWnd.h"
 #include "../HudManager.h"
-#include "../script_space.h"
-#include <luabind/operator.hpp>
 #include "../object_broker.h"
 #include "../callback_info.h"
 

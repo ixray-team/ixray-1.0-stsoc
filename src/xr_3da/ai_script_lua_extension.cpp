@@ -75,12 +75,12 @@ int __cdecl Lua::LuaOut(Lua::ELuaMessageType tLuaMessageType, LPCSTR caFormat, .
 	
 	va_start(l_tMarker,caFormat);
 
-	strcpy	(S2,S);
+	strcpy_s	(S2,S);
 	S1		= S2 + xr_strlen(S);
 	int		l_iResult = vsprintf(S1,caFormat,l_tMarker);
 	Msg		("%s",S2);
 	
-	strcpy	(S2,SS);
+	strcpy_s	(S2,SS);
 	S1		= S2 + xr_strlen(SS);
 	vsprintf(S1,caFormat,l_tMarker);
 
@@ -223,11 +223,11 @@ bool Script::bfLoadBuffer(CLuaVirtualMachine *tpLuaVM, LPCSTR caBuffer, size_t t
 	int				l_iErrorCode;
 	if (caNameSpaceName) {
 		string256		insert;
-		sprintf			(insert,"local this = %s\n",caNameSpaceName);
+		sprintf_s		(insert,sizeof(insert),"local this = %s\n",caNameSpaceName);
 		size_t			str_len = xr_strlen(insert);
 		LPSTR			script = xr_alloc<char>(u32(str_len + tSize));
-		strcpy			(script,insert);
-		CopyMemory	(script + str_len,caBuffer,u32(tSize));
+		strcpy_s		(script, str_len+tSize, insert);
+		CopyMemory		(script+str_len, caBuffer, u32(tSize));
 		l_iErrorCode	= luaL_loadbuffer(tpLuaVM,script,tSize + str_len,caScriptName);
 		xr_free			(script);
 	}
@@ -246,10 +246,10 @@ bool Script::bfLoadBuffer(CLuaVirtualMachine *tpLuaVM, LPCSTR caBuffer, size_t t
 
 bool bfDoFile(CLuaVirtualMachine *tpLuaVM, LPCSTR caScriptName, LPCSTR caNameSpaceName, bool bCall)
 {
-	string256		l_caLuaFileName;
+	string_path		l_caLuaFileName;
 	IReader			*l_tpFileReader = FS.r_open(caScriptName);
 	R_ASSERT		(l_tpFileReader);
-	strconcat		(l_caLuaFileName,"@",caScriptName);
+	strconcat		(sizeof(l_caLuaFileName),l_caLuaFileName,"@",caScriptName);
 	
 	if (!bfLoadBuffer(tpLuaVM,static_cast<LPCSTR>(l_tpFileReader->pointer()),(size_t)l_tpFileReader->length(),l_caLuaFileName,caNameSpaceName)) {
 		lua_pop			(tpLuaVM,4);
@@ -327,7 +327,7 @@ bool Script::bfGetNamespaceTable(CLuaVirtualMachine *tpLuaVM, LPCSTR N)
 {
 	lua_pushstring 		(tpLuaVM,"_G"); 
 	lua_gettable 		(tpLuaVM,LUA_GLOBALSINDEX); 
-	string256			S2;	strcpy	(S2,N);
+	string256			S2;	strcpy_s	(S2,N);
 	LPSTR				S	= S2;
 	for (;;) { 
 		if (!xr_strlen(S)) return	(false); 
@@ -359,7 +359,7 @@ CLuaVirtualMachine *Script::get_namespace_table(CLuaVirtualMachine *tpLuaVM, LPC
 	lua_pushstring 			(tpLuaVM,"_G"); 
 	lua_gettable 			(tpLuaVM,LUA_GLOBALSINDEX); 
 	string256				S2;
-	strcpy					(S2,N);
+	strcpy_s					(S2,N);
 	LPSTR					S	= S2;
 	for (;;) { 
 		if (!xr_strlen(S))
@@ -414,7 +414,7 @@ bool	Script::bfIsObjectPresent	(CLuaVirtualMachine *tpLuaVM, LPCSTR namespace_na
 luabind::object Script::lua_namespace_table(CLuaVirtualMachine *tpLuaVM, LPCSTR namespace_name)
 {
 	string256			S1;
-	strcpy				(S1,namespace_name);
+	strcpy_s				(S1,namespace_name);
 	LPSTR				S = S1;
 	luabind::object		lua_namespace = luabind::get_globals(tpLuaVM);
 	for (;;) {

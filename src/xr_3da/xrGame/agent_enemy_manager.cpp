@@ -6,7 +6,7 @@
 //	Description : Agent enemy manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "agent_enemy_manager.h"
 #include "agent_manager.h"
 #include "agent_memory_manager.h"

@@ -24,22 +24,22 @@ void CUINewsItemWnd::Init				(LPCSTR xml_name, LPCSTR start_from)
 	strcpy(str,start_from);
 	xml_init.InitWindow			(uiXml,str,0,this);
 
-	strconcat(str,start_from,":image");
+	strconcat(sizeof(str),str,start_from,":image");
 	m_UIImage					= xr_new<CUIStatic>();	m_UIImage->SetAutoDelete(true);
 	xml_init.InitStatic			(uiXml,str,0,m_UIImage);
 	AttachChild					(m_UIImage);
 
-	strconcat(str,start_from,":text_cont");
+	strconcat(sizeof(str),str,start_from,":text_cont");
 	m_UIText					= xr_new<CUIStatic>();	m_UIText->SetAutoDelete(true);
 	xml_init.InitStatic			(uiXml,str,0,m_UIText);
 	AttachChild					(m_UIText);
 
-	strconcat(str,start_from,":date_text_cont");
+	strconcat(sizeof(str),str,start_from,":date_text_cont");
 	m_UITextDate				= xr_new<CUIStatic>();	m_UITextDate->SetAutoDelete(true);
 	xml_init.InitStatic			(uiXml,str,0,m_UITextDate);
 	AttachChild					(m_UITextDate);
 
-	strconcat(str,start_from,":auto");
+	strconcat(sizeof(str),str,start_from,":auto");
 	xml_init.InitAutoStaticGroup(uiXml, str, 0, this);
 
 }
@@ -53,7 +53,7 @@ void CUINewsItemWnd::Setup			(GAME_NEWS_DATA& news_data)
 	string128						_time;
 	u32 years, months, days, hours, minutes, seconds, milliseconds;
 	split_time						(news_data.receive_time, years, months, days, hours, minutes, seconds, milliseconds);
-	sprintf							(_time, "%02i/%02i/%04i %02i:%02i", days, months, years, hours, minutes);
+	sprintf_s							(_time, "%02i/%02i/%04i %02i:%02i", days, months, years, hours, minutes);
 
 	m_UITextDate->SetText			(_time);
 	m_UITextDate->AdjustHeightToText();

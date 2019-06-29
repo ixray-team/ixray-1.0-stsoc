@@ -73,14 +73,15 @@ static int solve_trig1_aux(float c,
         theta[1] = theta[0] - temp;
         theta[0] += temp;
 
-	theta[0] = angle_normalize(theta[0]);
-	theta[1] = angle_normalize(theta[1]);
+	//theta[0] = angle_normalize(theta[0]);
+	//theta[1] = angle_normalize(theta[1]);
 
 	if (theta[0] > theta[1])
 	{
-	    temp = theta[0]; 
-	    theta[0] = theta[1];
-	    theta[1] = temp;
+		swap(theta[0],theta[1]);
+	//	temp = theta[0]; 
+	//    theta[0] = theta[1];
+	 //   theta[1] = temp;
 	}
     }
     return num;

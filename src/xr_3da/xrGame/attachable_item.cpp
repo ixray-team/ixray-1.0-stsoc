@@ -106,10 +106,10 @@ void CAttachableItem::enable			(bool value)
 bool  CAttachableItem::can_be_attached	() const
 {
 //	VERIFY							(m_valid);
-	if (!item().m_pInventory)
+	if (!item().m_pCurrentInventory)
 		return				(false);
 
-	if (!item().m_pInventory->IsBeltUseful())
+	if (!item().m_pCurrentInventory->IsBeltUseful())
 		return				(true);
 
 	if (item().m_eItemPlace != eItemPlaceBelt)

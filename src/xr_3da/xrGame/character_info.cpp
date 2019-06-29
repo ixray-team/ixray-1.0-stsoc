@@ -8,19 +8,11 @@
 
 #ifdef XRGAME_EXPORTS
 #	include "ui/xrUIXmlParser.h"
-#else
+#	include "PhraseDialog.h"
+#	include "xrServer_Objects_ALife_Monsters.h"
+#else // XRGAME_EXPORTS
 #	include "xrUIXmlParser.h"
-#endif
-
-
-#ifdef XRGAME_EXPORTS
-
-#include "PhraseDialog.h"
-#include "alife_registry_container_composition.h"
-#include "xrServer_Objects_ALife_Monsters.h"
-
-#endif
-
+#endif // XRGAME_EXPORTS
 
 //////////////////////////////////////////////////////////////////////////
 SCharacterProfile::SCharacterProfile()

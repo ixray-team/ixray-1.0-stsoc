@@ -37,6 +37,7 @@ CGameSpy_Full::~CGameSpy_Full()
 	delete_data(m_pGSA);
 	delete_data(m_pGS_Patching);
 	delete_data(m_pGS_HTTP);
+	delete_data(m_pGS_SB);
 
 	if (m_hGameSpyDLL)
 	{
@@ -52,6 +53,9 @@ void	CGameSpy_Full::LoadGameSpy()
 	m_hGameSpyDLL			= LoadLibrary	(g_name);
 	if (0==m_hGameSpyDLL)	R_CHK			(GetLastError());
 	R_ASSERT2		(m_hGameSpyDLL,"GameSpy DLL raised exception during loading or there is no game DLL at all");
+
+	HMODULE	hGameSpyDLL = m_hGameSpyDLL;
+	GAMESPY_LOAD_FN(xrGS_GetGameVersion);
 }
 
 void	CGameSpy_Full::Update	()
@@ -63,4 +67,9 @@ void	CGameSpy_Full::Update	()
 	}
 	m_pGS_HTTP->Think();
 	m_pGS_SB->Update();
+};
+
+const	char*	CGameSpy_Full::GetGameVersion	(const	char*result)
+{
+	return xrGS_GetGameVersion(result);
 };

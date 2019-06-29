@@ -126,15 +126,12 @@ protected:
 	void						SendEvent_Item2Ruck			(PIItem	pItem);
 	void						SendEvent_Item_Drop			(PIItem	pItem);
 	void						SendEvent_Item_Eat			(PIItem	pItem);
-	void 						SendEvent_Item_Sell			(PIItem	pItem);
-	void 						SendEvent_ActivateArtefact	(PIItem	pItem);
 	void						SendEvent_ActivateSlot		(PIItem	pItem);
 
 	//---------------------------------------------------------------------
 
 	void						ProcessPropertiesBoxClicked	();
 	void						ActivatePropertiesBox		();
-	void						Activate_Artefact			();
 
 	void						DropCurrentItem				(bool b_all);
 	void						EatItem						(PIItem itm);

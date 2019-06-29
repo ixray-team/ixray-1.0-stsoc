@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "game_base.h"
-#include "script_space.h"
 #include "xrServer_script_macroses.h"
 #include "../../xrNetServer/client_id.h"
 
@@ -28,14 +27,13 @@ void game_PlayerState::script_register(lua_State *L)
 			luabind::class_<game_PlayerState, WrapType>("game_PlayerState")
 			.def(	constructor<>())
 			.def_readwrite("team",				&BaseType::team)
-			.def_readwrite("kills",				&BaseType::kills)
-			.def_readwrite("deaths",			&BaseType::deaths)
-			.def_readwrite("money_total",		&BaseType::money_total)
+			.def_readwrite("kills",				&BaseType::m_iRivalKills)
+			.def_readwrite("deaths",			&BaseType::m_iDeaths)
 			.def_readwrite("money_for_round",	&BaseType::money_for_round)
-			.def_readwrite("flags",				&BaseType::flags)
+			.def_readwrite("flags",				&BaseType::flags__)
 			.def_readwrite("ping",				&BaseType::ping)
 			.def_readwrite("GameID",			&BaseType::GameID)
-			.def_readwrite("Skip",				&BaseType::Skip)
+//.			.def_readwrite("Skip",				&BaseType::Skip)
 			.def_readwrite("lasthitter",		&BaseType::lasthitter)
 			.def_readwrite("lasthitweapon",		&BaseType::lasthitweapon)
 			.def_readwrite("skin",				&BaseType::skin)
@@ -64,9 +62,9 @@ void game_GameState::script_register(lua_State *L)
 			luabind::class_< game_GameState, DLL_Pure >("game_GameState")
 			.def(	constructor<>())
 
-			.def_readwrite("type",				&game_GameState::type)
-			.def_readonly("round",				&game_GameState::round)
-			.def_readonly("start_time",			&game_GameState::start_time)
+			.def_readwrite("type",				&game_GameState::m_type)
+			.def_readonly("round",				&game_GameState::m_round)
+			.def_readonly("start_time",			&game_GameState::m_start_time)
 
 			.def("Type",						&game_GameState::Type)
 			.def("Phase",						&game_GameState::Phase)

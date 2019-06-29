@@ -13,6 +13,8 @@
 #include "xrMessages.h"
 #include "alife_space.h"
 #include "xrDebug.h"
+#include "xrServer.h"
+#include "battleye_system.h"
 
 class	CHUDManager;
 class	CParticlesObject;
@@ -33,7 +35,7 @@ class	CLevelSoundManager;
 	class	CDebugRenderer;
 #endif
 
-#define DEFAULT_FOV				90.f
+extern float g_fov;
 
 const int maxRP					= 64;
 const int maxTeams				= 32;
@@ -42,6 +44,19 @@ const int maxTeams				= 32;
 class CFogOfWarMngr;
 class CBulletManager;
 class CMapManager;
+
+#include "../feel_touch.h"
+
+class GlobalFeelTouch : public Feel::Touch
+{
+public:
+							GlobalFeelTouch();
+	virtual					~GlobalFeelTouch();
+
+			void			update						();
+			bool			is_object_denied			(CObject const * O);
+};
+
 
 class CLevel					: public IGame_Level, public IPureClient
 {
@@ -122,6 +137,7 @@ private:
 	OBJECTS_LIST				pActors4CrPr;
 
 	CObject*					pCurrentControlEntity;
+	xrServer::EConnect			m_connect_server_err;
 public:
 	void						AddObject_To_Objects4CrPr	(CGameObject* pObj);
 	void						AddActor_To_Actors4CrPr		(CGameObject* pActor);
@@ -160,6 +176,13 @@ public:
 	NET_Queue_Event				*game_events;
 	xr_deque<CSE_Abstract*>		game_spawn_queue;
 	xrServer*					Server;
+	GlobalFeelTouch				m_feel_deny;
+
+
+#ifdef BATTLEYE
+	BattlEyeSystem				battleye_system;
+	virtual bool				TestLoadBEClient();
+#endif // BATTLEYE
 
 private:
 	// preload sounds registry
@@ -186,6 +209,8 @@ protected:
 	bool	xr_stdcall			net_start_client4				();
 	bool	xr_stdcall			net_start_client5				();
 	bool	xr_stdcall			net_start_client6				();
+
+	bool	xr_stdcall			net_start_finalizer				();
 
 	void						net_OnChangeSelfName			(NET_Packet* P);
 
@@ -266,7 +291,8 @@ public:
 	virtual ~CLevel();
 
 	//названияе текущего уровня
-	virtual shared_str			name					() const;
+	virtual shared_str			name				() const;
+	virtual void				GetLevelInfo		( CServerInfo* si );
 
 	//gets the time from the game simulation
 	
@@ -312,12 +338,12 @@ protected:
 	u32		m_dwCL_PingDeltaSend;
 	u32		m_dwCL_PingLastSendTime;
 	u32		m_dwRealPing;
-	virtual	void			SendPingMessage				();
 public:
 	virtual	u32				GetRealPing					() { return m_dwRealPing; };
 
 public:
 			void			remove_objects				();
+	virtual void			OnSessionTerminate			(LPCSTR reason);
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

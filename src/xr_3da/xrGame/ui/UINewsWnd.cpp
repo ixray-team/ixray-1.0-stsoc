@@ -32,7 +32,7 @@ void CUINewsWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 	R_ASSERT3					(xml_result, "xml file not found", xml_name);
 	CUIXmlInit xml_init;
 
-	strconcat					(pth,start_from,"list");
+	strconcat					(sizeof(pth),pth,start_from,"list");
 	xml_init.InitWindow			(uiXml, pth, 0, this);
 	UIScrollWnd					= xr_new<CUIScrollView>();UIScrollWnd->SetAutoDelete(true);
 	AttachChild					(UIScrollWnd);

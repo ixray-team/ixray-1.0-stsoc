@@ -44,6 +44,8 @@ struct ServerInfo{
 	bool					m_bFFire;
 	s16						m_s16FFire;
 	bool					m_bPassword;
+	bool					m_bUserPass;
+	bool					m_bBattlEye;
 	s16						m_Ping;
 	s16						m_Port, m_HPort;
 

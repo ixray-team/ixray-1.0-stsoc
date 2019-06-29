@@ -5,6 +5,10 @@
 #include "vis_common.h"
 #include "IRenderDetailModel.h"
 
+#ifdef _EDITOR
+    #error you cant include this file in borland
+#endif
+
 // refs
 class ENGINE_API	IRenderable;
 class ENGINE_API	IRender_Visual;

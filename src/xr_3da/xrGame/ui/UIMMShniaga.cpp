@@ -11,7 +11,9 @@
 #include "../object_broker.h"
 #include <math.h>
 #include "../Actor.h"
+#include "../saved_game_wrapper.h"
 
+extern string_path g_last_saved_game;
 
 CUIMMShniaga::CUIMMShniaga(){
 	m_sound			= xr_new<CMMSound>();
@@ -53,24 +55,39 @@ CUIMMShniaga::~CUIMMShniaga(){
 	delete_data(m_buttons_new);
 }
 
-
-void CUIMMShniaga::Init(CUIXml& xml_doc, LPCSTR path){
+void CUIMMShniaga::Init(CUIXml& xml_doc, LPCSTR path)
+{
 	string256 _path;
 
 	CUIXmlInit::InitWindow(xml_doc, path, 0, this);
-	CUIXmlInit::InitStatic(xml_doc, strconcat(_path,path,":shniaga:magnifire"),0,m_magnifier); m_mag_pos = m_magnifier->GetWndPos().x;
-	CUIXmlInit::InitStatic(xml_doc, strconcat(_path,path,":shniaga"),0,m_shniaga);
-	CUIXmlInit::InitStatic(xml_doc, strconcat(_path,path,":shniaga:left_anim"),0,m_anims[0]);
-	CUIXmlInit::InitStatic(xml_doc, strconcat(_path,path,":shniaga:right_anim"),0,m_anims[1]);
-	CUIXmlInit::InitStatic(xml_doc, strconcat(_path,path,":shniaga:left_grating"),0,m_gratings[0]);
-	CUIXmlInit::InitStatic(xml_doc, strconcat(_path,path,":shniaga:right_grating"),0,m_gratings[1]);
-	CUIXmlInit::InitScrollView(xml_doc, strconcat(_path,path,":buttons_region"),0,m_view);
+	strconcat				(sizeof(_path),_path,path,":shniaga:magnifire");
+	CUIXmlInit::InitStatic(xml_doc, _path,0,m_magnifier); 
+	m_mag_pos				= m_magnifier->GetWndPos().x;
+	strconcat				(sizeof(_path),_path,path,":shniaga");
+	CUIXmlInit::InitStatic(xml_doc, _path,0,m_shniaga);
+	strconcat				(sizeof(_path),_path,path,":shniaga:left_anim");
+	CUIXmlInit::InitStatic(xml_doc, _path,0,m_anims[0]);
+	strconcat				(sizeof(_path),_path,path,":shniaga:right_anim");
+	CUIXmlInit::InitStatic(xml_doc, _path,0,m_anims[1]);
+	strconcat				(sizeof(_path),_path,path,":shniaga:left_grating");
+	CUIXmlInit::InitStatic(xml_doc, _path,0,m_gratings[0]);
+	strconcat				(sizeof(_path),_path,path,":shniaga:right_grating");
+	CUIXmlInit::InitStatic(xml_doc, _path,0,m_gratings[1]);
+	strconcat				(sizeof(_path),_path,path,":buttons_region");
+	CUIXmlInit::InitScrollView(xml_doc, _path,0,m_view);
+	strconcat				(sizeof(_path),_path,path,":shniaga:magnifire:y_offset");
+	m_offset = xml_doc.ReadFlt(_path,0,0);
 
 	if (!g_pGameLevel) {
-		CreateList			(m_buttons, xml_doc, "menu_main");
+		
+		if (!*g_last_saved_game || !CSavedGameWrapper::valid_saved_game(g_last_saved_game))
+			CreateList		(m_buttons, xml_doc, "menu_main");
+		else
+			CreateList		(m_buttons, xml_doc, "menu_main_last_save");
+
 		CreateList			(m_buttons_new, xml_doc, "menu_new_game");
 	}
-	else  {
+	else {
 		if (GameID() == GAME_SINGLE) {
 			VERIFY			(Actor());
 			if (Actor() && !Actor()->g_Alive())
@@ -261,7 +278,7 @@ void CUIMMShniaga::Update(){
 
 bool CUIMMShniaga::OnMouse(float x, float y, EUIMessages mouse_action){
 	
-	Fvector2 pos = UI()->GetUICursor()->GetPos();
+	Fvector2 pos = UI()->GetUICursor()->GetCursorPosition();
     Frect r;
 	m_magnifier->GetAbsoluteRect(r);
 	if (WINDOW_LBUTTON_DOWN == mouse_action && r.in(pos.x, pos.y))
@@ -363,6 +380,7 @@ void CUIMMShniaga::ProcessEvent(EVENT ev){
 //				float y = m_selected->GetWndPos().y;
 //				m_destination = (y < border) ? y : border;
 				m_destination = m_selected->GetWndPos().y - m_magnifier->GetWndPos().y;
+				m_destination += m_offset;
 				m_run_time = u32((log(1 + abs(m_origin - m_destination))/log(GetHeight()))*1000);
 				if (m_run_time < 100)
 					m_run_time = 100;

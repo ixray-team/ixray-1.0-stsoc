@@ -15,6 +15,16 @@
 #pragma comment(lib,"FreeImage.lib")
 #pragma comment(lib,"xrCore.lib")
 
+#define PROTECTED_BUILD
+
+#ifdef PROTECTED_BUILD
+#	define TRIVIAL_ENCRYPTOR_ENCODER
+#	define TRIVIAL_ENCRYPTOR_DECODER
+#	include "../xr_3da/trivial_encryptor.h"
+#	undef TRIVIAL_ENCRYPTOR_ENCODER
+#	undef TRIVIAL_ENCRYPTOR_DECODER
+#endif // PROTECTED_BUILD
+
 CBuild*	pBuild		= NULL;
 
 extern void logThread(void *dummy);
@@ -70,10 +80,10 @@ void Startup(LPSTR     lpCmdLine)
 	
 	// Load project
 	name[0]=0;				sscanf(strstr(cmd,"-f")+2,"%s",name);
-	string256				prjName;
-	FS.update_path			(prjName,"$game_levels$",strconcat(prjName,name,"\\build.prj"));
+	string_path				prjName;
+	FS.update_path			(prjName,"$game_levels$",strconcat(sizeof(prjName),prjName,name,"\\build.prj"));
 	string256				phaseName;
-	Phase					(strconcat(phaseName,"Reading project [",name,"]..."));
+	Phase					(strconcat(sizeof(phaseName),phaseName,"Reading project [",name,"]..."));
 
 	string256 inf;
 	extern  HWND logWindow;
@@ -114,10 +124,10 @@ void Startup(LPSTR     lpCmdLine)
 	Phase					("Converting data structures...");
 	pBuild					= xr_new<CBuild>();
 	pBuild->Load			(Params,*F);
-	xr_delete				(F);
+	FS.r_close				(F);
 	
 	// Call for builder
-	string256				lfn;
+	string_path				lfn;
 	CTimer	dwStartupTime;	dwStartupTime.Start();
 	FS.update_path			(lfn,_game_levels_,name);
 	pBuild->Run				(lfn);
@@ -135,11 +145,18 @@ void Startup(LPSTR     lpCmdLine)
 	Sleep					(500);
 }
 
+typedef void DUMMY_STUFF (const void*,const u32&,void*);
+XRCORE_API DUMMY_STUFF	*g_temporary_stuff;
+XRCORE_API DUMMY_STUFF	*g_dummy_stuff;
+
 int APIENTRY WinMain(HINSTANCE hInst,
                      HINSTANCE hPrevInstance,
                      LPSTR     lpCmdLine,
                      int       nCmdShow)
 {
+	g_temporary_stuff	= &trivial_encryptor::decode;
+	g_dummy_stuff		= &trivial_encryptor::encode;
+
 	// Initialize debugging
 	Core._initialize	("xrLC");
 	Startup				(lpCmdLine);

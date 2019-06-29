@@ -2,5 +2,3 @@
 // stdafx.obj will contain the pre-compiled type information
 
 #include "stdafx.h"
-
-namespace boost {	void  throw_exception(const std::exception &A) {};	};

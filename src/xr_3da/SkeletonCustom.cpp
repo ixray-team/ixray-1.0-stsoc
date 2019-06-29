@@ -5,8 +5,9 @@
 #include 	"SkeletonCustom.h"
 #include	"SkeletonX.h"
 #include	"fmesh.h"
-#include	"Render.h"
-
+#ifndef _EDITOR
+    #include	"Render.h"
+#endif
 int			psSkeletonUpdate	= 32;
 xrCriticalSection	UCalc_Mutex
 #ifdef PROFILE_CRITICAL_SECTIONS
@@ -20,6 +21,7 @@ void		CBoneInstance::construct	()
 {
 	ZeroMemory					(this,sizeof(*this));
 	mTransform.identity			();
+
 	mRenderTransform.identity	();
 	Callback_overwrite			= FALSE;
 }
@@ -142,7 +144,8 @@ CKinematics::~CKinematics	()
 	// wallmarks
 	ClearWallmarks			();
 
-    ::Render->model_Delete	(m_lod);
+	if(m_lod)
+		::Render->model_Delete(m_lod);
 }
 
 void	CKinematics::IBoneInstances_Create()
@@ -193,20 +196,30 @@ void	CKinematics::Load(const char* N, IReader *data, u32 dwFlags)
 	//Msg				("skeleton: %s",N);
 	inherited::Load	(N, data, dwFlags);
 
-    pUserData		= 0;
-    m_lod			= 0;
+    pUserData		= NULL;
+    m_lod			= NULL;
     // loading lods
+
 	IReader* LD 	= data->open_chunk(OGF_S_LODS);
-    if (LD){
-        string256	name_load,short_name;
-        strcpy		(short_name,N);
+    if (LD)
+	{
+        string_path		short_name;
+        strcpy_s		(short_name,sizeof(short_name),N);
+
         if (strext(short_name)) *strext(short_name)=0;
         // From stream
-        IReader* O 	= LD->open_chunk(0);
-        if (O){
-            strconcat		(name_load,short_name,":lod:1");
-            m_lod 			= ::Render->model_CreateChild(name_load,O);
-            O->close		();
+		{
+			string_path		lod_name;
+			LD->r_string	(lod_name, sizeof(lod_name));
+//.         strconcat		(sizeof(name_load),name_load, short_name, ":lod:", lod_name.c_str());
+            m_lod 			= ::Render->model_CreateChild(lod_name, NULL);
+            VERIFY3(m_lod,"Cant create LOD model for", N);
+//.			VERIFY2			(m_lod->Type==MT_HIERRARHY || m_lod->Type==MT_PROGRESSIVE || m_lod->Type==MT_NORMAL,lod_name.c_str());
+/*
+			strconcat		(name_load, short_name, ":lod:1");
+            m_lod 			= ::Render->model_CreateChild(name_load,LD);
+			VERIFY			(m_lod->Type==MT_SKELETON_GEOMDEF_PM || m_lod->Type==MT_SKELETON_GEOMDEF_ST);
+*/
         }
         LD->close	();
     }
@@ -434,7 +447,10 @@ void CKinematics::Depart		()
 
 	// unmask all bones
 	visimask.zero				();
-	for (u32 b=0; b<bones->size(); b++) visimask.set((u64(1)<<b),TRUE);
+	if(bones)
+	{
+		for (u32 b=0; b<bones->size(); b++) visimask.set((u64(1)<<b),TRUE);
+	}
 	// visibility
 	children.insert				(children.end(),children_invisible.begin(),children_invisible.end());
 	children_invisible.clear	();
@@ -448,8 +464,6 @@ void CKinematics::Release		()
 		CBoneData* &B = (*bones)[i];
 		xr_delete(B);
 	}
-    // release lods
-    if (m_lod)	m_lod->Release	();
 
 	// destroy shared data
     xr_delete(pUserData	);
@@ -457,6 +471,8 @@ void CKinematics::Release		()
 	xr_delete(bone_map_N);
 	xr_delete(bone_map_P);
 
+	if(m_lod)
+		m_lod->Release		();
 	inherited::Release();
 }
 
@@ -552,10 +568,30 @@ void BuildMatrix		(Fmatrix &mView, float invsz, const Fvector norm, const Fvecto
 	mScale.scale		(invsz,invsz,invsz);
 	mView.mulA_43		(mScale);
 }
-
+void CKinematics::EnumBoneVertices	(SEnumVerticesCallback &C, u16 bone_id)
+{
+	for ( u32 i=0; i<children.size(); i++ )
+		LL_GetChild( i )->EnumBoneVertices( C, bone_id );
+}
 #include "cl_intersect.h"
 
 DEFINE_VECTOR(Fobb,OBBVec,OBBVecIt);
+
+bool	CKinematics::	PickBone			(const Fmatrix &parent_xform,  Fvector& normal, float& dist, const Fvector& start, const Fvector& dir, u16 bone_id)
+{
+	Fvector S,D;//normal		= {0,0,0}
+	// transform ray from world to model
+	Fmatrix P;	P.invert	(parent_xform);
+	P.transform_tiny		(S,start);
+	P.transform_dir			(D,dir);
+	for (u32 i=0; i<children.size(); i++)
+			if (LL_GetChild(i)->PickBone(normal,dist,S,D,bone_id))
+			{
+				parent_xform.transform_dir			(normal);
+				return true;
+			}
+	return false;
+}
 
 void CKinematics::AddWallmark(const Fmatrix* parent_xform, const Fvector3& start, const Fvector3& dir, ref_shader shader, float size)
 {

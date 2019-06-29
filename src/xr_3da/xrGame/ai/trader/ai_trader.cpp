@@ -6,14 +6,13 @@
 //	Description : AI Behaviour for monster "Trader"
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "ai_trader.h"
 #include "../../trade.h"
 #include "../../script_entity_action.h"
 #include "../../script_game_object.h"
 #include "../../inventory.h"
 #include "../../xrserver_objects_alife_monsters.h"
-#include "../../script_space.h"
 #include "../../artifact.h"
 #include "../../xrserver.h"
 #include "../../relation_registry.h"
@@ -188,11 +187,14 @@ void CAI_Trader::OnEvent		(NET_Packet& P, u16 type)
 			break;
 		case GE_TRADE_SELL:
 		case GE_OWNERSHIP_REJECT:
-			P.r_u16		(id);
-			Obj = Level().Objects.net_Find	(id);
-			if(inventory().Drop(smart_cast<CGameObject*>(Obj))) 
-				Obj->H_SetParent(0,!P.r_eof() && P.r_u8());
-			break;
+			{
+				P.r_u16		(id);
+				Obj = Level().Objects.net_Find	(id);
+				bool just_before_destroy	= !P.r_eof() && P.r_u8();
+				Obj->SetTmpPreDestroy				(just_before_destroy);
+				if(inventory().DropItem(smart_cast<CGameObject*>(Obj))) 
+					Obj->H_SetParent(0, just_before_destroy);
+			}break;
 		case GE_TRANSFER_AMMO:
 			break;
 	}
@@ -387,18 +389,4 @@ void CAI_Trader::dialog_sound_start(LPCSTR phrase)
 void CAI_Trader::dialog_sound_stop()
 {
 	animation().external_sound_stop();
-}
-
-#include "../../script_space.h"
-
-using namespace luabind;
-
-#pragma optimize("s",on)
-void CAI_Trader::script_register(lua_State *L)
-{
-	module(L)
-	[
-		class_<CAI_Trader,CGameObject>("CAI_Trader")
-			.def(constructor<>())
-	];
 }

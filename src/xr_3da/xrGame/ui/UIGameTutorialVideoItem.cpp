@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "UIGameTutorial.h"
 #include "UIWindow.h"
 #include "UIStatic.h"
@@ -87,8 +87,8 @@ void CUISequenceVideoItem::Load(CUIXml* xml, int idx)
 	if (m_snd_name&&m_snd_name[0])
 	{
 		string_path			_l, _r;
-		strconcat			(_l, m_snd_name, "_l");
-		strconcat			(_r, m_snd_name, "_r");
+		strconcat			(sizeof(_l),_l, m_snd_name, "_l");
+		strconcat			(sizeof(_r),_r, m_snd_name, "_r");
 		m_sound[0].create	(_l,st_Effect,sg_Undefined);	VERIFY(m_sound[0]._handle());
 		m_sound[1].create	(_r,st_Effect,sg_Undefined);	VERIFY(m_sound[1]._handle());
 	}
@@ -169,7 +169,7 @@ void CUISequenceVideoItem::Start()
 
 bool CUISequenceVideoItem::Stop	(bool bForce)
 {
-	if(!m_flags.test(etiCanBeStopped)&&!bForce) 
+	if(!m_flags.test(etiCanBeStopped) && !bForce && IsPlaying()) 
 		return false;
 
 	m_flags.set					(etiPlaying,FALSE);

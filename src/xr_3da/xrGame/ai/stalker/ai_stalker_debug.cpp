@@ -6,7 +6,7 @@
 //	Description : Debug functions for monster "Stalker"
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 
 #ifdef DEBUG
 #include "ai_stalker.h"
@@ -492,7 +492,7 @@ void CAI_Stalker::OnHUDDraw				(CCustomHUD *hud)
 	string256							temp;
 
 	const CObjectHandlerPlanner			&objects = planner();
-	strconcat							(temp,indent,indent);
+	strconcat							(sizeof(temp),temp,indent,indent);
 	draw_planner						(objects,temp,indent,"root");
 
 	HUD().Font().pFontStat->OutSet		(330,up_indent);
@@ -659,7 +659,7 @@ void CAI_Stalker::OnHUDDraw				(CCustomHUD *hud)
 			movement().restrictions().base_in_restrictions().size()
 		) {
 		HUD().Font().pFontStat->OutNext	("%s%srestrictions",indent,indent);
-		strconcat							(temp,indent,indent,indent);
+		strconcat							(sizeof(temp),temp,indent,indent,indent);
 		draw_restrictions					(movement().restrictions().out_restrictions(),temp,indent,"out");
 		draw_restrictions					(movement().restrictions().in_restrictions(),temp,indent,"in");
 		draw_restrictions					(movement().restrictions().base_out_restrictions(),temp,indent,"base out");
@@ -923,7 +923,7 @@ void CAI_Stalker::dbg_draw_vision	()
 
 	CNotYetVisibleObject		*object = memory().visual().not_yet_visible_object(smart_cast<CGameObject*>(Level().CurrentEntity()));
 	string64					out_text;
-	sprintf						(out_text,"%.2f",object ? object->m_value : 0.f);
+	sprintf_s						(out_text,"%.2f",object ? object->m_value : 0.f);
 
 	HUD().Font().pFontMedium->SetColor	(D3DCOLOR_RGBA(255,0,0,95));
 	HUD().Font().pFontMedium->OutSet	(x,y);

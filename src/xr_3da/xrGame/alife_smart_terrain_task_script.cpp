@@ -6,9 +6,8 @@
 //	Description : ALife smart terrain task
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "alife_smart_terrain_task.h"
-#include "script_space.h"
 
 using namespace luabind;
 

@@ -12,7 +12,7 @@ struct ARTICLE_DATA : public IPureSerializeObject<IReader,IWriter>
 		:	article_id		(NULL),
 			receive_time	(0),
 			readed			(false),
-			article_type	(EArticleType::eEncyclopediaArticle)
+			article_type	(eEncyclopediaArticle)
 	{}
 
 	ARTICLE_DATA			(shared_str id, ALife::_TIME_ID time, EArticleType articleType)

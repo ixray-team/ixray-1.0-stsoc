@@ -22,23 +22,30 @@
 class CSE_ALifeItemAmmo;
 
 SERVER_ENTITY_DECLARE_BEGIN0(CSE_ALifeInventoryItem)
-	enum EFlags {
-		FLAG_NO_POSITION = u16(0x8000),
+public:
+	enum {
+		inventory_item_state_enabled	= u8(1) << 0,
+		inventory_item_angular_null		= u8(1) << 1,
+		inventory_item_linear_null		= u8(1) << 2,
+	};
+
+	union mask_num_items {
+		struct {
+			u8	num_items : 5;
+			u8	mask      : 3;
+		};
+		u8		common;
 	};
 
 public:
 	float							m_fCondition;
 	float							m_fMass;
-	int								m_iVolume;
 	u32								m_dwCost;
 	s32								m_iHealthValue;
 	s32								m_iFoodValue;
 	float							m_fDeteriorationValue;
-	int								m_iGridWidth;
-	int								m_iGridHeight;
-	u64								m_qwGridBitMask;
-	ALife::_OBJECT_ID				m_tPreviousParentID;
 	CSE_ALifeObject					*m_self;
+	u32								m_last_update_time;
 
 									CSE_ALifeInventoryItem	(LPCSTR caSection);
 	virtual							~CSE_ALifeInventoryItem	();
@@ -48,6 +55,7 @@ public:
 	virtual CSE_Abstract			*init					();
 	virtual CSE_Abstract			*cast_abstract			() {return 0;};
 	virtual CSE_ALifeInventoryItem	*cast_inventory_item	() {return this;};
+	virtual	u32						update_rate				() const;
 	// end of the virtual inheritance dependant code
 
 	IC		bool					attached	() const
@@ -57,8 +65,7 @@ public:
 	virtual bool					bfUseful();
 
 	/////////// network ///////////////
-	u32								m_dwTimeStamp;
-	u16								m_u16NumItems;
+	u8								m_u8NumItems;
 	SPHNetState						State;
 	///////////////////////////////////
 SERVER_ENTITY_DECLARE_END
@@ -66,6 +73,8 @@ add_to_type_list(CSE_ALifeInventoryItem)
 #define script_type_list save_type_list(CSE_ALifeInventoryItem)
 
 SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeItem,CSE_ALifeDynamicObjectVisual,CSE_ALifeInventoryItem)
+	bool							m_physics_disabled;
+
 									CSE_ALifeItem	(LPCSTR caSection);
 	virtual							~CSE_ALifeItem	();
 	virtual CSE_Abstract			*base			();
@@ -73,6 +82,8 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeItem,CSE_ALifeDynamicObjectVisual,CSE_ALif
 	virtual CSE_Abstract			*init					();
 	virtual CSE_Abstract			*cast_abstract			() {return this;};
 	virtual CSE_ALifeInventoryItem	*cast_inventory_item	() {return this;};
+	virtual BOOL					Net_Relevant			();
+	virtual void					OnEvent					(NET_Packet &tNetPacket, u16 type, u32 time, ClientID sender );
 SERVER_ENTITY_DECLARE_END
 add_to_type_list(CSE_ALifeItem)
 #define script_type_list save_type_list(CSE_ALifeItem)
@@ -81,12 +92,16 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemTorch,CSE_ALifeItem)
 //флаги
 	enum EStats{
 		eTorchActive				= (1<<0),
-		eNightVisionActive			= (1<<1)	
+		eNightVisionActive			= (1<<1),
+		eAttached					= (1<<2)
 	};
 	bool							m_active;
 	bool							m_nightvision_active;
+	bool							m_attached;
 									CSE_ALifeItemTorch	(LPCSTR caSection);
     virtual							~CSE_ALifeItemTorch	();
+	virtual BOOL					Net_Relevant			();
+
 SERVER_ENTITY_DECLARE_END
 add_to_type_list(CSE_ALifeItemTorch)
 #define script_type_list save_type_list(CSE_ALifeItemTorch)
@@ -100,7 +115,6 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemAmmo,CSE_ALifeItem)
 	virtual CSE_ALifeItemAmmo		*cast_item_ammo		()  {return this;};
 	virtual bool					can_switch_online	() const;
 	virtual bool					can_switch_offline	() const;
-
 SERVER_ENTITY_DECLARE_END
 add_to_type_list(CSE_ALifeItemAmmo)
 #define script_type_list save_type_list(CSE_ALifeItemAmmo)
@@ -127,8 +141,8 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemWeapon,CSE_ALifeItem)
 	EWeaponAddonStatus				m_grenade_launcher_status;
 
 	u32								timestamp;
-	u8								flags;
-	u8								state;
+	u8								wpn_flags;
+	u8								wpn_state;
 	u8								ammo_type;
 	u16								a_current;
 	u16								a_elapsed;
@@ -136,22 +150,24 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemWeapon,CSE_ALifeItem)
 	ALife::EHitType					m_tHitType;
 	LPCSTR							m_caAmmoSections;
 	u32								m_dwAmmoAvailable;
-	u32								m_dwSlot;
 	Flags8							m_addon_flags;
 	u8								m_bZoom;
 	u32								m_ef_main_weapon_type;
 	u32								m_ef_weapon_type;
 
-									CSE_ALifeItemWeapon(LPCSTR caSection);
+									CSE_ALifeItemWeapon	(LPCSTR caSection);
 	virtual							~CSE_ALifeItemWeapon();
-	virtual void					OnEvent			(NET_Packet& P, u16 type, u32 time, ClientID sender );
+	virtual void					OnEvent				(NET_Packet& P, u16 type, u32 time, ClientID sender );
 	virtual u32						ef_main_weapon_type	() const;
-	virtual u32						ef_weapon_type	() const;
-	u8								get_slot		();
-	u16								get_ammo_limit	();
-	u16								get_ammo_total	();
-	u16								get_ammo_elapsed();
-	u16								get_ammo_magsize();
+	virtual u32						ef_weapon_type		() const;
+	u8								get_slot			();
+	u16								get_ammo_limit		();
+	u16								get_ammo_total		();
+	u16								get_ammo_elapsed	();
+	u16								get_ammo_magsize	();
+
+	virtual BOOL					Net_Relevant		();
+
 	virtual CSE_ALifeItemWeapon		*cast_item_weapon	() {return this;}
 SERVER_ENTITY_DECLARE_END
 add_to_type_list(CSE_ALifeItemWeapon)
@@ -200,8 +216,9 @@ add_to_type_list(CSE_ALifeItemDetector)
 
 SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemArtefact,CSE_ALifeItem)
 	float							m_fAnomalyValue;
-									CSE_ALifeItemArtefact(LPCSTR caSection);
-	virtual							~CSE_ALifeItemArtefact();
+									CSE_ALifeItemArtefact	(LPCSTR caSection);
+	virtual							~CSE_ALifeItemArtefact	();
+	virtual BOOL					Net_Relevant			();
 SERVER_ENTITY_DECLARE_END
 add_to_type_list(CSE_ALifeItemArtefact)
 #define script_type_list save_type_list(CSE_ALifeItemArtefact)
@@ -255,9 +272,10 @@ add_to_type_list(CSE_ALifeItemBolt)
 
 SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemCustomOutfit,CSE_ALifeItem)
 	u32								m_ef_equipment_type;
-									CSE_ALifeItemCustomOutfit(LPCSTR caSection);
-	virtual							~CSE_ALifeItemCustomOutfit();
-	virtual u32						ef_equipment_type	() const;
+									CSE_ALifeItemCustomOutfit	(LPCSTR caSection);
+	virtual							~CSE_ALifeItemCustomOutfit	();
+	virtual u32						ef_equipment_type			() const;
+	virtual BOOL					Net_Relevant				();
 SERVER_ENTITY_DECLARE_END
 add_to_type_list(CSE_ALifeItemCustomOutfit)
 #define script_type_list save_type_list(CSE_ALifeItemCustomOutfit)

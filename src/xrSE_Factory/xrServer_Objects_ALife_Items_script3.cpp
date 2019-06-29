@@ -13,6 +13,7 @@
 
 using namespace luabind;
 
+#pragma optimize("s",on)
 void CSE_ALifeItemWeaponMagazinedWGL::script_register(lua_State *L)
 {
 	module(L)[

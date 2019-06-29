@@ -1,4 +1,4 @@
- #ifndef _CLOUDCONFIG_H
+#ifndef _CLOUDCONFIG_H
 #define _CLOUDCONFIG_H
 
 // note: timers has resolution (sec), where x=1, y=10, z=1/10,

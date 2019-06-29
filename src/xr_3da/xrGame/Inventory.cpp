@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "inventory.h"
 #include "actor.h"
 #include "trade.h"
@@ -60,12 +60,13 @@ CInventory::CInventory()
 	m_iNextActiveSlot							= NO_ACTIVE_SLOT;
 	m_iPrevActiveSlot							= NO_ACTIVE_SLOT;
 	m_iLoadActiveSlot							= NO_ACTIVE_SLOT;
+	m_ActivationSlotReason						= eGeneral;
 	m_pTarget									= NULL;
 
 	string256 temp;
 	for(u32 i=0; i<m_slots.size(); ++i ) 
 	{
-		sprintf(temp, "slot_persistent_%d", i+1);
+		sprintf_s(temp, "slot_persistent_%d", i+1);
 		if(pSettings->line_exist("inventory",temp)) 
 			m_slots[i].m_bPersistent = !!pSettings->r_bool("inventory",temp);
 	};
@@ -111,11 +112,22 @@ void CInventory::Take(CGameObject *pObj, bool bNotActivate, bool strict_placemen
 {
 	CInventoryItem *pIItem				= smart_cast<CInventoryItem*>(pObj);
 	VERIFY								(pIItem);
-	VERIFY								(pIItem->m_pInventory==NULL);
-	VERIFY								(CanTakeItem(pIItem));
 	
-	pIItem->m_pInventory				= this;
-	pIItem->SetDrop						(FALSE);
+	if(pIItem->m_pCurrentInventory)
+	{
+		Msg("! ERROR CInventory::Take but object has m_pCurrentInventory");
+		Msg("! Inventory Owner is [%d]", GetOwner()->object_id());
+		Msg("! Object Inventory Owner is [%d]", pIItem->m_pCurrentInventory->GetOwner()->object_id());
+
+		CObject* p	= pObj->H_Parent();
+		if(p)
+			Msg("! object parent is [%s] [%d]", p->cName().c_str(), p->ID());
+	}
+
+	R_ASSERT							(CanTakeItem(pIItem));
+	
+	pIItem->m_pCurrentInventory			= this;
+	pIItem->SetDropManual				(FALSE);
 
 	m_all.push_back						(pIItem);
 
@@ -173,14 +185,22 @@ void CInventory::Take(CGameObject *pObj, bool bNotActivate, bool strict_placemen
 	VERIFY								(pIItem->m_eItemPlace != eItemPlaceUndefined);
 }
 
-bool CInventory::Drop(CGameObject *pObj, bool call_drop) 
+bool CInventory::DropItem(CGameObject *pObj) 
 {
 	CInventoryItem *pIItem				= smart_cast<CInventoryItem*>(pObj);
 	VERIFY								(pIItem);
-	if(pIItem->m_pInventory!=this)		return false;
+	if( !pIItem )						return false;
 
-	VERIFY								(pIItem->m_pInventory);
-	VERIFY								(pIItem->m_pInventory==this);
+	if(pIItem->m_pCurrentInventory!=this)
+	{
+		Msg("ahtung !!! [%d]", Device.dwFrame);
+		Msg("CInventory::DropItem pIItem->m_pCurrentInventory!=this");
+		Msg("this = [%d]", GetOwner()->object_id());
+		Msg("pIItem->m_pCurrentInventory = [%d]", pIItem->m_pCurrentInventory->GetOwner()->object_id());
+	}
+
+	R_ASSERT							(pIItem->m_pCurrentInventory);
+	R_ASSERT							(pIItem->m_pCurrentInventory==this);
 	VERIFY								(pIItem->m_eItemPlace!=eItemPlaceUndefined);
 
 	pIItem->object().processing_activate(); 
@@ -188,54 +208,39 @@ bool CInventory::Drop(CGameObject *pObj, bool call_drop)
 	switch(pIItem->m_eItemPlace)
 	{
 	case eItemPlaceBelt:{
-			VERIFY(InBelt(pIItem));
+			R_ASSERT(InBelt(pIItem));
 			m_belt.erase(std::find(m_belt.begin(), m_belt.end(), pIItem));
 			pIItem->object().processing_deactivate();
 		}break;
 	case eItemPlaceRuck:{
-			VERIFY(InRuck(pIItem));
+			R_ASSERT(InRuck(pIItem));
 			m_ruck.erase(std::find(m_ruck.begin(), m_ruck.end(), pIItem));
 		}break;
 	case eItemPlaceSlot:{
-			VERIFY(InSlot(pIItem));
-			if(m_iActiveSlot == pIItem->GetSlot()) Activate(NO_ACTIVE_SLOT);
+			R_ASSERT			(InSlot(pIItem));
+			if(m_iActiveSlot == pIItem->GetSlot()) 
+				Activate	(NO_ACTIVE_SLOT);
+
 			m_slots[pIItem->GetSlot()].m_pIItem = NULL;							
 			pIItem->object().processing_deactivate();
 		}break;
 	default:
 		NODEFAULT;
 	};
-	TIItemContainer::iterator it = std::find(m_all.begin(), m_all.end(), pIItem);
-	if(it!=m_all.end())
-		m_all.erase(std::find(m_all.begin(), m_all.end(), pIItem));
+
+	TIItemContainer::iterator	it = std::find(m_all.begin(), m_all.end(), pIItem);
+	if ( it != m_all.end())
+		m_all.erase				(it);
 	else
-		Msg("! CInventory::Drop item not found in inventory!!!");
+		Msg						("! CInventory::Drop item not found in inventory!!!");
 
-	pIItem->m_pInventory = NULL;
+	pIItem->m_pCurrentInventory = NULL;
 
-	if (call_drop && smart_cast<CInventoryItem*>(pObj))
-		m_pOwner->OnItemDrop	(smart_cast<CInventoryItem*>(pObj));
+	m_pOwner->OnItemDrop			(smart_cast<CInventoryItem*>(pObj));
 
 	CalcTotalWeight					();
 	InvalidateState					();
 	m_drop_last_frame				= true;
-	return							true;
-}
-
-bool CInventory::DropAll()
-{
-	TIItemContainer::iterator it;
-
-	for(it = m_all.begin(); m_all.end() != it; ++it)
-	{
-		PIItem pIItem				= *it;
-		Ruck						(pIItem);
-		pIItem->Drop				();
-	}
-	
-	CalcTotalWeight					();
-	InvalidateState						();
-
 	return							true;
 }
 
@@ -361,56 +366,158 @@ void CInventory::Activate_deffered	(u32 slot, u32 _frame)
 	 m_iLoadActiveSlotFrame		= _frame;
 }
 
-bool CInventory::Activate(u32 slot, bool force) 
+void  CInventory::ActivateNextItemInActiveSlot()
+{
+	if(m_iActiveSlot==NO_ACTIVE_SLOT)	return;
+	
+	PIItem current_item		= m_slots[m_iActiveSlot].m_pIItem;
+	PIItem new_item			= NULL;
+
+	bool b = (current_item==NULL);
+	
+	TIItemContainer::const_iterator it		= m_all.begin();
+	TIItemContainer::const_iterator it_e	= m_all.end();
+
+	for(; it!=it_e; ++it) 
+	{
+		PIItem _pIItem		= *it;
+		if(_pIItem==current_item)
+		{
+			b = true;
+			continue;
+		}
+		if(_pIItem->GetSlot()==m_iActiveSlot)
+			new_item = _pIItem;
+
+		if(b && new_item)
+			break;
+	}
+
+	if(new_item==NULL)
+		return; //only 1 item for this slot
+
+	bool res = Ruck						(current_item);
+	R_ASSERT							(res);
+	NET_Packet							P;
+	current_item->object().u_EventGen	(P, GEG_PLAYER_ITEM2RUCK, current_item->object().H_Parent()->ID());
+	P.w_u16								(current_item->object().ID());
+	current_item->object().u_EventSend	(P);
+
+	res = Slot							(new_item);
+	R_ASSERT							(res);
+	new_item->object().u_EventGen		(P, GEG_PLAYER_ITEM2SLOT, new_item->object().H_Parent()->ID());
+	P.w_u16								(new_item->object().ID());
+	new_item->object().u_EventSend		(P);
+	
+	//activate
+	new_item->object().u_EventGen		(P, GEG_PLAYER_ACTIVATE_SLOT, new_item->object().H_Parent()->ID());
+	P.w_u32								(new_item->GetSlot());
+	new_item->object().u_EventSend		(P);
+
+
+	Msg("CHANGE");
+}
+
+bool CInventory::Activate(u32 slot, EActivationReason reason, bool bForce) 
 {	
+	if(	m_ActivationSlotReason==eKeyAction	&& reason==eImportUpdate )
+		return false;
+
+	bool res = false;
+
 	if(Device.dwFrame == m_iLoadActiveSlotFrame) 
 	{
 		 if( (m_iLoadActiveSlot == slot) && m_slots[slot].m_pIItem )
 			m_iLoadActiveSlotFrame = u32(-1);
 		 else
-			return false;
+			{
+			 res = false;
+			 goto _finish;
+			}
 
 	}
 
-	if( (slot!=NO_ACTIVE_SLOT && m_slots[slot].IsBlocked()) && !force)
-		return false;
+	if( (slot!=NO_ACTIVE_SLOT && m_slots[slot].IsBlocked()) && !bForce)
+	{
+		res = false;
+		goto _finish;
+	}
 
 	R_ASSERT2(slot == NO_ACTIVE_SLOT || slot<m_slots.size(), "wrong slot number");
 
 	if(slot != NO_ACTIVE_SLOT && !m_slots[slot].m_bVisible) 
-		return false;
+	{
+		res = false;
+		goto _finish;
+	}
 	
-	if(m_iActiveSlot == slot && m_slots[m_iActiveSlot].m_pIItem){
+	if(m_iActiveSlot == slot && m_iActiveSlot != NO_ACTIVE_SLOT && m_slots[m_iActiveSlot].m_pIItem)
+	{
 		m_slots[m_iActiveSlot].m_pIItem->Activate();
 	}
 
-	if(m_iActiveSlot == slot || (m_iNextActiveSlot == slot &&
-		m_iActiveSlot != NO_ACTIVE_SLOT &&
-		m_slots[m_iActiveSlot].m_pIItem &&
-		m_slots[m_iActiveSlot].m_pIItem->IsHiding()))
-		return false;
+	if(	m_iActiveSlot == slot || 
+		(m_iNextActiveSlot == slot &&
+		 m_iActiveSlot != NO_ACTIVE_SLOT &&
+		 m_slots[m_iActiveSlot].m_pIItem &&
+		 m_slots[m_iActiveSlot].m_pIItem->IsHiding()
+		 )
+	   )
+	{
+		res = false;
+		goto _finish;
+	}
 
 	//активный слот не выбран
 	if(m_iActiveSlot == NO_ACTIVE_SLOT)
 	{
 		if(m_slots[slot].m_pIItem)
 		{
-			m_iNextActiveSlot = slot;
-			return true;
+			m_iNextActiveSlot		= slot;
+			m_ActivationSlotReason	= reason;
+			res = true;
+			goto _finish;
 		}
 		else 
-			return false;
+		{
+			if(slot==GRENADE_SLOT)//fake for grenade
+			{
+				PIItem gr = SameSlot(GRENADE_SLOT, NULL, true);
+				if(gr)
+				{
+					Slot(gr);
+					goto _finish;
+				}else
+				{
+					res = false;
+					goto _finish;
+				}
+
+			}else
+			{
+				res = false;
+				goto _finish;
+			}
+		}
 	}
 	//активный слот задействован
 	else if(slot == NO_ACTIVE_SLOT || m_slots[slot].m_pIItem)
 	{
 		if(m_slots[m_iActiveSlot].m_pIItem)
 			m_slots[m_iActiveSlot].m_pIItem->Deactivate();
-		m_iNextActiveSlot = slot;
+
+		m_iNextActiveSlot		= slot;
+		m_ActivationSlotReason	= reason;
 	
-		return true;
+		res = true;
+		goto _finish;
 	}
-	return false;
+
+	_finish:
+
+	if(res)
+		m_ActivationSlotReason	= reason;
+	return res;
 }
 
 
@@ -431,7 +538,7 @@ void CInventory::SendActionEvent(s32 cmd, u32 flags)
 	P.w_u32					(flags);
 	P.w_s32					(pActor->GetZoomRndSeed());
 	P.w_s32					(pActor->GetShotRndSeed());
-	pActor->u_EventSend		(P);
+	pActor->u_EventSend		(P, net_flags(TRUE, TRUE, FALSE, TRUE));
 };
 
 bool CInventory::Action(s32 cmd, u32 flags) 
@@ -497,22 +604,25 @@ bool CInventory::Action(s32 cmd, u32 flags)
 	case kWPN_5:
 	case kWPN_6:
        {
-		   if (cmd == kWPN_6 && GameID() != GAME_SINGLE) return false;
+		   if (cmd == kWPN_6 && !IsGameTypeSingle()) return false;
 
 			if(flags&CMD_START)
 			{
                 if((int)m_iActiveSlot == cmd - kWPN_1 &&
-					m_slots[m_iActiveSlot].m_pIItem && GameID() == GAME_SINGLE)
+					m_slots[m_iActiveSlot].m_pIItem )
 				{
-					b_send_event = Activate(NO_ACTIVE_SLOT);
+					if(IsGameTypeSingle())
+						b_send_event = Activate(NO_ACTIVE_SLOT);
+					else
+					{
+						ActivateNextItemInActiveSlot();
+					}
 				}else{ 					
-					if ((int)m_iActiveSlot == cmd - kWPN_1 && GameID() != GAME_SINGLE)
+					if ((int)m_iActiveSlot == cmd - kWPN_1 && !IsGameTypeSingle())
 						break;
 
-					b_send_event = Activate(cmd - kWPN_1);
+					b_send_event = Activate(cmd - kWPN_1, eKeyAction);
 				}
-
-//.				return true;
 			}
 		}break;
 	case kARTEFACT:
@@ -520,18 +630,12 @@ bool CInventory::Action(s32 cmd, u32 flags)
 			if(flags&CMD_START)
 			{
                 if((int)m_iActiveSlot == ARTEFACT_SLOT &&
-					m_slots[m_iActiveSlot].m_pIItem && GameID() == GAME_SINGLE)
+					m_slots[m_iActiveSlot].m_pIItem && IsGameTypeSingle())
 				{
 					b_send_event = Activate(NO_ACTIVE_SLOT);
 				}else {
 					b_send_event = Activate(ARTEFACT_SLOT);
 				}
-//.				return true;
-			}
-			else
-			{
-				int x=0;
-				x=x;
 			}
 		}break;
 	}
@@ -566,65 +670,51 @@ void CInventory::Update()
 
 		m_iActiveSlot = m_iNextActiveSlot;
 	}
+	UpdateDropTasks	();
+}
+
+void CInventory::UpdateDropTasks()
+{
+	for(u32 i=0; i<m_slots.size(); ++i)	
+	{
+		if(m_slots[i].m_pIItem)
+			UpdateDropItem		(m_slots[i].m_pIItem);
+	}
+
+	for(i = 0; i < 2; ++i)	
+	{
+		TIItemContainer &list			= i?m_ruck:m_belt;
+		TIItemContainer::iterator it	= list.begin();
+		TIItemContainer::iterator it_e	= list.end();
 	
-	//проверить рюкзак и пояс, есть ли вещи, которые нужно выкинуть
-	u32		drop_count = 0;
-	for		(int i = 0; i < 2; ++i)	{
-		TIItemContainer &list = i?m_ruck:m_belt;
-		TIItemContainer::iterator it = list.begin();
-	
-		while(list.end() != it)
+		for( ;it!=it_e; ++it)
 		{
-			PIItem pIItem = *it;
-//			Msg("-- %s [%d]", pIItem->Name(), pIItem->object().ID());
-			R_ASSERT(pIItem);			
-			if( pIItem->GetDrop() )
-			{
-				pIItem->SetDrop(FALSE);
-				if(pIItem->object().H_Parent())	{
-					NET_Packet P;
-					pIItem->object().u_EventGen(P, GE_OWNERSHIP_REJECT, 
-										  pIItem->object().H_Parent()->ID());
-					P.w_u16(u16(pIItem->object().ID()));
-					if (OnServer()) pIItem->object().u_EventSend(P);
-				}
-				else 
-					m_drop_tasks.push_back(pIItem);
-			}
-			++it;
+			UpdateDropItem		(*it);
 		}
-	}
-
-	//проверить слоты
-	for(i=0; i<(int)m_slots.size(); ++i)	{
-		PIItem pIItem = m_slots[i].m_pIItem;
-
-		if(pIItem && pIItem->GetDrop())	{
-			pIItem->SetDrop		(FALSE);			 
-			
-			if(pIItem->object().H_Parent())
-			{
-				NET_Packet P;
-				pIItem->object().u_EventGen(P, GE_OWNERSHIP_REJECT, 
-									pIItem->object().H_Parent()->ID());
-				P.w_u16(u16(pIItem->object().ID()));
-				if (OnServer()) pIItem->object().u_EventSend(P);
-			}
-			else
-				m_drop_tasks.push_back	(pIItem);
-		}
-	}
-	while	(m_drop_tasks.size())	{
-		drop_count			= Drop(&m_drop_tasks.back()->object()) ? drop_count + 1 : drop_count;
-		m_drop_tasks.pop_back	();
 	}
 
 	if (m_drop_last_frame)
 	{
-		m_drop_last_frame = false;
+		m_drop_last_frame			= false;
 		m_pOwner->OnItemDropUpdate	();
 	}
 }
+
+void CInventory::UpdateDropItem(PIItem pIItem)
+{
+	if( pIItem->GetDropManual() )
+	{
+		pIItem->SetDropManual(FALSE);
+		if ( OnServer() ) 
+		{
+			NET_Packet					P;
+			pIItem->object().u_EventGen	(P, GE_OWNERSHIP_REJECT, pIItem->object().H_Parent()->ID());
+			P.w_u16						(u16(pIItem->object().ID()));
+			pIItem->object().u_EventSend(P);
+		}
+	}// dropManual
+}
+
 //ищем на поясе гранату такоже типа
 PIItem CInventory::Same(const PIItem pIItem, bool bSearchRuck) const
 {
@@ -643,9 +733,9 @@ PIItem CInventory::Same(const PIItem pIItem, bool bSearchRuck) const
 }
 
 //ищем на поясе вещь для слота 
-PIItem CInventory::SameSlot(const PIItem pIItem, bool bSearchRuck) const
+
+PIItem CInventory::SameSlot(const u32 slot, PIItem pIItem, bool bSearchRuck) const
 {
-	u32 slot = pIItem->GetSlot();
 	if(slot == NO_ACTIVE_SLOT) 	return NULL;
 
 	const TIItemContainer &list = bSearchRuck ? m_ruck : m_belt;
@@ -667,7 +757,7 @@ PIItem CInventory::Get(const char *name, bool bSearchRuck) const
 	for(TIItemContainer::const_iterator it = list.begin(); list.end() != it; ++it) 
 	{
 		PIItem pIItem = *it;
-		if(!xr_strcmp(pIItem->object().cNameSect(), name) && 
+		if(pIItem && !xr_strcmp(pIItem->object().cNameSect(), name) && 
 								pIItem->Useful()) 
 				return pIItem;
 	}
@@ -681,7 +771,7 @@ PIItem CInventory::Get(CLASS_ID cls_id, bool bSearchRuck) const
 	for(TIItemContainer::const_iterator it = list.begin(); list.end() != it; ++it) 
 	{
 		PIItem pIItem = *it;
-		if(pIItem->object().CLS_ID == cls_id && 
+		if(pIItem && pIItem->object().CLS_ID == cls_id && 
 								pIItem->Useful()) 
 				return pIItem;
 	}
@@ -695,7 +785,7 @@ PIItem CInventory::Get(const u16 id, bool bSearchRuck) const
 	for(TIItemContainer::const_iterator it = list.begin(); list.end() != it; ++it) 
 	{
 		PIItem pIItem = *it;
-		if(pIItem->object().ID() == id) 
+		if(pIItem && pIItem->object().ID() == id) 
 			return pIItem;
 	}
 	return NULL;
@@ -717,7 +807,7 @@ PIItem CInventory::item(CLASS_ID cls_id) const
 	for(TIItemContainer::const_iterator it = list.begin(); list.end() != it; ++it) 
 	{
 		PIItem pIItem = *it;
-		if(pIItem->object().CLS_ID == cls_id && 
+		if(pIItem && pIItem->object().CLS_ID == cls_id && 
 			pIItem->Useful()) 
 			return pIItem;
 	}
@@ -749,7 +839,7 @@ u32 CInventory::dwfGetSameItemCount(LPCSTR caSection, bool SearchAll)
 	for(TIItemContainer::iterator l_it = l_list.begin(); l_list.end() != l_it; ++l_it) 
 	{
 		PIItem	l_pIItem = *l_it;
-		if (!xr_strcmp(l_pIItem->object().cNameSect(), caSection))
+		if (l_pIItem && !xr_strcmp(l_pIItem->object().cNameSect(), caSection))
             ++l_dwCount;
 	}
 	
@@ -762,7 +852,7 @@ u32		CInventory::dwfGetGrenadeCount(LPCSTR caSection, bool SearchAll)
 	for(TIItemContainer::iterator l_it = l_list.begin(); l_list.end() != l_it; ++l_it) 
 	{
 		PIItem	l_pIItem = *l_it;
-		if (l_pIItem->object().CLS_ID == CLSID_GRENADE_F1 || l_pIItem->object().CLS_ID == CLSID_GRENADE_RGD5)
+		if (l_pIItem && l_pIItem->object().CLS_ID == CLSID_GRENADE_F1 || l_pIItem->object().CLS_ID == CLSID_GRENADE_RGD5)
 			++l_dwCount;
 	}
 
@@ -775,7 +865,7 @@ bool CInventory::bfCheckForObject(ALife::_OBJECT_ID tObjectID)
 	for(TIItemContainer::iterator l_it = l_list.begin(); l_list.end() != l_it; ++l_it) 
 	{
 		PIItem	l_pIItem = *l_it;
-		if (l_pIItem->object().ID() == tObjectID)
+		if (l_pIItem && l_pIItem->object().ID() == tObjectID)
 			return(true);
 	}
 	return		(false);
@@ -787,7 +877,7 @@ CInventoryItem *CInventory::get_object_by_id(ALife::_OBJECT_ID tObjectID)
 	for(TIItemContainer::iterator l_it = l_list.begin(); l_list.end() != l_it; ++l_it) 
 	{
 		PIItem	l_pIItem = *l_it;
-		if (l_pIItem->object().ID() == tObjectID)
+		if (l_pIItem && l_pIItem->object().ID() == tObjectID)
 			return	(l_pIItem);
 	}
 	return		(0);
@@ -799,24 +889,32 @@ CInventoryItem *CInventory::get_object_by_id(ALife::_OBJECT_ID tObjectID)
 #include "script_game_object.h"
 bool CInventory::Eat(PIItem pIItem)
 {
+	R_ASSERT(pIItem->m_pCurrentInventory==this);
 	//устанаовить съедобна ли вещь
 	CEatableItem* pItemToEat = smart_cast<CEatableItem*>(pIItem);
-	if(!pItemToEat) return false;
+	R_ASSERT				(pItemToEat);
 
 	CEntityAlive *entity_alive = smart_cast<CEntityAlive*>(m_pOwner);
-	if(!entity_alive) return false;
+	R_ASSERT				(entity_alive);
 	
 	pItemToEat->UseBy		(entity_alive);
 
 	if(IsGameTypeSingle() && Actor()->m_inventory == this)
 		Actor()->callback(GameObject::eUseObject)((smart_cast<CGameObject*>(pIItem))->lua_game_object());
 
-	if(pItemToEat->Empty() )
+	if(pItemToEat->Empty() && entity_alive->Local())
 	{
-		pIItem->Drop();
-		return false;
+		NET_Packet					P;
+		CGameObject::u_EventGen		(P,GE_OWNERSHIP_REJECT,entity_alive->ID());
+		P.w_u16						(pIItem->object().ID());
+		CGameObject::u_EventSend	(P);
+
+		CGameObject::u_EventGen		(P,GE_DESTROY,pIItem->object().ID());
+		CGameObject::u_EventSend	(P);
+
+		return		false;
 	}
-	return true;
+	return			true;
 }
 
 bool CInventory::InSlot(PIItem pIItem) const
@@ -908,9 +1006,6 @@ CInventoryItem	*CInventory::GetItemFromInventory(LPCSTR caItemName)
 
 bool CInventory::CanTakeItem(CInventoryItem *inventory_item) const
 {
-	VERIFY			(inventory_item);
-	VERIFY			(m_pOwner);
-
 	if (inventory_item->object().getDestroy()) return false;
 
 	if(!inventory_item->CanTake()) return false;

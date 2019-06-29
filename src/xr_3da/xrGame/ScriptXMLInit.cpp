@@ -1,5 +1,4 @@
-
-#include "StdAfx.h"
+#include "pch_script.h"
 #include "ScriptXmlInit.h"
 #include "ui\UIXmlInit.h"
 #include "ui\UITextureMaster.h"
@@ -23,7 +22,6 @@
 #include "ui\UIScrollView.h"
 #include "ui\UIProgressBar.h"
 
-#include "script_space.h"
 using namespace luabind;
 
 void _attach_child(CUIWindow* _child, CUIWindow* _parent)

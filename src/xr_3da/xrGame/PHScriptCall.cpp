@@ -1,11 +1,9 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "PHCommander.h"
 #include "script_space_forward.h"
 #include "script_callback_ex.h"
 #include "../xr_object.h"
 #include "PHScriptCall.h"
-#include "script_space.h"
-#include <luabind/operator.hpp>
 
 /*
 IC bool compare_safe(const luabind::object &o1 , const luabind::object &o2)

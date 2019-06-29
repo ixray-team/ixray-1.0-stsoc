@@ -82,7 +82,7 @@ bool CPHAICharacter::TryPosition(Fvector pos,bool exact_state){
 	SetVelocity(cur_vel);
 	Fvector	pos_new;GetPosition(pos_new);
 
-#ifdef DEBUG
+#if 0
 	Fvector	dif;dif .sub( pos, pos_new );
 	float	dif_m = dif.magnitude();
 	if(ret&&dif_m>EPS_L)

@@ -148,7 +148,7 @@ extern void		Surface_Init	();
 // 
 void xrLoad(LPCSTR name)
 {
-	string256					N;
+	string_path					N;
 	FS.update_path				(N,"$game_data$","shaders_xrlc.xr");
 	g_shaders_xrlc				= xr_new<Shader_xrLC_LIB> ();
 	g_shaders_xrlc->Load		(N);
@@ -270,7 +270,7 @@ void xrLoad(LPCSTR name)
 					BT.pSurface	= 0;
 				} else {
 					strcat			(N,".thm");
-					IReader* THM	= FS.r_open("$textures$",N);
+					IReader* THM	= FS.r_open("$game_textures$",N);
 					R_ASSERT2		(THM,	N);
 
 					// version
@@ -304,6 +304,8 @@ void xrLoad(LPCSTR name)
 							u32			w=0, h=0;
 							BT.pSurface = Surface_Load(N,w,h); 
 							R_ASSERT2	(BT.pSurface,"Can't load surface");
+							if ((w != BT.dwWidth) || (h != BT.dwHeight))
+								Msg		("! THM doesn't correspond to the texture: %dx%d -> %dx%d", BT.dwWidth, BT.dwHeight, w, h);
 							BT.Vflip	();
 						} else {
 							// Free surface memory

@@ -123,7 +123,7 @@ void CUIComboBox::SetCurrentValue()
 
 	LPCSTR cur_val		= *CStringTable().translate( GetOptTokenValue());
 	m_text.SetText		( cur_val );
-	m_list.SetSelected	( cur_val );
+	m_list.SetSelectedText( cur_val );
 	
 	CUIListBoxItem* itm	= m_list.GetSelectedItem();
 	if(itm)

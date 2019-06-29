@@ -56,19 +56,6 @@ IC	bool CAI_Stalker::group_behaviour							() const
 	return					(m_group_behaviour);
 }
 
-IC	bool CAI_Stalker::can_kill_member							()
-{
-	update_can_kill_info	();
-	return					(m_can_kill_member);
-}
-#include "../../inventory.h"
-IC	bool CAI_Stalker::can_kill_enemy							()
-{
-	VERIFY					(inventory().ActiveItem());
-	update_can_kill_info	();
-	return					(m_can_kill_enemy);
-}
-
 IC	CWeaponShotEffector &CAI_Stalker::weapon_shot_effector		() const
 {
 	VERIFY					(m_weapon_shot_effector);

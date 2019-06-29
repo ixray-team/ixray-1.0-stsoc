@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "UICarBodyWnd.h"
 #include "xrUIXmlParser.h"
 #include "UIXmlInit.h"
@@ -270,7 +270,7 @@ void CUICarBodyWnd::SendMessage(CUIWindow *pWnd, s16 msg, void *pData)
 	{
 		if(m_pUIPropertiesBox->GetClickedItem())
 		{
-			switch(m_pUIPropertiesBox->GetClickedItem()->GetID())
+			switch(m_pUIPropertiesBox->GetClickedItem()->GetTAG())
 			{
 			case INVENTORY_EAT_ACTION:	//סתוסעü מבתוךע
 				EatItem();
@@ -442,7 +442,7 @@ void CUICarBodyWnd::ActivatePropertiesBox()
 		Frect							vis_rect;
 
 		GetAbsoluteRect					(vis_rect);
-		GetUICursor()->GetPos			(cursor_pos.x, cursor_pos.y);
+		cursor_pos						= GetUICursor()->GetCursorPosition();
 		cursor_pos.sub					(vis_rect.lt);
 		m_pUIPropertiesBox->Show		(vis_rect, cursor_pos);
 	}
@@ -452,6 +452,16 @@ void CUICarBodyWnd::EatItem()
 {
 	CActor *pActor				= smart_cast<CActor*>(Level().CurrentEntity());
 	if(!pActor)					return;
+
+	CUIDragDropListEx* owner_list		= CurrentItem()->OwnerList();
+	if(owner_list==m_pUIOthersBagList)
+	{
+		u16 owner_id				= (m_pInventoryBox)?m_pInventoryBox->ID():smart_cast<CGameObject*>(m_pOthersObject)->ID();
+
+		move_item(	owner_id, //from
+					Actor()->ID(), //to
+					CurrentIItem()->object().ID());
+	}
 
 	NET_Packet					P;
 	CGameObject::u_EventGen		(P, GEG_PLAYER_ITEM_EAT, Actor()->ID());

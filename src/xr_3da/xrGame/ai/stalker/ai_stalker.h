@@ -243,7 +243,6 @@ public:
 	virtual	ALife::ERelationType 		tfGetRelationType		(const CEntityAlive *tpEntityAlive) const;
 	virtual const SRotation				Orientation				() const;
 	virtual	const MonsterSpace::SBoneRotation &head_orientation	() const;
-	virtual bool						use_model_pitch			() const;
 
 	//InventoryOwner stuff
 	virtual bool						CanPutInSlot			(PIItem item, u32 slot)		{return(slot!=OUTFIT_SLOT);};
@@ -286,8 +285,8 @@ private:
 			void						update_can_kill_info	();
 
 public:
-	IC		bool						can_kill_member			();
-	IC		bool						can_kill_enemy			();
+			bool						can_kill_member			();
+			bool						can_kill_enemy			();
 			float						pick_distance			();
 	IC		float						start_pick_distance		() const;
 			bool						fire_make_sense			();
@@ -538,6 +537,13 @@ private:
 public:
 	virtual	void						on_before_change_team						();
 	virtual	void						on_after_change_team						();
+
+private:
+	bool	m_sight_enabled_before_animation_controller;
+
+public:
+	virtual	void						create_anim_mov_ctrl						(CBlend *b);
+	virtual	void						destroy_anim_mov_ctrl						();
 
 private:
 	bool	m_can_select_items;

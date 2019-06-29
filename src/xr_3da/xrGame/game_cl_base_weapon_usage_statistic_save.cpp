@@ -8,27 +8,82 @@
 // 1 - initial save
 // 2 - added Bone Names
 
-void		WeaponUsageStatistic::SaveData()
+void WeaponUsageStatistic::SaveDataLtx(CInifile& ini)
 {
+	if (OnClient())					return;
+	if (!CollectData())				return;
+	if (aPlayersStatistic.empty())	return;
+
+	WriteLtx						(ini);
+}
+
+void WeaponUsageStatistic::WriteLtx(CInifile& ini)
+{
+	LPCSTR sect = "wpn_usage";
+
+	ini.w_u32(sect, "dwTotalPlayersAliveTime_0_sec",m_dwTotalPlayersAliveTime[0]/1000);
+	ini.w_u32(sect, "dwTotalPlayersAliveTime_1_sec",m_dwTotalPlayersAliveTime[1]/1000);
+	ini.w_u32(sect, "dwTotalPlayersAliveTime_2_sec",m_dwTotalPlayersAliveTime[2]/1000);
+
+	ini.w_u32(sect, "dwTotalPlayersMoneyRound_0",m_dwTotalPlayersMoneyRound[0]);
+	ini.w_u32(sect, "dwTotalPlayersMoneyRound_1",m_dwTotalPlayersMoneyRound[1]);
+	ini.w_u32(sect, "dwTotalPlayersMoneyRound_2",m_dwTotalPlayersMoneyRound[2]);
+
+	ini.w_u32(sect, "dwTotalNumRespawns_0",m_dwTotalNumRespawns[0]);
+	ini.w_u32(sect, "dwTotalNumRespawns_1",m_dwTotalNumRespawns[1]);
+	ini.w_u32(sect, "dwTotalNumRespawns_2",m_dwTotalNumRespawns[2]);
+
+	u32 NumPlayers = aPlayersStatistic.size();
+
+	ini.w_u32(sect, "NumPlayers",NumPlayers);
+
+	for (u32 i=0; i<NumPlayers; i++)
+	{
+		Player_Statistic& PS = aPlayersStatistic[i];
+		string512			save_sect;
+		sprintf_s			(save_sect,"%s_player_%d",sect,i);
+		PS.WriteLtx			(ini,save_sect);
+	}
+}
+
+void WeaponUsageStatistic::SaveData()
+{
+
 	if (OnClient()) return;
 	if (!CollectData()) return;
 	if (aPlayersStatistic.empty()) return;
-	
+
+	string1024		GameType;
+	SYSTEMTIME		Time;	
+	switch (GameID())
+	{
+	case GAME_DEATHMATCH: sprintf_s(GameType, "dm"); break;
+	case GAME_TEAMDEATHMATCH: sprintf_s(GameType, "tdm"); break;
+	case GAME_ARTEFACTHUNT: sprintf_s(GameType, "ah"); break;
+	default:
+		return;
+		break;
+	};
+	GetLocalTime(&Time);	
+	sprintf_s(mFileName, "(%s)_(%s)_%02d.%02d.%02d_%02d.%02d.%02d.wus", *(Level().name()), GameType, Time.wMonth, Time.wDay, Time.wYear, Time.wHour, Time.wMinute, Time.wSecond);
+
+
 	//---------------------------------------------------------
-	FILE* SFile = fopen(mFileName, "wb");
-	if (!SFile) return;
+	FS.update_path			(mFileName,"$logs$",mFileName);
+	FILE* SFile				= fopen(mFileName, "wb");
+	if (!SFile)				return;
 	//---------------------------------------------------------
-	u32 IDENT = WUS_IDENT;
-	fwrite(&IDENT, 4, 1, SFile);
-	u32 Ver = WUS_VERSION;
-	fwrite(&Ver, 4, 1, SFile);
+	u32 IDENT				= WUS_IDENT;
+	fwrite					(&IDENT, 4, 1, SFile);
+	u32 Ver					= WUS_VERSION;
+	fwrite					(&Ver, 4, 1, SFile);
 	//---------------------------------------------------------
-	Write(SFile);
+	Write					(SFile);
 	//---------------------------------------------------------
-	fclose(SFile);
+	fclose					(SFile);
 };
 
-void				WeaponUsageStatistic::Write						(FILE* pFile)
+void WeaponUsageStatistic::Write(FILE* pFile)
 {
 	if (!pFile) return;	
 	//---------------------------------------------	
@@ -46,7 +101,45 @@ void				WeaponUsageStatistic::Write						(FILE* pFile)
 	}
 }
 
-void				Player_Statistic::Write						(FILE* pFile)
+void Player_Statistic::WriteLtx(CInifile& ini, LPCSTR sect)
+{
+	ini.w_string(sect, "name", PName.c_str());
+
+	ini.w_u32(sect,"TotalShots",m_dwTotalShots);
+
+	ini.w_u32(sect,"dwTotalAliveTime_0_sec",m_dwTotalAliveTime[0]/1000);
+	ini.w_u32(sect,"dwTotalAliveTime_1_sec",m_dwTotalAliveTime[1]/1000);
+	ini.w_u32(sect,"dwTotalAliveTime_2_sec",m_dwTotalAliveTime[2]/1000);
+
+	ini.w_u32(sect,"dwTotalMoneyRound_0",m_dwTotalMoneyRound[0]);
+	ini.w_u32(sect,"dwTotalMoneyRound_1",m_dwTotalMoneyRound[1]);
+	ini.w_u32(sect,"dwTotalMoneyRound_2",m_dwTotalMoneyRound[2]);
+
+	ini.w_u32(sect,"dwNumRespawned_0",m_dwNumRespawned[0]);
+	ini.w_u32(sect,"dwNumRespawned_1",m_dwNumRespawned[1]);
+	ini.w_u32(sect,"dwNumRespawned_2",m_dwNumRespawned[2]);
+
+	ini.w_u8(sect,"m_dwArtefacts_0",m_dwArtefacts[0]);
+	ini.w_u8(sect,"m_dwArtefacts_1",m_dwArtefacts[1]);
+	ini.w_u8(sect,"m_dwArtefacts_2",m_dwArtefacts[2]);
+
+	ini.w_u8(sect,"dwCurrentTeam",m_dwCurrentTeam);
+
+	u32 NumWeapons = aWeaponStats.size();
+
+	ini.w_u32(sect,"NumWeapons",NumWeapons);
+
+	for (u32 i=0; i<aWeaponStats.size(); i++)
+	{
+		string512				save_sect;
+		sprintf_s				(save_sect,"%s_wpn_%d",sect,i);
+		Weapon_Statistic& WS	= aWeaponStats[i];
+		WS.WriteLtx				(ini, save_sect);
+	}
+
+}
+
+void Player_Statistic::Write(FILE* pFile)
 {
 	if (!pFile) return;
 	//----------------------------------------------
@@ -66,7 +159,46 @@ void				Player_Statistic::Write						(FILE* pFile)
 	}
 };
 
-void				Weapon_Statistic::Write						(FILE* pFile)
+void Weapon_Statistic::WriteLtx(CInifile& ini, LPCSTR sect)
+{
+	ini.w_string(sect,"wpn_name",WName.c_str());
+
+	ini.w_string(sect,"wpn_inv_name",InvName.c_str());
+
+	ini.w_u32(sect,"wpn_dwNumBought",NumBought);
+
+	ini.w_u32(sect,"wpn_dwRoundsFired",m_dwRoundsFired);
+
+	ini.w_u32(sect,"wpn_dwBulletsFired",m_dwBulletsFired);
+
+	ini.w_u32(sect,"wpn_dwHitsScored",m_dwHitsScored);
+
+	ini.w_u32(sect,"wpn_dwKillsScored",m_dwKillsScored);
+
+	//----------------------------------------------
+	u32 NumHits = 0;
+	for (u32 i=0; i<m_Hits.size(); i++)
+	{
+		HitData& Hit = m_Hits[i];
+		if (Hit.Completed) NumHits++;
+	};
+
+	ini.w_u32(sect,"NumHits",NumHits);
+
+	for (i=0; i<m_Hits.size(); ++i)
+	{
+		HitData& Hit		= m_Hits[i];
+		if (!Hit.Completed) continue;
+
+		string512				save_prefix;
+		sprintf_s				(save_prefix,"hit_%d_", i);
+
+		Hit.WriteLtx			(ini, sect, save_prefix);
+	};
+};
+
+
+void Weapon_Statistic::Write(FILE* pFile)
 {
 	if (!pFile) return;
 	//----------------------------------------------
@@ -95,7 +227,23 @@ void				Weapon_Statistic::Write						(FILE* pFile)
 	};
 };
 
-void				HitData::Write						(FILE* pFile)
+void HitData::WriteLtx(CInifile& ini, LPCSTR sect, LPCSTR prefix)
+{
+	string512		buff;
+	
+	ini.w_fvector3(sect,strconcat(sizeof(buff), buff, prefix ,"pos_0"),Pos0);
+	ini.w_fvector3(sect,strconcat(sizeof(buff), buff, prefix ,"pos_1"),Pos1);
+	
+	ini.w_u16(sect,strconcat(sizeof(buff), buff, prefix ,"BoneID"),BoneID);
+
+	ini.w_bool(sect,strconcat(sizeof(buff), buff, prefix ,"Deadly"),Deadly);
+
+	ini.w_string(sect,strconcat(sizeof(buff), buff, prefix ,"TargetName"),TargetName.c_str());
+
+	ini.w_string(sect,strconcat(sizeof(buff), buff, prefix ,"BoneName"),BoneName.c_str());
+};
+
+void HitData::Write						(FILE* pFile)
 {
 	if (!pFile) return;
 	//----------------------------------------------

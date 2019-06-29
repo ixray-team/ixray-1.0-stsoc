@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "script_space.h"
+#include "pch_script.h"
 #include "Explosive.h"
 
 using namespace luabind;

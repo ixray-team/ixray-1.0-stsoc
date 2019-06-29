@@ -219,7 +219,7 @@ bool CUIScrollView::OnMouse(float x, float y, EUIMessages mouse_action)
 		case WINDOW_MOUSE_MOVE:
 			if( pInput->iGetAsyncBtnState(0) ){
 				Fvector2	curr_pad_pos = m_pad->GetWndPos	();
-				curr_pad_pos.y				+= GetUICursor()->GetPosDelta().y;
+				curr_pad_pos.y				+= GetUICursor()->GetCursorPositionDelta().y;
 				
 				float max_pos = m_pad->GetHeight() - GetHeight();
 				max_pos							= _max(0.0f,max_pos);

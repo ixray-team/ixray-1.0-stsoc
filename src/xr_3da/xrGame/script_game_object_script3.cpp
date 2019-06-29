@@ -6,14 +6,8 @@
 //	Description : XRay Script game object script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "script_space.h"
-#include <luabind/adopt_policy.hpp>
-#include <luabind/iterator_policy.hpp>
-#include <luabind/out_value_policy.hpp>
-
+#include "pch_script.h"
 #include "script_game_object.h"
-
 #include "alife_space.h"
 #include "script_entity_space.h"
 #include "movement_manager_space.h"
@@ -41,16 +35,16 @@ using namespace luabind;
 class_<CScriptGameObject> &script_register_game_object2(class_<CScriptGameObject> &instance)
 {
 	instance
-		.def("add_sound",					(u32 (CScriptGameObject::*)(LPCSTR,u32,ESoundTypes,u32,u32,u32))(CScriptGameObject::add_sound))
-		.def("add_sound",					(u32 (CScriptGameObject::*)(LPCSTR,u32,ESoundTypes,u32,u32,u32,LPCSTR))(CScriptGameObject::add_sound))
+		.def("add_sound",					(u32 (CScriptGameObject::*)(LPCSTR,u32,ESoundTypes,u32,u32,u32))(&CScriptGameObject::add_sound))
+		.def("add_sound",					(u32 (CScriptGameObject::*)(LPCSTR,u32,ESoundTypes,u32,u32,u32,LPCSTR))(&CScriptGameObject::add_sound))
 		.def("remove_sound",				&CScriptGameObject::remove_sound)
 		.def("set_sound_mask",				&CScriptGameObject::set_sound_mask)
-		.def("play_sound",					(void (CScriptGameObject::*)(u32))(CScriptGameObject::play_sound))
-		.def("play_sound",					(void (CScriptGameObject::*)(u32,u32))(CScriptGameObject::play_sound))
-		.def("play_sound",					(void (CScriptGameObject::*)(u32,u32,u32))(CScriptGameObject::play_sound))
-		.def("play_sound",					(void (CScriptGameObject::*)(u32,u32,u32,u32))(CScriptGameObject::play_sound))
-		.def("play_sound",					(void (CScriptGameObject::*)(u32,u32,u32,u32,u32))(CScriptGameObject::play_sound))
-		.def("play_sound",					(void (CScriptGameObject::*)(u32,u32,u32,u32,u32,u32))(CScriptGameObject::play_sound))
+		.def("play_sound",					(void (CScriptGameObject::*)(u32))(&CScriptGameObject::play_sound))
+		.def("play_sound",					(void (CScriptGameObject::*)(u32,u32))(&CScriptGameObject::play_sound))
+		.def("play_sound",					(void (CScriptGameObject::*)(u32,u32,u32))(&CScriptGameObject::play_sound))
+		.def("play_sound",					(void (CScriptGameObject::*)(u32,u32,u32,u32))(&CScriptGameObject::play_sound))
+		.def("play_sound",					(void (CScriptGameObject::*)(u32,u32,u32,u32,u32))(&CScriptGameObject::play_sound))
+		.def("play_sound",					(void (CScriptGameObject::*)(u32,u32,u32,u32,u32,u32))(&CScriptGameObject::play_sound))
 		.def("binded_object",				&CScriptGameObject::binded_object)
 		.def("set_previous_point",			&CScriptGameObject::set_previous_point)
 		.def("set_start_point",				&CScriptGameObject::set_start_point)
@@ -74,21 +68,21 @@ class_<CScriptGameObject> &script_register_game_object2(class_<CScriptGameObject
 		.def("restore_sound_threshold",		&CScriptGameObject::restore_sound_threshold)
 
 		// sight manager
-		.def("set_sight",					(void (CScriptGameObject::*)(SightManager::ESightType sight_type, const Fvector *vector3d, u32 dwLookOverDelay))(CScriptGameObject::set_sight))
-		.def("set_sight",					(void (CScriptGameObject::*)(SightManager::ESightType sight_type, bool torso_look, bool path))(CScriptGameObject::set_sight))
-		.def("set_sight",					(void (CScriptGameObject::*)(SightManager::ESightType sight_type, const Fvector &vector3d, bool torso_look))(CScriptGameObject::set_sight))
-		.def("set_sight",					(void (CScriptGameObject::*)(SightManager::ESightType sight_type, const Fvector *vector3d))(CScriptGameObject::set_sight))
-		.def("set_sight",					(void (CScriptGameObject::*)(CScriptGameObject *object_to_look))(CScriptGameObject::set_sight))
-		.def("set_sight",					(void (CScriptGameObject::*)(CScriptGameObject *object_to_look, bool torso_look))(CScriptGameObject::set_sight))
-		.def("set_sight",					(void (CScriptGameObject::*)(CScriptGameObject *object_to_look, bool torso_look, bool fire_object))(CScriptGameObject::set_sight))
-		.def("set_sight",					(void (CScriptGameObject::*)(CScriptGameObject *object_to_look, bool torso_look, bool fire_object, bool no_pitch))(CScriptGameObject::set_sight))
-//		.def("set_sight",					(void (CScriptGameObject::*)(const MemorySpace::CMemoryInfo *memory_object, bool	torso_look))(CScriptGameObject::set_sight))
+		.def("set_sight",					(void (CScriptGameObject::*)(SightManager::ESightType sight_type, const Fvector *vector3d, u32 dwLookOverDelay))(&CScriptGameObject::set_sight))
+		.def("set_sight",					(void (CScriptGameObject::*)(SightManager::ESightType sight_type, bool torso_look, bool path))(&CScriptGameObject::set_sight))
+		.def("set_sight",					(void (CScriptGameObject::*)(SightManager::ESightType sight_type, const Fvector &vector3d, bool torso_look))(&CScriptGameObject::set_sight))
+		.def("set_sight",					(void (CScriptGameObject::*)(SightManager::ESightType sight_type, const Fvector *vector3d))(&CScriptGameObject::set_sight))
+		.def("set_sight",					(void (CScriptGameObject::*)(CScriptGameObject *object_to_look))(&CScriptGameObject::set_sight))
+		.def("set_sight",					(void (CScriptGameObject::*)(CScriptGameObject *object_to_look, bool torso_look))(&CScriptGameObject::set_sight))
+		.def("set_sight",					(void (CScriptGameObject::*)(CScriptGameObject *object_to_look, bool torso_look, bool fire_object))(&CScriptGameObject::set_sight))
+		.def("set_sight",					(void (CScriptGameObject::*)(CScriptGameObject *object_to_look, bool torso_look, bool fire_object, bool no_pitch))(&CScriptGameObject::set_sight))
+//		.def("set_sight",					(void (CScriptGameObject::*)(const MemorySpace::CMemoryInfo *memory_object, bool	torso_look))(&CScriptGameObject::set_sight))
 
 		// object handler
-		.def("set_item",					(void (CScriptGameObject::*)(MonsterSpace::EObjectAction ))(CScriptGameObject::set_item))
-		.def("set_item",					(void (CScriptGameObject::*)(MonsterSpace::EObjectAction, CScriptGameObject *))(CScriptGameObject::set_item))
-		.def("set_item",					(void (CScriptGameObject::*)(MonsterSpace::EObjectAction, CScriptGameObject *, u32))(CScriptGameObject::set_item))
-		.def("set_item",					(void (CScriptGameObject::*)(MonsterSpace::EObjectAction, CScriptGameObject *, u32, u32))(CScriptGameObject::set_item))
+		.def("set_item",					(void (CScriptGameObject::*)(MonsterSpace::EObjectAction ))(&CScriptGameObject::set_item))
+		.def("set_item",					(void (CScriptGameObject::*)(MonsterSpace::EObjectAction, CScriptGameObject *))(&CScriptGameObject::set_item))
+		.def("set_item",					(void (CScriptGameObject::*)(MonsterSpace::EObjectAction, CScriptGameObject *, u32))(&CScriptGameObject::set_item))
+		.def("set_item",					(void (CScriptGameObject::*)(MonsterSpace::EObjectAction, CScriptGameObject *, u32, u32))(&CScriptGameObject::set_item))
 
 		.def("bone_position",				&CScriptGameObject::bone_position)
 

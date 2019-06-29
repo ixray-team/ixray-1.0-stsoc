@@ -58,6 +58,7 @@ protected:
     float				m_origin;
 	float				m_destination;
 	float				m_mag_pos;
+	float				m_offset;
 
 	xr_vector<CUIStatic*>	m_buttons;
 	xr_vector<CUIStatic*>	m_buttons_new;

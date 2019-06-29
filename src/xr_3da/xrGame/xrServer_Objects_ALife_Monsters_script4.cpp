@@ -6,9 +6,8 @@
 //	Description : Server monsters for ALife simulator, script export, the second part
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "xrServer_Objects_ALife_Monsters.h"
-#include "script_space.h"
 #include "xrServer_script_macroses.h"
 #include "alife_human_brain.h"
 
@@ -62,6 +61,7 @@ void CSE_ALifeMonsterAbstract::script_register(lua_State *L)
 			CSE_ALifeSchedulable
 		)
 		.def("smart_terrain_id",				&smart_terrain_id)
+		.def_readwrite("m_smart_terrain_id",	&CSE_ALifeMonsterAbstract::m_smart_terrain_id)
 		.def("clear_smart_terrain",				&clear_smart_terrain)
 		.def("brain",							&monster_brain)
 		.def("rank",							&CSE_ALifeMonsterAbstract::Rank)

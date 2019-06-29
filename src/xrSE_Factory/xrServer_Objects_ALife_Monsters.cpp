@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include "xrServer_Objects_ALife_Items.h"
 #include "xrServer_Objects_ALife_Monsters.h"
 #include "object_broker.h"
@@ -29,6 +29,7 @@
 #	include "alife_online_offline_group_brain.h"
 #	include "alife_simulator.h"
 #	include "alife_object_registry.h"
+#	include "date_time.h"
 #endif
 
 void setup_location_types_section(GameGraph::TERRAIN_VECTOR &m_vertex_types, CInifile *ini, LPCSTR section)
@@ -37,8 +38,9 @@ void setup_location_types_section(GameGraph::TERRAIN_VECTOR &m_vertex_types, CIn
 	GameGraph::STerrainPlace		terrain_mask;
 	terrain_mask.tMask.resize		(GameGraph::LOCATION_TYPE_COUNT);
 
-	CInifile::SectIt				I = ini->r_section(section).begin();
-	CInifile::SectIt				E = ini->r_section(section).end();
+	CInifile::Sect&	sect			= ini->r_section(section);
+	CInifile::SectCIt				I = sect.Data.begin();
+	CInifile::SectCIt				E = sect.Data.end();
 	for ( ; I != E; ++I) {
 		LPCSTR						S = *(*I).first;
 		string16					I;
@@ -112,8 +114,8 @@ using namespace ALife;
 ////////////////////////////////////////////////////////////////////////////
 CSE_ALifeTraderAbstract::CSE_ALifeTraderAbstract(LPCSTR caSection)
 {
-	m_fCumulativeItemMass		= 0.f;
-	m_iCumulativeItemVolume		= 0;
+//	m_fCumulativeItemMass		= 0.f;
+//	m_iCumulativeItemVolume		= 0;
 	m_dwMoney					= 0;
 	if (pSettings->line_exist(caSection, "money"))
 		m_dwMoney 				= pSettings->r_u32(caSection, "money");
@@ -258,7 +260,7 @@ void CSE_ALifeTraderAbstract::OnChangeProfile(PropValue* sender)
 
 #endif
 
-SPECIFIC_CHARACTER_ID CSE_ALifeTraderAbstract::specific_character()
+shared_str CSE_ALifeTraderAbstract::specific_character()
 {
 #ifdef XRGAME_EXPORTS
 #pragma todo("Dima to Yura, MadMax : Remove that hacks, please!")
@@ -291,7 +293,7 @@ SPECIFIC_CHARACTER_ID CSE_ALifeTraderAbstract::specific_character()
 		for(int i=0; i<=CSpecificCharacter::GetMaxIndex(); i++)
 		{
 			CSpecificCharacter spec_char;
-			SPECIFIC_CHARACTER_ID id = CSpecificCharacter::IndexToId(i);
+			shared_str id = CSpecificCharacter::IndexToId(i);
 			spec_char.Load(id);
 
 			if(spec_char.data()->m_bNoRandom) continue;
@@ -344,7 +346,7 @@ SPECIFIC_CHARACTER_ID CSE_ALifeTraderAbstract::specific_character()
 	}
 }
 
-void CSE_ALifeTraderAbstract::set_specific_character	(SPECIFIC_CHARACTER_ID new_spec_char)
+void CSE_ALifeTraderAbstract::set_specific_character	(shared_str new_spec_char)
 {
 	R_ASSERT(new_spec_char.size());
 
@@ -442,12 +444,12 @@ void CSE_ALifeTraderAbstract::set_specific_character	(SPECIFIC_CHARACTER_ID new_
 #endif
 }
 
-void CSE_ALifeTraderAbstract::set_character_profile(PROFILE_ID new_profile)
+void CSE_ALifeTraderAbstract::set_character_profile(shared_str new_profile)
 {
 	m_sCharacterProfile = new_profile;
 }
 
-PROFILE_ID CSE_ALifeTraderAbstract::character_profile()
+shared_str CSE_ALifeTraderAbstract::character_profile()
 {
 	return	m_sCharacterProfile;
 }
@@ -664,13 +666,13 @@ void CSE_ALifeCustomZone::STATE_Write	(NET_Packet	&tNetPacket)
 void CSE_ALifeCustomZone::UPDATE_Read	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Read		(tNetPacket);
-	tNetPacket.r_u32			(m_owner_id);
+//	tNetPacket.r_u32			(m_owner_id);
 }
 
 void CSE_ALifeCustomZone::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
-	tNetPacket.w_u32			(m_owner_id);
+//	tNetPacket.w_u32			(m_owner_id);
 }
 
 //xr_token TokenAnomalyType[]={
@@ -1124,8 +1126,6 @@ CSE_ALifeMonsterAbstract::CSE_ALifeMonsterAbstract(LPCSTR caSection)	: CSE_ALife
 			*I					= READ_IF_EXISTS(pSettings,r_float,imm_section,strcat(strcpy(S,ALife::g_cafHitType2String(ALife::EHitType(I - B))),"_immunity"),1.f);
 	}
 
-	m_flags.set					(flCorpseRemoval,TRUE);
-	
 	if (pSettings->line_exist(caSection,"retreat_threshold"))
 		m_fRetreatThreshold		= pSettings->r_float(caSection,"retreat_threshold");
 	else
@@ -1134,6 +1134,7 @@ CSE_ALifeMonsterAbstract::CSE_ALifeMonsterAbstract(LPCSTR caSection)	: CSE_ALife
 	m_fEyeRange					= pSettings->r_float(caSection,"eye_range");
 
 	m_fGoingSpeed				= pSettings->r_float(caSection, "going_speed");
+	m_fCurrentLevelGoingSpeed	= READ_IF_EXISTS(pSettings,r_float,caSection,"current_level_going_speed",m_fGoingSpeed);
 
 	setup_location_types		(m_tpaTerrain,pSettings,pSettings->r_string(caSection,"terrain"));
 
@@ -1143,7 +1144,11 @@ CSE_ALifeMonsterAbstract::CSE_ALifeMonsterAbstract(LPCSTR caSection)	: CSE_ALife
 	m_smart_terrain_id			= 0xffff;
 	m_task_reached				= false;
 
-	m_rank						= (pSettings->line_exist(caSection,"rank")) ? int(pSettings->r_u8(caSection,"rank")) : 0;
+	m_rank						= (pSettings->line_exist(caSection,"rank")) ? pSettings->r_s32(caSection,"rank") : 0;
+
+#ifdef XRGAME_EXPORTS
+	m_stay_after_death_time_interval	= generate_time(1,1,1,pSettings->r_u32("monsters_common","stay_after_death_time_interval"),0,0);
+#endif // XRGAME_EXPORTS
 }
 
 CSE_ALifeMonsterAbstract::~CSE_ALifeMonsterAbstract()
@@ -1264,6 +1269,7 @@ bool CSE_ALifeMonsterAbstract::need_update	(CSE_ALifeDynamicObject *object)
 ////////////////////////////////////////////////////////////////////////////
 // CSE_ALifeCreatureActor
 ////////////////////////////////////////////////////////////////////////////
+
 CSE_ALifeCreatureActor::CSE_ALifeCreatureActor	(LPCSTR caSection) : CSE_ALifeCreatureAbstract(caSection), CSE_ALifeTraderAbstract(caSection),CSE_PHSkeleton(caSection)
 {
 	if (pSettings->section_exist(caSection) && pSettings->line_exist(caSection,"visual"))
@@ -1639,11 +1645,6 @@ CSE_ALifeMonsterBase::CSE_ALifeMonsterBase	(LPCSTR caSection) : CSE_ALifeMonster
     set_visual					(pSettings->r_string(caSection,"visual"));
 	m_spec_object_id			= 0xffff;
 	
-	// check flCustom was not changed 
-	VERIFY						(flCustom == (u32(1) << 23));
-
-	m_flags.set					(flNeedCheckSpawnItem,	TRUE);
-	m_flags.set					(flSkipSpawnItem,		TRUE);
 }
 
 CSE_ALifeMonsterBase::~CSE_ALifeMonsterBase()
@@ -1921,9 +1922,6 @@ void CSE_ALifeOnlineOfflineGroup::STATE_Read				(NET_Packet &tNetPacket, u16 siz
 
 #if 1
 	u32							container_size = tNetPacket.r_u32();
-
-	MEMBERS::iterator			I = m_members.begin();
-	MEMBERS::iterator			E = m_members.end();
 	for (u32 i=0; i<container_size; ++i) {
 		MEMBERS::value_type		pair;
 		load_data				(pair.first,tNetPacket);

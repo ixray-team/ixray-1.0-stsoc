@@ -77,15 +77,18 @@ CMapSpotPointer::~CMapSpotPointer()
 
 LPCSTR CMapSpotPointer::GetHint()
 {
+	return NULL;
+/*
 	m_pointer_hint = "to: ";
 	m_pointer_hint += inherited::GetHint();
 	Fvector2 cam_pos;
 	cam_pos.set(Device.vCameraPosition.x,Device.vCameraPosition.z);
 	float dist = MapLocation()->Position().distance_to(cam_pos);
 	string32 s;
-	sprintf(s," [%.2f]m.", dist);
+	sprintf_s(s," [%.2f]m.", dist);
 	m_pointer_hint += s;
 	return m_pointer_hint.c_str();
+*/
 }
 
 //////////////////////////////////////////////////
@@ -113,7 +116,7 @@ void CMiniMapSpot::Load(CUIXml* xml, LPCSTR path)
 
 	Frect _stored_rect = m_UIStaticItem.GetOriginalRect();
 
-	strconcat(buf, path, ":texture_above");
+	strconcat(sizeof(buf), buf, path, ":texture_above");
 	n = xml->NavigateToNode(buf,0);
 	if(n){
 		LPCSTR texture  = xml->Read(buf, 0, NULL);
@@ -131,7 +134,7 @@ void CMiniMapSpot::Load(CUIXml* xml, LPCSTR path)
 		m_icon_above				= m_UIStaticItem.GetShader		();
 	}
 
-	strconcat(buf, path, ":texture_below");
+	strconcat(sizeof(buf),buf, path, ":texture_below");
 	n = xml->NavigateToNode(buf,0);
 	if(n){
 		LPCSTR texture  = xml->Read(buf, 0, NULL);
@@ -148,7 +151,7 @@ void CMiniMapSpot::Load(CUIXml* xml, LPCSTR path)
 
 		m_icon_below				= m_UIStaticItem.GetShader		();
 	}
-	strconcat(buf, path, ":texture");
+	strconcat(sizeof(buf),buf, path, ":texture");
 	n = xml->NavigateToNode(buf,0);
 	if(n){
 		LPCSTR texture  = xml->Read(buf, 0, NULL);

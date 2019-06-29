@@ -174,18 +174,18 @@ void CUICharacterInfo::InitCharacter(u16 id)
 	}
 
 	if(m_icons[eUIRank]){
-		sprintf(str, "%s", *stbl.translate(GetRankAsText(chInfo.Rank().value())));
+		sprintf_s(str, "%s", *stbl.translate(GetRankAsText(chInfo.Rank().value())));
 		m_icons[eUIRank]->SetText(str);
 	}
 
 
 	if(m_icons[eUIReputation]){
-		sprintf(str, "%s", *stbl.translate(GetReputationAsText(chInfo.Reputation().value())));
+		sprintf_s(str, "%s", *stbl.translate(GetReputationAsText(chInfo.Reputation().value())));
 		m_icons[eUIReputation]->SetText(str);
 	}
 
 	if(m_icons[eUICommunity]){
-		sprintf(str, "%s", *CStringTable().translate(chInfo.Community().id()));
+		sprintf_s(str, "%s", *CStringTable().translate(chInfo.Community().id()));
 		m_icons[eUICommunity]->SetText(str);
 	}
 
@@ -221,7 +221,7 @@ void  CUICharacterInfo::SetRelation(ALife::ERelationType relation, CHARACTER_GOO
 	m_icons[eUIRelation]->SetTextColor(GetRelationColor(relation));
 	string256		str;
 
-	sprintf(str, "%s", *stbl.translate(GetGoodwillAsText(goodwill)));
+	sprintf_s(str, "%s", *stbl.translate(GetGoodwillAsText(goodwill)));
 
 	m_icons[eUIRelation]->SetText(str);
 }

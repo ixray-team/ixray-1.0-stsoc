@@ -13,6 +13,7 @@
 #include "../../ai_object_location.h"
 #include "ai_monster_squad.h"
 #include "ai_monster_squad_manager.h"
+#include <functional>
 
 //////////////////////////////////////////////////////////////////////////
 // CControllerCoverEvaluator
@@ -189,7 +190,7 @@ const CCoverPoint *CMonsterCoverManager::find_cover(const Fvector &src_pos, cons
 
 void CMonsterCoverManager::less_cover_direction(Fvector &dir)
 {
-	float angle				= ai().level_graph().vertex_cover_angle(m_object->ai_location().level_vertex_id(),deg(10), std::greater<float>());
+	float angle				= ai().level_graph().vertex_cover_angle(m_object->ai_location().level_vertex_id(),deg(10), ::std::greater<float>());
 
 	collide::rq_result		l_rq;
 

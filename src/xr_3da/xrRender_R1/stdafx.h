@@ -24,7 +24,7 @@
 #include "..\blenders\blender.h"
 #include "..\blenders\blender_clsid.h"
 #include "..\psystem.h"
-#include "xrRender_console.h"
+#include "..\xrRender\xrRender_console.h"
 #include "FStaticRender.h"
 
 #define		TEX_POINT_ATT	"internal\\internal_light_attpoint"

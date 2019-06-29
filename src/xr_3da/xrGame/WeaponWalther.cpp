@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "weaponwalther.h"
 
 CWeaponWalther::CWeaponWalther(void) : CWeaponPistol("WALTHER")
@@ -10,8 +10,6 @@ CWeaponWalther::CWeaponWalther(void) : CWeaponPistol("WALTHER")
 CWeaponWalther::~CWeaponWalther(void)
 {
 }
-
-#include "script_space.h"
 
 using namespace luabind;
 

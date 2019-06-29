@@ -33,7 +33,6 @@ class CMainMenu :
 	public CDeviceResetNotifier
 
 {
-
 	CUIDialogWnd*		m_startDialog;
 	
 
@@ -50,17 +49,16 @@ class CMainMenu :
 	Flags16			m_Flags;
 	string_path		m_screenshot_name;
 	u32				m_screenshotFrame;
-			void	ReadTextureInfo		();
+	void						ReadTextureInfo		();
 
 
 	xr_vector<CUIWindow*>		m_pp_draw_wnds;
 
-//	CGameSpy_HTTP*		m_pGameSpyHTTP;
-	CGameSpy_Full*		m_pGameSpyFull;	
+	CGameSpy_Full*				m_pGameSpyFull;	
 
 public:
-	enum	EErrorDlg {
-		ErrNoError			= 0,
+	enum	EErrorDlg 
+	{
 		ErrInvalidPassword,
 		ErrInvalidHost,
 		ErrSessionFull,
@@ -71,7 +69,15 @@ public:
 		ErrDifferentVersion,
 		ErrGSServiceFailed,
 		ErrMasterServerConnectFailed,
+		NoNewPatch,
+		NewPatchFound,
+		PatchDownloadError,
+		PatchDownloadSuccess,
+		ConnectToMasterServer,
+		SessionTerminate,
+		LoadingError,
 		ErrMax,
+		ErrNoError = ErrMax,
 	};
 
 	Patch_Dawnload_Progress		m_sPDProgress;
@@ -80,28 +86,18 @@ public:
 	CGameSpy_Full*				GetGS() const {return m_pGameSpyFull;};
 protected:
 	EErrorDlg		m_NeedErrDialog;	
-
+	u32				m_start_time;
+	
 	shared_str		m_sPatchURL;
 	shared_str		m_sPatchFileName;
 	
 	xr_vector<CUIMessageBoxEx*>	m_pMB_ErrDlgs;
 
-	CUIMessageBoxEx*	m_pMSB_NoNewPatch;
-	CUIMessageBoxEx*	m_pMSB_NewPatch;
-	CUIMessageBoxEx*	m_pMSB_PatchDownloadError;
-	CUIMessageBoxEx*	m_pMSB_PatchDownloadSuccess;
-	CUIMessageBoxEx*	m_pMSB_ConnectToMasterServer;
-
-
-//	CUIMessageBoxEx*	m_pMB_ErrInvalidPassword;
-//	CUIMessageBoxEx*	m_pMB_ErrInvalidHost;
-//	CUIMessageBoxEx*	m_pMB_ErrSessionFull;
-//	CUIMessageBoxEx*	m_pMB_ErrServerReject;
-//	CUIMessageBoxEx*	m_pMB_ErrCDKeyInUse;
-//	CUIMessageBoxEx*	m_pMB_ErrCDKeyDisabled;
-//	CUIMessageBoxEx*	m_pMB_ErrCDKeyInvalid;
-//	CUIMessageBoxEx*	m_pMB_ErrDifferentVersion;	
-
+//.	CUIMessageBoxEx*	m_pMSB_NoNewPatch;
+//.	CUIMessageBoxEx*	m_pMSB_NewPatch;
+//.	CUIMessageBoxEx*	m_pMSB_PatchDownloadError;
+//.	CUIMessageBoxEx*	m_pMSB_PatchDownloadSuccess;
+//.	CUIMessageBoxEx*	m_pMSB_ConnectToMasterServer;
 public:
 	u32				m_deactivated_frame;
 	virtual void	DestroyInternal					(bool bForce);
@@ -146,6 +142,9 @@ public:
 	void			OnNewPatchFound					(LPCSTR VersionName, LPCSTR URL);
 	void			OnNoNewPatchFound				();
 	void xr_stdcall OnDownloadPatch					(CUIWindow*, void*);
+	void xr_stdcall OnConnectToMasterServerOkClicked(CUIWindow*, void*);
+	void			OnSessionTerminate				(LPCSTR reason);
+	void			OnLoadError						(LPCSTR module);
 	void			OnDownloadPatchError			();
 	void			OnDownloadPatchSuccess			();
 	void			OnDownloadPatchProgress			(u64 bytesReceived, u64 totalSize);
@@ -154,11 +153,9 @@ public:
 	void			Hide_CTMS_Dialog				();
 	void			SetNeedVidRestart				();
 	virtual void	OnDeviceReset					();
-
+	LPCSTR			GetGSVer						();
 		bool		ValidateCDKey					();
 		bool		IsCDKeyIsValid();
-protected:
-	CUIMessageBoxEx*	m_pMessageBox;
 };
 
 extern CMainMenu*	MainMenu();

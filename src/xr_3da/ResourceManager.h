@@ -8,7 +8,7 @@
 
 #include	"shader.h"
 #include	"tss_def.h"
-
+#include	"TextureDescrManager.h"
 // refs
 struct		lua_State;
 
@@ -64,7 +64,8 @@ private:
 	xr_vector<ref_texture>								m_necessary;
 	// misc
 public:
-	CInifile*											m_description;
+	CTextureDescrMngr									m_textures_description;
+//.	CInifile*											m_textures_description;
 	xr_vector<std::pair<shared_str,R_constant_setup*> >	v_constant_setup;
 	lua_State*											LSVM;
 	BOOL												bDeferredLoad;
@@ -78,7 +79,7 @@ public:
 	IBlender* 						_FindBlender		(LPCSTR Name);
 	void							_GetMemoryUsage		(u32& m_base, u32& c_base, u32& m_lmaps, u32& c_lmaps);
 	void							_DumpMemoryUsage	();
-	BOOL							_GetDetailTexture	(LPCSTR Name, LPCSTR& T, R_constant_setup* &M);
+//.	BOOL							_GetDetailTexture	(LPCSTR Name, LPCSTR& T, R_constant_setup* &M);
 
 	map_Blender&					_GetBlenders		()		{	return m_blenders;	}
 
@@ -146,7 +147,7 @@ public:
 	Shader*							_lua_Create			(LPCSTR		s_shader,	LPCSTR s_textures);
 	BOOL							_lua_HasShader		(LPCSTR		s_shader);
 
-	CResourceManager						()	: bDeferredLoad(TRUE), m_description(0)	{	}
+	CResourceManager						()	: bDeferredLoad(TRUE)/*, m_description(0)*/	{	}
 	~CResourceManager						()	;
 
 	void			OnDeviceCreate			(IReader* F);

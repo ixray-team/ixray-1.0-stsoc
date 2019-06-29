@@ -6,9 +6,8 @@
 //	Description : Server monsters for ALife simulator, script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "xrServer_Objects_ALife_Monsters.h"
-#include "script_space.h"
 #include "xrServer_script_macroses.h"
 
 using namespace luabind;
@@ -22,17 +21,14 @@ LPCSTR profile_name_script (CSE_ALifeTraderAbstract* ta)
 void CSE_ALifeTraderAbstract::script_register(lua_State *L)
 {
 	module(L)[
-		def("cast_alife_object_to_creature",&_dynamic_cast<CSE_ALifeCreatureAbstract,CSE_ALifeObject>),
-		def("cast_alife_object_to_trader_abstract",&_dynamic_cast<CSE_ALifeTraderAbstract,CSE_ALifeObject>),
-
 		class_<CSE_ALifeTraderAbstract>
 			("cse_alife_trader_abstract")
 //			.def(		constructor<LPCSTR>())
 #ifdef XRGAME_EXPORTS
-			.def("community",		CommunityName)
-			.def("profile_name",	profile_name_script)
-			.def("rank",			Rank)
-			.def("reputation",		Reputation)
+			.def("community",		&CommunityName)
+			.def("profile_name",	&profile_name_script)
+			.def("rank",			&Rank)
+			.def("reputation",		&Reputation)
 #endif // XRGAME_EXPORTS
 	];
 }
@@ -70,7 +66,7 @@ void CSE_ALifeAnomalousZone::script_register(lua_State *L)
 			CSE_ALifeCustomZone
 		)
 #ifdef XRGAME_EXPORTS
-		.def("spawn_artefacts",	CSE_ALifeAnomalousZone::spawn_artefacts)
+		.def("spawn_artefacts",	&CSE_ALifeAnomalousZone::spawn_artefacts)
 #endif
 	];
 }

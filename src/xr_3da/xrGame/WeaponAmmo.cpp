@@ -170,7 +170,8 @@ bool CWeaponAmmo::Get(CCartridge &cartridge)
 	cartridge.bullet_material_idx = GMLib.GetMaterialIdx(WEAPON_MATERIAL_NAME);
 	cartridge.m_InvShortName = NameShort();
 	--m_boxCurr;
-	if(m_pInventory)m_pInventory->InvalidateState();
+	if(m_pCurrentInventory)
+		m_pCurrentInventory->InvalidateState();
 	return true;
 }
 

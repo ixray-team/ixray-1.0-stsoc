@@ -162,7 +162,7 @@ void CWeaponMagazined::FireEnd()
 	inherited::FireEnd();
 
 	CActor	*actor = smart_cast<CActor*>(H_Parent());
-	if(!iAmmoElapsed && actor) 
+	if(!iAmmoElapsed && actor && GetState()!=eReload) 
 		Reload();
 }
 
@@ -175,9 +175,9 @@ void CWeaponMagazined::Reload()
 
 bool CWeaponMagazined::TryReload() 
 {
-	if(m_pInventory) 
+	if(m_pCurrentInventory) 
 	{
-		m_pAmmo = smart_cast<CWeaponAmmo*>(m_pInventory->GetAny(*m_ammoTypes[m_ammoType] ));
+		m_pAmmo = smart_cast<CWeaponAmmo*>(m_pCurrentInventory->GetAny(*m_ammoTypes[m_ammoType] ));
 
 		
 		if(IsMisfire() && iAmmoElapsed)
@@ -195,7 +195,7 @@ bool CWeaponMagazined::TryReload()
 		} 
 		else for(u32 i = 0; i < m_ammoTypes.size(); ++i) 
 		{
-			m_pAmmo = smart_cast<CWeaponAmmo*>(m_pInventory->GetAny( *m_ammoTypes[i] ));
+			m_pAmmo = smart_cast<CWeaponAmmo*>(m_pCurrentInventory->GetAny( *m_ammoTypes[i] ));
 			if(m_pAmmo) 
 			{ 
 				m_ammoType = i; 
@@ -213,11 +213,11 @@ bool CWeaponMagazined::TryReload()
 
 bool CWeaponMagazined::IsAmmoAvailable()
 {
-	if (smart_cast<CWeaponAmmo*>(m_pInventory->GetAny(*m_ammoTypes[m_ammoType])))
+	if (smart_cast<CWeaponAmmo*>(m_pCurrentInventory->GetAny(*m_ammoTypes[m_ammoType])))
 		return	(true);
 	else
 		for(u32 i = 0; i < m_ammoTypes.size(); ++i)
-			if (smart_cast<CWeaponAmmo*>(m_pInventory->GetAny(*m_ammoTypes[i])))
+			if (smart_cast<CWeaponAmmo*>(m_pCurrentInventory->GetAny(*m_ammoTypes[i])))
 				return	(true);
 	return		(false);
 }
@@ -269,7 +269,7 @@ void CWeaponMagazined::UnloadMagazine(bool spawn_ammo)
 	xr_map<LPCSTR, u16>::iterator l_it;
 	for(l_it = l_ammo.begin(); l_ammo.end() != l_it; ++l_it) 
 	{
-		CWeaponAmmo *l_pA = smart_cast<CWeaponAmmo*>(m_pInventory->GetAny(l_it->first));
+		CWeaponAmmo *l_pA = smart_cast<CWeaponAmmo*>(m_pCurrentInventory->GetAny(l_it->first));
 		if(l_pA) 
 		{
 			u16 l_free = l_pA->m_boxSize - l_pA->m_boxCurr;
@@ -295,7 +295,7 @@ void CWeaponMagazined::ReloadMagazine()
 		m_pAmmo		= NULL;
 	}
 	
-	if (!m_pInventory) return;
+	if (!m_pCurrentInventory) return;
 
 	if(m_set_next_ammoType_on_reload != u32(-1)){		
 		m_ammoType						= m_set_next_ammoType_on_reload;
@@ -305,14 +305,14 @@ void CWeaponMagazined::ReloadMagazine()
 	if(!unlimited_ammo()) 
 	{
 		//попытаться найти в инвентаре патроны текущего типа 
-		m_pAmmo = smart_cast<CWeaponAmmo*>(m_pInventory->GetAny(*m_ammoTypes[m_ammoType]));
+		m_pAmmo = smart_cast<CWeaponAmmo*>(m_pCurrentInventory->GetAny(*m_ammoTypes[m_ammoType]));
 		
 		if(!m_pAmmo && !m_bLockType) 
 		{
 			for(u32 i = 0; i < m_ammoTypes.size(); ++i) 
 			{
 				//проверить патроны всех подходящих типов
-				m_pAmmo = smart_cast<CWeaponAmmo*>(m_pInventory->GetAny(*m_ammoTypes[i]));
+				m_pAmmo = smart_cast<CWeaponAmmo*>(m_pCurrentInventory->GetAny(*m_ammoTypes[i]));
 				if(m_pAmmo) 
 				{ 
 					m_ammoType = i; 
@@ -324,15 +324,6 @@ void CWeaponMagazined::ReloadMagazine()
 	else
 		m_ammoType = m_ammoType;
 
-//	VERIFY((u32)iAmmoElapsed == m_magazine.size());
-	if((u32)iAmmoElapsed != m_magazine.size()){
-		Msg("iAmmoElapsed = %d, m_magazine.size() = %d", iAmmoElapsed, m_magazine.size() );	
-		Msg("weapon=%s",*cNameSect());
-		if(H_Parent()){
-			Msg("owner=%s",*H_Parent()->cNameSect());
-		}
-		VERIFY((u32)iAmmoElapsed == m_magazine.size());
-	}
 
 	//нет патронов для перезарядки
 	if(!m_pAmmo && !unlimited_ammo() ) return;
@@ -357,14 +348,14 @@ void CWeaponMagazined::ReloadMagazine()
 		++iAmmoElapsed;
 		l_cartridge.m_LocalAmmoType = u8(m_ammoType);
 		m_magazine.push_back(l_cartridge);
-//		m_fCurrentCartirdgeDisp = l_cartridge.m_kDisp;
 	}
 	m_ammoName = (m_pAmmo) ? m_pAmmo->m_nameShort : NULL;
 
 	VERIFY((u32)iAmmoElapsed == m_magazine.size());
 
 	//выкинуть коробку патронов, если она пустая
-	if(m_pAmmo && !m_pAmmo->m_boxCurr && OnServer()) m_pAmmo->Drop();
+	if(m_pAmmo && !m_pAmmo->m_boxCurr && OnServer()) 
+		m_pAmmo->SetDropManual(TRUE);
 
 	if(iMagazineSize > iAmmoElapsed) 
 	{ 
@@ -622,14 +613,15 @@ void CWeaponMagazined::switch2_Fire	()
 		return;
 #endif // DEBUG
 
-	VERIFY2(
-		io && (ii == io->inventory().ActiveItem()),
-		make_string(
-			"item[%s], parent[%s]",
-			*cName(),
-			H_Parent() ? *H_Parent()->cName() : "no_parent"
-		)
-	);
+//
+//	VERIFY2(
+//		io && (ii == io->inventory().ActiveItem()),
+//		make_string(
+//			"item[%s], parent[%s]",
+//			*cName(),
+//			H_Parent() ? *H_Parent()->cName() : "no_parent"
+//		)
+//	);
 
 	m_bStopedAfterQueueFired = false;
 	m_bFireSingleShot = true;
@@ -814,7 +806,7 @@ bool CWeaponMagazined::Attach(PIItem pIItem, bool b_send_event)
 		if (b_send_event && OnServer())
 		{
 			//уничтожить подсоединенную вещь из инвентаря
-			pIItem->Drop					();
+//.			pIItem->Drop					();
 			pIItem->object().DestroyObject	();
 		};
 
@@ -1130,9 +1122,9 @@ void	CWeaponMagazined::SetQueueSize			(int size)
 {
 	m_iQueueSize = size; 
 	if (m_iQueueSize == -1)
-		strcpy(m_sCurFireMode, " (A)");
+		strcpy_s(m_sCurFireMode, " (A)");
 	else
-		sprintf(m_sCurFireMode, " (%d)", m_iQueueSize);
+		sprintf_s(m_sCurFireMode, " (%d)", m_iQueueSize);
 };
 
 float	CWeaponMagazined::GetWeaponDeterioration	()
@@ -1188,19 +1180,19 @@ void CWeaponMagazined::GetBriefInfo(xr_string& str_name, xr_string& icon_sect_na
 
 
 	string256		sItemName;
-	strcpy			(sItemName, *CStringTable().translate(pSettings->r_string(icon_sect_name.c_str(), "inv_name_short")));
+	strcpy_s			(sItemName, *CStringTable().translate(pSettings->r_string(icon_sect_name.c_str(), "inv_name_short")));
 
 	if ( HasFireModes() )
-		strcat(sItemName, GetCurrentFireModeStr());
+		strcat_s(sItemName, GetCurrentFireModeStr());
 
 	str_name		= sItemName;
 
 
 	{
 		if (!unlimited_ammo())
-			sprintf			(sItemName, "%d/%d",AE,AC - AE);
+			sprintf_s			(sItemName, "%d/%d",AE,AC - AE);
 		else
-			sprintf			(sItemName, "%d/--",AE);
+			sprintf_s			(sItemName, "%d/--",AE);
 
 		str_count				= sItemName;
 	}

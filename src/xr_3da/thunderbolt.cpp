@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #pragma once
 
-#include "render.h"
+#ifndef _EDITOR
+    #include "render.h"
+#endif    
 #include "Thunderbolt.h"
 #include "igame_persistent.h"
 #include "LightAnimLibrary.h"

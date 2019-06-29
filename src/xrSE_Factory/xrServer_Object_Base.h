@@ -12,7 +12,7 @@
 #include "object_interfaces.h"
 #include "script_value_container.h"
 #include "alife_space.h"
-#include "client_id.h"
+#include "../../xrNetServer/client_id.h"
 
 class NET_Packet;
 class xrClientData;
@@ -96,16 +96,6 @@ public:
 	// ALife spawn params
 	// obsolete, just because we hope to uncomment all this stuff
 	Flags32							m_spawn_flags;
-//	float							m_spawn_probability;
-//	shared_str						m_spawn_control;
-//	u32								m_max_spawn_count;
-//	u64								m_min_spawn_interval;
-//	u64								m_max_spawn_interval;
-
-	// only for save_update
-//	u32								m_spawn_count;
-//	u64								m_last_spawn_time;
-//	u64								m_next_spawn_time;
 
 	//client object custom data serialization
 	xr_vector<u8>					client_data;
@@ -117,8 +107,7 @@ public:
 	virtual							~CSE_Abstract	();
 	virtual void					OnEvent			(NET_Packet &tNetPacket, u16 type, u32 time, ClientID sender ){};
 	virtual void					FillProps		(LPCSTR pref, PropItemVec &items);
-//	virtual void					save_update		(NET_Packet &tNetPacket);
-//	virtual void					load_update		(NET_Packet &tNetPacket);
+	virtual BOOL					Net_Relevant	(){return TRUE;};
 	//
 	virtual void		__stdcall	Spawn_Write		(NET_Packet &tNetPacket, BOOL bLocal);
 	virtual BOOL		__stdcall	Spawn_Read		(NET_Packet &tNetPacket);

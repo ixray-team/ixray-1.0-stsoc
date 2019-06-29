@@ -238,11 +238,11 @@ void CBuild::ImplicitLighting()
 		// base
 		Status	("Saving base...");
 		{
-			string256				name, out_name;
+			string_path				name, out_name;
 			sscanf					(strstr(Core.Params,"-f")+2,"%s",name);
 			R_ASSERT				(name[0] && defl.texture);
 			b_BuildTexture& TEX		=	*defl.texture;
-			strconcat				(out_name,name,"\\",TEX.name,".dds");
+			strconcat				(sizeof(out_name),out_name,name,"\\",TEX.name,".dds");
 			FS.update_path			(out_name,_game_levels_,out_name);
 			clMsg					("Saving texture '%s'...",out_name);
 			VerifyPath				(out_name);
@@ -264,10 +264,10 @@ void CBuild::ImplicitLighting()
 			xr_vector<u32>			packed;
 			defl.lmap.Pack			(packed);
 
-			string256				name, out_name;
+			string_path				name, out_name;
 			sscanf					(strstr(GetCommandLine(),"-f")+2,"%s",name);
 			b_BuildTexture& TEX		=	*defl.texture;
-			strconcat				(out_name,name,"\\",TEX.name,"_lm.dds");
+			strconcat				(sizeof(out_name),out_name,name,"\\",TEX.name,"_lm.dds");
 			FS.update_path			(out_name,_game_levels_,out_name);
 			clMsg					("Saving texture '%s'...",out_name);
 			VerifyPath				(out_name);

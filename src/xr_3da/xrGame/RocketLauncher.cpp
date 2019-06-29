@@ -9,6 +9,7 @@
 #include "xrserver_objects_alife_items.h"
 #include "level.h"
 #include "ai_object_location.h"
+#include "../IGame_Persistent.h"
 
 CRocketLauncher::CRocketLauncher()
 {
@@ -31,7 +32,7 @@ void CRocketLauncher::SpawnRocket(LPCSTR rocket_section, CGameObject* parent_roc
 	R_ASSERT			(D);
 	CSE_Temporary		*l_tpTemporary = smart_cast<CSE_Temporary*>(D);
 	R_ASSERT			(l_tpTemporary);
-	l_tpTemporary->m_tNodeID	= parent_rocket_launcher->ai_location().level_vertex_id();
+	l_tpTemporary->m_tNodeID	= (g_dedicated_server)?u32(-1) : parent_rocket_launcher->ai_location().level_vertex_id();
 	// Fill
 	D->s_name			= rocket_section;
 	D->set_name_replace	("");
@@ -61,7 +62,7 @@ void CRocketLauncher::AttachRocket(u16 rocket_id, CGameObject* parent_rocket_lau
 	m_rockets.push_back(pRocket);
 }
 
-void CRocketLauncher::DetachRocket(u16 rocket_id)
+void CRocketLauncher::DetachRocket(u16 rocket_id, bool bLaunch)
 {
 	CCustomRocket *pRocket = smart_cast<CCustomRocket*>(Level().Objects.net_Find(rocket_id));
 	if (!pRocket && OnClient()) return;
@@ -78,16 +79,17 @@ void CRocketLauncher::DetachRocket(u16 rocket_id)
 
 	if( It != m_rockets.end() )
 	{
-		(*It)->H_SetParent(NULL);
-		m_rockets.erase(It);
+		(*It)->m_bLaunched	= bLaunch;
+		(*It)->H_SetParent	(NULL);
+		m_rockets.erase		(It);
 	};
 
 	if( It_l != m_launched_rockets.end() )
 	{
-		(*It_l)->H_SetParent(NULL);
-		m_launched_rockets.erase(It_l);
+		(*It)->m_bLaunched			= bLaunch;
+		(*It_l)->H_SetParent		(NULL);
+		m_launched_rockets.erase	(It_l);
 	}
-//	Msg("---------Detached rocket [%d] frame [%d]",rocket_id, Device.dwFrame);
 }
 
 

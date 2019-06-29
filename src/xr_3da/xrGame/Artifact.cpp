@@ -10,6 +10,7 @@
 #include "xrServer_Objects_ALife_Monsters.h"
 #include "phworld.h"
 #include "restriction_space.h"
+#include "../IGame_Persistent.h"
 
 #define	FASTMODE_DISTANCE (50.f)	//distance to camera from sphere, when zone switches to fast update sequence
 
@@ -186,7 +187,9 @@ void CArtefact::OnH_B_Independent(bool just_before_destroy)
 void CArtefact::UpdateCL		() 
 {
 	inherited::UpdateCL			();
-	if (o_fastmode)				UpdateWorkload	(Device.dwTimeDelta);	
+	
+	if (o_fastmode || m_activationObj)
+		UpdateWorkload			(Device.dwTimeDelta);	
 }
 
 void CArtefact::UpdateWorkload		(u32 dt) 
@@ -406,8 +409,8 @@ void CArtefact::OnAnimationEnd		(u32 state)
 	case eHiding:
 		{
 			SwitchState(eHidden);
-//.			if(m_pInventory->GetNextActiveSlot()!=NO_ACTIVE_SLOT)
-//.				m_pInventory->Activate(m_pInventory->GetPrevActiveSlot());
+//.			if(m_pCurrentInventory->GetNextActiveSlot()!=NO_ACTIVE_SLOT)
+//.				m_pCurrentInventory->Activate(m_pCurrentInventory->GetPrevActiveSlot());
 		}break;
 	case eShowing:
 		{
@@ -425,6 +428,14 @@ void CArtefact::OnAnimationEnd		(u32 state)
 		}break;
 	};
 }
+
+
+
+u16	CArtefact::bone_count_to_synchronize	() const
+{
+	return CInventoryItem::object().PHGetSyncItemsNumber();
+}
+
 
 
 //---SArtefactActivation----
@@ -570,7 +581,7 @@ void SArtefactActivation::SpawnAnomaly()
 		m_af->Center(pos);
 		CSE_Abstract		*object = Level().spawn_item(	zone_sect,
 															pos,
-															m_af->ai_location().level_vertex_id(),
+															(g_dedicated_server)?u32(-1):m_af->ai_location().level_vertex_id(),
 															0xffff,
 															true
 		);
@@ -589,9 +600,9 @@ void SArtefactActivation::SpawnAnomaly()
 		object->Spawn_Write			(P,TRUE);
 		Level().Send				(P,net_flags(TRUE));
 		F_entity_Destroy			(object);
-#ifdef DEBUG
+//. #ifdef DEBUG
 		Msg("artefact [%s] spawned a zone [%s] at [%f]", *m_af->cName(), zone_sect, Device.fTimeGlobal);
-#endif
+//. #endif
 }
 
 shared_str clear_brackets(LPCSTR src)
@@ -600,8 +611,9 @@ shared_str clear_brackets(LPCSTR src)
 	
 	if( NULL == strchr(src,'"') )	return	shared_str(src);
 
-	string512	_original;	
-	u32			_len				= xr_strlen(strcpy(_original,src));
+	string512						_original;	
+	strcpy_s						(_original,src);
+	u32			_len				= xr_strlen(_original);
 	if	(0==_len)					return	shared_str("");
 	if	('"'==_original[_len-1])	_original[_len-1]=0;					// skip end
 	if	('"'==_original[0])			return	shared_str(&_original[0] + 1);	// skip begin

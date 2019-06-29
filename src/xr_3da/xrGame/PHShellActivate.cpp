@@ -7,11 +7,17 @@
 #include "PHJointDestroyInfo.h"
 #include "PHCollideValidator.h"
 #include "Level.h"
+#include "physicsshellholder.h"
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	#include "PhysicsShellAnimator.h"
+#endif
+
 ///////////////////////////////////////////////////////////////
 ///#pragma warning(disable:4995)
-//#include "../ode/src/collision_kernel.h"
-//#include <../ode/src/joint.h>
-//#include <../ode/src/objects.h>
+//#include "../../xrODE/ode/src/collision_kernel.h"
+//#include "../../xrODE/ode/src/joint.h"
+//#include "../../xrODE/ode/src/objects.h"
 
 //#pragma warning(default:4995)
 ///////////////////////////////////////////////////////////////////
@@ -20,16 +26,18 @@
 
 #include "PHElement.h"
 #include "PHShell.h"
-
-void CPHShell::Activate(const Fmatrix &m0,float dt01,const Fmatrix &m2,bool disable){
-
-	if(isActive())return;
+void CPHShell::activate(bool disable)
+{
 	PresetActive();
-
 	if(!CPHObject::is_active()) vis_update_deactivate();
 	if(!disable)EnableObject(0);
 
-	ELEMENT_I i;
+}
+void CPHShell::Activate(const Fmatrix &m0,float dt01,const Fmatrix &m2,bool disable){
+
+	if(isActive())return;
+	activate(disable);
+//	ELEMENT_I i;
 	mXFORM.set(m0);
 	//for(i=elements.begin();elements.end() != i;++i){
 
@@ -74,13 +82,7 @@ void CPHShell::Activate(const Fmatrix &m0,float dt01,const Fmatrix &m2,bool disa
 void CPHShell::Activate(const Fmatrix &transform,const Fvector& lin_vel,const Fvector& ang_vel,bool disable){
 
 	if(isActive())return;
-	PresetActive();	
-	
-	if(!CPHObject::is_active()) vis_update_deactivate();
-	if(!disable)EnableObject(0);
-
-
-
+	activate(disable);
 
 	ELEMENT_I i;
 	mXFORM.set(transform);
@@ -116,14 +118,8 @@ void CPHShell::Activate(const Fmatrix &transform,const Fvector& lin_vel,const Fv
 void CPHShell::Activate(bool disable)
 { 
 	if(isActive())return;
-	PresetActive();
-	
-	if(!CPHObject::is_active()) vis_update_deactivate();
-	if(!disable)EnableObject(0);
 
-
-
-
+	activate(disable);
 	{		
 		ELEMENT_I i=elements.begin(),e=elements.end();
 			 for(;i!=e;++i)(*i)->Activate(mXFORM,disable);
@@ -224,6 +220,14 @@ void CPHShell::PresetActive()
 
 
 void CPHShell::Deactivate(){
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	if (m_pPhysicsShellAnimatorC)
+	{
+		xr_delete<CPhysicsShellAnimator>(m_pPhysicsShellAnimatorC); 
+	}
+#endif
+
 	if(!isActive())return;
 	R_ASSERT2(!ph_world->Processing(),"can not deactivate physics shell during physics processing!!!");
 	R_ASSERT2(!ph_world->IsFreezed(),"can not deactivate physics shell when ph world is freezed!!!");
@@ -232,15 +236,22 @@ void CPHShell::Deactivate(){
 	VERIFY(ph_world&&ph_world->Exist());
 	if(isFullActive())
 	{
-		
+		vis_update_deactivate();
 		CPHObject::activate();
 		ph_world->Freeze();
 		CPHObject::UnFreeze();
 		ph_world->StepTouch();
 		ph_world->UnFreeze();
+		//Fmatrix m;
+		//InterpolateGlobalTransform(&m);
 	}
 	spatial_unregister();
+	
 	vis_update_activate();
+	//if(ref_object && !CPHObject::is_active() && m_active_count == 0)
+	//{
+	//	ref_object->processing_activate();
+	//}
 	DisableObject();
 	CPHObject::remove_from_recently_deactivated();
 	

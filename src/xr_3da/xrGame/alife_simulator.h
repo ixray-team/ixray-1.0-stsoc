@@ -27,6 +27,11 @@ public:
 					CALifeSimulator		(xrServer *server, shared_str* command_line);
 	virtual			~CALifeSimulator	();
 	virtual	void	destroy				();
+
+#if 0//def DEBUG
+			void	validate			();
+#endif //DEBUG
+
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 add_to_type_list(CALifeSimulator)

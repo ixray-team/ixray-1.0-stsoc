@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "xrRender_console.h"
+#include "..\xrRender\xrRender_console.h"
 
 #pragma comment(lib,"xr_3DA")
 

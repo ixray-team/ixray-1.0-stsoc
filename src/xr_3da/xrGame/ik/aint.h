@@ -158,30 +158,30 @@ public:
 
     int IsFullRange(float eps = AINT_BIG_EPSILON) const
     {
-	return _abs(high-2*M_PI) < eps && _abs(low) < eps;
+		return _abs(high-2*M_PI) < eps && _abs(low) < eps;
     }
 
     int IsEmpty(float eps = AINT_BIG_EPSILON) const
     {
-	if (low <= high)
-	    return (
-		_abs(low-high) < eps);
-	else
-	    return (_abs(low-2*M_PI) + _abs(high) < eps);
-    }
+		if (low <= high)
+			return (
+			_abs(low-high) < eps);
+		else
+			return (_abs(low-2*M_PI) + _abs(high) < eps);
+		}
 
-    // returns T if a is in the angle range
-    int InRange(float a, float eps = AINT_EPSILON) const
-    {
-	if (IsEmpty())
-	    return 0;
+		// returns T if a is in the angle range
+		int InRange(float a, float eps = AINT_EPSILON) const
+		{
+		if (IsEmpty())
+			return 0;
 
-	a = angle_normalize(a);
-	if (iszero(a) || istwopi(a))
-	    return (low > high) || iszero(low) || istwopi(high);
-	else
-	    return (low < high) ? 
-	    le(low,a,eps) && le(a,high,eps) : le(a,high,eps) || ge(a,low,eps);
+		a = angle_normalize(a);
+		if (iszero(a) || istwopi(a))
+			return (low > high) || iszero(low) || istwopi(high);
+		else
+			return (low < high) ? 
+			le(low,a,eps) && le(a,high,eps) : le(a,high,eps) || ge(a,low,eps);
     }
 
 

@@ -23,7 +23,7 @@ void	CCar::OnMouseMove(int dx, int dy)
 	if (Remote())					return;
 
 	CCameraBase* C	= active_camera;
-	float scale		= (C->f_fov/DEFAULT_FOV)*psMouseSens * psMouseSensScale/50.f;
+	float scale		= (C->f_fov/g_fov)*psMouseSens * psMouseSensScale/50.f;
 	if (dx){
 		float d		= float(dx)*scale;
 		C->Move		((d<0)?kLEFT:kRIGHT, _abs(d));
@@ -213,27 +213,42 @@ float CCar::FireDirDiff()
 	return 0.0f;
 }
 #include "script_game_object.h"
+#include "car_memory.h"
+#include "visual_memory_manager.h"
+
 bool CCar::isObjectVisible			(CScriptGameObject* O_)
 {
-	if(!O_){
-		Msg("Attempt to call CCar::isObjectVisible method wihth passed NULL parameter");
-		return false;
-	}
-	CObject* O = &O_->object();
-	Fvector dir_to_object;
-	Fvector to_point;
-	O->Center(to_point);
-	
-	Fvector from_point;
-	Center(from_point);
-	from_point.y += 1.5f;
-	dir_to_object.sub(to_point,from_point).normalize_safe();
-	float ray_length = from_point.distance_to(to_point);
+	if(m_memory)
+	{
+		return m_memory->visual().visible_now(&O_->object());
+	}else
+	{
 
-
-	BOOL res = Level().ObjectSpace.RayTest(from_point, dir_to_object, ray_length, collide::rqtStatic, NULL, NULL);
+		if(!O_)
+		{
+			Msg("Attempt to call CCar::isObjectVisible method wihth passed NULL parameter");
+			return false;
+		}
+		CObject* O = &O_->object();
+		Fvector dir_to_object;
+		Fvector to_point;
+		O->Center(to_point);
 		
-	return (0==res);
+		Fvector				from_point;
+		Center				(from_point);
+	
+		if(HasWeapon())
+		{
+			from_point.y		= XFORM().c.y + m_car_weapon->_height();
+		}
+
+		dir_to_object.sub(to_point,from_point).normalize_safe();
+		float ray_length = from_point.distance_to(to_point);
+
+
+		BOOL res = Level().ObjectSpace.RayTest(from_point, dir_to_object, ray_length, collide::rqtStatic, NULL, NULL);
+		return (0==res);
+	}
 }
 
 bool CCar::HasWeapon()

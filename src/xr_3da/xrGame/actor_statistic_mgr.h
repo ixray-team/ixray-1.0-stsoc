@@ -10,8 +10,10 @@ private:
 public:
 							CActorStatisticMgr		();
 							~CActorStatisticMgr		();
-	SStatSectionData&		GetSection				(int key);
+	SStatSectionData&		GetSection				(const shared_str& key);
 	
-	void					AddPoints				(int key, const shared_str& detail_key, s32 cnt, s32 pts);
-	s32						GetSectionPoints		(int key);
+	void					AddPoints				(const shared_str& key, const shared_str& detail_key, const shared_str& str_value);
+	void					AddPoints				(const shared_str& key, const shared_str& detail_key, s32 cnt, s32 pts);
+	s32						GetSectionPoints		(const shared_str& key);
+	const vStatSectionData&	GetCStorage				();
 };

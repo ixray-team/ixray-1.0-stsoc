@@ -22,6 +22,7 @@ void CRenderTarget::accum_point		(light* L)
 	RCache.set_xform_view			(Device.mView);
 	RCache.set_xform_project		(Device.mProject);
 	enable_scissor					(L);
+	enable_dbt_bounds				(L);
 
 	// *****************************	Mask by stencil		*************************************
 	// *** similar to "Carmack's reverse", but assumes convex, non intersecting objects,
@@ -105,4 +106,6 @@ void CRenderTarget::accum_point		(light* L)
 
 	dwLightMarkerID					+=	2;	// keep lowest bit always setted up
 	CHK_DX		(HW.pDevice->SetRenderState(D3DRS_SCISSORTESTENABLE,FALSE));
+
+	u_DBT_disable				();
 }

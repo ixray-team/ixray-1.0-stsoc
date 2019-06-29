@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #pragma hdrstop
 
+#ifndef _EDITOR
+
 #include "xrdebug.h"
 #include "resource.h"
 #include "dbghelp.h"
@@ -69,7 +71,7 @@ static INT_PTR CALLBACK DialogProc	( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
 	return TRUE;
 }
 
-void xrDebug::backend(const char* reason, const char* expression, const char *argument0, const char *argument1, const char* file, int line, const char *function, bool &ignore_always) 
+void xrDebug::backend(const char* reason, const char* expression, const char *argument0, const char *argument1, const char* file, int line, const char *function, bool &ignore_always)
 {
 	static	xrCriticalSection	CS;
 
@@ -77,13 +79,14 @@ void xrDebug::backend(const char* reason, const char* expression, const char *ar
 
 	// Log
 	string1024			tmp;
-	sprintf				(tmp,"***STOP*** file '%s', line %d.\n***Reason***: %s",file,line,reason);
+	sprintf				(tmp,"***STOP*** file '%s', line %d.\n***Reason***: %s\n %s",file,line,reason,expression);
 	Msg					(tmp);
 	FlushLog			();
 	if (handler)		handler	();
 
 	// Call the dialog
-	dlgExpr				= reason;	
+	dlgExpr				= reason;
+    sprintf             ()
 	dlgFile				= file;
 	sprintf				(dlgLine,"%d",line);
 	INT_PTR res			= -1;
@@ -135,6 +138,11 @@ void xrDebug::error		(long hr, const char* expr, const char *file, int line, con
 	backend		(error2string(hr),expr,0,0,file,line,function,ignore_always);
 }
 
+void xrDebug::error		(long hr, const char* expr, const char *e2, const char *file, int line, const char *function, bool &ignore_always)
+{
+	backend		(error2string(hr),expr,e2,0,file,line,function,ignore_always);
+}
+
 void xrDebug::fail		(const char *e1, const char *file, int line, const char *function, bool &ignore_always)
 {
 	backend		("assertion failed",e1,0,0,file,line,function,ignore_always);
@@ -168,6 +176,13 @@ void __cdecl xrDebug::fatal(const char *file, int line, const char *function, co
 
 	backend		("fatal error","<no expression>",buffer,0,file,line,function,ignore_always);
 }
+void xrDebug::do_exit	(const std::string &message)
+{
+	FlushLog			();
+    MessageBox			(NULL,message.c_str(),"Error",MB_OK|MB_ICONERROR|MB_SYSTEMMODAL);
+    TerminateProcess	(GetCurrentProcess(),1);
+}
+
 int __cdecl _out_of_memory	(size_t size)
 {
 	Debug.fatal				(DEBUG_INFO,"Out of memory. Memory request: %d K",size/1024);
@@ -308,7 +323,7 @@ namespace std{
 		FATAL		("Out of memory.");
     }
 
-    void	xrDebug::_initialize		()
+    void	xrDebug::_initialize		(const bool &dedicated)
     {
 //        std::set_new_mode 				(1);					// gen exception if can't allocate memory
         std::set_new_handler			(def_new_handler  );	// exception-handler for 'out of memory' condition
@@ -319,7 +334,7 @@ namespace std{
     _CRTIMP int		__cdecl _set_new_mode( int );
     _CRTIMP _PNH	__cdecl _set_new_handler( _PNH );
 
-    void	xrDebug::_initialize		()
+    void	xrDebug::_initialize		(const bool &dedicated)
     {
 		handler							= 0;
         _set_new_mode					(1);					// gen exception if can't allocate memory
@@ -328,5 +343,7 @@ namespace std{
 		std::set_unexpected				(_terminate);
         ::SetUnhandledExceptionFilter	( UnhandledFilter );	// exception handler to all "unhandled" exceptions
     }
+
 #endif
 
+#endif

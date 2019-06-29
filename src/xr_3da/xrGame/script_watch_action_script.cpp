@@ -6,9 +6,8 @@
 //	Description : Script watch action class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_watch_action.h"
-#include "script_space.h"
 #include "script_game_object.h"
 #include "sight_manager_space.h"
 
@@ -44,6 +43,6 @@ void CScriptWatchAction::script_register(lua_State *L)
 			.def("direct",						&CScriptWatchAction::SetWatchDirection)		// time
 			.def("type",						&CScriptWatchAction::SetWatchType)
 			.def("bone",						&CScriptWatchAction::SetWatchBone)
-			.def("completed",					(bool (CScriptWatchAction::*)())(CScriptWatchAction::completed))
+			.def("completed",					(bool (CScriptWatchAction::*)())(&CScriptWatchAction::completed))
 	];
 }

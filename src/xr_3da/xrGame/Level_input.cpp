@@ -93,14 +93,16 @@ public:
 
 // Обработка нажатия клавиш
 extern bool g_block_pause;
+
 void CLevel::IR_OnKeyboardPress	(int key)
 {
 	bool b_ui_exist = (pHUD && pHUD->GetUI());
 
-	if (DIK_F10 == key)		vtune.enable();
-	if (DIK_F11 == key)		vtune.disable();
-
-	switch (get_binded_action(key)) 
+//.	if (DIK_F10 == key)		vtune.enable();
+//.	if (DIK_F11 == key)		vtune.disable();
+	
+	EGameActions _curr = get_binded_action(key);
+	switch ( _curr ) 
 	{
 
 	case kSCREENSHOT:
@@ -125,21 +127,14 @@ void CLevel::IR_OnKeyboardPress	(int key)
 	case kPAUSE:
 		if(!g_block_pause)
 		{
-			if (GameID() == GAME_SINGLE)
+			if ( IsGameTypeSingle() )
 			{
 				Device.Pause(!Device.Paused(), TRUE, TRUE, "li_pause_key");
-			}
-			else
-			if (OnServer())
-			{
-				NET_Packet					net_packet;
-				net_packet.w_begin			(M_PAUSE_GAME);
-				net_packet.w_u8				(u8(!Device.Paused()));
-				Send						(net_packet,net_flags(TRUE));
 			}
 		}
 		return;
 		break;
+	
 	};
 
 	if(	g_bDisableAllInput )	return;
@@ -151,45 +146,52 @@ void CLevel::IR_OnKeyboardPress	(int key)
 
 	if ( game && Game().IR_OnKeyboardPress(key) ) return;
 
-	switch (key) {
-#ifdef DEBUG
-	case DIK_RETURN:
-			bDebug	= !bDebug;
-		return;
-	case DIK_BACK:
-		if (GameID() == GAME_SINGLE)
-			HW.Caps.SceneMode			= (HW.Caps.SceneMode+1)%3;
-		return;
-#endif
-
-	case DIK_F6: {
-		if ( !IsGameTypeSingle() ) return;
-//		if (!autosave_manager().ready_for_autosave()) {
-//			Msg("! Cannot save the game right now!");
-//			return;
-//		}
+	if(_curr == kQUICK_SAVE && IsGameTypeSingle())
+	{
 		Console->Execute			("save");
 		return;
 	}
-	case DIK_F7: {
-		if (GameID() != GAME_SINGLE)
-			return;
-		
+	if(_curr == kQUICK_LOAD && IsGameTypeSingle())
+	{
 #ifdef DEBUG
 		FS.get_path					("$game_config$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
 		FS.get_path					("$game_scripts$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
 		FS.rescan_pathes			();
 #endif // DEBUG
 		string_path					saved_game,command;
-		strconcat					(saved_game,Core.UserName,"_","quicksave");
-		if (!CSavedGameWrapper::saved_game_exist(saved_game))
+		strconcat					(sizeof(saved_game),saved_game,Core.UserName,"_","quicksave");
+		if (!CSavedGameWrapper::valid_saved_game(saved_game))
 			return;
 
-		strconcat					(command,"load ",saved_game);
+		strconcat					(sizeof(command),command,"load ",saved_game);
 		Console->Execute			(command);
 		return;
 	}
+
+#ifndef MASTER_GOLD
+	switch (key) {
+	case DIK_NUMPAD5: 
+		{
+			if (GameID() != GAME_SINGLE) 
+			{
+				Msg("For this game type Demo Record is disabled.");
+///				return;
+			};
+			Console->Hide	();
+			Console->Execute("demo_record 1");
+		}
+		break;
+#endif // MASTER_GOLD
 #ifdef DEBUG
+	case DIK_RETURN:
+			bDebug	= !bDebug;
+		return;
+
+	case DIK_BACK:
+		if (GameID() == GAME_SINGLE)
+			HW.Caps.SceneMode			= (HW.Caps.SceneMode+1)%3;
+		return;
+
 	case DIK_F4: {
 		if (pInput->iGetAsyncKeyState(DIK_LALT))
 			break;
@@ -298,18 +300,6 @@ void CLevel::IR_OnKeyboardPress	(int key)
 		break;
 #endif
 #ifdef DEBUG
-	case DIK_NUMPAD5: 
-		{
-			if (GameID() != GAME_SINGLE) 
-			{
-				Msg("For this game type Demo Record is disabled.");
-///				return;
-			};
-			Console->Hide	();
-			Console->Execute("demo_record 1");
-		}
-		break;
-
 	case DIK_F9:{
 //		if (!ai().get_alife())
 //			break;
@@ -348,11 +338,12 @@ void CLevel::IR_OnKeyboardPress	(int key)
 //			m_bSynchronization	= false;
 //		}
 //		return;
-#endif
+#endif // DEBUG
+#ifndef MASTER_GOLD
 	}
+#endif // MASTER_GOLD
 
-
-	if(bindConsoleCmds.execute(key))
+	if (bindConsoleCmds.execute(key))
 		return;
 
 	if( b_ui_exist && HUD().GetUI()->MainInputReceiver() )return;

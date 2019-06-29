@@ -28,6 +28,17 @@ CCustomOutfit::~CCustomOutfit()
 	xr_delete(m_boneProtection);
 }
 
+void CCustomOutfit::net_Export(NET_Packet& P)
+{
+	inherited::net_Export	(P);
+	P.w_float_q8			(m_fCondition,0.0f,1.0f);
+}
+
+void CCustomOutfit::net_Import(NET_Packet& P)
+{
+	inherited::net_Import	(P);
+	P.r_float_q8			(m_fCondition,0.0f,1.0f);
+}
 
 void CCustomOutfit::Load(LPCSTR section) 
 {
@@ -42,6 +53,7 @@ void CCustomOutfit::Load(LPCSTR section)
 	m_HitTypeProtection[ALife::eHitTypeChemicalBurn]= pSettings->r_float(section,"chemical_burn_protection");
 	m_HitTypeProtection[ALife::eHitTypeExplosion]	= pSettings->r_float(section,"explosion_protection");
 	m_HitTypeProtection[ALife::eHitTypeFireWound]	= pSettings->r_float(section,"fire_wound_protection");
+	m_HitTypeProtection[ALife::eHitTypePhysicStrike]= READ_IF_EXISTS(pSettings, r_float, section, "physic_strike_protection", 0.0f);
 
 	if (pSettings->line_exist(section, "actor_visual"))
 		m_ActorVisual = pSettings->r_string(section, "actor_visual");
@@ -99,9 +111,9 @@ BOOL	CCustomOutfit::BonePassBullet					(int boneID)
 #include "torch.h"
 void	CCustomOutfit::OnMoveToSlot		()
 {
-	if (m_pInventory)
+	if (m_pCurrentInventory)
 	{
-		CActor* pActor = smart_cast<CActor*> (m_pInventory->GetOwner());
+		CActor* pActor = smart_cast<CActor*> (m_pCurrentInventory->GetOwner());
 		if (pActor)
 		{
 			if (m_ActorVisual.size())
@@ -114,9 +126,9 @@ void	CCustomOutfit::OnMoveToSlot		()
 					{
 						NewVisual = pSettings->r_string(TeamSection, *cNameSect());
 						string256 SkinName;
-						std::strcpy(SkinName, pSettings->r_string("mp_skins_path", "skin_path"));
-						strcat(SkinName, *NewVisual);
-						strcat(SkinName, ".ogf");
+						strcpy_s(SkinName, pSettings->r_string("mp_skins_path", "skin_path"));
+						strcat_s(SkinName, *NewVisual);
+						strcat_s(SkinName, ".ogf");
 						NewVisual._set(SkinName);
 					}
 				}
@@ -136,9 +148,9 @@ void	CCustomOutfit::OnMoveToSlot		()
 
 void	CCustomOutfit::OnMoveToRuck		()
 {
-	if (m_pInventory)
+	if (m_pCurrentInventory)
 	{
-		CActor* pActor = smart_cast<CActor*> (m_pInventory->GetOwner());
+		CActor* pActor = smart_cast<CActor*> (m_pCurrentInventory->GetOwner());
 		if (pActor)
 		{
 			CTorch* pTorch = smart_cast<CTorch*>(pActor->inventory().ItemFromSlot(TORCH_SLOT));

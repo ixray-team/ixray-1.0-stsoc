@@ -18,6 +18,7 @@
 #include "character_info.h"
 #include "game_cl_base_weapon_usage_statistic.h"
 #include "../xr_collide_defs.h"
+#include "weapon.h"
 
 //константы shoot_factor, определяющие 
 //поведение пули при столкновении с объектом
@@ -33,7 +34,9 @@ extern float gCheckHitK;
 //return TRUE-тестировать объект / FALSE-пропустить объект
 BOOL CBulletManager::test_callback(const collide::ray_defs& rd, CObject* object, LPVOID params)
 {
-	SBullet* bullet = (SBullet*)params;
+	bullet_test_callback_data* pData	= (bullet_test_callback_data*)params;
+	SBullet* bullet = pData->pBullet;
+
 	if( (object->ID() == bullet->parent_id)		&&  
 		(bullet->fly_dist<PARENT_IGNORE_DIST)	&&
 		(!bullet->flags.ricochet_was))			return FALSE;
@@ -46,8 +49,8 @@ BOOL CBulletManager::test_callback(const collide::ray_defs& rd, CObject* object,
 			if ((NULL!=cform) && (cftObject==cform->Type())){
 				CActor* actor		= smart_cast<CActor*>(entity);
 				CAI_Stalker* stalker= smart_cast<CAI_Stalker*>(entity);
-				// в кого попали? 
-				if (actor||stalker){
+				// в кого попали?
+				if (actor && IsGameTypeSingle()/**/||stalker/**/){
 					// попали в актера или сталкера
 					Fsphere S		= cform->getSphere();
 					entity->XFORM().transform_tiny	(S.P)	;
@@ -59,16 +62,48 @@ BOOL CBulletManager::test_callback(const collide::ray_defs& rd, CObject* object,
 						CObject* initiator			= Level().Objects.net_Find	(bullet->parent_id);
 						if (actor){
 							// попали в актера
-							CAI_Stalker* i_stalker	= smart_cast<CAI_Stalker*>(initiator);
-							// если стрелял сталкер, учитываем - hit_probability_factor сталкерa иначе - 1.0
 							float hpf				= 1.f;
 							float ahp				= actor->HitProbability();
-							if (i_stalker){
+#if 1
+#	if 0
+							CObject					*weapon_object = Level().Objects.net_Find	(bullet->weapon_id);
+							if (weapon_object) {
+								CWeapon				*weapon = smart_cast<CWeapon*>(weapon_object);
+								if (weapon) {
+									float fly_dist		= bullet->fly_dist+dist;
+									float dist_factor	= _min(1.f,fly_dist/Level().BulletManager().m_fHPMaxDist);
+									ahp					= dist_factor*weapon->hit_probability() + (1.f-dist_factor)*1.f;
+								}
+							}
+#	else
+							float					game_difficulty_hit_probability = actor->HitProbability();
+							CAI_Stalker				*stalker = smart_cast<CAI_Stalker*>(initiator);
+							if (stalker)
+								hpf					= stalker->SpecificCharacter().hit_probability_factor();
+
+							float					dist_factor = 1.f;
+							CObject					*weapon_object = Level().Objects.net_Find	(bullet->weapon_id);
+							if (weapon_object) {
+								CWeapon				*weapon = smart_cast<CWeapon*>(weapon_object);
+								if (weapon) {
+									game_difficulty_hit_probability = weapon->hit_probability();
+									float fly_dist	= bullet->fly_dist+dist;
+									dist_factor		= _min(1.f,fly_dist/Level().BulletManager().m_fHPMaxDist);
+								}
+							}
+
+							ahp						= dist_factor*game_difficulty_hit_probability + (1.f-dist_factor)*1.f;
+#	endif
+#else
+							CAI_Stalker* i_stalker	= smart_cast<CAI_Stalker*>(initiator);
+							// если стрелял сталкер, учитываем - hit_probability_factor сталкерa иначе - 1.0
+							if (i_stalker) {
 								hpf					= i_stalker->SpecificCharacter().hit_probability_factor();
 								float fly_dist		= bullet->fly_dist+dist;
 								float dist_factor	= _min(1.f,fly_dist/Level().BulletManager().m_fHPMaxDist);
 								ahp					= dist_factor*actor->HitProbability() + (1.f-dist_factor)*1.f;
 							}
+#endif
 							if (Random.randF(0.f,1.f)>(ahp*hpf)){ 
 								bRes				= FALSE;	// don't hit actor
 								play_whine			= true;		// play whine sound
@@ -112,7 +147,9 @@ BOOL CBulletManager::test_callback(const collide::ray_defs& rd, CObject* object,
 //return TRUE-продолжить трассировку / FALSE-закончить трассировку
 BOOL  CBulletManager::firetrace_callback(collide::rq_result& result, LPVOID params)
 {
-	SBullet* bullet = (SBullet*)params;
+	bullet_test_callback_data* pData	= (bullet_test_callback_data*)params;
+	pData->bStopTracing					= true;
+	SBullet* bullet						= pData->pBullet;
 
 	//вычислить точку попадания
 	Fvector end_point;
@@ -138,7 +175,15 @@ BOOL  CBulletManager::firetrace_callback(collide::rq_result& result, LPVOID para
 		//получить треугольник и узнать его материал
 		CDB::TRI* T			= Level().ObjectSpace.GetStaticTris()+result.element;
 		hit_material_idx	= T->material;
-		Level().BulletManager().RegisterEvent(EVENT_HIT, FALSE,bullet, end_point, result, hit_material_idx);
+		
+
+		SGameMtl* mtl = GMLib.GetMaterialByIdx(hit_material_idx);
+		if( fsimilar(mtl->fShootFactor,1.0f,EPS) )//Если материал полностью простреливаемый
+		{
+			pData->bStopTracing		= false;
+		}else
+			Level().BulletManager().RegisterEvent(EVENT_HIT, FALSE,bullet, end_point, result, hit_material_idx);
+
 	}
 
 	//проверить достаточно ли силы хита, чтобы двигаться дальше
@@ -241,7 +286,7 @@ void CBulletManager::DynamicObjectHit	(CBulletManager::_event& E)
 	VERIFY(E.R.O);
 	if (g_clear) E.Repeated = false;
 	if (GameID() == GAME_SINGLE) E.Repeated = false;
-	bool NeedShootmark = !E.Repeated;
+	bool NeedShootmark = true;//!E.Repeated;
 	
 	if (E.R.O->CLS_ID == CLSID_OBJECT_ACTOR)
 	{
@@ -396,7 +441,7 @@ std::pair<float, float>  CBulletManager::ObjectHit	(SBullet* bullet, const Fvect
 	int bullet_state		= 0;
 #endif
 
-	if (mtl->fShootFactor==1.0f)//Если материал полностью простреливаемый, то
+	if (fsimilar(mtl->fShootFactor,1.0f,EPS))//Если материал полностью простреливаемый, то
 	{
 		#ifdef DEBUG
 		bullet_state = 2;
@@ -467,7 +512,7 @@ std::pair<float, float>  CBulletManager::ObjectHit	(SBullet* bullet, const Fvect
 		#endif		
 	}
 #ifdef DEBUG
-	extern g_bDrawBulletHit;
+	extern BOOL g_bDrawBulletHit;
 	if(g_bDrawBulletHit)
 		g_hit[bullet_state].push_back(dbg_bullet_pos);
 #endif 

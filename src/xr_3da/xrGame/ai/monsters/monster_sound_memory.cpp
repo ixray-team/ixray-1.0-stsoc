@@ -129,11 +129,19 @@ struct pred_remove_nonactual_sounds {
 void CMonsterSoundMemory::UpdateHearing()
 {
 	// удаление устаревших звуков
-	xr_vector<SoundElem>::iterator I = remove_if(Sounds.begin(), Sounds.end(), pred_remove_nonactual_sounds(Device.dwTimeGlobal - time_memory));
-	Sounds.erase(I,Sounds.end());
+	Sounds.erase	(
+		std::remove_if(
+			Sounds.begin(),
+			Sounds.end(),
+			pred_remove_nonactual_sounds(
+				Device.dwTimeGlobal - time_memory
+			)
+		),
+		Sounds.end()
+	);
 
 	// пересчитать value
-	for (I=Sounds.begin(); I!=Sounds.end(); I++) I->CalcValue(Device.dwTimeGlobal, monster->Position());
+	for (xr_vector<SoundElem>::iterator I = Sounds.begin(); I != Sounds.end(); ++I) I->CalcValue(Device.dwTimeGlobal, monster->Position());
 
 	// update help sound
 	if (m_time_help_sound + time_help_sound_remember < time()) m_time_help_sound = 0;
@@ -162,7 +170,7 @@ struct pred_remove_relcase {
 	CObject *obj;
 	pred_remove_relcase(CObject *o) {obj = o;}
 
-	bool operator() (const SoundElem &x) {
+	bool operator() (const SoundElem &x) const {
 		if (x.who == obj) return true;
 
 		return false;
@@ -172,8 +180,14 @@ struct pred_remove_relcase {
 void CMonsterSoundMemory::remove_links(CObject *O)
 {
 	// удаление устаревших звуков
-	xr_vector<SoundElem>::iterator I = remove_if(Sounds.begin(), Sounds.end(), pred_remove_relcase(O));
-	Sounds.erase(I,Sounds.end());
+	Sounds.erase	(
+		std::remove_if(
+			Sounds.begin(),
+			Sounds.end(),
+			pred_remove_relcase(O)
+		),
+		Sounds.end()
+	);
 }
 
 //////////////////////////////////////////////////////////////////////////

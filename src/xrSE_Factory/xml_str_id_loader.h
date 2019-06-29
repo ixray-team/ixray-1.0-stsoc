@@ -84,13 +84,13 @@ LPCSTR CSXML_IdToIndex::tag_name = NULL;
 
 
 TEMPLATE_SPECIALIZATION
-CSXML_IdToIndex::CSXML_IdToIndex()
+CSXML_IdToIndex::CXML_IdToIndex()
 {
 }
 
 
 TEMPLATE_SPECIALIZATION
-CSXML_IdToIndex::~CSXML_IdToIndex()
+CSXML_IdToIndex::~CXML_IdToIndex()
 {
 }
 
@@ -140,7 +140,7 @@ void CSXML_IdToIndex::DeleteIdToIndexData	()
 	xr_vector<CUIXml*>			_tmp;	
 	for(;it!=it_e;++it)
 	{
-		xr_vector<CUIXml*>::iterator it_f = find(_tmp.begin(), _tmp.end(), (*it)._xml);
+		xr_vector<CUIXml*>::iterator it_f = std::find(_tmp.begin(), _tmp.end(), (*it)._xml);
 		if(it_f==_tmp.end())
 			_tmp.push_back	((*it)._xml);
 	}

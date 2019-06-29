@@ -1,6 +1,7 @@
 #pragma once
 
 #include "level_bullet_manager.h"
+#include "game_base_kill_type.h"
 
 struct BulletData 
 {
@@ -42,6 +43,7 @@ struct HitData
 	bool			operator	!=		(u32 ID)	{return ID != BulletID;};
 	//-----------------------------------------------------------
 	void				Write						(FILE* pFile);
+	void				WriteLtx					(CInifile& ini, LPCSTR sect, LPCSTR perfix);
 };
 
 DEF_VECTOR	(HITS_VEC, HitData);
@@ -74,6 +76,7 @@ struct Weapon_Statistic
 	bool			operator	==		(LPCSTR name){int res = xr_strcmp(WName.c_str(), name);return	res	 == 0;}
 	//-----------------------------------------------------------
 	void				Write						(FILE* pFile);
+	void				WriteLtx					(CInifile& ini, LPCSTR sect);
 };
 
 DEF_VECTOR		(WEAPON_STATS, Weapon_Statistic);
@@ -88,6 +91,11 @@ struct Player_Statistic
 	u32				m_dwTotalAliveTime[3];
 	s32				m_dwTotalMoneyRound[3];
 	u32				m_dwNumRespawned[3];
+	u8				m_dwArtefacts[3];
+	
+	u32				m_dwSpecialKills	[3];//headshot, backstab, knifekill
+
+	u8				m_dwCurrentTeam;
 
 	WEAPON_STATS	aWeaponStats;	
 	//-----------------------------------------------
@@ -104,6 +112,7 @@ struct Player_Statistic
 	bool			operator	==		(LPCSTR name){int res = xr_strcmp(PName.c_str(), name);return	res	 == 0;}
 	//-----------------------------------------------------------
 	void				Write						(FILE* pFile);
+	void				WriteLtx					(CInifile& ini, LPCSTR sect);
 };
 
 DEF_VECTOR	(PLAYERS_STATS, Player_Statistic);
@@ -151,9 +160,7 @@ struct WeaponUsageStatistic {
 	u32				m_dwTotalNumRespawns[3];
 	//-----------------------------------------------
 	u32				m_dwLastUpdateTime;
-	u32				m_dwLastSaveTime;
 	u32				m_dwUpdateTimeDelta;
-	u32				m_dwSaveTimeDelta;
 	//-----------------------------------------------
 	WeaponUsageStatistic();
 	~WeaponUsageStatistic();
@@ -162,6 +169,8 @@ struct WeaponUsageStatistic {
 
 	PLAYERS_STATS_it					FindPlayer			(LPCSTR PlayerName);
 	bool								GetPlayer			(LPCSTR PlayerName, PLAYERS_STATS_it& pPlayerI);	
+	void								ChangePlayerName	( LPCSTR from, LPCSTR to );
+
 	bool								FindBullet			(u32 BulletID, ABULLETS_it& Bullet_it);
 	void								RemoveBullet		(ABULLETS_it& Bullet_it);
 	//-----------------------------------------------
@@ -180,22 +189,24 @@ struct WeaponUsageStatistic {
 	//-----------------------------------------------
 	void				Send_Check_Respond			();
 	void				On_Check_Respond			(NET_Packet* P);
-	//-----------------------------------------------
-	void				Draw						();
-	//-----------------------------------------------
+
 	void				OnPlayerKilled				(game_PlayerState* ps);
 	void				OnPlayerSpawned				(game_PlayerState* ps);
 	void				OnPlayerAddMoney			(game_PlayerState* ps, s32 MoneyAmount);
+	void				OnPlayerBringArtefact		(game_PlayerState* ps);
+	void				OnPlayerKillPlayer			(game_PlayerState* ps, KILL_TYPE KillType, SPECIAL_KILL_TYPE SpecialKillType);
+	void				OnExplosionKill				(game_PlayerState* ps, const SHit& hit);
 	//-----------------------------------------------
 	void				Update						();
 	void				OnUpdateRequest				(NET_Packet* P);
 	void				OnUpdateRespond				(NET_Packet* P);
 	//-----------------------------------------------
-	bool				m_bFirstSave;
-	string1024			mFileName;
+	string_path			mFileName;
 	void				SaveData					();
-
 	void				Write						(FILE* pFile);
+
+	void				SaveDataLtx					(CInifile& ini);
+	void				WriteLtx					(CInifile& ini);
 };
 
 struct Bullet_Check_Respond_True

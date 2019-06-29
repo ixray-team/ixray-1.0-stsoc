@@ -12,15 +12,15 @@ IC	CScriptAnimationAction::CScriptAnimationAction	()
 {
 	m_tMentalState		= MonsterSpace::eMentalStateDanger;
 	m_tGoalType			= eGoalTypeMental;
-	m_bHandUsage		= true;
 	m_tAnimAction		= MonsterSpace::eAA_NoAction;
 	m_bCompleted		= true;
+	m_use_animation_movement_controller	= false;
 }
 
-IC	CScriptAnimationAction::CScriptAnimationAction	(LPCSTR caAnimationToPlay, bool use_single_hand)
+IC	CScriptAnimationAction::CScriptAnimationAction	(LPCSTR caAnimationToPlay, bool use_animation_movement_controller)
 {
 	SetAnimation		(caAnimationToPlay);
-	m_bHandUsage		= !use_single_hand;
+	m_use_animation_movement_controller	= use_animation_movement_controller;
 }
 
 IC	CScriptAnimationAction::CScriptAnimationAction	(MonsterSpace::EMentalState tMentalState)
@@ -36,6 +36,7 @@ IC	CScriptAnimationAction::CScriptAnimationAction	(MonsterSpace::EScriptMonsterA
 	m_tAnimAction		= tAnimAction;
 	m_bCompleted		= false;
 	anim_index			= index;
+	m_use_animation_movement_controller	= false;
 }
 
 IC	void CScriptAnimationAction::SetAnimation		(LPCSTR caAnimationToPlay)
@@ -44,6 +45,7 @@ IC	void CScriptAnimationAction::SetAnimation		(LPCSTR caAnimationToPlay)
 	m_tMentalState		= MonsterSpace::eMentalStateDanger;
 	m_tGoalType			= eGoalTypeAnimation;
 	m_bCompleted		= false;
+	m_use_animation_movement_controller	= false;
 }
 
 IC	void CScriptAnimationAction::SetMentalState		(MonsterSpace::EMentalState tMentalState)
@@ -51,6 +53,7 @@ IC	void CScriptAnimationAction::SetMentalState		(MonsterSpace::EMentalState tMen
 	m_tMentalState		= tMentalState;
 	m_tGoalType			= eGoalTypeMental;
 	m_bCompleted		= true;
+	m_use_animation_movement_controller	= false;
 }
 
 

@@ -451,6 +451,12 @@ void CTorch::net_Export			(NET_Packet& P)
 	BYTE F = 0;
 	F |= (m_switched_on ? eTorchActive : 0);
 	F |= (m_bNightVisionOn ? eNightVisionActive : 0);
+	const CActor *pA = smart_cast<const CActor *>(H_Parent());
+	if (pA)
+	{
+		if (pA->attached(this))
+			F |= eAttached;
+	}
 	P.w_u8(F);
 //	Msg("CTorch::net_export - NV[%d]", m_bNightVisionOn);
 }
@@ -495,17 +501,4 @@ void CTorch::afterDetach			()
 void CTorch::renderable_Render()
 {
 	inherited::renderable_Render();
-}
-#include "script_space.h"
-
-using namespace luabind;
-
-#pragma optimize("s",on)
-void CTorch::script_register	(lua_State *L)
-{
-	module(L)
-	[
-		class_<CTorch,CGameObject>("CTorch")
-			.def(constructor<>())
-	];
 }

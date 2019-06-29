@@ -6,8 +6,7 @@
 //	Description : Script objects binder
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "script_space.h"
+#include "pch_script.h"
 #include "ai_space.h"
 #include "script_engine.h"
 #include "script_binder.h"

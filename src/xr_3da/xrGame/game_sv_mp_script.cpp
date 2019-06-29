@@ -1,13 +1,11 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "game_sv_mp_script.h"
-#include "script_space.h"
 #include "xrServer_script_macroses.h"
 #include "xrserver.h"
 #include "xrserver_objects_alife_monsters.h"
 #include "level.h"
 #include "ai_space.h"
 #include "script_engine.h"
-#include <luabind/adopt_policy.hpp>
 
 using namespace luabind;
 
@@ -85,10 +83,9 @@ void	game_sv_mp_script::SpawnPlayer				(ClientID id, LPCSTR N, LPCSTR SkinName, 
 	}
 
 	// Spawn
-	LPCSTR			options			=	get_name_id	(id);
 	CSE_Abstract*	E				=	spawn_begin	(N);								// create SE
 	
-	E->set_name_replace		(get_option_s(options,"name","Player"));	// name
+	E->set_name_replace		( get_name_id(id) );	// name
 
 	E->s_flags.assign		(M_SPAWN_OBJECT_LOCAL | M_SPAWN_OBJECT_ASPLAYER);			// flags
 
@@ -123,8 +120,7 @@ void	game_sv_mp_script::SpawnPlayer				(ClientID id, LPCSTR N, LPCSTR SkinName, 
 			}
 		};
 
-	
-	Msg		("* %s respawned as %s",get_option_s(options,"name","Player"), (0 == pA) ? "spectator" : "actor");
+	Msg		("* %s respawned as %s", get_name_id(id), (0 == pA) ? "spectator" : "actor");
 	spawn_end				(E,id);
 	
 	ps_who->SetGameID(CL->owner->ID);
@@ -174,7 +170,8 @@ struct CWrapperBase : public T, public luabind::wrap_base {
 	DEFINE_LUA_WRAPPER_METHOD_R2P1_V2(net_Export_State, NET_Packet, ClientID)
 
 	DEFINE_LUA_WRAPPER_METHOD_V0(OnRoundStart)
-	DEFINE_LUA_WRAPPER_METHOD_V1(OnRoundEnd, LPCSTR)
+//	DEFINE_LUA_WRAPPER_METHOD_V1(OnDelayedRoundEnd, ERoundEnd_Result)
+	DEFINE_LUA_WRAPPER_METHOD_V0(OnRoundEnd)
 
 	virtual game_PlayerState* createPlayerState()
 	{return call_member<game_PlayerState*>(this,"createPlayerState")[adopt(result)];}
@@ -182,17 +179,6 @@ struct CWrapperBase : public T, public luabind::wrap_base {
 	{return ptr->self_type::inherited::createPlayerState();}
 
 	DEFINE_LUA_WRAPPER_METHOD_R2P3_V3(OnPlayerHitPlayer, u16, u16, NET_Packet)
-/*
-	virtual BOOL OnTouch(u16 p1, u16 p2)
-	{return call_member<bool>(this,"OnTouch",p1,p2);}
-	static  bool OnTouch_static(inherited* ptr, u16 p1, u16 p2)
-	{return ptr->self_type::inherited::OnTouch(p1,p2);}
-
-	virtual BOOL OnDetach(u16 p1, u16 p2)
-	{return call_member<bool>(this,"OnDetach",p1,p2);}
-	static  bool OnDetach_static(inherited* ptr, u16 p1, u16 p2)
-	{return ptr->self_type::inherited::OnDetach(p1,p2);}
-*/
 };
 
 #pragma warning(pop)
@@ -234,10 +220,9 @@ void game_sv_mp_script::script_register(lua_State *L)
 			.def("Create",				(void (BaseType::*)(LPCSTR))(&BaseType::Create), &WrapType::Create_static)
 
 			.def("OnPlayerHitPlayer",	&BaseType::OnPlayerHitPlayer,	&WrapType::OnPlayerHitPlayer_static)
-//				.def("OnTouch",				&BaseType::OnTouch,				&WrapType::OnTouch_static)
-//			.	.def("OnDetach",			&BaseType::OnDetach,			&WrapType::OnDetach_static)
 
 			.def("OnRoundStart",		&BaseType::OnRoundStart, &WrapType::OnRoundStart_static)
+//			.def("OnDelayedRoundEnd",	&BaseType::OnDelayedRoundEnd, &WrapType::OnDelayedRoundEnd_static)
 			.def("OnRoundEnd",			&BaseType::OnRoundEnd, &WrapType::OnRoundEnd_static)
 
 			.def("net_Export_State",	&BaseType::net_Export_State, &WrapType::net_Export_State_static)

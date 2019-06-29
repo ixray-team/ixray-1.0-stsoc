@@ -112,7 +112,12 @@ namespace FPU
 		_control87	( _RC_NEAR, MCW_RC );
 		_64r		= getFPUsw();	// 64, rounding
 
+#ifndef XRCORE_STATIC
+
 		m24r		();
+
+#endif	//XRCORE_STATIC
+
 		::Random.seed	( u32(CPU::GetCLK()%(1i64<<32i64)) );
 	}
 };
@@ -225,7 +230,7 @@ void _initialize_cpu	(void)
 		CPU::ID.feature	&= ~_CPU_FEATURE_SSE2	;
 	};
 
-	string128	features;	strcpy(features,"RDTSC");
+	string128	features;	strcpy_s(features,sizeof(features),"RDTSC");
     if (CPU::ID.feature&_CPU_FEATURE_MMX)	strcat(features,", MMX");
     if (CPU::ID.feature&_CPU_FEATURE_3DNOW)	strcat(features,", 3DNow!");
     if (CPU::ID.feature&_CPU_FEATURE_SSE)	strcat(features,", SSE");
@@ -253,12 +258,15 @@ void _initialize_cpu_thread	()
 #define _MM_SET_FLUSH_ZERO_MODE(mode) _mm_setcsr((_mm_getcsr() & ~_MM_FLUSH_ZERO_MASK) | (mode))
 #define _MM_SET_DENORMALS_ZERO_MODE(mode) _mm_setcsr((_mm_getcsr() & ~_MM_DENORMALS_ZERO_MASK) | (mode))
 static	BOOL	_denormals_are_zero_supported	= TRUE;
-extern void __cdecl _terminate		();
+void debug_on_thread_spawn	();
+
 void _initialize_cpu_thread	()
 {
-	std::set_terminate				(_terminate);
-	// fpu & sse
+	debug_on_thread_spawn	();
+#ifndef XRCORE_STATIC
+	// fpu & sse 
 	FPU::m24r	();
+#endif  // XRCORE_STATIC
 	if (CPU::ID.feature&_CPU_FEATURE_SSE)	{
 		//_mm_setcsr ( _mm_getcsr() | (_MM_FLUSH_ZERO_ON+_MM_DENORMALS_ZERO_ON) );
 		_MM_SET_FLUSH_ZERO_MODE			(_MM_FLUSH_ZERO_ON);

@@ -6,9 +6,8 @@
 //	Description : Server objects script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "xrServer_Objects.h"
-#include "script_space.h"
 #include "phnetstate.h"
 #include "xrServer_script_macroses.h"
 #include "script_ini_file.h"

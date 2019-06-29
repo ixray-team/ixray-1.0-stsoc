@@ -147,11 +147,17 @@ PHCALL_I CPHCommander::find_call(CPHReqComparerV* cmp_condition,CPHReqComparerV*
 }
 void CPHCommander::remove_call(CPHReqComparerV* cmp_condition,CPHReqComparerV* cmp_action,PHCALL_STORAGE& cs)
 {
-	//PHCALL_I i=find_call(cmp_condition,cmp_action);
-	//if(i!=m_calls.end())remove_call(i);
-	
-	PHCALL_I I= remove_if(cs.begin(),cs.end(),SFRemovePred2(cmp_condition,cmp_action));
-	cs.erase(I,cs.end());
+	cs.erase	(
+		std::remove_if(
+			cs.begin(),
+			cs.end(),
+			SFRemovePred2(
+				cmp_condition,
+				cmp_action
+			)
+		),
+		cs.end()
+	);
 }
 
 void CPHCommander::remove_call(CPHReqComparerV* cmp_condition,CPHReqComparerV* cmp_action)
@@ -190,8 +196,14 @@ struct SRemoveRped
 };
 void CPHCommander::remove_calls(CPHReqComparerV* cmp_object,PHCALL_STORAGE& cs)
 {
-	PHCALL_I I= remove_if(cs.begin(),cs.end(),SRemoveRped(cmp_object));
-	cs.erase(I,cs.end());
+	cs.erase	(
+		std::remove_if(
+			cs.begin(),
+			cs.end(),
+			SRemoveRped(cmp_object)
+		),
+		cs.end()
+	);
 }
 void CPHCommander::remove_calls(CPHReqComparerV* cmp_object)
 {

@@ -29,19 +29,19 @@
 		else{inst_z;}
 CCustomRocket::CCustomRocket() 
 {
-	m_eState = eInactive;
-	m_bEnginePresent = false;
-	m_bStopLightsWithEngine = true;
-	m_bLightsEnabled = false;
+	m_eState					= eInactive;
+	m_bEnginePresent			= false;
+	m_bStopLightsWithEngine		= true;
+	m_bLightsEnabled			= false;
 
 
-	m_vPrevVel.set(0,0,0);
+	m_vPrevVel.set				(0,0,0);
 
-	m_pTrailLight = NULL;
-	m_LaunchXForm.identity();
-	m_vLaunchVelocity.set(0,0,0);
+	m_pTrailLight				= NULL;
+	m_LaunchXForm.identity		();
+	m_vLaunchVelocity.set		(0,0,0);
 	m_vLaunchAngularVelocity.set(0,0,0);
-
+	m_bLaunched					= false;
 }
 
 CCustomRocket::~CCustomRocket	()
@@ -372,7 +372,7 @@ void CCustomRocket::OnH_A_Independent()
 {
 	inherited::OnH_A_Independent();
 
-	if(!g_pGameLevel->bReady)	return;
+	if(!g_pGameLevel->bReady || !m_bLaunched)	return;
 	setVisible					(true);
 	StartFlying					();
 	StartEngine					();

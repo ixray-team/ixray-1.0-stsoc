@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "ParticlesObject.h"
 #include "Physics.h"
+
 #ifdef DEBUG
-#include "../StatGraph.h"
-#include "PHDebug.h"
-#endif
+#	include "../StatGraph.h"
+#	include "PHDebug.h"
+#endif // DEBUG
+
 #include "hit.h"
 #include "PHDestroyable.h"
 #include "car.h"
@@ -13,7 +15,6 @@
 #include "camerafirsteye.h"
 #include "Actor.h"
 #include "ActorEffector.h"
-#define   _USE_MATH_DEFINES
 #include "math.h"
 #include "script_entity_action.h"
 #include "inventory.h"
@@ -26,13 +27,15 @@
 #include "GameMtlLib.h"
 #include "PHActivationShape.h"
 #include "CharacterPhysicsSupport.h"
+#include "car_memory.h"
+
 BONE_P_MAP CCar::bone_map=BONE_P_MAP();
 
 extern CPHWorld*	ph_world;
 
-CCar::CCar(void)
+CCar::CCar()
 {
-
+	m_memory		= NULL;
 	m_driver_anim_type = 0;
 	m_bone_steer	= BI_NONE;
 	active_camera	= 0;
@@ -97,6 +100,7 @@ CCar::~CCar(void)
 	ClearExhausts		();
 	xr_delete			(inventory);
 	xr_delete			(m_car_weapon);
+	xr_delete			(m_memory);
  //	xr_delete			(l_tpEntityAction);
 }
 
@@ -104,13 +108,16 @@ void CCar::reinit		()
 {
 	CEntity::reinit			();
 	CScriptEntity::reinit	();
+	if(m_memory)
+		m_memory->reinit	();
 }
 
 void CCar::reload		(LPCSTR section)
 {
 	CEntity::reload			(section);
+	if(m_memory)
+		m_memory->reload	(section);
 }
-
 
 void CCar::cb_Steer			(CBoneInstance* B)
 {
@@ -148,6 +155,10 @@ BOOL	CCar::net_Spawn				(CSE_Abstract* DC)
 	CSE_Abstract					*e = (CSE_Abstract*)(DC);
 	CSE_ALifeCar					*co=smart_cast<CSE_ALifeCar*>(e);
 	BOOL							R = inherited::net_Spawn(DC);
+
+	PKinematics(Visual())->CalculateBones_Invalidate();
+	PKinematics(Visual())->CalculateBones();
+
 	CPHSkeleton::Spawn(e);
 	setEnabled						(TRUE);
 	setVisible						(TRUE);
@@ -167,6 +178,13 @@ BOOL	CCar::net_Spawn				(CSE_Abstract* DC)
 		CPHDestroyable::Load(pUserData,"destroyed");
 	if(pUserData->section_exist("mounted_weapon_definition"))
 		m_car_weapon = xr_new<CCarWeapon>(this);
+
+	if(pUserData->section_exist("visual_memory_definition"))
+	{
+		m_memory			= xr_new<car_memory>(this);
+		m_memory->reload	(pUserData->r_string("visual_memory_definition", "section"));
+	}
+
 	return							(CScriptEntity::net_Spawn(DC) && R);
 	
 }
@@ -185,7 +203,7 @@ void CCar::SpawnInitPhysics	(CSE_Abstract	*D)
 	CSE_PHSkeleton		*so = smart_cast<CSE_PHSkeleton*>(D);
 	R_ASSERT						(so);
 	ParseDefinitions				();//parse ini filling in m_driving_wheels,m_steering_wheels,m_breaking_wheels
-	CreateSkeleton					();//creates m_pPhysicsShell & fill in bone_map
+	CreateSkeleton					(D);//creates m_pPhysicsShell & fill in bone_map
 	CKinematics *K					=smart_cast<CKinematics*>(Visual());
 	K->CalculateBones_Invalidate();//this need to call callbacks
 	K->CalculateBones	();
@@ -394,14 +412,24 @@ void CCar::UpdateEx			(float fov)
 	
 }
 
+BOOL CCar::AlwaysTheCrow()
+{
+	return (m_car_weapon && m_car_weapon->IsActive() );
+}
+
 void CCar::UpdateCL				( )
 {
 	inherited::UpdateCL();
 	CExplosive::UpdateCL();
-	if(m_car_weapon)m_car_weapon->UpdateCL();
+	if(m_car_weapon)
+	{
+		m_car_weapon->UpdateCL();
+		if(m_memory)
+			m_memory->set_camera(m_car_weapon->ViewCameraPos(), m_car_weapon->ViewCameraDir(), m_car_weapon->ViewCameraNorm());
+	}
 	ASCUpdate			();
 	if(Owner()) return;
-//	UpdateEx			(DEFAULT_FOV);
+//	UpdateEx			(g_fov);
 	VisualUpdate(90);
 	if (GetScriptControl())
 			ProcessScripts();
@@ -451,6 +479,8 @@ void CCar::UpdateCL				( )
 void	CCar::renderable_Render				( )
 {
 	inherited::renderable_Render			();
+	if(m_car_weapon)
+		m_car_weapon->Render_internal();
 }
 
 void	CCar::net_Export			(NET_Packet& P)
@@ -752,7 +782,7 @@ void CCar::ParseDefinitions()
 	string32 rat_num;
 	for(int i=1;true;++i)
 	{
-		sprintf(rat_num,"N%d",i);
+		sprintf_s(rat_num,"N%d",i);
 		if(!ini->line_exist("transmission_gear_ratio",rat_num)) break;
 		Fvector gear_rat=ini->r_fvector3("transmission_gear_ratio",rat_num);
 		gear_rat[0]*=main_gear_ratio;
@@ -790,7 +820,7 @@ void CCar::ParseDefinitions()
 	m_damage_particles.Init(this);
 }
 
-void CCar::CreateSkeleton()
+void CCar::CreateSkeleton(CSE_Abstract	*po)
 {
 
 	if (!Visual()) return;
@@ -801,7 +831,7 @@ void CCar::CreateSkeleton()
 		K->CalculateBones	();
 	}
 
-
+#pragma todo(" replace below by P_build_Shell or call inherited")
 	m_pPhysicsShell		= P_create_Shell();
 	m_pPhysicsShell->build_FromKinematics(smart_cast<CKinematics*>(Visual()),&bone_map);
 	m_pPhysicsShell->set_PhysicsRefObject(this);
@@ -810,6 +840,8 @@ void CCar::CreateSkeleton()
 	m_pPhysicsShell->SetAirResistance(0.f,0.f);
 	m_pPhysicsShell->SetPrefereExactIntegration();
 
+	ApplySpawnIniToPhysicShell(&po->spawn_ini(),m_pPhysicsShell,false);
+	ApplySpawnIniToPhysicShell(smart_cast<CKinematics*>(Visual())->LL_UserData(),m_pPhysicsShell,false);
 }
 
 void CCar::Init()
@@ -908,8 +940,8 @@ void CCar::Init()
 	if(ini->section_exist("damage_items"))
 	{
 		CInifile::Sect& data		= ini->r_section("damage_items");
-		for (CInifile::SectIt I=data.begin(); I!=data.end(); I++){
-			CInifile::Item& item	= *I;
+		for (CInifile::SectCIt		I=data.Data.begin(); I!=data.Data.end(); I++){
+			const CInifile::Item& item	= *I;
 			u16 index				= pKinematics->LL_BoneID(*item.first); 
 			R_ASSERT3(index != BI_NONE, "Wrong bone name", *item.first);
 			xr_map   <u16,SWheel>::iterator i=m_wheels_map.find(index);
@@ -1667,9 +1699,11 @@ void CCar::OnEvent(NET_Packet& P, u16 type)
 			P.r_u16		(id);
 			CObject* O	= Level().Objects.net_Find	(id);
 
-			if(GetInventory()->Drop(smart_cast<CGameObject*>(O))) 
+			bool just_before_destroy		= !P.r_eof() && P.r_u8();
+			O->SetTmpPreDestroy				(just_before_destroy);
+			if(GetInventory()->DropItem(smart_cast<CGameObject*>(O))) 
 			{
-				O->H_SetParent(0,!P.r_eof() && P.r_u8());
+				O->H_SetParent(0, just_before_destroy);
 			}
 		}break;
 	}
@@ -1928,7 +1962,10 @@ void CCar::net_Relcase(CObject* O)
 {
 	CExplosive::net_Relcase(O);
 	inherited::net_Relcase(O);
+	if(m_memory)
+		m_memory->remove_links(O);
 }
+
 void CCar::ASCUpdate()
 {
 	for(u16 i=0;i<cAsCallsnum;++i)

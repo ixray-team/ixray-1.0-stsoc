@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "rgd5.h"
 
 CRGD5::CRGD5(void)
@@ -11,8 +11,6 @@ CRGD5::CRGD5(void)
 CRGD5::~CRGD5(void)
 {
 }
-
-#include "script_space.h"
 
 using namespace luabind;
 

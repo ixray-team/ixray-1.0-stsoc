@@ -114,16 +114,16 @@ CUICellItem* CUICellItem::PopChild()
 
 bool CUICellItem::HasChild(CUICellItem* item)
 {
-	return (m_childs.end() != find(m_childs.begin(), m_childs.end(), item) );
+	return (m_childs.end() != std::find(m_childs.begin(), m_childs.end(), item) );
 }
 
 void CUICellItem::UpdateItemText()
 {
 	string32			str;
 	if(ChildsCount())
-		sprintf				(str,"x%d",ChildsCount()+1);
+		sprintf_s				(str,"x%d",ChildsCount()+1);
 	else
-		sprintf				(str,"");
+		sprintf_s				(str,"");
 
 	SetText				(str);
 }
@@ -161,7 +161,7 @@ void CUIDragItem::Init(const ref_shader& sh, const Frect& rect, const Frect& tex
 	m_static.TextureOn				();
 	m_static.SetColor				(color_rgba(255,255,255,170));
 	m_static.SetStretchTexture		(true);
-	m_pos_offset.sub				(rect.lt, GetUICursor()->GetPos());
+	m_pos_offset.sub				(rect.lt, GetUICursor()->GetCursorPosition());
 }
 
 bool CUIDragItem::OnMouse(float x, float y, EUIMessages mouse_action)
@@ -187,7 +187,7 @@ void CUIDragItem::OnFrame()
 void CUIDragItem::Draw()
 {
 	Fvector2 tmp;
-	tmp.sub					(GetWndPos(), GetUICursor()->GetPos());
+	tmp.sub					(GetWndPos(), GetUICursor()->GetCursorPosition());
 	tmp.sub					(m_pos_offset);
 	tmp.mul					(-1.0f);
 	MoveWndDelta			(tmp);
@@ -207,6 +207,6 @@ void CUIDragItem::SetBackList(CUIDragDropListEx*l)
 
 Fvector2 CUIDragItem::GetPosition()
 {
-	return Fvector2().add(m_pos_offset, GetUICursor()->GetPos());
+	return Fvector2().add(m_pos_offset, GetUICursor()->GetCursorPosition());
 }
 

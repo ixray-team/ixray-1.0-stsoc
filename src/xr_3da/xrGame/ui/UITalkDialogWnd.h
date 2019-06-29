@@ -36,8 +36,7 @@ public:
 	CGameFont *	GetHeaderFont()			{ return m_pNameTextFont; }
 	u32			GetOurReplicsColor()	{ return m_uOurReplicsColor; }
 
-	//номер выбранного вопроса
-	int m_iClickedQuestion;
+	shared_str			m_ClickedQuestionID;
 
 	//список вопросов, которые мы можем задавать персонажу
 
@@ -56,13 +55,13 @@ public:
 	CUICharacterInfo	UICharacterInfoLeft;
 	CUICharacterInfo	UICharacterInfoRight;
 
-	void				AddQuestion(const char* str, int value);
-	void				AddAnswer(const char* SpeakerName, const char* str, bool bActor);
-	void				AddIconedAnswer(LPCSTR text, LPCSTR texture_name, Frect texture_rect, LPCSTR templ_name);
-	void				ClearAll();
-	void				ClearQuestions();
+	void				AddQuestion			(LPCSTR str, LPCSTR value);
+	void				AddAnswer			(LPCSTR SpeakerName, const char* str, bool bActor);
+	void				AddIconedAnswer		(LPCSTR text, LPCSTR texture_name, Frect texture_rect, LPCSTR templ_name);
+	void				ClearAll			();
+	void				ClearQuestions		();
 
-	void				SetOsoznanieMode(bool b);
+	void				SetOsoznanieMode	(bool b);
 private:
 	CUIScrollView*			UIQuestionsList;
 	CUIScrollView*			UIAnswersList;
@@ -85,9 +84,9 @@ class CUIQuestionItem :public CUIWindow, public CUIWndCallback
 	float			m_min_height;
 public:
 	CUI3tButton*	m_text;
-	int				m_value;
+	shared_str		m_s_value;
 					CUIQuestionItem			(CUIXml* xml_doc, LPCSTR path);
-	void			Init					(int val, LPCSTR text);
+	void			Init					(LPCSTR val, LPCSTR text);
 
 	virtual void	SendMessage				(CUIWindow* pWnd, s16 msg, void* pData = NULL);
 	void __stdcall	OnTextClicked			(CUIWindow* w, void*);

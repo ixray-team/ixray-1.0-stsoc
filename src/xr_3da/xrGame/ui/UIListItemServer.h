@@ -17,6 +17,7 @@ struct SRV_ICONS{
 	bool pass;
 	bool dedicated;
 	bool punkbuster;
+	bool user_pass;
 };
 
 struct LIST_SRV_INFO{
@@ -51,7 +52,8 @@ public:
 	// own
 	virtual void			Init					(LIST_SRV_ITEM& params, float x, float y, float width, float height);
 			void			SetParams				(LIST_SRV_ITEM& params);
-			void			CreateConsoleCommand	(xr_string& command, LPCSTR player_name);
+			void			CreateConsoleCommand	(xr_string& command, LPCSTR player_name, LPCSTR player_pass, LPCSTR server_psw);
+
 			int				Get_gs_index			()		{return m_srv_info.info.Index;}
 			LIST_SRV_ITEM*	GetInfo					()		{return &m_srv_info;};
 	
@@ -67,11 +69,11 @@ protected:
 	CUIStatic 				m_iconPass;
 	CUIStatic 				m_iconDedicated;
 	CUIStatic 				m_iconPunkBuster;
+	CUIStatic 				m_iconUserPass;
 	CUIStatic 				m_server;
 	CUIStatic 				m_map;
 	CUIStatic 				m_game;
 	CUIStatic 				m_players;
 	CUIStatic 				m_ping;
 	CUIStatic 				m_version;
-
 };

@@ -6,11 +6,9 @@
 //	Description : Script world state script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_world_state.h"
-#include "script_space.h"
 #include "condition_state.h"
-#include <luabind/operator.hpp>
 
 using namespace luabind;
 
@@ -22,8 +20,8 @@ void CScriptWorldStateWrapper::script_register(lua_State *L)
 		class_<CScriptWorldState>("world_state")
 			.def(								constructor<>())
 			.def(								constructor<CScriptWorldState>())
-			.def("add_property",				(void (CScriptWorldState::*)(const CScriptWorldState::COperatorCondition &))(CScriptWorldState::add_condition))
-			.def("remove_property",				(void (CScriptWorldState::*)(const CScriptWorldState::COperatorCondition::_condition_type &))(CScriptWorldState::remove_condition))
+			.def("add_property",				(void (CScriptWorldState::*)(const CScriptWorldState::COperatorCondition &))(&CScriptWorldState::add_condition))
+			.def("remove_property",				(void (CScriptWorldState::*)(const CScriptWorldState::COperatorCondition::_condition_type &))(&CScriptWorldState::remove_condition))
 			.def("clear",						&CScriptWorldState::clear)
 			.def("includes",					&CScriptWorldState::includes)
 			.def("property",					&CScriptWorldState::property)

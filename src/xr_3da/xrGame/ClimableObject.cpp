@@ -84,17 +84,20 @@ BOOL CClimableObject::	net_Spawn			( CSE_Abstract* DC)
 {
 	CSE_Abstract				*e = (CSE_Abstract*)(DC);
 	CSE_ALifeObjectClimable	*CLB=smart_cast<CSE_ALifeObjectClimable*>(e);
-	Fmatrix& b=CLB->shapes[0].data.box;
+	const Fmatrix& b=CLB->shapes[0].data.box;
 	m_box.m_halfsize.set(b._11,b._22,b._33);
+	m_radius=_max(_max(m_box.m_halfsize.x,m_box.m_halfsize.y),m_box.m_halfsize.z);
+
 	//m_box.m_halfsize.set(1.f,1.f,1.f);
+	BOOL ret	= inherited::net_Spawn(DC);
 	const float f_min_width=0.2f;
 	Fvector shift;shift.set(0.f,0.f,0.f);
-	if(m_box.m_halfsize.x<f_min_width){m_box.m_halfsize.x=f_min_width;shift.set(1.f,0.f,0.f);}
-	if(m_box.m_halfsize.y<f_min_width){m_box.m_halfsize.y=f_min_width;shift.set(0.f,1.f,0.f);}
-	if(m_box.m_halfsize.z<f_min_width){m_box.m_halfsize.z=f_min_width;shift.set(0.f,0.f,1.f);}
+	SORT(b._11,m_axis.set(XFORM().i);m_axis.mul(m_box.m_halfsize.x),m_side.set(XFORM().i);m_side.mul(m_box.m_halfsize.x),m_norm.set(XFORM().i);if(m_box.m_halfsize.x<f_min_width){m_box.m_halfsize.x=f_min_width;shift.set(1.f,0.f,0.f);};m_norm.mul(m_box.m_halfsize.x),
+		b._22,m_axis.set(XFORM().j);m_axis.mul(m_box.m_halfsize.y),m_side.set(XFORM().j);m_side.mul(m_box.m_halfsize.y),m_norm.set(XFORM().j);if(m_box.m_halfsize.y<f_min_width){m_box.m_halfsize.y=f_min_width;shift.set(0.f,1.f,0.f);};m_norm.mul(m_box.m_halfsize.y),
+		b._33,m_axis.set(XFORM().k);m_axis.mul(m_box.m_halfsize.z),m_side.set(XFORM().k);m_side.mul(m_box.m_halfsize.z),m_norm.set(XFORM().k);if(m_box.m_halfsize.z<f_min_width){m_box.m_halfsize.z=f_min_width;shift.set(0.f,0.f,1.f);};m_norm.mul(m_box.m_halfsize.z)
+		);
 	shift.mul(f_min_width);
-	m_radius=_max(_max(m_box.m_halfsize.x,m_box.m_halfsize.y),m_box.m_halfsize.z);
-	BOOL ret	= inherited::net_Spawn(DC);
+	
 	XFORM().transform_dir(shift);
 	CObject::Position().sub(shift);
 	m_box.xform_set(Fidentity);
@@ -102,11 +105,6 @@ BOOL CClimableObject::	net_Spawn			( CSE_Abstract* DC)
 	P_BuildStaticGeomShell(smart_cast<CPHStaticGeomShell*>(m_pStaticShell),smart_cast<CGameObject*>(this),0,m_box);
 	m_pStaticShell->SetMaterial("materials\\fake_ladders");
 	
-	SORT(	m_box.m_halfsize.x,m_axis.set(XFORM().i);m_axis.mul(m_box.m_halfsize.x),m_side.set(XFORM().i);m_side.mul(m_box.m_halfsize.x),m_norm.set(XFORM().i);m_norm.mul(m_box.m_halfsize.x),
-			m_box.m_halfsize.y,m_axis.set(XFORM().j);m_axis.mul(m_box.m_halfsize.y),m_side.set(XFORM().j);m_side.mul(m_box.m_halfsize.y),m_norm.set(XFORM().j);m_norm.mul(m_box.m_halfsize.y),
-			m_box.m_halfsize.z,m_axis.set(XFORM().k);m_axis.mul(m_box.m_halfsize.z),m_side.set(XFORM().k);m_side.mul(m_box.m_halfsize.z),m_norm.set(XFORM().k);m_norm.mul(m_box.m_halfsize.z)
-			);
-
 	if(m_axis.y<0.f)
 	{
 		m_axis.invert();
@@ -217,12 +215,12 @@ void		CClimableObject::DToAxis(CPHCharacter *actor,Fvector &dir)const
 }
 void CClimableObject::DSideToAxis		(CPHCharacter	*actor,Fvector	&dir)const
 {
-VERIFY(actor);
-DToAxis(actor,dir);
-Fvector side;side.set(m_side);
-to_mag_and_dir(side);
-side.mul(side.dotproduct(dir));
-dir.set(side);
+	VERIFY(actor);
+	DToAxis(actor,dir);
+	Fvector side;side.set(m_side);
+	to_mag_and_dir(side);
+	side.mul(side.dotproduct(dir));
+	dir.set(side);
 }
 
 float CClimableObject::DDSideToAxis(CPHCharacter *actor,Fvector &dir)const

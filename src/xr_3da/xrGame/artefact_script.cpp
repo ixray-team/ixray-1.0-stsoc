@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "artifact.h"
-#include "script_space.h"
 #include "MercuryBall.h"
 #include "GraviArtifact.h"
 #include "BlackDrops.h"

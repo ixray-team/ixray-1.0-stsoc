@@ -66,6 +66,20 @@ public:
 	typedef u32 const_death_iterator;
 	typedef const CVertex* const_vertex_iterator;
 
+private:
+	struct vertex {
+		static IC	bool	predicate			(const u32 &value, const CVertex &vertex)
+		{
+			return	(value < vertex.position().xz());
+		}
+		
+		static IC	bool	predicate2			(const CVertex &vertex, const u32 &value)
+		{
+			return	(vertex.position().xz() < value);
+		}
+	};
+
+public:
 #ifndef AI_COMPILER
 					CLevelGraph					();
 #else
@@ -226,12 +240,12 @@ public:
 #endif
 };
 
-IC	bool operator<		(const CLevelGraph::CVertex &vertex, u32 vertex_xz);
-IC	bool operator>		(const CLevelGraph::CVertex &vertex, u32 vertex_xz);
-IC	bool operator==		(const CLevelGraph::CVertex &vertex, u32 vertex_xz);
-IC	bool operator<		(u32 vertex_xz, const CLevelGraph::CVertex &vertex);
-IC	bool operator>		(u32 vertex_xz, const CLevelGraph::CVertex &vertex);
-IC	bool operator==		(u32 vertex_xz, const CLevelGraph::CVertex &vertex);
+IC	bool operator<		(const CLevelGraph::CVertex &vertex, const u32 &vertex_xz);
+IC	bool operator>		(const CLevelGraph::CVertex &vertex, const u32 &vertex_xz);
+IC	bool operator==		(const CLevelGraph::CVertex &vertex, const u32 &vertex_xz);
+IC	bool operator<		(const u32 &vertex_xz, const CLevelGraph::CVertex &vertex);
+IC	bool operator>		(const u32 &vertex_xz, const CLevelGraph::CVertex &vertex);
+IC	bool operator==		(const u32 &vertex_xz, const CLevelGraph::CVertex &vertex);
 
 #ifdef DEBUG
 #	ifndef AI_COMPILER

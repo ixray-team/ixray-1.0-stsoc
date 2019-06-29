@@ -6,9 +6,8 @@
 //	Description : Base action script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_action_wrapper.h"
-#include "script_space.h"
 #include "script_game_object.h"
 
 using namespace luabind;
@@ -24,10 +23,10 @@ void CActionBase<CScriptGameObject>::script_register(lua_State *L)
 			.def(								constructor<>())
 			.def(								constructor<CScriptGameObject*>())
 			.def(								constructor<CScriptGameObject*,LPCSTR>())
-			.def("add_precondition",			(void (CScriptActionBase::*)(const CScriptActionBase::COperatorCondition &))(CScriptActionBase::add_condition))
-			.def("add_effect",					(void (CScriptActionBase::*)(const CScriptActionBase::COperatorCondition &))(CScriptActionBase::add_effect))
-			.def("remove_precondition",			(void (CScriptActionBase::*)(const CScriptActionBase::COperatorCondition::_condition_type &))(CScriptActionBase::remove_condition))
-			.def("remove_effect",				(void (CScriptActionBase::*)(const CScriptActionBase::COperatorCondition::_condition_type &))(CScriptActionBase::remove_effect))
+			.def("add_precondition",			(void (CScriptActionBase::*)(const CScriptActionBase::COperatorCondition &))(&CScriptActionBase::add_condition))
+			.def("add_effect",					(void (CScriptActionBase::*)(const CScriptActionBase::COperatorCondition &))(&CScriptActionBase::add_effect))
+			.def("remove_precondition",			(void (CScriptActionBase::*)(const CScriptActionBase::COperatorCondition::_condition_type &))(&CScriptActionBase::remove_condition))
+			.def("remove_effect",				(void (CScriptActionBase::*)(const CScriptActionBase::COperatorCondition::_condition_type &))(&CScriptActionBase::remove_effect))
 			.def("setup",						&CScriptActionBase::setup,		&CScriptActionWrapper::setup_static)
 			.def("initialize",					&CScriptActionBase::initialize, &CScriptActionWrapper::initialize_static)
 			.def("execute",						&CScriptActionBase::execute,	&CScriptActionWrapper::execute_static)

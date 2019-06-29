@@ -7,12 +7,18 @@
 #pragma warning(disable:4995)
 #include <d3dx9.h>
 #pragma warning(default:4995)
-
 #include "HW.h"
 #include "xr_IOconsole.h"
 
-void	fill_vid_mode_list			(CHW* _hw);
-void	free_vid_mode_list			();
+#ifndef _EDITOR
+	void	fill_vid_mode_list			(CHW* _hw);
+	void	free_vid_mode_list			();
+#else
+	void	fill_vid_mode_list			(CHW* _hw)	{};
+	void	free_vid_mode_list			()			{};
+#endif
+
+	void	free_vid_mode_list			();
 
 ENGINE_API CHW			HW;
 
@@ -152,17 +158,19 @@ void	CHW::selectResolution	(u32 &dwWidth, u32 &dwHeight, BOOL bWindowed)
 		dwHeight	= psCurrentVidMode[1];
 	}else //check
 	{
+#ifndef _EDITOR
 		string64					buff;
-		sprintf						(buff,"%dx%d",psCurrentVidMode[0],psCurrentVidMode[1]);
+		sprintf_s					(buff,sizeof(buff),"%dx%d",psCurrentVidMode[0],psCurrentVidMode[1]);
 		
 		if(_ParseItem(buff,vid_mode_token)==u32(-1)) //not found
 		{ //select safe
-			sprintf					(buff,"vid_mode %s",vid_mode_token[0].name);
+			sprintf_s				(buff,sizeof(buff),"vid_mode %s",vid_mode_token[0].name);
 			Console->Execute		(buff);
 		}
 
 		dwWidth						= psCurrentVidMode[0];
 		dwHeight					= psCurrentVidMode[1];
+#endif
 	}
 #endif
 
@@ -516,7 +524,7 @@ void	fill_vid_mode_list			(CHW* _hw)
 		_hw->pD3D->EnumAdapterModes(_hw->DevAdapter, _hw->Caps.fTarget, i, &Mode);
 		if(Mode.Width < 800)		continue;
 
-		sprintf						(str,"%dx%d", Mode.Width, Mode.Height);
+		sprintf_s						(str,sizeof(str),"%dx%d", Mode.Width, Mode.Height);
 	
 		if(_tmp.end() != std::find_if(_tmp.begin(), _tmp.end(), _uniq_mode(str)))
 			continue;

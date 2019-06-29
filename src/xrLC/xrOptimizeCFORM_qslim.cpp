@@ -43,8 +43,14 @@ void SimplifyCFORM		(CDB::CollectorPacked& CL)
 	u32 base_faces_cnt		= u32(CL.getTS());
 
 	// save source SMF
-	string_path				fn;
-	SaveAsSMF				(strconcat(fn,pBuild->path,"cform_source.smf"),CL);
+#ifdef PRIQUEL
+	bool					keep_temp_files = !!strstr(Core.Params,"-keep_temp_files");
+	if (keep_temp_files)
+#endif // PRIQUEL
+	{
+		string_path			fn;
+		SaveAsSMF			(strconcat(sizeof(fn),fn,pBuild->path,"cform_source.smf"),CL);
+	}
 
 	// prepare model
 	MxStdModel* mdl			= xr_new<MxStdModel>(base_verts_cnt,base_faces_cnt);
@@ -134,7 +140,13 @@ void SimplifyCFORM		(CDB::CollectorPacked& CL)
 
 
 	// save source CDB
-	SaveAsSMF				(strconcat(fn,pBuild->path,"cform_optimized.smf"),CL);
+#ifdef PRIQUEL
+	if (keep_temp_files)
+#endif // PRIQUEL
+	{
+		string_path			fn;
+		SaveAsSMF			(strconcat(sizeof(fn),fn,pBuild->path,"cform_optimized.smf"),CL);
+	}
 
  	xr_delete				(slim);
 	xr_delete				(mdl);

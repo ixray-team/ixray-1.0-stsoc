@@ -1,7 +1,6 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "pseudodog.h"
 #include "psy_dog.h"
-#include "../../../script_space.h"
 
 using namespace luabind;
 

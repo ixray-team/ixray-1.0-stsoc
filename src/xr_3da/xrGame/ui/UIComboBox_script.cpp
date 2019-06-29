@@ -7,10 +7,8 @@
 // Copyright 2004 GSC Game World
 //
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "UIComboBox.h"
-
-#include "../script_space.h"
 
 using namespace luabind;
 
@@ -21,8 +19,8 @@ void CUIComboBox::script_register(lua_State *L)
 	[
 		class_<CUIComboBox, CUIWindow>("CUIComboBox")
 		.def(						constructor<>())
-		.def("Init",				(void (CUIComboBox::*)(float, float, float))   CUIComboBox::Init)
-		.def("Init",				(void (CUIComboBox::*)(float, float, float, float))   CUIComboBox::Init)		
+		.def("Init",				(void (CUIComboBox::*)(float, float, float))   &CUIComboBox::Init)
+		.def("Init",				(void (CUIComboBox::*)(float, float, float, float))   &CUIComboBox::Init)		
 		.def("SetVertScroll",		&CUIComboBox::SetVertScroll)
 		.def("SetListLength",		&CUIComboBox::SetListLength)
 		.def("CurrentID",			&CUIComboBox::CurrentID)

@@ -273,13 +273,22 @@ void CSightManager::Exec_Look		(float dt)
 	mXFORM.c.set		(m_object->Position());
 	m_object->XFORM().set(mXFORM);
 #else
+
 	Fmatrix				&m = m_object->XFORM();
-	float				h = -body.current.yaw;
-	float				_sh = _sin(h), _ch = _cos(h);
-	m.i.set				( _ch,	0.f,	_sh); m._14_	= 0.f;
-	m.j.set				( 0.f,	1.f,	0.f); m._24_	= 0.f;
-	m.k.set				(-_sh,	0.f,	_ch); m._34_	= 0.f;
-											; m._44_	= 1.f;
+/*
+	if(m_object->animation_movement_controlled	( )	)
+	{
+		//m.getHPB
+		body.current.yaw = - atan2(m.i.x,m.i.z);
+		body.target.yaw = body.current.yaw;
+	} else {
+*/
+		float				h = -body.current.yaw;
+		float				_sh = _sin(h), _ch = _cos(h);
+		m.i.set				( _ch,	0.f,	_sh); m._14_	= 0.f;
+		m.j.set				( 0.f,	1.f,	0.f); m._24_	= 0.f;
+		m.k.set				(-_sh,	0.f,	_ch); m._34_	= 0.f;
+//	}
 #endif
 	STOP_PROFILE
 }

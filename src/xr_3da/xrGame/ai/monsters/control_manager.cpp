@@ -105,8 +105,14 @@ void CControl_Manager::update_frame()
 		if ((*it)) (*it)->update_frame();
 	}
 
-	COM_VEC_IT it_remove = remove_if(m_active_elems.begin(), m_active_elems.end(), predicate_remove());
-	m_active_elems.erase(it_remove, m_active_elems.end());
+	m_active_elems.erase	(
+		std::remove_if(
+			m_active_elems.begin(),
+			m_active_elems.end(),
+			predicate_remove()
+		),
+		m_active_elems.end()
+	);
 }
 
 void CControl_Manager::update_schedule()
@@ -118,8 +124,14 @@ void CControl_Manager::update_schedule()
 		if ((*it)) (*it)->update_schedule();
 	}
 
-	COM_VEC_IT it_remove = remove_if(m_active_elems.begin(), m_active_elems.end(), predicate_remove());
-	m_active_elems.erase(it_remove, m_active_elems.end());
+	m_active_elems.erase	(
+		std::remove_if(
+			m_active_elems.begin(),
+			m_active_elems.end(),
+			predicate_remove()
+		),
+		m_active_elems.end()
+	);
 }
 
 ControlCom::EControlType CControl_Manager::com_type(CControl_Com *com)
@@ -394,7 +406,7 @@ void CControl_Manager::dump(CControl_Com *com, LPCSTR action, ControlCom::EContr
 			else 
 				strcpy(str, "NONE");
 
-			sprintf(st, "Locked[%u] Capturer[%s]", it->second->ced()->is_locked(), str);
+			sprintf_s(st, "Locked[%u] Capturer[%s]", it->second->ced()->is_locked(), str);
 		}
 
 		Msg("[%u] %s: Active[%u] %s",index+1, dbg_control_name_table[it->first], it->second->is_active(),st);

@@ -10,7 +10,6 @@
 
 #include "script_binder_object.h"
 #include "script_game_object.h"
-#include "script_space.h"
 
 class CScriptGameObject;
 

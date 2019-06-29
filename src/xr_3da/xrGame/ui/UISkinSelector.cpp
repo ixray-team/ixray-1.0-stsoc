@@ -140,7 +140,7 @@ void CUISkinSelectorWnd::Init(const char* strSectionName)
 	string64 buff;
 	for (int i = 0; i<4; i++)
 	{
-		sprintf(buff,"skin_selector:image_%d",i);
+		sprintf_s(buff,"skin_selector:image_%d",i);
 		CUIXmlInit::InitStatic(xml_doc,buff,0,m_pImage[i]);
 	}
 	UpdateSkins();
@@ -249,9 +249,9 @@ bool CUISkinSelectorWnd::OnKeyboard(int dik, EUIMessages keyboard_action)
 	if (dik >= DIK_1 && dik < (int)right_border + DIK_1)
 	{
 		int NewIndex = dik - DIK_1;
-		Msg("Selected %d", NewIndex);
-		for (u32 i=0; i<m_skinsEnabled.size(); i++)
-			Msg("Enabled - %d", m_skinsEnabled[i]);
+//		Msg("Selected %d", NewIndex);
+//		for (u32 i=0; i<m_skinsEnabled.size(); i++)
+//			Msg("Enabled - %d", m_skinsEnabled[i]);
 		xr_vector<int>::iterator It = std::find(m_skinsEnabled.begin(), m_skinsEnabled.end(), NewIndex);
 		if (It != m_skinsEnabled.end())
 		{
@@ -261,12 +261,13 @@ bool CUISkinSelectorWnd::OnKeyboard(int dik, EUIMessages keyboard_action)
 		return true;		
 	}
 
-	game_cl_Deathmatch * dm = smart_cast<game_cl_Deathmatch *>(&(Game()));
+//	game_cl_Deathmatch * dm = smart_cast<game_cl_Deathmatch *>(&(Game()));
 
 	switch (dik){
 		case DIK_ESCAPE:
-			Game().StartStopMenu(this,true);
-			dm->OnSkinMenuBack();
+//			Game().StartStopMenu(this,true);
+//			dm->OnSkinMenuBack();
+			OnBtnCancel();
 			return true;
 		case DIK_SPACE: // do autoselect
 			m_iActiveIndex = -1;

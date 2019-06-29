@@ -3,7 +3,7 @@
 #include "ogf_face.h"
 #include "std_classes.h"
 #include "fs.h"
-#include "fmesh.h"
+#include "..\xr_3da\fmesh.h"
 #include "xrOcclusion.h"
 #include "nvMeshMender.h"
 
@@ -344,7 +344,7 @@ void OGF::CalculateTB()
 
 	// retriving data
 	u32 o_idx		= 0;
-	for (face_it=faces.begin(); face_it!=faces.end(); face_it++){
+	for (itOGF_F face_it=faces.begin(); face_it!=faces.end(); face_it++){
 		OGF_Face	&iF = *face_it;
 		iF.v[0]		= o_indices[o_idx++];
 		iF.v[1]		= o_indices[o_idx++];
@@ -564,7 +564,7 @@ void OGF_LOD::Save		(IWriter &fs)
 	// Header
 	ogf_header			H;
 	string1024			sid;
-	strconcat			(sid,
+	strconcat			(sizeof(sid),sid,
 		pBuild->shader_render[pBuild->materials[lod_Material].shader].name,
 		"/",
 		pBuild->textures[pBuild->materials[lod_Material].surfidx].name

@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "helicopter.h"
-#include "script_space.h"
 #include "script_game_object.h"
 
 int CHelicopter::GetMovementState()
@@ -67,6 +66,9 @@ void CHelicopter::script_register(lua_State *L)
 
 				.def("SetSpeedInDestPoint",					&CHelicopter::SetSpeedInDestPoint)
 				.def("GetSpeedInDestPoint",					&CHelicopter::GetSpeedInDestPoint)
+				//////////////////////Start By JoHnY///////////////////////
+				.def("SetLinearAcc",						&CHelicopter::SetLinearAcc)
+				//////////////////////End By JoHnY/////////////////////////
 
 				.def("SetOnPointRangeDist",					&CHelicopter::SetOnPointRangeDist)
 				.def("GetOnPointRangeDist",					&CHelicopter::GetOnPointRangeDist)
@@ -74,8 +76,8 @@ void CHelicopter::script_register(lua_State *L)
 				.def("GetDistanceToDestPosition",			&CHelicopter::GetDistanceToDestPosition)
 
 				.def("ClearEnemy",							&CHelicopter::UnSetEnemy)
-				.def("SetEnemy",							(void (CHelicopter::*)(CScriptGameObject*)) CHelicopter::SetEnemy)
-				.def("SetEnemy",							(void (CHelicopter::*)(Fvector*)) CHelicopter::SetEnemy)
+				.def("SetEnemy",							(void (CHelicopter::*)(CScriptGameObject*)) &CHelicopter::SetEnemy)
+				.def("SetEnemy",							(void (CHelicopter::*)(Fvector*)) &CHelicopter::SetEnemy)
 				.def("GoPatrolByPatrolPath",				&CHelicopter::goPatrolByPatrolPath)
 				.def("GoPatrolByRoundPath",					&CHelicopter::goByRoundPath)
 				.def("SetDestPosition",						&CHelicopter::SetDestPosition)
@@ -83,8 +85,8 @@ void CHelicopter::script_register(lua_State *L)
 				.def("SetFireTrailLength",					&CHelicopter::SetFireTrailLength)
 				.def("SetBarrelDirTolerance",				&CHelicopter::SetBarrelDirTolerance)
 
-				.def("UseFireTrail",						(bool (CHelicopter::*)(void)) CHelicopter::UseFireTrail)
-				.def("UseFireTrail",						(void (CHelicopter::*)(bool)) CHelicopter::UseFireTrail)
+				.def("UseFireTrail",						(bool (CHelicopter::*)(void)) &CHelicopter::UseFireTrail)
+				.def("UseFireTrail",						(void (CHelicopter::*)(bool)) &CHelicopter::UseFireTrail)
 
 				.def("Die",									&CHelicopter::DieHelicopter)
 				.def("StartFlame",							&CHelicopter::StartFlame)

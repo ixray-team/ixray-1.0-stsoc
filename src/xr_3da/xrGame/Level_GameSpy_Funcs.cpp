@@ -23,7 +23,7 @@ void						CLevel::OnGameSpyChallenge			(NET_Packet* P)
 
 	newP.w_begin	(M_GAMESPY_CDKEY_VALIDATION_CHALLENGE_RESPOND);
 	newP.w_stringZ(ResponseStr);
-	Send(newP);
+	Send(newP, net_flags(TRUE, TRUE, TRUE, TRUE));
 
 //	g_pGamePersistent->LoadTitle("st_validating_cdkey");
 };

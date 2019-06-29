@@ -15,15 +15,15 @@
 
 
 #if XRAY_EXCEPTIONS
-IC	xr_string	string2xr_string(LPCSTR s) {return s ? s : "";}
-IC	void		throw_and_log(const xr_string &s) {Msg("! %s",s.c_str()); throw s;}
-#	define	THROW(xpr)				if (!(xpr)) {throw_and_log (__FILE__LINE__" Expression \""#xpr"\"");}
-#	define	THROW2(xpr,msg0)		if (!(xpr)) {throw_and_log (xr_string(__FILE__LINE__).append(" Expression \"").append(#xpr).append(string2xr_string(msg0)));}
-#	define	THROW3(xpr,msg0,msg1)	if (!(xpr)) {throw_and_log (xr_string(__FILE__LINE__).append(" Expression \"").append(#xpr).append(string2xr_string(msg0)).append(", ").append(string2xr_string(msg1)));}
+IC	xr_string	string2xr_string(LPCSTR s) {return *shared_str(s ? s : "");}
+IC	void		throw_and_log(const xr_string &s) {Msg("! %s",s.c_str()); throw *shared_str(s.c_str());}
+#	define		THROW(xpr)				if (!(xpr)) {throw_and_log (__FILE__LINE__" Expression \""#xpr"\"");}
+#	define		THROW2(xpr,msg0)		if (!(xpr)) {throw *shared_str(xr_string(__FILE__LINE__).append(" \"").append(#xpr).append(string2xr_string(msg0)).c_str());}
+#	define		THROW3(xpr,msg0,msg1)	if (!(xpr)) {throw *shared_str(xr_string(__FILE__LINE__).append(" \"").append(#xpr).append(string2xr_string(msg0)).append(", ").append(string2xr_string(msg1)).c_str());}
 #else
-#	define	THROW					VERIFY
-#	define	THROW2					VERIFY2
-#	define	THROW3					VERIFY3
+#	define		THROW					VERIFY
+#	define		THROW2					VERIFY2
+#	define		THROW3					VERIFY3
 #endif
 
 #include "../gamefont.h"
@@ -36,4 +36,4 @@ IC	void		throw_and_log(const xr_string &s) {Msg("! %s",s.c_str()); throw s;}
 
 #ifndef DEBUG
 #	define MASTER_GOLD
-#endif 
+#endif // DEBUG

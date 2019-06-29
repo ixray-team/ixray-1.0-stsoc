@@ -6,9 +6,8 @@
 //	Description : XRay Script Storage
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_storage.h"
-#include "script_space.h"
 #include "script_thread.h"
 #include <stdarg.h>
 #include "doug_lea_memory_allocator.h"
@@ -161,7 +160,7 @@ int CScriptStorage::vscript_log		(ScriptStorage::ELuaMessageType tLuaMessageType
 
 #ifndef DEBUG
 	return		(0);
-#else
+#else // DEBUG
 
 	LPCSTR		S = "", SS = "";
 	LPSTR		S1;
@@ -221,8 +220,10 @@ int CScriptStorage::vscript_log		(ScriptStorage::ELuaMessageType tLuaMessageType
 	strcat	(S2,"\r\n");
 
 #ifndef ENGINE_BUILD
-	ai().script_engine().m_output.w(S2,xr_strlen(S2)*sizeof(char));
-#endif
+#	ifdef DEBUG
+		ai().script_engine().m_output.w(S2,xr_strlen(S2)*sizeof(char));
+#	endif // DEBUG
+#endif // DEBUG
 
 	return	(l_iResult);
 #endif
@@ -305,7 +306,7 @@ bool CScriptStorage::parse_namespace(LPCSTR caNamespaceName, LPSTR b, LPSTR c)
 	return			(true);
 }
 
-bool CScriptStorage::load_buffer	(CLuaVirtualMachine *L, LPCSTR caBuffer, size_t tSize, LPCSTR caScriptName, LPCSTR caNameSpaceName)
+bool CScriptStorage::load_buffer	(lua_State *L, LPCSTR caBuffer, size_t tSize, LPCSTR caScriptName, LPCSTR caNameSpaceName)
 {
 	int					l_iErrorCode;
 	if (caNameSpaceName && xr_strcmp("_G",caNameSpaceName)) {
@@ -315,7 +316,7 @@ bool CScriptStorage::load_buffer	(CLuaVirtualMachine *L, LPCSTR caBuffer, size_t
 
 		if (!parse_namespace(caNameSpaceName,a,b))
 			return		(false);
-		sprintf			(insert,header,caNameSpaceName,a,b);
+		sprintf_s			(insert,header,caNameSpaceName,a,b);
 		u32				str_len = xr_strlen(insert);
 		LPSTR			script = xr_alloc<char>(str_len + tSize);
 		strcpy			(script,insert);
@@ -351,13 +352,13 @@ bool CScriptStorage::load_buffer	(CLuaVirtualMachine *L, LPCSTR caBuffer, size_t
 bool CScriptStorage::do_file	(LPCSTR caScriptName, LPCSTR caNameSpaceName)
 {
 	int				start = lua_gettop(lua());
-	string256		l_caLuaFileName;
+	string_path		l_caLuaFileName;
 	IReader			*l_tpFileReader = FS.r_open(caScriptName);
 	if (!l_tpFileReader) {
 		script_log	(eLuaMessageTypeError,"Cannot open file \"%s\"",caScriptName);
 		return		(false);
 	}
-	strconcat		(l_caLuaFileName,"@",caScriptName);
+	strconcat		(sizeof(l_caLuaFileName),l_caLuaFileName,"@",caScriptName);
 	
 	if (!load_buffer(lua(),static_cast<LPCSTR>(l_tpFileReader->pointer()),(size_t)l_tpFileReader->length(),l_caLuaFileName,caNameSpaceName)) {
 //		VERIFY		(lua_gettop(lua()) >= 4);
@@ -510,7 +511,7 @@ luabind::object CScriptStorage::name_space(LPCSTR namespace_name)
 	}
 }
 
-bool CScriptStorage::print_output(CLuaVirtualMachine *L, LPCSTR caScriptFileName, int iErorCode)
+bool CScriptStorage::print_output(lua_State *L, LPCSTR caScriptFileName, int iErorCode)
 {
 	if (iErorCode)
 		print_error		(L,iErorCode);
@@ -542,7 +543,7 @@ bool CScriptStorage::print_output(CLuaVirtualMachine *L, LPCSTR caScriptFileName
 	return				(true);
 }
 
-void CScriptStorage::print_error(CLuaVirtualMachine *L, int iErrorCode)
+void CScriptStorage::print_error(lua_State *L, int iErrorCode)
 {
 	switch (iErrorCode) {
 		case LUA_ERRRUN : {
@@ -573,10 +574,12 @@ void CScriptStorage::print_error(CLuaVirtualMachine *L, int iErrorCode)
 	}
 }
 
+#ifdef DEBUG
 void CScriptStorage::flush_log()
 {
-	string256			log_file_name;
-	strconcat           (log_file_name,Core.ApplicationName,"_",Core.UserName,"_lua.log");
+	string_path			log_file_name;
+	strconcat           (sizeof(log_file_name),log_file_name,Core.ApplicationName,"_",Core.UserName,"_lua.log");
 	FS.update_path      (log_file_name,"$logs$",log_file_name);
 	m_output.save_to	(log_file_name);
 }
+#endif // DEBUG

@@ -50,7 +50,7 @@ CUIGameDM::CUIGameDM()
 	m_time_caption = "timelimit";
 	GameCaptions()->addCustomMessage(m_time_caption, DI2PX(0.0f), DI2PY(-0.8f), SZ(0.03f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, TIME_MSG_COLOR, "");
 	m_spectrmode_caption = "spetatormode";
-	GameCaptions()->addCustomMessage(m_spectrmode_caption, DI2PX(0.0f), DI2PY(-0.9f), SZ(0.03f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, SPECTRMODE_MSG_COLOR, "");
+	GameCaptions()->addCustomMessage(m_spectrmode_caption, DI2PX(0.0f), DI2PY(-0.7f), SZ(0.03f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, SPECTRMODE_MSG_COLOR, "");
 	m_spectator_caption = "spectator";
 	GameCaptions()->addCustomMessage(m_spectator_caption, DI2PX(0.0f), DI2PY(0.0f), SZ(0.03f), HUD().Font().pFontGraffiti19Russian, CGameFont::alCenter, NORMAL_MSG_COLOR, "");
 	m_pressjump_caption = "pressjump";
@@ -340,9 +340,9 @@ void CUIGameDM::SetFraglimit(int local_frags, int fraglimit)
 {
 	string64 str;
 	if(fraglimit)
-		sprintf(str,"%d/%d", local_frags, fraglimit);
+		sprintf_s(str,"%d/%d", local_frags, fraglimit);
 	else
-		sprintf(str,"%d", local_frags);
+		sprintf_s(str,"%d", local_frags);
 
 	m_pFragLimitIndicator->SetText(str);
 }

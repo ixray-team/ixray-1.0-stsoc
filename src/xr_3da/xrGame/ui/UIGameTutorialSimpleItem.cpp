@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "UIGameTutorial.h"
 #include "UIWindow.h"
 #include "UIStatic.h"
@@ -99,7 +99,7 @@ void CUISequenceSimpleItem::Load(CUIXml* xml, int idx)
 		XML_NODE* _sr				= xml->GetLocalRoot();
 		xml->SetLocalRoot			(xml->NavigateToNode("main_wnd",0));
 
-		sprintf						(sname,"auto_static_%d", i);
+		sprintf_s						(sname,"auto_static_%d", i);
 
 		SSubItem* _si				= &m_subitems[i];
 		_si->m_start				= xml->ReadAttribFlt("auto_static",i,"start_time",0);
@@ -173,8 +173,8 @@ void CUISequenceSimpleItem::Start()
 	if(m_flags.test(etiNeedPauseSound))
 		Device.Pause			(TRUE, FALSE, TRUE, "simpleitem_start");
 
-	GetUICursor()->SetPos		(m_desired_cursor_pos.x, m_desired_cursor_pos.y);
-	m_time_start				= float(Device.dwTimeContinual)/1000.0f;
+	GetUICursor()->SetUICursorPosition		(m_desired_cursor_pos);
+	m_time_start							= float(Device.dwTimeContinual)/1000.0f;
 	m_owner->MainWnd()->AttachChild	(m_UIWindow);
 
 	if (m_sound._handle())		m_sound.play(NULL, sm_2D);

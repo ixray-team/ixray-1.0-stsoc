@@ -52,15 +52,23 @@ void CFontManager::InitializeFonts()
 
 LPCSTR CFontManager::GetFontTexName (LPCSTR section)
 {
-	u32 w = Device.dwWidth;
-
 	static char* tex_names[]={"texture800","texture","texture1600"};
 	int def_idx		= 1;//default 1024x768
 	int idx			= def_idx;
 
+#if 0
+	u32 w = Device.dwWidth;
+
 	if(w<=800)		idx = 0;
 	else if(w<=1280)idx = 1;
 	else 			idx = 2;
+#else
+	u32 h = Device.dwHeight;
+
+	if(h<=600)		idx = 0;
+	else if(h<=900)	idx = 1;
+	else 			idx = 2;
+#endif
 
 	while(idx>=0){
 		if( pSettings->line_exist(section,tex_names[idx]) )
@@ -282,3 +290,8 @@ void CHUDManager::OnConnected()
 	}
 }
 
+void CHUDManager::net_Relcase	(CObject *object)
+{
+	VERIFY						(m_pHUDTarget);
+	m_pHUDTarget->net_Relcase	(object);
+}

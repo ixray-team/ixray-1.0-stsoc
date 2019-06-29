@@ -10,6 +10,11 @@ class CPHShellSplitterHolder;
 #include "PHDefs.h"
 #include "PHShellSplitter.h"
 #include "phmovestorage.h"
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	class CPhysicsShellAnimator;
+#endif
+
 class CPHShell: public CPhysicsShell,public CPHObject {
 
 	friend class CPHShellSplitterHolder;
@@ -25,6 +30,11 @@ class CPHShell: public CPhysicsShell,public CPHObject {
 	JOINT_STORAGE			joints;
 	CPHShellSplitterHolder	*m_spliter_holder;
 	CPHMoveStorage			m_traced_geoms;
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	CPhysicsShellAnimator*	m_pPhysicsShellAnimatorC;
+#endif
+
 protected:
 	dSpaceID			    m_space;
 public:
@@ -39,7 +49,9 @@ public:
 	virtual	BoneCallbackFun* GetBonesCallback		()	{return BonesCallback ;}
 	virtual BoneCallbackFun* GetStaticObjectBonesCallback()	{return StataticRootBonesCallBack;}
 	virtual	void			add_Element				(CPhysicsElement* E);
-
+	virtual	void			ToAnimBonesPositions	();
+	virtual bool			AnimToVelocityState		(float dt, float l_limit, float a_limit );
+	virtual void			SetBonesCallbacksOverwrite(bool v);
 	void					SetPhObjectInElements	();
 	virtual	void			EnableObject			(CPHObject* obj);
 	virtual	void			DisableObject			();
@@ -64,6 +76,14 @@ public:
 	virtual void			Activate				(const Fmatrix &transform,const Fvector& lin_vel,const Fvector& ang_vel,bool disable=false);
 	virtual void			Activate				(bool disable=false);
 	virtual void			Activate				(const Fmatrix& start_from, bool disable=false){};
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	virtual	CPhysicsShellAnimator*	PPhysicsShellAnimator(){return	m_pPhysicsShellAnimatorC;};
+#endif
+
+private:
+			void			activate				(bool disable);	
+public:
 	virtual	void			Build					(bool disable=false);
 	virtual	void			RunSimulation			(bool place_current_forms=true);
 	virtual	void			net_Import				(NET_Packet& P);
@@ -79,6 +99,13 @@ public:
 	virtual			void	SetIgnoreDynamic		()											;
 	virtual			void	SetRagDoll				()											;
 	virtual			void	SetIgnoreRagDoll		()											;
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	virtual			void	SetAnimated				()											;
+	virtual			void	SetIgnoreAnimated		()											;
+	virtual			bool	Animated				()											;
+#endif
+
 	virtual			void	SetSmall				()											;
 	virtual			void	SetIgnoreSmall			()											;
 	virtual void			setMass					(float M)									;
@@ -167,7 +194,7 @@ public:
 	virtual		void				vis_update_activate				();
 	virtual		void				vis_update_deactivate	  		();
 	virtual		void				PureStep						(float step);
-	virtual		void				StaticCollideStep				(float step);
+	virtual		void				CollideAll						();
 	virtual		void				PhDataUpdate					(dReal step);
 	virtual		void				PhTune							(dReal step);
 	virtual		void				InitContact						(dContact* c,bool &do_collide,u16 /*material_idx_1*/,u16 /*material_idx_2*/){};

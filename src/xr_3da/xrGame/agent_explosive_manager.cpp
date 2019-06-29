@@ -121,8 +121,14 @@ void CAgentExplosiveManager::react_on_explosives	()
 			reaction.m_processing	= true;
 		}
 
-		I					= remove_if(m_explosives.begin(),m_explosives.end(),CRemoveExplosivesPredicate());
-		m_explosives.erase	(I,m_explosives.end());
+		m_explosives.erase	(
+			std::remove_if(
+				m_explosives.begin(),
+				m_explosives.end(),
+				CRemoveExplosivesPredicate()
+			),
+			m_explosives.end()
+		);
 	}
 }
 

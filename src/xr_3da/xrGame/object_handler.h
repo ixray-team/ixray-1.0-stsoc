@@ -62,7 +62,6 @@ public:
 	virtual	void					update				();
 	virtual void					OnItemTake			(CInventoryItem *inventory_item);
 	virtual void					OnItemDrop			(CInventoryItem *inventory_item);
-	virtual void					OnItemDropUpdate	();
 	virtual	void					attach				(CInventoryItem *inventory_item);
 	virtual	void					detach				(CInventoryItem *inventory_item);
 			CInventoryItem			*best_weapon		() const;

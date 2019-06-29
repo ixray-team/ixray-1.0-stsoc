@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "helicopter.h"
 #include "level.h"
 #include "script_game_object.h"
@@ -157,7 +157,14 @@ float CHelicopter::GetMaxVelocity()
 {
 	return m_movement.maxLinearSpeed;
 }
+//////////////////////Start By JoHnY///////////////////////
+void CHelicopter::SetLinearAcc(float LAcc_fw, float LAcc_bw)
+{
+	m_movement.LinearAcc_fw = LAcc_fw;	//ускорение разгона
+	m_movement.LinearAcc_bk = LAcc_bw;	//ускорение торможения
 
+}
+//////////////////////End By JoHnY/////////////////////////
 void CHelicopter::SetSpeedInDestPoint(float sp)
 {
 	m_movement.SetSpeedInDestPoint(sp);

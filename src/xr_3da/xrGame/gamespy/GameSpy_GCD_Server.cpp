@@ -40,6 +40,7 @@ void	CGameSpy_GCD_Server::LoadGameSpy(HMODULE hGameSpyDLL)
 	GAMESPY_LOAD_FN(xrGS_gcd_reauthenticate_user);
 	GAMESPY_LOAD_FN(xrGS_gcd_disconnect_user);
 	GAMESPY_LOAD_FN(xrGS_gcd_think);
+	GAMESPY_LOAD_FN(xrGS_gcd_getkeyhash);
 }
 
 bool	CGameSpy_GCD_Server::Init()
@@ -101,4 +102,9 @@ void	CGameSpy_GCD_Server::DisconnectUser(int localid)
 void	CGameSpy_GCD_Server::Think()
 {
 	xrGS_gcd_think();
+};
+
+char*	CGameSpy_GCD_Server::GetKeyHash(int localid)
+{
+	return xrGS_gcd_getkeyhash(localid);
 };

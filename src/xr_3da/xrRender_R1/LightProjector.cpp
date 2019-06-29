@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "LightProjector.h"
 #include "..\xr_object.h"
-#include "lighttrack.h"
+#include "..\xrRender\lighttrack.h"
 
 // tir2.xrdemo		-> 45.2
 // tir2.xrdemo		-> 61.8

@@ -118,6 +118,8 @@ void CUIStaticItem::Render(float angle)
 	// convert&set pos
 	Fvector2		bp_ns;
 	bp_ns.set		(iPos);
+
+
 	// actual rendering
 	u32		vOffset;
 	FVF::TL* start_pv			= (FVF::TL*)RCache.Vertex.Lock	(32,hGeom_fan.stride(),vOffset);

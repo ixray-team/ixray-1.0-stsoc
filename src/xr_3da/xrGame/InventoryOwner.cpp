@@ -1,10 +1,4 @@
-/////////////////////////////////////////////////////
-// Для персонажей, имеющих инвентарь
-// InventoryOwner.cpp
-//////////////////////////////////////////////////////
-
-
-#include "stdafx.h"
+#include "pch_script.h"
 #include "InventoryOwner.h"
 #include "entity_alive.h"
 #include "pda.h"
@@ -18,7 +12,6 @@
 #include "AI_PhraseDialogManager.h"
 #include "level.h"
 #include "game_base_space.h"
-#include "script_space.h"
 #include "PhraseDialog.h"
 #include "xrserver.h"
 #include "xrServer_Objects_ALife_Monsters.h"
@@ -148,8 +141,8 @@ BOOL CInventoryOwner::net_Spawn		(CSE_Abstract* DC)
 	}
 	else
 	{
-		CharacterInfo().m_SpecificCharacter.Load					(DEFAULT_PROFILE);
-		CharacterInfo().InitSpecificCharacter						(DEFAULT_PROFILE);
+		CharacterInfo().m_SpecificCharacter.Load					("mp_actor");
+		CharacterInfo().InitSpecificCharacter						("mp_actor");
 		CharacterInfo().m_SpecificCharacter.data()->m_sGameName = (E->name_replace()[0]) ? E->name_replace() : *pThis->cName();
 		m_game_name												= (E->name_replace()[0]) ? E->name_replace() : *pThis->cName();
 	}
@@ -514,9 +507,7 @@ void CInventoryOwner::sell_useless_items		()
 				continue;
 		}
 
-		NET_Packet				packet;
-		object->u_EventGen		(packet,GE_DESTROY,(*I)->object().ID());
-		object->u_EventSend		(packet);
+		(*I)->object().DestroyObject();
 	}
 }
 

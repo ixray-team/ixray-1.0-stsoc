@@ -77,8 +77,8 @@ ICF static BOOL info_trace_callback(collide::rq_result& result, LPVOID params)
 	BOOL& bOverlaped	= *(BOOL*)params;
 	if(result.O){
 		if (Level().CurrentEntity()!=result.O){	
-			bOverlaped		= TRUE;
-			return			FALSE;
+//			bOverlaped		= TRUE;
+			return			TRUE;//FALSE;
 		}else{
 			return			TRUE;
 		}
@@ -117,7 +117,8 @@ void CActor::PickupModeUpdate()
 
 	//подбирание объекта
 	if(inventory().m_pTarget && inventory().m_pTarget->Useful() &&
-		m_pUsableObject && m_pUsableObject->nonscript_usable())
+		m_pUsableObject && m_pUsableObject->nonscript_usable() &&
+		!Level().m_feel_deny.is_object_denied(smart_cast<CGameObject*>(inventory().m_pTarget)) )
 	{
 		NET_Packet P;
 		u_EventGen(P,GE_OWNERSHIP_TAKE, ID());
@@ -136,7 +137,7 @@ void CActor::PickupModeUpdate()
 }
 
 #include "../CameraBase.h"
-BOOL	g_b_COD_PickUpMode = FALSE;
+BOOL	g_b_COD_PickUpMode = TRUE;
 void	CActor::PickupModeUpdate_COD	()
 {
 	if (Level().CurrentViewEntity() != this || !g_b_COD_PickUpMode) return;
@@ -196,6 +197,13 @@ void	CActor::PickupModeUpdate_COD	()
 		if (!CanPickItem(frustum,Device.vCameraPosition,&pNearestItem->object()))
 			pNearestItem = NULL;
 	}
+
+	if (pNearestItem && pNearestItem->cast_game_object())
+	{
+		if (Level().m_feel_deny.is_object_denied(pNearestItem->cast_game_object()))
+				pNearestItem = NULL;
+	}
+
 	HUD().GetUI()->UIMainIngameWnd->SetPickUpItem(pNearestItem);
 
 	if (pNearestItem && m_bPickupMode)

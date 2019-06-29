@@ -29,7 +29,7 @@ public:
 	Word word_2;
     u32  curr_subline;
 	u32  slash_n_size() { return 2;}
-IC	bool is_separated()	{ return 0 == word_2.pos; }
+IC	bool is_separated()	{ return (0 == word_2.pos)||(word_1.pos>=word_2.pos); }
 };
 
 // Attention! Destructor is not virtual.
@@ -49,7 +49,7 @@ public:
 const CUILine*		CutByLength				(CGameFont* pFont, float length, BOOL cut_word);
 
 void 				Draw					(CGameFont* pFont, float x, float y)						const;
-
+bool				IsEmpty					() {return m_subLines.empty();}
 protected:
 	int				GetSize					();
 	bool			GetWord					(Word& w, const xr_string& text, int begin)					const;

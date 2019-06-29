@@ -42,3 +42,8 @@ XRGAMESPY_API void xrGS_gcd_think(void)
 {
 	gcd_think();
 }
+
+XRGAMESPY_API char* xrGS_gcd_getkeyhash(int localid)
+{
+	return gcd_getkeyhash(GAMESPY_GAMEID,localid);
+}

@@ -15,5 +15,7 @@ public:
 	virtual void		shedule_Update		(u32 dt);
 	BOOL				net_Spawn			(CSE_Abstract* DC);
 
-	virtual bool		IsVisibleForZones() { return true;		}
+	virtual bool		IsVisibleForZones	() { return true;		}
+	virtual	void		GoEnabledState		();
+	virtual	void		GoDisabledState		();
 };

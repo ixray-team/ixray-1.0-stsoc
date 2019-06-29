@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "game_cl_base.h"
-#include "script_space.h"
 
 using namespace luabind;
 

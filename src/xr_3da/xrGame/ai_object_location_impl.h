@@ -19,7 +19,11 @@ IC	void CAI_ObjectLocation::init()
 		ai().level_graph().set_invalid_vertex	(m_level_vertex_id);
 	else
 		m_level_vertex_id	= u32(-1);
-	ai().game_graph().set_invalid_vertex	(m_game_vertex_id);
+
+	if (ai().get_game_graph())
+		ai().game_graph().set_invalid_vertex	(m_game_vertex_id);
+	else
+		m_game_vertex_id						= GameGraph::_GRAPH_ID(-1);
 }
 
 IC	void CAI_ObjectLocation::game_vertex(const CGameGraph::CVertex *game_vertex)

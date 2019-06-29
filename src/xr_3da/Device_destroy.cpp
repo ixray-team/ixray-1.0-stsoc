@@ -51,7 +51,7 @@ void CRenderDevice::Destroy	(void) {
 #include "IGame_Level.h"
 #include "CustomHUD.h"
 extern BOOL bNeed_re_create_env;
-void CRenderDevice::Reset		()
+void CRenderDevice::Reset		(bool precache)
 {
 #ifdef DEBUG
 	_SHOW_REF("*ref -CRenderDevice::ResetTotal: DeviceREF:",HW.pDevice);
@@ -80,7 +80,8 @@ void CRenderDevice::Reset		()
 		bNeed_re_create_env = TRUE;
 	}
 	_SetupStates			();
-	PreCache				(20);
+	if (precache)
+		PreCache			(20);
 	u32 tm_end				= TimerAsync();
 	Msg						("*** RESET [%d ms]",tm_end-tm_start);
 

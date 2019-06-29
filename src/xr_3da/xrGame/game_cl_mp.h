@@ -50,15 +50,6 @@ struct cl_Message_Sound
 {
 	ref_sound	mSound_Voice;
 	ref_sound	mSound_Radio;
-	/*
-	~cl_Message_Sound()
-	{
-		if (mSound_Voice._feedback()) mSound_Voice.stop();
-		mSound_Voice.destroy();
-		if (mSound_Radio._feedback()) mSound_Radio.stop();
-		mSound_Radio.destroy();
-	};
-	*/
 };
 
 DEF_VECTOR	(TEAMSOUND, cl_Message_Sound);
@@ -76,19 +67,6 @@ struct cl_MessageMenu
 	MENUMESSAGES		m_aMessages;	
 
 	bool operator == (CUISpeechMenu* pMenu){return pMenu == m_pSpeechMenu;}
-	/*
-	cl_MessageMenu()
-	{
-		m_pSpeechMenu = NULL;
-		m_aMessages.clear();
-	};
-
-	~cl_MessageMenu()
-	{
-		if (m_pSpeechMenu)	xr_delete(m_pSpeechMenu);
-		m_aMessages.clear();
-	};
-	*/
 };
 
 struct Bonus_Struct
@@ -139,8 +117,6 @@ protected:
 	DEF_VECTOR(BONUSES, Bonus_Struct);
 	BONUSES							m_pBonusList;
 
-///	CUISpeechMenu*					m_pSpeechMenu;	
-	//// VOTING
 	bool							m_bVotingActive;
 	CUIVotingCategory*				m_pVoteStartWindow;
 	CUIVote*						m_pVoteRespondWindow;
@@ -151,13 +127,11 @@ protected:
 	virtual	void			ChatSayTeam				(const shared_str&	phrase);
 	virtual	void			ChatSayAll				(const shared_str&	phrase);
 	virtual	void			OnChatMessage			(NET_Packet* P);
-
-	
+	virtual	void			OnWarnMessage			(NET_Packet* P);
+	virtual	void			OnRadminMessage			(u16 type, NET_Packet* P);
 
 	virtual void			UpdateMapLocations		() {};
-//-----------------------------------------------------------------------------------
-//	CUIMessageBoxEx*		pBuySpawnMsgBox;
-//-----------------------------------------------------------------------------------
+
 	ref_shader				m_EquipmentIconsShader;
 	ref_shader				m_KillEventIconsShader;
 	ref_shader				m_RadiationIconsShader;

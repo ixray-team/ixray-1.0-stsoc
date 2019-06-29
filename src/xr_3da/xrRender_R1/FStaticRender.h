@@ -1,21 +1,22 @@
 #pragma once
 
-#include "r__dsgraph_structure.h"
-#include "r__occlusion.h"
+#include "..\xrRender\r__dsgraph_structure.h"
 
-#include "PSLibrary.h"
+#include "..\xrRender\PSLibrary.h"
 
-#include "hom.h"
-#include "detailmanager.h"
+#include "..\xrRender\hom.h"
+#include "..\xrRender\detailmanager.h"
 #include "glowmanager.h"
-#include "wallmarksengine.h"
+#include "..\xrRender\wallmarksengine.h"
 #include "fstaticrender_rendertarget.h"
-#include "modelpool.h"
+#include "..\xrRender\modelpool.h"
 
 #include "lightShadows.h"
 #include "lightProjector.h"
 #include "lightPPA.h"
-#include "light_DB.h"
+#include "..\xrRender\light_DB.h"
+
+#include "../Fmesh.h"
 
 // definition
 class CRender													:	public R_dsgraph_structure
@@ -46,7 +47,7 @@ public:
 	xrXRC														Sectors_xrc;
 	CDB::MODEL*													rmPortals;
 	CHOM														HOM;
-	R_occlusion													HWOCC;
+//.	R_occlusion													HWOCC;
 	
 	// Global containers
 	xr_vector<FSlideWindowItem>									SWIs;

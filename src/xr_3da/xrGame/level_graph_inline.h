@@ -611,12 +611,12 @@ IC	void CLevelGraph::iterate_vertices		(const Fvector &min_position, const Fvect
 	CVertex						*I, *E;
 
 	if (valid_vertex_position(min_position))
-		I						= std::lower_bound(m_nodes,m_nodes + header().vertex_count(),vertex_position(min_position).xz());
+		I						= std::lower_bound(m_nodes,m_nodes + header().vertex_count(),vertex_position(min_position).xz(),&vertex::predicate2);
 	else
 		I						= m_nodes;
 
 	if (valid_vertex_position(max_position)) {
-		E						= std::upper_bound(m_nodes,m_nodes + header().vertex_count(),vertex_position(max_position).xz());
+		E						= std::upper_bound(m_nodes,m_nodes + header().vertex_count(),vertex_position(max_position).xz(),&vertex::predicate);
 		if (E != (m_nodes + header().vertex_count()))
 			++E;
 	}
@@ -637,32 +637,32 @@ IC	u32	CLevelGraph::max_z					() const
 	return						(m_max_z);
 }
 
-IC	bool operator<		(const CLevelGraph::CVertex &vertex, u32 vertex_xz)
+IC	bool operator<		(const CLevelGraph::CVertex &vertex, const u32 &vertex_xz)
 {
 	return						(vertex.position().xz() < vertex_xz);
 }
 
-IC	bool operator>		(const CLevelGraph::CVertex &vertex, u32 vertex_xz)
+IC	bool operator>		(const CLevelGraph::CVertex &vertex, const u32 &vertex_xz)
 {
 	return						(vertex.position().xz() > vertex_xz);
 }
 
-IC	bool operator==		(const CLevelGraph::CVertex &vertex, u32 vertex_xz)
+IC	bool operator==		(const CLevelGraph::CVertex &vertex, const u32 &vertex_xz)
 {
 	return						(vertex.position().xz() == vertex_xz);
 }
 
-IC	bool operator<		(u32 vertex_xz, const CLevelGraph::CVertex &vertex)
+IC	bool operator<		(const u32 &vertex_xz, const CLevelGraph::CVertex &vertex)
 {
 	return						(vertex_xz < vertex.position().xz());
 }
 
-IC	bool operator>		(u32 vertex_xz, const CLevelGraph::CVertex &vertex)
+IC	bool operator>		(const u32 &vertex_xz, const CLevelGraph::CVertex &vertex)
 {
 	return						(vertex_xz > vertex.position().xz());
 }
 
-IC	bool operator==		(u32 vertex_xz, const CLevelGraph::CVertex &vertex)
+IC	bool operator==		(const u32 &vertex_xz, const CLevelGraph::CVertex &vertex)
 {
 	return						(vertex_xz == vertex.position().xz());
 }

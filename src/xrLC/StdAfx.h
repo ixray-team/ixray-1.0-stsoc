@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <xrCore.h>
+#include "../xrCore/xrCore.h"
 
 #pragma warning(disable:4995)
 #include <commctrl.h>

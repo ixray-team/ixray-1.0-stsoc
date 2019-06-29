@@ -23,7 +23,7 @@
 #ifndef _ODE_CONTACT_H_
 #define _ODE_CONTACT_H_
 
-#include <ode/common.h>
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {

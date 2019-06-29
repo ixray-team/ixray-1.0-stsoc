@@ -135,7 +135,6 @@ void CSE_ALifeDynamicObject::detach(CSE_ALifeInventoryItem *tpALifeInventoryItem
 	l_tpALifeDynamicObject1->m_tNodeID		= m_tNodeID;
 	l_tpALifeDynamicObject1->m_tGraphID		= m_tGraphID;
 	l_tpALifeDynamicObject1->m_fDistance	= m_fDistance;
-	tpALifeInventoryItem->m_tPreviousParentID = ID;
 
 	if (!bALifeRequest)
 		return;

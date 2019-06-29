@@ -204,6 +204,7 @@ dJointSetBallAnchor
 dJointSetData
 dJointSetFeedback
 dJointSetFixed
+dJointSetFixedQuaternionPos
 dJointSetHinge2Anchor
 dJointSetHinge2Axis1
 dJointSetHinge2Axis2

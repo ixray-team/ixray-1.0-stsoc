@@ -210,12 +210,12 @@ void	CResourceManager::LS_Load			()
 	xr_vector<char*>*	folder			= FS.file_list_open	("$game_shaders$",::Render->getShaderPath(),FS_ListFiles|FS_RootOnly);
 	VERIFY								(folder);
 	for (u32 it=0; it<folder->size(); it++)	{
-		string256						namesp,fn;
-		strcpy							(namesp,(*folder)[it]);
+		string_path						namesp,fn;
+		strcpy_s							(namesp,(*folder)[it]);
 		if	(0==strext(namesp) || 0!=xr_strcmp(strext(namesp),".s"))	continue;
 		*strext	(namesp)=0;
-		if		(0==namesp[0])			strcpy	(namesp,"_G");
-		strconcat						(fn,::Render->getShaderPath(),(*folder)[it]);
+		if		(0==namesp[0])			strcpy_s	(namesp,"_G");
+		strconcat						(sizeof(fn),fn,::Render->getShaderPath(),(*folder)[it]);
 		FS.update_path					(fn,"$game_shaders$",fn);
 		try {
 			Script::bfLoadFileIntoNamespace	(LSVM,fn,namesp,true);
@@ -278,14 +278,17 @@ Shader*	CResourceManager::_lua_Create		(LPCSTR d_shader, LPCSTR s_textures)
 	{
 		// Analyze possibility to detail this shader
 		C.iElement			= 0;
-		C.bDetail			= Device.Resources->_GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
+//.		C.bDetail			= Device.Resources->_GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
+		C.bDetail			= Device.Resources->m_textures_description.GetDetailTexture(C.L_textures[0],C.detail_texture,C.detail_scaler);
+
 		if (C.bDetail)		S.E[0]	= C._lua_Compile(s_shader,"normal_hq");
 		else				S.E[0]	= C._lua_Compile(s_shader,"normal");
 	} else {
 		if (Script::bfIsObjectPresent(LSVM,s_shader,"normal",LUA_TFUNCTION))
 		{
 			C.iElement			= 0;
-			C.bDetail			= Device.Resources->_GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
+//.			C.bDetail			= Device.Resources->_GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
+			C.bDetail			= Device.Resources->m_textures_description.GetDetailTexture(C.L_textures[0],C.detail_texture,C.detail_scaler);
 			S.E[0]				= C._lua_Compile(s_shader,"normal");
 		}
 	}
@@ -294,7 +297,8 @@ Shader*	CResourceManager::_lua_Create		(LPCSTR d_shader, LPCSTR s_textures)
 	if (Script::bfIsObjectPresent(LSVM,s_shader,"normal",LUA_TFUNCTION))
 	{
 		C.iElement			= 1;
-		C.bDetail			= Device.Resources->_GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
+//.		C.bDetail			= Device.Resources->_GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
+		C.bDetail			= Device.Resources->m_textures_description.GetDetailTexture(C.L_textures[0],C.detail_texture,C.detail_scaler);
 		S.E[1]				= C._lua_Compile(s_shader,"normal");
 	}
 

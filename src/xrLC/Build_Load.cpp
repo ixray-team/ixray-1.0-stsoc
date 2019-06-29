@@ -46,7 +46,7 @@ void CBuild::Load	(const b_params& Params, const IReader& _in_FS)
 	IReader*		F			= 0;
 
 	// 
-	string256				sh_name;
+	string_path				sh_name;
 	FS.update_path			(sh_name,"$game_data$","shaders_xrlc.xr");
 	shaders.Load			(sh_name);
 
@@ -275,8 +275,12 @@ void CBuild::Load	(const b_params& Params, const IReader& _in_FS)
 				BT.bHasAlpha= TRUE;
 				BT.pSurface	= 0;
 			} else {
-				char			th_name[256]; 
-				FS.update_path	(th_name,"$textures$",strconcat(th_name,N,".thm"));
+				string_path			th_name;
+#ifdef PRIQUEL
+				FS.update_path	(th_name,"$game_textures$",strconcat(sizeof(th_name),th_name,N,".thm"));
+#else // PRIQUEL
+				FS.update_path	(th_name,"$textures$",strconcat(sizeof(th_name),th_name,N,".thm"));
+#endif // PRIQUEL
 				clMsg			("processing: %s",th_name);
 				IReader* THM	= FS.r_open(th_name);
 				R_ASSERT2		(THM,th_name);
@@ -310,6 +314,9 @@ void CBuild::Load	(const b_params& Params, const IReader& _in_FS)
 						clMsg		("- loading: %s",N);
 						u32			w=0, h=0;
 						BT.pSurface = Surface_Load(N,w,h);
+						R_ASSERT2	(BT.pSurface,"Can't load surface");
+						if ((w != BT.dwWidth) || (h != BT.dwHeight))
+							Msg		("! THM doesn't correspond to the texture: %dx%d -> %dx%d", BT.dwWidth, BT.dwHeight, w, h);
 						BT.Vflip	();
 					} else {
 						// Free surface memory

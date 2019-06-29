@@ -37,3 +37,25 @@ xrGUID generate_guid()
 	Memory.mem_copy	(&result,&temp,sizeof(temp));
 	return			(result);
 }
+
+LPCSTR generate_guid(const xrGUID &guid, LPSTR buffer, const u32 &buffer_size)
+{
+#ifdef WINVER
+	STATIC_CHECK	(sizeof(xrGUID) == sizeof(GUID),Different_GUID_types);
+	GUID			temp;
+	Memory.mem_copy	(&temp,&guid,sizeof(guid));
+	RPC_CSTR		temp2;
+	RPC_STATUS		status = UuidToString(&temp,&temp2);
+	switch (status) {
+		case RPC_S_OK				: break;
+		case RPC_S_OUT_OF_MEMORY	: NODEFAULT;
+		default						: NODEFAULT;
+	}
+	VERIFY			(buffer_size > xr_strlen((LPCSTR)temp2));
+	strcpy			(buffer,(LPCSTR)temp2);
+	RpcStringFree	(&temp2);
+	return			(buffer);
+#else
+	NODEFAULT;
+#endif // WINVER
+}

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "UIListWnd.h"
 #include "UIListItemEx.h"
 #include "ServerList.h"
@@ -6,9 +6,6 @@
 #include "UISpinText.h"
 #include "UIMapInfo.h"
 #include "UIComboBox.h"
-
-#include "../script_space.h"
-#include <luabind\adopt_policy.hpp>
 
 using namespace luabind;
 
@@ -78,7 +75,9 @@ void CUIListWnd::script_register(lua_State *L)
 		.def_readwrite("with_pass",			&SServerFilters::with_pass)
 		.def_readwrite("without_pass",		&SServerFilters::without_pass)
 		.def_readwrite("without_ff",		&SServerFilters::without_ff)
-		.def_readwrite("without_pb",		&SServerFilters::without_pb)
+#ifdef BATTLEYE
+		.def_readwrite("with_battleye",		&SServerFilters::with_battleye)
+#endif // BATTLEYE
 		.def_readwrite("listen_servers",	&SServerFilters::listen_servers),
 
 		class_<CServerList, CUIWindow>("CServerList")

@@ -10,10 +10,12 @@
 #include "GameMtlLib.h"
 #include "Level.h"
 #include "PHWorld.h"
-#include <../ode/src/util.h>
+#include "../../xrODE/ode/src/util.h"
+
 #ifdef DEBUG
-#include "PHDebug.h"
-#endif
+#	include "PHDebug.h"
+#endif // DEBUG
+
 #include "PHDynamicData.h"
 #include "PHSynchronize.h"
 #include "phnetstate.h"

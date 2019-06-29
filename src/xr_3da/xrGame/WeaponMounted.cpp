@@ -148,7 +148,7 @@ void	CWeaponMounted::UpdateCL()
 
 		if(OwnerActor() && OwnerActor()->IsMyCamera()) 
 		{
-			cam_Update(Device.fTimeDelta, DEFAULT_FOV);
+			cam_Update(Device.fTimeDelta, g_fov);
 			OwnerActor()->Cameras().Update(Camera());
 			OwnerActor()->Cameras().ApplyDevice(VIEWPORT_NEAR);
 		}
@@ -173,7 +173,7 @@ void	CWeaponMounted::OnMouseMove			(int dx, int dy)
 	if (Remote())	return;
 
 	CCameraBase* C	= camera;
-	float scale		= (C->f_fov/DEFAULT_FOV)*psMouseSens * psMouseSensScale/50.f;
+	float scale		= (C->f_fov/g_fov)*psMouseSens * psMouseSensScale/50.f;
 	if (dx){
 		float d		= float(dx)*scale;
 		C->Move		((d<0)?kLEFT:kRIGHT, _abs(d));

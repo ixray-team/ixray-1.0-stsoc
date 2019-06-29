@@ -53,13 +53,13 @@ void CUITrackBar::Init(float x, float y, float width, float height){
 	CUIWindow::Init		(x, y, width, DEF_CONTROL_HEIGHT);
 
 
-	item_height			= CUITextureMaster::GetTextureHeight(strconcat(buf,FRAME_LINE_TEXTURE,"_b"));
+	item_height			= CUITextureMaster::GetTextureHeight(strconcat(sizeof(buf),buf,FRAME_LINE_TEXTURE,"_b"));
 	m_pFrameLine->Init	(0, (height - item_height)/2, width, item_height);
 	m_pFrameLine->InitTexture(FRAME_LINE_TEXTURE);
 	m_pFrameLine_d->Init(0,(height - item_height)/2, width, item_height);
 	m_pFrameLine_d->InitTexture(FRAME_LINE_TEXTURE_D);
 
-	strconcat			(buf,SLIDER_TEXTURE,"_e");
+	strconcat			(sizeof(buf),buf,SLIDER_TEXTURE,"_e");
 	item_width			= CUITextureMaster::GetTextureWidth(buf);
     item_height			= CUITextureMaster::GetTextureHeight(buf);
 	m_pSlider->Init		(0, (height - item_height)/2, item_width, item_height);

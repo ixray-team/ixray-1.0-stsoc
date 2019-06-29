@@ -232,9 +232,10 @@ void	CServerDlg::LoadMapList()
 		if( !map_list_cfg.section_exist(_name) ) continue;
 
 		CInifile::Sect& S		= map_list_cfg.r_section(_name);
-		CInifile::SectIt it		= S.begin(), end = S.end();
+		CInifile::SectCIt it	= S.Data.begin(), end = S.Data.end();
 
-		for (;it!=end; ++it){
+		for (;it!=end; ++it)
+		{
 			shared_str _map_name = it->first;
 			m_maps[_id].push_back	(_map_name);
 //			strcpy(m_Maps[MapListType][m_MapsNum[MapListType]++], token);
@@ -245,7 +246,7 @@ void	CServerDlg::LoadMapList()
 	//weather
 	shared_str				weather_sect = "weather";
 	CInifile::Sect& S		= map_list_cfg.r_section(weather_sect);
-	CInifile::SectIt it		= S.begin(), end = S.end();
+	CInifile::SectCIt it		= S.Data.begin(), end = S.Data.end();
 
 	shared_str				WeatherType;
 	shared_str				WeatherTime;

@@ -40,7 +40,7 @@ public		:
 	}
 	virtual void	Execute	(LPCSTR args)	= 0;
 	virtual void	Status	(TStatus& S)	{ S[0]=0; }
-	virtual void	Info	(TInfo& I)		{ strcpy(I,"no arguments"); }
+	virtual void	Info	(TInfo& I)		{ strcpy_s(I,"no arguments"); }
 	virtual void	Save	(IWriter *F)	{
 		TStatus		S;	Status(S);
 		if (S[0])	F->w_printf("%s %s\r\n",cName,S); 
@@ -68,9 +68,9 @@ public		:
 		else InvalidSyntax();
 	}
 	virtual void	Status	(TStatus& S)
-	{	strcpy(S,value->test(mask)?"on":"off"); }
+	{	strcpy_s(S,value->test(mask)?"on":"off"); }
 	virtual void	Info	(TInfo& I)
-	{	strcpy(I,"'on/off' or '1/0'"); }
+	{	strcpy_s(I,"'on/off' or '1/0'"); }
 };
 
 class ENGINE_API	CCC_ToggleMask : public IConsole_Command
@@ -89,13 +89,13 @@ public		:
 	{
 		value->set(mask,!GetValue());
 		TStatus S;
-		strconcat(S,cName," is ", value->test(mask)?"on":"off");
+		strconcat(sizeof(S),S,cName," is ", value->test(mask)?"on":"off");
 		Log(S);
 	}
 	virtual void	Status	(TStatus& S)
-	{	strcpy(S,value->test(mask)?"on":"off"); }
+	{	strcpy_s(S,value->test(mask)?"on":"off"); }
 	virtual void	Info	(TInfo& I)
-	{	strcpy(I,"'on/off' or '1/0'"); }
+	{	strcpy_s(I,"'on/off' or '1/0'"); }
 };
 
 class ENGINE_API	CCC_Token : public IConsole_Command
@@ -127,12 +127,12 @@ public		:
 		xr_token *tok = tokens;
 		while (tok->name) {
 			if (tok->id==(int)(*value)) {
-				strcpy(S,tok->name);
+				strcpy_s(S,tok->name);
 				return;
 			}
 			tok++;
 		}
-		strcpy(S,"?");
+		strcpy_s(S,"?");
 		return;
 	}
 	virtual void	Info	(TInfo& I)
@@ -172,12 +172,12 @@ public		:
 	}
 	virtual void	Status	(TStatus& S)
 	{	
-		sprintf	(S,"%3.5f",*value);
+		sprintf_s	(S,sizeof(S),"%3.5f",*value);
 		while	(xr_strlen(S) && ('0'==S[xr_strlen(S)-1]))	S[xr_strlen(S)-1] = 0;
 	}
 	virtual void	Info	(TInfo& I)
 	{	
-		sprintf(I,"float value in range [%3.3f,%3.3f]",min,max);
+		sprintf_s(I,sizeof(I),"float value in range [%3.3f,%3.3f]",min,max);
 	}
 };
 
@@ -205,11 +205,11 @@ public		:
 	}
 	virtual void	Status	(TStatus& S)
 	{	
-		sprintf	(S,"%f,%f,%f",value->x,value->y,value->z);
+		sprintf_s	(S,sizeof(S),"%f,%f,%f",value->x,value->y,value->z);
 	}
 	virtual void	Info	(TInfo& I)
 	{	
-		sprintf(I,"vector3 in range [%f,%f,%f]-[%f,%f,%f]",min.x,min.y,min.z,max.x,max.y,max.z);
+		sprintf_s(I,sizeof(I),"vector3 in range [%f,%f,%f]-[%f,%f,%f]",min.x,min.y,min.z,max.x,max.y,max.z);
 	}
 };
 
@@ -242,7 +242,7 @@ public		:
 	}
 	virtual void	Info	(TInfo& I)
 	{	
-		sprintf(I,"integer value in range [%d,%d]",min,max);
+		sprintf_s(I,sizeof(I),"integer value in range [%d,%d]",min,max);
 	}
 };
 
@@ -268,11 +268,11 @@ public:
 	}
 	virtual void	Status	(TStatus& S)
 	{	
-		strcpy	(S,value);
+		strcpy_s	(S,value);
 	}
 	virtual void	Info	(TInfo& I)
 	{	
-		sprintf(I,"string with up to %d characters",size);
+		sprintf_s(I,sizeof(I),"string with up to %d characters",size);
 	}
 };
 

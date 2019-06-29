@@ -40,6 +40,14 @@ void CUIPdaKillMessage::Init(KillMessageStruct& msg){
 	width = InitIcon(m_initiator,   x, msg.m_initiator);	x += width ? width + INDENT : 0;
 	width = InitText(m_victim_name, x, msg.m_victim);		x += width ? width + INDENT : 0;
 			InitIcon(m_ext_info,	x, msg.m_ext_info);
+	
+	m_killer_name.AdjustHeightToText();
+	m_victim_name.AdjustHeightToText();
+	float h = GetHeight();
+	h		= _max(h,m_killer_name.GetHeight());
+	h		= _max(h,m_victim_name.GetHeight());
+	SetHeight(h);
+
 }
 
 float CUIPdaKillMessage::InitText(CUIStatic& refStatic, float x, PlayerInfo& info){
@@ -56,10 +64,12 @@ float CUIPdaKillMessage::InitText(CUIStatic& refStatic, float x, PlayerInfo& inf
 
 	float height						= pFont->CurrentHeight_();
 	y = (selfHeight - height)/2;
+	float __eps							= pFont->SizeOf_('o');//hack -(
+	UI()->ClientToScreenScaledWidth		(__eps);
 
-	clamp								(width, 0.0f, 110.0f);
-	refStatic.Init						(x, y, width + 1, height);
-	refStatic.SetElipsis				(CUIStatic::eepEnd, 0);
+	clamp								(width, 0.0f, 120.0f);
+	refStatic.Init						(x, 0/*y*/, width + __eps, height);
+//.	refStatic.SetElipsis				(CUIStatic::eepEnd, 0);
 	refStatic.SetText					(*info.m_name);
 	refStatic.SetTextColor				(info.m_color);
 

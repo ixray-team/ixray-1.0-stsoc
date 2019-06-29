@@ -32,6 +32,7 @@
 #define MESSAGE_MENUS	"ahunt_messages_menu"
 
 #include "game_cl_artefacthunt_snd_msg.h"
+#include "../IGame_Persistent.h"
 
 game_cl_ArtefactHunt::game_cl_ArtefactHunt()
 {
@@ -60,7 +61,7 @@ void game_cl_ArtefactHunt::Init ()
 	old_artefactID = 0;
 	old_teamInPossession = 0;
 	//---------------------------------------------------
-	string256	fn_game;
+	string_path	fn_game;
 	if (FS.exist(fn_game, "$level$", "level.game")) 
 	{
 		IReader *F = FS.r_open	(fn_game);
@@ -93,14 +94,14 @@ void game_cl_ArtefactHunt::Init ()
 				case rptTeamBaseParticle:
 					{
 						string256 ParticleStr;
-						sprintf(ParticleStr, "teambase_particle_%d", RP_team);
+						sprintf_s(ParticleStr, "teambase_particle_%d", RP_team);
 						if (pSettings->line_exist("artefacthunt_gamedata", ParticleStr))
 						{
 							Fmatrix			transform;
 							transform.identity();
 							transform.setXYZ(R.A);
 							transform.translate_over(R.P);
-							CParticlesObject* pStaticParticles			= CParticlesObject::Create(pSettings->r_string("artefacthunt_gamedata", ParticleStr),FALSE);
+							CParticlesObject* pStaticParticles			= CParticlesObject::Create(pSettings->r_string("artefacthunt_gamedata", ParticleStr),FALSE,false);
 							pStaticParticles->UpdateParent	(transform,zero_vel);
 							pStaticParticles->Play			();
 							Level().m_StaticParticles.push_back		(pStaticParticles);
@@ -146,8 +147,8 @@ void game_cl_ArtefactHunt::net_import_state	(NET_Packet& P)
 	P.r_u16	(artefactID);
 	bBearerCantSprint = !!P.r_u8();
 
-	iReinforcementTime = P.r_u32();
-	if (iReinforcementTime != 0)
+	iReinforcementTime = P.r_s32();
+	if (iReinforcementTime > 0)
 	{
 		P.r_s32	(dReinforcementTime);
 		dReinforcementTime += Level().timeServer();
@@ -179,9 +180,9 @@ void game_cl_ArtefactHunt::TranslateGameMessage	(u32 msg, NET_Packet& P)
 			game_PlayerState* pPlayer = GetPlayerByGameID(PlayerID);
 			if (!pPlayer) break;
 
-			sprintf(tmp, "%s%s", "%s%s %s", *st.translate("mp_has_tak_art"));
+			sprintf_s(tmp, "%s%s", "%s%s %s", *st.translate("mp_has_tak_art"));
 
-			sprintf(Text, tmp, 
+			sprintf_s(Text, tmp, 
 				CTeamInfo::GetTeam_color_tag(int(Team)), 
 				pPlayer->name, 
 				Color_Main,
@@ -206,9 +207,9 @@ void game_cl_ArtefactHunt::TranslateGameMessage	(u32 msg, NET_Packet& P)
 			game_PlayerState* pPlayer = GetPlayerByGameID(PlayerID);
 			if (!pPlayer) break;
 
-            sprintf(tmp, "%s%s", "%s%s %s", *st.translate("mp_has_drop_art"));
+            sprintf_s(tmp, "%s%s", "%s%s %s", *st.translate("mp_has_drop_art"));
 
-			sprintf(Text, tmp, 
+			sprintf_s(Text, tmp, 
 				CTeamInfo::GetTeam_color_tag(int(Team)), 
 				pPlayer->name, 
 				Color_Main,
@@ -227,9 +228,9 @@ void game_cl_ArtefactHunt::TranslateGameMessage	(u32 msg, NET_Packet& P)
 			game_PlayerState* pPlayer = GetPlayerByGameID(PlayerID);
 			if (!pPlayer) break;
 
-			sprintf(tmp, "%s%s", "%s%s %s", *st.translate("mp_scores"));
+			sprintf_s(tmp, "%s%s", "%s%s %s", *st.translate("mp_scores"));
 
-			sprintf(Text, tmp, 
+			sprintf_s(Text, tmp, 
 				CTeamInfo::GetTeam_color_tag(int(Team)), 
 				CTeamInfo::GetTeam_name(int(Team)),
 				Color_Main);
@@ -246,7 +247,7 @@ void game_cl_ArtefactHunt::TranslateGameMessage	(u32 msg, NET_Packet& P)
 		}break;
 	case GAME_EVENT_ARTEFACT_SPAWNED: //ahunt
 		{
-			sprintf(Text, "%s%s", 
+			sprintf_s(Text, "%s%s", 
 				Color_Main, *st.translate("mp_art_spowned"));
 			CommonMessageOut(Text);
 
@@ -254,7 +255,7 @@ void game_cl_ArtefactHunt::TranslateGameMessage	(u32 msg, NET_Packet& P)
 		}break;
 	case GAME_EVENT_ARTEFACT_DESTROYED:  //ahunt
 		{
-			sprintf(Text, "%s%s", 
+			sprintf_s(Text, "%s%s", 
 				Color_Main, *st.translate("mp_art_destroyed"));
 			u16 ArtefactID = P.r_u16();
 			//-------------------------------------------
@@ -342,20 +343,23 @@ void game_cl_ArtefactHunt::shedule_Update			(u32 dt)
 	if(!m_game_ui && HUD().GetUI() ) m_game_ui = smart_cast<CUIGameAHunt*>( HUD().GetUI()->UIGame() );
 
 	inherited::shedule_Update		(dt);
-	
+
+	if(g_dedicated_server)	return;
+
 	//out game information
 //	m_game_ui->SetReinforcementCaption("");
 	m_game_ui->SetBuyMsgCaption		("");
 	m_game_ui->SetTodoCaption		("");
 	m_game_ui->SetPressBuyMsgCaption	("");	
 
-	switch (phase)
+	switch (m_phase)
 	{
 	case GAME_PHASE_INPROGRESS:
 		{
 			if (local_player)
 			{
-				if (local_player->testFlag(GAME_PLAYER_FLAG_ONBASE))
+				if (local_player->testFlag(GAME_PLAYER_FLAG_ONBASE) &&
+					!local_player->testFlag(GAME_PLAYER_FLAG_VERY_VERY_DEAD))
 				{
 					m_bBuyEnabled = TRUE;
 				}
@@ -375,7 +379,7 @@ void game_cl_ArtefactHunt::shedule_Update			(u32 dt)
 						if (!(pCurBuyMenu && pCurBuyMenu->IsShown()) && 
 							!(pCurSkinMenu && pCurSkinMenu->IsShown()))
 						{					
-							sprintf(msg, *st.translate("mp_press_to_buy"), "B");
+							sprintf_s(msg, *st.translate("mp_press_to_buy"), "B");
 							if(m_game_ui) m_game_ui->SetBuyMsgCaption(msg);
 						};
 					}					
@@ -421,12 +425,12 @@ void game_cl_ArtefactHunt::shedule_Update			(u32 dt)
 				};				
 			}
 
-			if (local_player/*pCurActor && !m_game_ui->pCurBuyMenu->IsShown()*/)
+			if (local_player)
 			{
 				game_TeamState team0 = teams[0];
 				game_TeamState team1 = teams[1];
 
-				if (dReinforcementTime != 0 && Level().CurrentViewEntity() && m_cl_dwWarmUp_Time == 0)
+				if (dReinforcementTime > 0 && Level().CurrentViewEntity() && m_cl_dwWarmUp_Time == 0)
 				{
 					u32 CurTime = Level().timeServer();
 					u32 dTime;
@@ -496,7 +500,7 @@ void game_cl_ArtefactHunt::shedule_Update			(u32 dt)
 
 	if (m_game_ui->m_pBuySpawnMsgBox->IsShown())
 	{
-		if (phase != GAME_PHASE_INPROGRESS || (!local_player || !local_player->testFlag(GAME_PLAYER_FLAG_VERY_VERY_DEAD)))
+		if (m_phase != GAME_PHASE_INPROGRESS || (!local_player || !local_player->testFlag(GAME_PLAYER_FLAG_VERY_VERY_DEAD)))
 		{
 			StartStopMenu(m_game_ui->m_pBuySpawnMsgBox, true);
 		};
@@ -507,12 +511,16 @@ void game_cl_ArtefactHunt::shedule_Update			(u32 dt)
 void game_cl_ArtefactHunt::SetScore				()
 {
 	game_cl_TeamDeathmatch::SetScore();
-//	game_cl_Deathmatch::SetScore();
+
 	if (Level().CurrentViewEntity() && m_game_ui)
 	{
 		game_PlayerState* ps = GetPlayerByGameID(Level().CurrentViewEntity()->ID());
-		if (ps&&m_game_ui) m_game_ui->SetRank(ps->team, ps->rank);
-		if (ps&&m_game_ui) m_game_ui->SetFraglimit(ps->kills, artefactsNum);
+		
+		if (ps&&m_game_ui) 
+			m_game_ui->SetRank(ps->team, ps->rank);
+
+		if (ps&&m_game_ui) 
+			m_game_ui->SetFraglimit(ps->frags(), artefactsNum);
 	}
 }
 BOOL game_cl_ArtefactHunt::CanCallBuyMenu			()
@@ -553,18 +561,19 @@ bool game_cl_ArtefactHunt::CanBeReady				()
 			StartStopMenu(m_game_ui->m_pUITeamSelectWnd,true);
 		return false;
 	};
-/*
+
 	if (!m_bSkinSelected)
 	{
 		if (CanCallSkinMenu())
 			StartStopMenu(pCurSkinMenu,true);
 		return false;
 	};
-*/
+
 	if (pCurBuyMenu && !pCurBuyMenu->IsShown())
 		ClearBuyMenu();
 
 	m_bMenuCalledFromReady = FALSE;
+//	return inherited::CanBeReady();
 	return true;
 };
 
@@ -668,21 +677,21 @@ void	game_cl_ArtefactHunt::UpdateMapLocations		()
 	};
 };
 
-bool	game_cl_ArtefactHunt::NeedToSendReady_Spectator			(int key, game_PlayerState* ps)
+bool game_cl_ArtefactHunt::NeedToSendReady_Spectator(int key, game_PlayerState* ps)
 {
-	CStringTable st;
+	CStringTable		st;
 	bool res = ( GAME_PHASE_PENDING	== Phase() && kWPN_FIRE == key) || 
-		( (/*kWPN_FIRE == key || */kJUMP == key) && GAME_PHASE_INPROGRESS	== Phase() && 
+		( (kJUMP == key) && GAME_PHASE_INPROGRESS==Phase() && 
 		CanBeReady());
 	
-	if (GAME_PHASE_INPROGRESS == Phase() && kJUMP == key &&
-		iReinforcementTime != 0 && 
-		!m_game_ui->m_pBuySpawnMsgBox->IsShown() && 
+	if ((GAME_PHASE_INPROGRESS==Phase()) && (kJUMP==key) &&
+		(iReinforcementTime!=0) && 
+		(!m_game_ui->m_pBuySpawnMsgBox->IsShown()) && 
 		local_player && (local_player->money_for_round+m_iSpawn_Cost)>=0) 
 	{
-		string1024	BuySpawnText;
-		sprintf(BuySpawnText, *st.translate("mp_press_yes2pay"), 
-			abs(local_player->money_for_round), abs(m_iSpawn_Cost));
+		string1024				BuySpawnText;
+		sprintf_s					(BuySpawnText, *st.translate("mp_press_yes2pay"), 
+								abs(local_player->money_for_round), abs(m_iSpawn_Cost));
 		m_game_ui->m_pBuySpawnMsgBox->SetText(BuySpawnText);
 
 		if (m_bTeamSelected && m_bSkinSelected)
@@ -692,7 +701,7 @@ bool	game_cl_ArtefactHunt::NeedToSendReady_Spectator			(int key, game_PlayerStat
 	return res;
 }
 
-void	game_cl_ArtefactHunt::OnSpawn					(CObject* pObj)
+void game_cl_ArtefactHunt::OnSpawn(CObject* pObj)
 {
 	inherited::OnSpawn(pObj);
 	if (!pObj) return;
@@ -704,13 +713,13 @@ void	game_cl_ArtefactHunt::OnSpawn					(CObject* pObj)
 	};	
 }
 
-void	game_cl_ArtefactHunt::OnDestroy				(CObject* pObj)
+void game_cl_ArtefactHunt::OnDestroy(CObject* pObj)
 {	
 	inherited::OnDestroy(pObj);
 	if (!pObj) return;
 };
 
-void	game_cl_ArtefactHunt::LoadSndMessages				()
+void game_cl_ArtefactHunt::LoadSndMessages()
 {
 	LoadSndMessage("ahunt_snd_messages", "artefact_new", ID_NEW_AF);
 	LoadSndMessage("ahunt_snd_messages", "artefact_lost", ID_AF_LOST);

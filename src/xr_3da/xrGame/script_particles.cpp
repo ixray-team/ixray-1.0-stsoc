@@ -10,15 +10,19 @@
 #include "script_particles.h"
 #include "../objectanimator.h"
 
-CScriptParticlesCustom::CScriptParticlesCustom(CScriptParticles* owner, LPCSTR caParticlesName):CParticlesObject(caParticlesName,FALSE)
+CScriptParticlesCustom::CScriptParticlesCustom(CScriptParticles* owner, LPCSTR caParticlesName):CParticlesObject(caParticlesName,FALSE,true)
 {
+//	Msg							("CScriptParticlesCustom: 0x%08x",*(int*)&owner);
 	m_owner						= owner;
 	m_animator					= 0;
 }
+
 CScriptParticlesCustom::~CScriptParticlesCustom()
 {
+//	Msg							("~CScriptParticlesCustom: 0x%08x",*(int*)&m_owner);
 	xr_delete					(m_animator);
 }
+
 void CScriptParticlesCustom::PSI_internal_delete()
 {
 	m_owner->m_particles					= NULL;

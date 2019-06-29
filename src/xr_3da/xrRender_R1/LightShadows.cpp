@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "LightShadows.h"
-#include "LightTrack.h"
+#include "..\xrRender\LightTrack.h"
 #include "..\xr_object.h"
 #include "..\fbasicvisual.h"
 #include "..\CustomHUD.h"
@@ -38,8 +38,8 @@ CLightShadows::CLightShadows()
 
 	LPCSTR	RTname			= "$user$shadow";
 	LPCSTR	RTtemp			= "$user$temp";
-	string128 RTname2;		strconcat(RTname2,RTname,",",RTname);
-	string128 RTtemp2;		strconcat(RTtemp2,RTtemp,",",RTtemp);
+	string128 RTname2;		strconcat(sizeof(RTname2),RTname2,RTname,",",RTname);
+	string128 RTtemp2;		strconcat(sizeof(RTtemp2),RTtemp2,RTtemp,",",RTtemp);
 
 	// 
 	RT.create				(RTname,S_rt_size,S_rt_size,S_rtf);
@@ -392,7 +392,7 @@ void CLightShadows::render	()
 		// Search the cache
 		cache_item*						CI		= 0; BOOL	bValid = FALSE;
 		cache_item						CI_what; CI_what.O	= S.O; CI_what.L = S.L; CI_what.tris=0;
-		xr_vector<cache_item>::iterator	CI_ptr	= lower_bound(cache.begin(),cache.end(),CI_what,cache_search);
+		xr_vector<cache_item>::iterator	CI_ptr	= std::lower_bound(cache.begin(),cache.end(),CI_what,cache_search);
 		if (CI_ptr==cache.end())		
 		{	// empty ?
 			CI_ptr	= cache.insert		(CI_ptr,CI_what);

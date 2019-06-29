@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "trade.h"
 #include "actor.h"
 #include "ai/stalker/ai_stalker.h"
@@ -181,5 +181,3 @@ void CTrade::StopTrade()
 void CTrade::UpdateTrade()
 {
 }
-
-

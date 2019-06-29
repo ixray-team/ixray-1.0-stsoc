@@ -26,16 +26,17 @@ public:
 #endif
 		{};
 	};
-	typedef xr_vector<Item>			Items;
-	typedef Items::iterator			SectIt;
+	typedef xr_vector<Item>				Items;
+	typedef Items::const_iterator		SectCIt;
+	typedef Items::iterator				SectIt_;
     struct XRCORE_API	Sect {
 		shared_str		Name;
 		Items			Data;
 
-		IC SectIt		begin()		{ return Data.begin();	}
-		IC SectIt		end()		{ return Data.end();	}
-		IC size_t		size()		{ return Data.size();	}
-		IC void			clear()		{ Data.clear();			}
+//.		IC SectCIt		begin()		{ return Data.begin();	}
+//.		IC SectCIt		end()		{ return Data.end();	}
+//.		IC size_t		size()		{ return Data.size();	}
+//.		IC void			clear()		{ Data.clear();			}
 	    BOOL			line_exist	(LPCSTR L, LPCSTR* val=0);
 	};
 	typedef	xr_vector<Sect*>		Root;

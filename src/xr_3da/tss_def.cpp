@@ -13,7 +13,12 @@ IDirect3DStateBlock9* SimulatorStates::record	()
 		{
 		case 0:	CHK_DX(HW.pDevice->SetRenderState		((D3DRENDERSTATETYPE)S.v1,S.v2));				break;
 		case 1: CHK_DX(HW.pDevice->SetTextureStageState	(S.v1,(D3DTEXTURESTAGESTATETYPE)S.v2,S.v3));	break;
-		case 2: CHK_DX(HW.pDevice->SetSamplerState		(S.v1,(D3DSAMPLERSTATETYPE)S.v2,S.v3));			break;
+		case 2: 
+			{
+				CHK_DX(HW.pDevice->SetSamplerState		(S.v1,
+														(D3DSAMPLERSTATETYPE)S.v2,
+														((D3DSAMPLERSTATETYPE)S.v2==D3DSAMP_MAGFILTER&&S.v3==D3DTEXF_ANISOTROPIC)?D3DTEXF_LINEAR:S.v3));
+			}break;
 		}
 	}
 	IDirect3DStateBlock9*	SB = 0;

@@ -15,7 +15,7 @@ class	ENGINE_API CKinematics;
 class	ENGINE_API CInifile;
 class	ENGINE_API CBoneData;
 class   ENGINE_API CBoneInstance;
-
+struct	SEnumVerticesCallback;
 // t-defs
 typedef xr_vector<CBoneData*>		vecBones;
 typedef vecBones::iterator			vecBonesIt;
@@ -87,8 +87,8 @@ public:
 #endif
 	IC void				SetParentID		(u16 id){ParentID=id;}
 	
-	IC u16				GetSelfID		(){return SelfID;}
-	IC u16				GetParentID		(){return ParentID;}
+	IC u16				GetSelfID		() const {return SelfID;}
+	IC u16				GetParentID		() const {return ParentID;}
 
 	// assign face
 	void				AppendFace		(u16 child_idx, u16 idx)
@@ -226,6 +226,10 @@ public:
 	void						CalculateWallmarks	();
 	void						RenderWallmark		(intrusive_ptr<CSkeletonWallmark> wm, FVF::LIT* &verts);
 	void						ClearWallmarks		();
+public:
+				
+				bool			PickBone			(const Fmatrix &parent_xform, Fvector& normal, float& dist, const Fvector& start, const Fvector& dir, u16 bone_id);
+	virtual		void			EnumBoneVertices	(SEnumVerticesCallback &C, u16 bone_id);
 public:
 								CKinematics			();
 	virtual						~CKinematics		();

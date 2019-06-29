@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "GameTask.h"
 #include "ui/xrUIXmlParser.h"
 #include "encyclopedia_article.h"
@@ -7,7 +7,6 @@
 
 #include "level.h"
 #include "actor.h"
-#include "script_space.h"
 #include "script_engine.h"
 #include "script_callback_ex.h"
 #include "script_game_object.h"
@@ -110,18 +109,22 @@ void CGameTask::Load(const TASK_ID& id)
 		m_Objectives.push_back			(SGameTaskObjective(this,i));
 		SGameTaskObjective&				objective = m_Objectives.back();
 
-
+//.
 		LPCSTR tag_text					= g_gameTaskXml->Read(l_root, "text", 0, NULL);
 		objective.description			= tag_text;
+//.
 		tag_text						= g_gameTaskXml->Read(l_root, "article", 0, NULL);
 		if(tag_text)
 			objective.article_id		= tag_text;
 
+//.
 		tag_text						= g_gameTaskXml->ReadAttrib(l_root, "key", NULL);
 		if(tag_text)
 			objective.article_key		= tag_text;
 
-		if(i==0){
+//.
+		if(i==0)
+		{
 			objective.icon_texture_name		= g_gameTaskXml->Read(g_gameTaskXml->GetLocalRoot(), "icon", 0, NULL);
 			if( objective.icon_texture_name.size() && 
 				0 != stricmp(*objective.icon_texture_name, "ui\\ui_icons_task") )
@@ -137,8 +140,12 @@ void CGameTask::Load(const TASK_ID& id)
 				objective.icon_rect.y2			= g_gameTaskXml->ReadAttribFlt(l_root, "icon", 0, "height");
 			}
 		}
+//.
 		objective.map_location			= g_gameTaskXml->Read(l_root, "map_location_type", 0, NULL);
+
 		LPCSTR object_story_id			= g_gameTaskXml->Read(l_root, "object_story_id", 0, NULL);
+
+//*
 		LPCSTR ddd;
 		ddd								= g_gameTaskXml->Read(l_root, "map_location_hidden", 0, NULL);
 		if(ddd)
@@ -149,7 +156,10 @@ void CGameTask::Load(const TASK_ID& id)
 		b2								= (NULL==object_story_id);
 		VERIFY3							(b1==b2,"check [map_location_type] and [object_story_id] fields in objective definition for: ",*objective.description);
 		
+//.
 		objective.object_id				= u16(-1);
+
+//.
 		objective.map_hint				= g_gameTaskXml->ReadAttrib(l_root, "map_location_type", 0, "hint", NULL);
 
 		if(object_story_id){
@@ -386,6 +396,14 @@ void SGameTaskObjective::SetObjectID_script(u16 id)
 	object_id = id;
 }
 
+void SGameTaskObjective::SetIconName_script(LPCSTR _str)
+{
+	icon_texture_name	= _str;
+	icon_rect			= CUITextureMaster::GetTextureRect(icon_texture_name.c_str());
+	icon_rect.rb.sub	(icon_rect.rb, icon_rect.lt);
+	icon_texture_name	= CUITextureMaster::GetTextureFileName(icon_texture_name.c_str());
+}
+
 void SGameTaskObjective::SetArticleKey_script(LPCSTR _str)
 {
 	article_key = _str;
@@ -440,6 +458,11 @@ void CGameTask::SetTitle_script(LPCSTR _title)
 	m_Title	= _title;
 }
 
+void CGameTask::SetPriority_script(int _prio)		
+{
+	m_priority	= _prio;
+}
+
 void CGameTask::AddObjective_script(SGameTaskObjective* O)	
 {
 	O->m_pScriptHelper.init_functors(O->m_pScriptHelper.m_s_complete_lua_functions,		O->m_complete_lua_functions);
@@ -452,8 +475,6 @@ void CGameTask::AddObjective_script(SGameTaskObjective* O)
 
 void SGameTaskObjective::ChangeStateCallback()
 {
-
-//	Actor()->callback(GameObject::eTaskStateChange)(*task_id, obj_id, state);
 	Actor()->callback(GameObject::eTaskStateChange)(parent, this, task_state);
 }
 

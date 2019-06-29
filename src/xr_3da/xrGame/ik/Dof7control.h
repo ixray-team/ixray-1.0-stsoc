@@ -139,7 +139,7 @@ public:
     // positive direction axis
     // Returns 1 if the goal is feasible
     int  SetGoal(const Matrix  G, float &rangle);
-
+	void EvaluateCircle(const float p[3]);
     // Solve for both R1 and R2 given the pos or angle of the R joint
     // returns the angle of the R joint 
 

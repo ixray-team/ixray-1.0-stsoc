@@ -165,7 +165,7 @@ bool CUIBagWnd::IsBlueTeamItem(CUICellItem* itm)
 	for (int i = 1; i < 20; ++i)
 	{
 		// Имя поля
-		sprintf			(wpnSection, "slot%i", i);
+		sprintf_s			(wpnSection, "slot%i", i);
 
 		if (!pSettings->line_exist(m_sectionName, wpnSection)) 
 			continue;
@@ -248,7 +248,7 @@ void CUIBagWnd::InitWpnSectStorage()
 		wpnOneType.clear();
 
 		// Имя поля
-		sprintf			(wpnSection, "slot%i", i);
+		sprintf_s			(wpnSection, "slot%i", i);
 		if (!pSettings->line_exist(m_sectionName, wpnSection)) 
 		{
 			m_wpnSectStorage.push_back(wpnOneType);
@@ -273,7 +273,7 @@ void CUIBagWnd::InitWpnSectStorage()
 
 	CInifile::Sect &sect = pSettings->r_section(m_sectionPrice.c_str());
 
-	for (CInifile::SectIt it = sect.begin(); it != sect.end(); it++)
+	for (CInifile::SectCIt it = sect.Data.begin(); it != sect.Data.end(); it++)
 	{
 		u8 group_id, index;
 		GetWeaponIndexByName((*it).first.c_str(), group_id, index);
@@ -353,14 +353,14 @@ void	CUIBagWnd::ReloadItemsPrices	()
 
 		m_info[itm->m_index].price		= pSettings->r_u32(m_sectionPrice, *itm_name);
 
-		strconcat						(ItemCostStr, itm_name.c_str(), "_cost");
+		strconcat						(sizeof(ItemCostStr),ItemCostStr, itm_name.c_str(), "_cost");
 		if (pSettings->line_exist		(m_sectionPrice, ItemCostStr))
 			m_info[itm->m_index].price	= pSettings->r_u32(m_sectionPrice, ItemCostStr);
 
 
 		for (u32 i=1; i<=g_mp_restrictions.GetRank(); ++i)
 		{
-			sprintf						(RankStr, "rank_%d", i);
+			sprintf_s						(RankStr, "rank_%d", i);
 			if (!pSettings->line_exist	(RankStr, ItemCostStr))	continue;
 			m_info[itm->m_index].price	= pSettings->r_u32(RankStr, ItemCostStr);
 		}
@@ -448,7 +448,7 @@ void CUIBagWnd::PutItemToGroup(CUICellItem* pItem, int iGroup)
 	{
 		++subSection_group3[iActiveSection - GROUP_31];
 		
-		sprintf						(tmp_str, "%d", subSection_group3[iActiveSection - GROUP_31]);
+		sprintf_s						(tmp_str, "%d", subSection_group3[iActiveSection - GROUP_31]);
 		CBuyItemCustomDrawCell* p	= xr_new<CBuyItemCustomDrawCell>(tmp_str, UI()->Font()->pFontLetterica16Russian);
 		pItem->SetCustomDraw		(p);
 

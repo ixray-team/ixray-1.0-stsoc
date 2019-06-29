@@ -37,7 +37,7 @@ public:
 	u8									old_teamInPossession;
 	u16									artefactID;
 	u16									old_artefactID;
-	u32									iReinforcementTime;
+	s32									iReinforcementTime;
 	s32									dReinforcementTime;
 
 	int									m_iSpawn_Cost;

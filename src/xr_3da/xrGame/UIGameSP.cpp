@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "uigamesp.h"
 #include "actor.h"
 #include "level.h"
@@ -46,18 +46,21 @@ void CUIGameSP::shedule_Update(u32 dt)
 	if(!pActor)							return;
 	if(pActor->g_Alive())				return;
 
-	{
-		CUIDialogWnd* mir				= MainInputReceiver();
-		if( mir			&&
-				(	mir==InventoryMenu	||
-					mir==PdaMenu		||
-					mir==TalkMenu		||
-					mir==UICarBodyMenu
-				)
-			)
-		mir->GetHolder()->StartStopMenu			(mir,true);
+	HideShownDialogs						();
+}
 
-	}
+void CUIGameSP::HideShownDialogs()
+{
+	CUIDialogWnd* mir				= MainInputReceiver();
+	if( mir			&&
+			(	mir==InventoryMenu	||
+				mir==PdaMenu		||
+				mir==TalkMenu		||
+				mir==UICarBodyMenu
+			)
+		)
+	mir->GetHolder()->StartStopMenu			(mir,true);
+
 }
 
 void CUIGameSP::SetClGame (game_cl_GameState* g)

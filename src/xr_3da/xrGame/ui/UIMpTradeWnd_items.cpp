@@ -6,6 +6,7 @@
 #include "UICellItem.h"
 #include "UIDragDropListEx.h"
 #include "../string_table.h"
+#include "UIMpItemsStoreWnd.h"
 
 
 extern "C"
@@ -322,22 +323,22 @@ struct eq_state_comparer
 
 u32 CUIMpTradeWnd::GetItemCount(SBuyItemInfo::EItmState state) const
 {
-	return	(u32)count_if(m_all_items.begin(), m_all_items.end(),eq_state_comparer(state));
+	return	(u32)std::count_if(m_all_items.begin(), m_all_items.end(),eq_state_comparer(state));
 
 }
 
 u32 CUIMpTradeWnd::GetItemCount(const shared_str& name_sect, SBuyItemInfo::EItmState state) const
 {
-	return	(u32)count_if(m_all_items.begin(), m_all_items.end(),eq_name_state_comparer(name_sect,state));
+	return	(u32)std::count_if(m_all_items.begin(), m_all_items.end(),eq_name_state_comparer(name_sect,state));
 }
 u32 CUIMpTradeWnd::GetItemCount(const shared_str& name_sect, SBuyItemInfo::EItmState state, u8 addon) const
 {
-	return	(u32)count_if(m_all_items.begin(), m_all_items.end(),eq_name_state_addon_comparer(name_sect,state,addon));
+	return	(u32)std::count_if(m_all_items.begin(), m_all_items.end(),eq_name_state_addon_comparer(name_sect,state,addon));
 }
 
 u32 CUIMpTradeWnd::GetGroupCount(const shared_str& name_group, SBuyItemInfo::EItmState state) const
 {
-	return	(u32)count_if(m_all_items.begin(), m_all_items.end(),eq_group_state_comparer(name_group,state));
+	return	(u32)std::count_if(m_all_items.begin(), m_all_items.end(),eq_group_state_comparer(name_group,state));
 }
 
 void CUIMpTradeWnd::ClearPreset(ETradePreset idx)
@@ -390,12 +391,12 @@ struct preset_eq {
 	};
 };
 
-void CUIMpTradeWnd::StorePreset(ETradePreset idx, bool bSilent)
+void CUIMpTradeWnd::StorePreset(ETradePreset idx, bool bSilent, bool check_allowed_items)
 {
 	if(!bSilent)
 	{
 		string512						buff;
-		sprintf							(buff,	"%s [%d]",
+		sprintf_s							(buff,	"%s [%d]",
 												CStringTable().translate("ui_st_preset_stored_to").c_str(), idx);
 		SetInfoString					(buff);
 	}
@@ -421,6 +422,11 @@ void CUIMpTradeWnd::StorePreset(ETradePreset idx, bool bSilent)
 		if(0==cnt)				
 			continue;
 
+		if(check_allowed_items)
+		{
+			if(NULL==m_store_hierarchy->FindItem(iinfo->m_name_sect,0))
+				continue;
+		}
 		v.resize					(v.size()+1);
 		_preset_item& _one			= v.back();
 		_one.sect_name				= iinfo->m_name_sect;
@@ -442,8 +448,6 @@ void CUIMpTradeWnd::StorePreset(ETradePreset idx, bool bSilent)
 
 void CUIMpTradeWnd::ApplyPreset(ETradePreset idx)
 {
-	Msg("--ApplyPreset [%d]",idx);
-
 	SellAll								();
 
 	const preset_items&		v			=  GetPreset(idx);
@@ -476,7 +480,7 @@ void CUIMpTradeWnd::ApplyPreset(ETradePreset idx)
 						shared_str addon_name	= GetAddonNameSect(pitem, at);
 						
 						SBuyItemInfo* addon_item = CreateItem(addon_name, SBuyItemInfo::e_undefined, false);
-						bool b_res_addon		 = TryToBuyItem(addon_item, /*(idx==_preset_idx_origin)?bf_own_item:*/bf_normal, pitem );
+						bool b_res_addon		 = TryToBuyItem(addon_item, bf_normal, pitem );
 						if(!b_res_addon)
 							DestroyItem			(addon_item);
 					}
@@ -488,7 +492,6 @@ void CUIMpTradeWnd::ApplyPreset(ETradePreset idx)
 
 void CUIMpTradeWnd::CleanUserItems()
 {
-	Msg("--CleanUserItems");
 	SBuyItemInfo*	iinfo	= NULL;
 	SBuyItemInfo::EItmState _state=SBuyItemInfo::e_bought;
 
@@ -508,7 +511,7 @@ void CUIMpTradeWnd::CleanUserItems()
 				{
 					CUICellItem* iii = iinfo->m_cell_item->PopChild	();
 					SBuyItemInfo* iinfo_sub		= FindItem(iii);
-					R_ASSERT2(	iinfo_sub->GetState()==_state || iinfo_sub->GetState()==SBuyItemInfo::e_shop,
+					R_ASSERT2(	iinfo_sub->GetState()==_state || iinfo_sub->GetState()==SBuyItemInfo::e_shop || iinfo_sub->GetState()==SBuyItemInfo::e_own,
 								_state_names[_state]);
 				}
 
@@ -546,7 +549,6 @@ void CUIMpTradeWnd::CleanUserItems()
 
 void CUIMpTradeWnd::SellAll()
 {
-	Msg("--SellAll");
 	SBuyItemInfo*	iinfo		= NULL;
 	SBuyItemInfo*	tmp_iinfo	= NULL;
 	bool			b_ok		= true;
@@ -573,12 +575,9 @@ void CUIMpTradeWnd::SellAll()
 
 void CUIMpTradeWnd::ResetToOrigin()
 {
-	Msg("--ResetToOrigin");
 	// 1-sell all bought items
 	// 2-buy all sold items
 	
-	ITEMS_vec_cit it;
-
 	SBuyItemInfo*	iinfo		= NULL;
 	SBuyItemInfo*	tmp_iinfo	= NULL;
 	bool			b_ok		= true;
@@ -602,8 +601,6 @@ void CUIMpTradeWnd::ResetToOrigin()
 
 void CUIMpTradeWnd::OnBtnSellClicked(CUIWindow* w, void* d)
 {
-	Msg("--OnBtnSellClicked");
-
 	CheckDragItemToDestroy				();
 	CUIDragDropListEx*	pList			= m_list[e_player_bag];
 
@@ -621,15 +618,6 @@ void CUIMpTradeWnd::OnBtnSellClicked(CUIWindow* w, void* d)
 
 void CUIMpTradeWnd::SetupPlayerItemsBegin()
 {
-	if(
-		(0!=GetItemCount(SBuyItemInfo::e_own))		||
-		(0!=GetItemCount(SBuyItemInfo::e_sold))		||
-		(0!=GetItemCount(SBuyItemInfo::e_bought))
-		){
-			DumpAllItems("");
-			R_ASSERT2(0, "0!=GetItemCount");
-		}
-
 	for(int idx = e_first; idx<e_player_total; ++idx)
 	{
 		CUIDragDropListEx* lst			= m_list[idx];
@@ -639,7 +627,7 @@ void CUIMpTradeWnd::SetupPlayerItemsBegin()
 
 void CUIMpTradeWnd::SetupPlayerItemsEnd()
 {
-	StorePreset			(_preset_idx_origin, true);
+	StorePreset			(_preset_idx_origin, true, false);
 }
 
 void CUIMpTradeWnd::SetupDefaultItemsBegin()
@@ -648,7 +636,7 @@ void CUIMpTradeWnd::SetupDefaultItemsBegin()
 }
 void CUIMpTradeWnd::SetupDefaultItemsEnd()
 {
-	StorePreset			(_preset_idx_default, true);
+	StorePreset			(_preset_idx_default, true, false);
 }
 
 void CUIMpTradeWnd::CheckDragItemToDestroy()
@@ -723,7 +711,7 @@ void CUICellItemTradeMenuDraw::OnDraw(CUICellItem* cell)
 			acc = 1;
 		string64							buff;
 
-		sprintf								(buff,"%d", acc - DIK_ESCAPE);
+		sprintf_s								(buff,"%d", acc - DIK_ESCAPE);
 		CGameFont* pFont					= UI()->Font()->pFontLetterica16Russian;
 		pFont->SetColor						(color_rgba(135,123,116,255));
 		pFont->Out							(pos.x, pos.y, buff);

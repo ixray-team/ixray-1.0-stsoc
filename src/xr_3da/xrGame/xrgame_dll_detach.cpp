@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "ai_space.h"
 #include "object_factory.h"
 #include "ai/monsters/ai_monster_squad_manager.h"
@@ -40,19 +40,24 @@ extern void dump_list_xmls							();
 extern void CreateUIGeom							();
 extern void DestroyUIGeom							();
 
+#include "../IGame_Persistent.h"
 void init_game_globals()
 {
 	CreateUIGeom									();
-	CInfoPortion::InitInternal						();
-	CEncyclopediaArticle::InitInternal				();
-	CPhraseDialog::InitInternal						();
+
+	if(!g_dedicated_server)
+	{
+		CInfoPortion::InitInternal						();
+		CEncyclopediaArticle::InitInternal				();
+		CPhraseDialog::InitInternal						();
+		InventoryUtilities::CreateShaders				();
+	};
 	CCharacterInfo::InitInternal					();
 	CSpecificCharacter::InitInternal				();
 	CHARACTER_COMMUNITY::InitInternal				();
 	CHARACTER_RANK::InitInternal					();
 	CHARACTER_REPUTATION::InitInternal				();
 	MONSTER_COMMUNITY::InitInternal					();
-	InventoryUtilities::CreateShaders				();
 }
 
 extern CUIXml*	g_gameTaskXml;
@@ -73,28 +78,30 @@ void clean_game_globals()
 	story_ids.clear									();
 	spawn_story_ids.clear							();
 
-	InventoryUtilities::DestroyShaders				();
-	//XML indexes
-	CInfoPortion::DeleteSharedData					();
-	CInfoPortion::DeleteIdToIndexData				();
+	if(!g_dedicated_server)
+	{
+		CInfoPortion::DeleteSharedData					();
+		CInfoPortion::DeleteIdToIndexData				();
 
-	CEncyclopediaArticle::DeleteSharedData			();
-	CEncyclopediaArticle::DeleteIdToIndexData		();
+		CEncyclopediaArticle::DeleteSharedData			();
+		CEncyclopediaArticle::DeleteIdToIndexData		();
 
-	CPhraseDialog::DeleteSharedData					();
-	CPhraseDialog::DeleteIdToIndexData				();
-
+		CPhraseDialog::DeleteSharedData					();
+		CPhraseDialog::DeleteIdToIndexData				();
+		
+		InventoryUtilities::DestroyShaders				();
+	}
 	CCharacterInfo::DeleteSharedData				();
 	CCharacterInfo::DeleteIdToIndexData				();
 	
 	CSpecificCharacter::DeleteSharedData			();
 	CSpecificCharacter::DeleteIdToIndexData			();
-	
 
 	CHARACTER_COMMUNITY::DeleteIdToIndexData		();
 	CHARACTER_RANK::DeleteIdToIndexData				();
 	CHARACTER_REPUTATION::DeleteIdToIndexData		();
 	MONSTER_COMMUNITY::DeleteIdToIndexData			();
+
 
 	//static shader for blood
 	CEntityAlive::UnloadBloodyWallmarks				();

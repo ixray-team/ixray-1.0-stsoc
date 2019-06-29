@@ -23,9 +23,9 @@
 #ifndef _ODE_OBJECTS_H_
 #define _ODE_OBJECTS_H_
 
-#include <ode/common.h>
-#include <ode/mass.h>
-#include <ode/contact.h>
+#include "common.h"
+#include "mass.h"
+#include "contact.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -213,6 +213,7 @@ void dJointSetUniversalAxis2 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetUniversalParam (dJointID, int parameter, dReal value);
 void dJointAddUniversalTorques(dJointID joint, dReal torque1, dReal torque2);
 void dJointSetFixed (dJointID);
+void dJointSetFixedQuaternionPos (dJointID joint,dQuaternion quaternion,dReal* pos);
 void dJointSetAMotorNumAxes (dJointID, int num);
 void dJointSetAMotorAxis (dJointID, int anum, int rel,
 			  dReal x, dReal y, dReal z);

@@ -77,32 +77,32 @@ struct PsiEquation
 
     void Reset(float a, float b, float x)  
     { 
-	alpha = a; beta = b; xi = x;  
-	a2b2 = a*a + b*b;
-	atan2ba = atan2(b,a);
-	num_crits = num_roots = status = 0;
-	status_ptr = &status;
-	num_roots_ptr = &num_roots;
-	num_crits_ptr = &num_crits;
+		alpha = a; beta = b; xi = x;  
+		a2b2 = a*a + b*b;
+		atan2ba = atan2(b,a);
+		num_crits = num_roots = status = 0;
+		status_ptr = &status;
+		num_roots_ptr = &num_roots;
+		num_crits_ptr = &num_crits;
     }
 
     PsiEquation() {}
     PsiEquation(float a, float b, float x)
     {
-	Reset(a,b,x);
+		Reset(a,b,x);
     }
 
 
     float eval(float psi) const
     {
-	return sin_and_cos(psi, alpha, beta) + xi;
-	// return alpha*cos(psi) + beta*sin(psi) + xi;
+		return sin_and_cos(psi, alpha, beta) + xi;
+		// return alpha*cos(psi) + beta*sin(psi) + xi;
     }
 
     float deriv(float psi) const
     {
-	return sin_and_cos(psi, beta, -alpha);
-	// return -alpha*sin(psi) + beta*cos(psi); 
+		return sin_and_cos(psi, beta, -alpha);
+		// return -alpha*sin(psi) + beta*cos(psi); 
     }
 
 

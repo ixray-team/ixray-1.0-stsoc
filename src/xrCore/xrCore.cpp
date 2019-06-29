@@ -13,7 +13,9 @@
 #	include	<malloc.h>
 #endif // DEBUG
 
-XRCORE_API		xrCore Core;
+XRCORE_API		xrCore	Core;
+XRCORE_API		u32		build_id;
+XRCORE_API		LPCSTR	build_date;
 
 namespace CPU
 {
@@ -24,11 +26,11 @@ static u32	init_counter	= 0;
 
 extern char g_application_path[256];
 
-extern xr_vector <shared_str>	LogFile;
+//. extern xr_vector<shared_str>*	LogFile;
 
 void xrCore::_initialize	(LPCSTR _ApplicationName, LogCallback cb, BOOL init_fs, LPCSTR fs_fname)
 {
-	strcpy					(ApplicationName,_ApplicationName);
+	strcpy_s					(ApplicationName,_ApplicationName);
 	if (0==init_counter) {
 #ifdef XRCORE_STATIC	
 		_clear87	();
@@ -38,33 +40,31 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, LogCallback cb, BOOL init_fs,
 		_control87	( _MCW_EM,  MCW_EM );
 #endif
 		// Init COM so we can use CoCreateInstance
-		CoInitializeEx		(NULL, COINIT_MULTITHREADED);
+//		HRESULT co_res = 
+			CoInitializeEx (NULL, COINIT_MULTITHREADED);
 
-		strlwr				(strcpy(Params,GetCommandLine()));
+		strcpy_s			(Params,sizeof(Params),GetCommandLine());
+		_strlwr_s			(Params,sizeof(Params));
 
 		string_path		fn,dr,di;
 
 		// application path
         GetModuleFileName(GetModuleHandle(MODULE_NAME),fn,sizeof(fn));
         _splitpath		(fn,dr,di,0,0);
-        strconcat		(ApplicationPath,dr,di);
-#ifndef _EDITOR        
-		strcpy			(g_application_path,ApplicationPath);
+        strconcat		(sizeof(ApplicationPath),ApplicationPath,dr,di);
+#ifndef _EDITOR
+		strcpy_s		(g_application_path,sizeof(g_application_path),ApplicationPath);
 #endif
-		// application data path
-//.		R_CHK			(GetEnvironmentVariable("APPDATA",fn,sizeof(fn)));
-//.		u32 fn_len		= xr_strlen(fn);
-//.		if (fn_len && fn[fn_len-1]=='\\') fn[fn_len-1]=0;
 
 		// working path
+        if( strstr(Params,"-wf") )
+        {
+            string_path				c_name;
+            sscanf					(strstr(Core.Params,"-wf ")+4,"%[^ ] ",c_name);
+            SetCurrentDirectory     (c_name);
+
+        }
 		GetCurrentDirectory(sizeof(WorkingPath),WorkingPath);
-
-//.		strconcat		(ApplicationDataPath,fn,"\\",COMPANY_NAME,"\\",PRODUCT_NAME);
-//.			strcpy			(ApplicationDataPath, ApplicationPath);
-//.			strcpy			(ApplicationDataPath, "_AppData_");
-
-//			_splitpath		(fn,dr,di,0,0);
-//			strconcat		(ApplicationDataPath,dr,di);                                       
 
 		// User/Comp Name
 		DWORD	sz_user		= sizeof(UserName);
@@ -80,6 +80,7 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, LogCallback cb, BOOL init_fs,
 
 		DUMP_PHASE;
 
+		InitLog				();
 		_initialize_cpu		();
 
 //		Debug._initialize	();
@@ -89,31 +90,44 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, LogCallback cb, BOOL init_fs,
 		xr_FS				= xr_new<CLocatorAPI>	();
 
 		xr_EFS				= xr_new<EFS_Utils>		();
+//.		R_ASSERT			(co_res==S_OK);
 	}
 	if (init_fs){
 		u32 flags			= 0;
 		if (0!=strstr(Params,"-build"))	 flags |= CLocatorAPI::flBuildCopy;
 		if (0!=strstr(Params,"-ebuild")) flags |= CLocatorAPI::flBuildCopy|CLocatorAPI::flEBuildCopy;
-#ifdef	DEBUG
-		if (0==strstr(Params,"-nocache"))flags |= CLocatorAPI::flCacheFiles;
-#endif
-#ifdef	_EDITOR // for EDITORS - no cache
+#ifdef DEBUG
+		if (strstr(Params,"-cache"))  flags |= CLocatorAPI::flCacheFiles;
+		else flags &= ~CLocatorAPI::flCacheFiles;
+#endif // DEBUG
+#ifdef _EDITOR // for EDITORS - no cache
 		flags 				&=~ CLocatorAPI::flCacheFiles;
-#endif
+#endif // _EDITOR
 		flags |= CLocatorAPI::flScanAppRoot;
-		if (0!=strstr(Params,"-file_activity"))	 flags |= CLocatorAPI::flDumpFileActivity;
 
+#ifndef	_EDITOR
+	#ifndef ELocatorAPIH
+		if (0!=strstr(Params,"-file_activity"))	 flags |= CLocatorAPI::flDumpFileActivity;
+	#endif
+#endif
 		FS._initialize		(flags,0,fs_fname);
+		Msg					("'%s' build %d, %s\n","xrCore",build_id, build_date);
 		EFS._initialize		();
 #ifdef DEBUG
+    #ifndef	_EDITOR
 		Msg					("CRT heap 0x%08x",_get_heap_handle());
 		Msg					("Process heap 0x%08x",GetProcessHeap());
+    #endif
 #endif // DEBUG
 	}
 	SetLogCB				(cb);
 	init_counter++;
 }
 
+#ifndef	_EDITOR
+#include "compression_ppmd_stream.h"
+extern compression::ppmd::stream	*trained_model;
+#endif
 void xrCore::_destroy		()
 {
 	--init_counter;
@@ -122,6 +136,15 @@ void xrCore::_destroy		()
 		EFS._destroy		();
 		xr_delete			(xr_FS);
 		xr_delete			(xr_EFS);
+
+#ifndef	_EDITOR
+		if (trained_model) {
+			void			*buffer = trained_model->buffer();
+			xr_free			(buffer);
+			xr_delete		(trained_model);
+		}
+#endif
+
 		Memory._destroy		();
 	}
 }
@@ -145,7 +168,7 @@ void xrCore::_destroy		()
 			_control87		( _RC_NEAR, MCW_RC );
 			_control87		( _MCW_EM,  MCW_EM );
 		}
-		LogFile.reserve		(256);
+//.		LogFile.reserve		(256);
 		break;
 	case DLL_THREAD_ATTACH:
 		CoInitializeEx	(NULL, COINIT_MULTITHREADED);

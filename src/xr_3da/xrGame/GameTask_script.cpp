@@ -1,7 +1,5 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "GameTask.h"
-#include "script_space.h"
-#include <luabind/adopt_policy.hpp>
 
 using namespace luabind;
 
@@ -28,6 +26,9 @@ void CGameTask::script_register(lua_State *L)
 				.def("set_map_location",					&SGameTaskObjective::SetMapLocation_script		)
 				.def("set_object_id",						&SGameTaskObjective::SetObjectID_script			)
 				.def("set_article_key",						&SGameTaskObjective::SetArticleKey_script		)
+				.def("set_icon_name",						&SGameTaskObjective::SetIconName_script			)
+				.def_readwrite("def_ml_enabled",			&SGameTaskObjective::def_location_enabled		)
+				
 				.def("add_complete_info",					&SGameTaskObjective::AddCompleteInfo_script		)
 				.def("add_fail_info",						&SGameTaskObjective::AddFailInfo_script			)
 				.def("add_on_complete_info",				&SGameTaskObjective::AddOnCompleteInfo_script	)
@@ -35,11 +36,11 @@ void CGameTask::script_register(lua_State *L)
 				
 				.def("add_complete_func",					&SGameTaskObjective::AddCompleteFunc_script			)
 				.def("add_fail_func",						&SGameTaskObjective::AddFailFunc_script				)
-				.def("add_on_complete_func",				&SGameTaskObjective::AddOnCompleteFunc_script	)
+				.def("add_on_complete_func",				&SGameTaskObjective::AddOnCompleteFunc_script		)
 				.def("add_on_fail_func",					&SGameTaskObjective::AddOnFailFunc_script			)
-
+				
 				.def("get_state",							&SGameTaskObjective::TaskState						)
-				.def("get_idx",								&SGameTaskObjective::GetIDX_script						)
+				.def("get_idx",								&SGameTaskObjective::GetIDX_script					)
 				.def("get_state",							&SGameTaskObjective::TaskState						),
 
 
@@ -48,9 +49,13 @@ void CGameTask::script_register(lua_State *L)
 				.def("load",								&CGameTask::Load_script							)
 				.def("set_title",							&CGameTask::SetTitle_script						)
 				.def("get_title",							&CGameTask::GetTitle_script						)
+				.def("set_priority",						&CGameTask::SetPriority_script					)
+				.def("get_priority",						&CGameTask::GetPriority_script					)
 				.def("add_objective",						&CGameTask::AddObjective_script,		adopt(_2))
 				.def("get_objective",						&CGameTask::GetObjective_script					)
 				.def("get_id",								&CGameTask::GetID_script						)
+				.def("set_id",								&CGameTask::SetID_script						)
 				.def("get_objectives_cnt",					&CGameTask::GetObjectiveSize_script				)
+				
 		];
 }

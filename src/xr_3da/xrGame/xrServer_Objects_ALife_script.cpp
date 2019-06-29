@@ -6,9 +6,8 @@
 //	Description : Server objects for ALife simulator, script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "xrServer_Objects_ALife.h"
-#include "script_space.h"
 #include "xrServer_script_macroses.h"
 
 using namespace luabind;
@@ -47,12 +46,12 @@ void CSE_ALifeObject::script_register(lua_State *L)
 			CSE_Abstract
 		)
 		.def_readonly	("online",				&CSE_ALifeObject::m_bOnline)
-		.def			("move_offline",		(bool (CSE_ALifeObject::*)() const)(CSE_ALifeObject::move_offline))
-		.def			("move_offline",		(void (CSE_ALifeObject::*)(bool))(CSE_ALifeObject::move_offline))
-		.def			("visible_for_map",		(bool (CSE_ALifeObject::*)() const)(CSE_ALifeObject::visible_for_map))
-		.def			("visible_for_map",		(void (CSE_ALifeObject::*)(bool))(CSE_ALifeObject::visible_for_map))
-		.def			("can_switch_online",	(void (CSE_ALifeObject::*)(bool))(CSE_ALifeObject::can_switch_online))
-		.def			("can_switch_offline",	(void (CSE_ALifeObject::*)(bool))(CSE_ALifeObject::can_switch_offline))
+		.def			("move_offline",		(bool (CSE_ALifeObject::*)() const)(&CSE_ALifeObject::move_offline))
+		.def			("move_offline",		(void (CSE_ALifeObject::*)(bool))(&CSE_ALifeObject::move_offline))
+		.def			("visible_for_map",		(bool (CSE_ALifeObject::*)() const)(&CSE_ALifeObject::visible_for_map))
+		.def			("visible_for_map",		(void (CSE_ALifeObject::*)(bool))(&CSE_ALifeObject::visible_for_map))
+		.def			("can_switch_online",	(void (CSE_ALifeObject::*)(bool))(&CSE_ALifeObject::can_switch_online))
+		.def			("can_switch_offline",	(void (CSE_ALifeObject::*)(bool))(&CSE_ALifeObject::can_switch_offline))
 		.def_readonly	("m_level_vertex_id",	&CSE_ALifeObject::m_tNodeID)
 		.def_readonly	("m_game_vertex_id",	&CSE_ALifeObject::m_tGraphID)
 		.def_readonly	("m_story_id",			&CSE_ALifeObject::m_story_id)

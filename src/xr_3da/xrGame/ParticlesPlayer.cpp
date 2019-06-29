@@ -16,7 +16,7 @@ static void generate_orthonormal_basis(const Fvector& dir,Fmatrix &result)
 CParticlesPlayer::SParticlesInfo* CParticlesPlayer::SBoneInfo::FindParticles(const shared_str& ps_name)
 {
 	for (ParticlesInfoListIt it=particles.begin(); it!=particles.end(); it++)
-		if (it->ps->Name()==ps_name) return &(*it);
+		if (it->ps && it->ps->Name()==ps_name) return &(*it);
 	return 0;
 }
 CParticlesPlayer::SParticlesInfo* CParticlesPlayer::SBoneInfo::AppendParticles(CObject* object, const shared_str& ps_name)
@@ -81,8 +81,8 @@ void CParticlesPlayer::LoadParticles(CKinematics* K)
 	if(ini&&ini->section_exist("particle_bones")){
 		bone_mask		= 0;
 		CInifile::Sect& data		= ini->r_section("particle_bones");
-		for (CInifile::SectIt I=data.begin(); I!=data.end(); I++){
-			CInifile::Item& item	= *I;
+		for (CInifile::SectCIt I=data.Data.begin(); I!=data.Data.end(); I++){
+			const CInifile::Item& item	= *I;
 			u16 index				= K->LL_BoneID(*item.first); 
 			R_ASSERT3(index != BI_NONE, "Particles bone not found", *item.first);
 			Fvector					offs;
@@ -136,7 +136,6 @@ void CParticlesPlayer::StartParticles(const shared_str& particles_name, u16 bone
 }
 void CParticlesPlayer::StartParticles(const shared_str& particles_name, u16 bone_num, const Fmatrix& xform, u16 sender_id, int life_time, bool auto_stop)
 {
-
 	VERIFY(fis_zero(xform.c.magnitude()));
 	R_ASSERT(*particles_name);
 	
@@ -164,7 +163,6 @@ void CParticlesPlayer::StartParticles(const shared_str& particles_name, u16 bone
 
 void CParticlesPlayer::StartParticles(const shared_str& ps_name, const Fmatrix& xform, u16 sender_id, int life_time, bool auto_stop)
 {
-	
 	CObject* object					= m_self_object;
 	VERIFY(object);
 	for(BoneInfoVecIt it = m_Bones.begin(); it!=m_Bones.end(); it++){

@@ -6,8 +6,7 @@
 //	Description : Script process class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "script_space.h"
+#include "pch_script.h"
 #include "script_engine.h"
 #include "script_process.h"
 #include "script_thread.h"

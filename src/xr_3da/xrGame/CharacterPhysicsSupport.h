@@ -7,9 +7,16 @@
 #include "Entity_Alive.h"
 #include "PHSoundPlayer.h"
 #include "Phdestroyable.h"
+#include "character_hit_animations.h"
+
+
 class CPhysicsShell;
 class CPHMovementControl;
 class CIKLimbsController;
+class interactive_motion;
+
+
+
 class CCharacterPhysicsSupport :
 public CPHSkeleton,
 public CPHDestroyable
@@ -38,16 +45,27 @@ private:
 		fl_death_anim_on			=1<<0,
 		fl_skeleton_in_shell		=1<<1,
 		fl_specific_bonce_demager	=1<<2,
-		fl_block_hit				=1<<3
+		fl_block_hit				=1<<3,
 	};
+
+	struct	animation_movement_state{ 
+		bool		active;
+		bool		character_exist;
+		void		init( ){ active	=  false ; character_exist =  false ; }
+		animation_movement_state( )		{ init( ); }
+	}									anim_mov_state;
+
 	CEntityAlive						&m_EntityAlife																																		;
 	Fmatrix								&mXFORM																																				;
 	CPhysicsShell						*&m_pPhysicsShell																																	;
 	CPhysicsShell						*m_physics_skeleton																																	;
-	CPHMovementControl					*m_PhysicMovementControl																																;
+	CPHMovementControl					*m_PhysicMovementControl																															;
 	CPHSoundPlayer						m_ph_sound_player																																	;
 	CIKLimbsController					*m_ik_controller																																	;
 	SCollisionHitCallback				*m_collision_hit_callback;
+	character_hit_animation_controller	m_hit_animations;
+
+	interactive_motion					*m_interactive_motion;
 //skeleton modell(!share?)
 	float								skel_airr_lin_factor																																;
 	float								skel_airr_ang_factor																																;
@@ -106,11 +124,13 @@ virtual CPhysicsShellHolder*			PPhysicsShellHolder				()	{return m_EntityAlife.P
 virtual bool							CanRemoveObject					();
 public:
 IC		CPHMovementControl				*movement						()	{return m_PhysicMovementControl;}
-		CPHSoundPlayer					*ph_sound_player				()	{return &m_ph_sound_player;}
+IC		CPHSoundPlayer					*ph_sound_player				()	{return &m_ph_sound_player;}
+IC		CIKLimbsController				*ik_controller					()	{return	m_ik_controller;}
 		void							SetRemoved						();
 		bool							IsRemoved						(){return m_eState==esRemoved;}
 		bool							IsSpecificDamager				()																{return !!m_flags.test(fl_specific_bonce_demager)	;}
 		float							BonceDamageFactor				(){return m_BonceDamageFactor;}
+		void							set_movement_position			( const Fvector &pos );
 //////////////////base hierarchi methods///////////////////////////////////////////////////
 		void							CreateCharacter					();
 		void 							in_UpdateCL()																																		;
@@ -123,6 +143,8 @@ IC		CPHMovementControl				*movement						()	{return m_PhysicMovementControl;}
 		void 							in_Hit							(float P,Fvector &dir, CObject *who, s16 element,Fvector p_in_object_space, float impulse,ALife::EHitType hit_type ,bool is_killing=false);
 		void							in_NetSave						(NET_Packet& P)																										;
 		void							in_ChangeVisual					();
+		void							on_create_anim_mov_ctrl			();
+		void							on_destroy_anim_mov_ctrl		();
 		void							PHGetLinearVell					(Fvector& velocity);
 		SCollisionHitCallback*			get_collision_hit_callback		();
 		bool							set_collision_hit_callback		(SCollisionHitCallback* cc);
@@ -134,14 +156,15 @@ private:
 		void 							CreateSkeleton					(CPhysicsShell* &pShell)																							;
 		void 							CreateSkeleton					();
 		void 							ActivateShell					(CObject* who)																										;
-static void _stdcall 					IKVisualCallback				(CKinematics* K)																									;
+		void							KillHit							(CObject* who, ALife::EHitType hit_type, float &impulse)																										;
+static	void							DeathAnimCallback				(CBlend *B)																											;
 		void							CreateIKController				()																													;
 		void							DestroyIKController				()																													;
-		void							CalculateIK						(CKinematics* K)																									;
 		void							CollisionCorrectObjPos			(const Fvector& start_from,bool character_create=false);
 		void							FlyTo							(const	Fvector &disp);
 		void							TestForWounded					();
 IC		void							UpdateFrictionAndJointResistanse();
+IC		void							UpdateDeathAnims				();
 IC		void							CalculateTimeDelta				();
 IC		bool							DoCharacterShellCollide			();
 };

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "trade.h"
 #include "actor.h"
 #include "ai/stalker/ai_stalker.h"
@@ -188,18 +188,18 @@ u32	CTrade::GetItemPrice(PIItem pItem, bool b_buying)
 		// rare case
 		_partner			= &pPartner;
 	}
-	const SInventoryOwner	&partner = *_partner;
+//.	const SInventoryOwner	&partner = *_partner;
 
 	// computing action factor
 	const CTradeFactors		*p_trade_factors;
 
 
 	if (buying){
-		if( ! partner.inv_owner->trade_parameters().enabled(CTradeParameters::action_buy(0),pItem->object().cNameSect()) ) return 0;
-		p_trade_factors		= &partner.inv_owner->trade_parameters().factors(CTradeParameters::action_buy(0),pItem->object().cNameSect());
+		if( ! pThis.inv_owner->trade_parameters().enabled(CTradeParameters::action_buy(0),pItem->object().cNameSect()) ) return 0;
+		p_trade_factors		= &pThis.inv_owner->trade_parameters().factors(CTradeParameters::action_buy(0),pItem->object().cNameSect());
 	}else{
-		if( ! partner.inv_owner->trade_parameters().enabled(CTradeParameters::action_sell(0),pItem->object().cNameSect()) ) return 0;
-		p_trade_factors		= &partner.inv_owner->trade_parameters().factors(CTradeParameters::action_sell(0),pItem->object().cNameSect());
+		if( ! pThis.inv_owner->trade_parameters().enabled(CTradeParameters::action_sell(0),pItem->object().cNameSect()) ) return 0;
+		p_trade_factors		= &pThis.inv_owner->trade_parameters().factors(CTradeParameters::action_sell(0),pItem->object().cNameSect());
 	}
 	const CTradeFactors		&trade_factors = *p_trade_factors;
 

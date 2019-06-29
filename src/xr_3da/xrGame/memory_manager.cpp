@@ -6,7 +6,7 @@
 //	Description : Memory manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "memory_manager.h"
 #include "visual_memory_manager.h"
 #include "sound_memory_manager.h"
@@ -22,7 +22,6 @@
 #include "ai_object_location.h"
 #include "level_graph.h"
 #include "profiler.h"
-#include "actor.h"
 #include "agent_enemy_manager.h"
 
 CMemoryManager::CMemoryManager		(CEntityAlive *entity_alive, CSound_UserDataVisitor *visitor)
@@ -30,9 +29,12 @@ CMemoryManager::CMemoryManager		(CEntityAlive *entity_alive, CSound_UserDataVisi
 	VERIFY				(entity_alive);
 	m_object			= smart_cast<CCustomMonster*>(entity_alive);
 	m_stalker			= smart_cast<CAI_Stalker*>(m_object);
-	CActor				*actor = smart_cast<CActor*>(entity_alive);
 
-	m_visual			= xr_new<CVisualMemoryManager>	(m_object, m_stalker, actor);
+	if (m_stalker)
+		m_visual		= xr_new<CVisualMemoryManager>(m_stalker);
+	else
+		m_visual		= xr_new<CVisualMemoryManager>(m_object);
+
 	m_sound				= xr_new<CSoundMemoryManager>	(m_object, m_stalker, visitor);
 	m_hit				= xr_new<CHitMemoryManager>		(m_object, m_stalker);
 	m_enemy				= xr_new<CEnemyManager>			(m_object);
@@ -52,7 +54,6 @@ CMemoryManager::~CMemoryManager		()
 
 void CMemoryManager::Load			(LPCSTR section)
 {
-	visual().Load		(section);
 	sound().Load		(section);
 	hit().Load			(section);
 	enemy().Load		(section);

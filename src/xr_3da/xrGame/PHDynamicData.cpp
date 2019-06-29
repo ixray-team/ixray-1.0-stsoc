@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "PHDynamicData.h"
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -121,13 +122,13 @@ void PHDynamicData::InterpolateTransformVsParent(Fmatrix &transform){
 	//BoneTransform.mulA(parent_transform);
 	transform.mulA_43	(parent_transform);
 }
+
 PHDynamicData * PHDynamicData::GetChild(unsigned int ChildNum)
 {
 	if(ChildNum<numOfChilds)
 		return &Childs[ChildNum];
 	else return NULL;
 }
-
 
 void PHDynamicData::CalculateData()
 {
@@ -143,8 +144,6 @@ void PHDynamicData::CalculateData()
 		Childs[i].CalculateR_N_PosOfChilds(body);
 	}
 }
-
-
 
 void PHDynamicData::Create(unsigned int numOfchilds, dBodyID Body)
 {
@@ -201,3 +200,4 @@ void PHDynamicData::SetAsZeroRecursive(){
 void PHDynamicData::SetZeroTransform(Fmatrix& aTransform){
 	ZeroTransform.set(aTransform);
 }
+#endif // #if 0

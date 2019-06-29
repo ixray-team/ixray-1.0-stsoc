@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "weaponsvd.h"
 
 CWeaponSVD::CWeaponSVD(void) : CWeaponCustomPistol("SVD")
@@ -29,8 +29,6 @@ void CWeaponSVD::OnAnimationEnd(u32 state)
 	}
 	inherited::OnAnimationEnd(state);
 }
-
-#include "script_space.h"
 
 using namespace luabind;
 

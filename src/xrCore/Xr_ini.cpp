@@ -64,7 +64,7 @@ XRCORE_API void _decorate(LPSTR dest, LPCSTR src)
 
 BOOL	CInifile::Sect::line_exist( LPCSTR L, LPCSTR* val )
 {
-	SectIt A = std::lower_bound(Data.begin(),Data.end(),L,item_pred);
+	SectCIt A = std::lower_bound(Data.begin(),Data.end(),L,item_pred);
     if (A!=Data.end() && xr_strcmp(*A->first,L)==0){
     	if (val) *val = *A->second;
     	return TRUE;
@@ -116,8 +116,8 @@ CInifile::~CInifile( )
 
 static void	insert_item(CInifile::Sect *tgt, const CInifile::Item& I)
 {
-	CInifile::SectIt	sect_it		= std::lower_bound(tgt->begin(),tgt->end(),*I.first,item_pred);
-	if (sect_it!=tgt->end() && sect_it->first.equal(I.first)){ 
+	CInifile::SectIt_	sect_it		= std::lower_bound(tgt->Data.begin(),tgt->Data.end(),*I.first,item_pred);
+	if (sect_it!=tgt->Data.end() && sect_it->first.equal(I.first)){ 
 		sect_it->second	= I.second;
 #ifdef DEBUG
 		sect_it->comment= I.comment;
@@ -160,7 +160,7 @@ void	CInifile::Load(IReader* F, LPCSTR path)
 			R_ASSERT	(path&&path[0]);
         	if (_GetItem	(str,1,inc_name,'"')){
             	string_path	fn,inc_path,folder;
-                strconcat	(fn,path,inc_name);
+                strconcat	(sizeof(fn),fn,path,inc_name);
 				_splitpath	(fn,inc_path,folder, 0, 0 );
 				strcat		(inc_path,folder);
             	IReader* I 	= FS.r_open(fn); R_ASSERT3(I,"Can't find include file:", inc_name);
@@ -188,7 +188,7 @@ void	CInifile::Load(IReader* F, LPCSTR path)
 					xr_string	tmp;
 					_GetItem	(inherited_names,k,tmp);
 					Sect& inherited_section = r_section(tmp.c_str());
-					for (SectIt it=inherited_section.begin(); it!=inherited_section.end(); it++)
+					for (SectIt_ it =inherited_section.Data.begin(); it!=inherited_section.Data.end(); it++)
 						insert_item	(Current,*it);
 				}
 			}
@@ -249,42 +249,43 @@ bool	CInifile::save_as( LPCSTR new_fname )
     IWriter* F			= FS.w_open_ex(fName);
     if (F){
         string512		temp,val;
-        for (RootIt r_it=DATA.begin(); r_it!=DATA.end(); r_it++){
-            sprintf		(temp,"[%s]",*(*r_it)->Name);
+        for (RootIt r_it=DATA.begin(); r_it!=DATA.end(); ++r_it)
+		{
+            sprintf_s		(temp,sizeof(temp),"[%s]",*(*r_it)->Name);
             F->w_string	(temp);
-            for (SectIt s_it=(*r_it)->begin(); s_it!=(*r_it)->end(); s_it++)
+            for (SectCIt s_it=(*r_it)->Data.begin(); s_it!=(*r_it)->Data.end(); ++s_it)
             {
-                Item&	I = *s_it;
+                const Item&	I = *s_it;
                 if (*I.first) {
                     if (*I.second) {
                         _decorate	(val,*I.second);
 #ifdef DEBUG
                         if (*I.comment) {
                             // name, value and comment
-                            sprintf	(temp,"%8s%-32s = %-32s ;%s"," ",*I.first,val,*I.comment);
+                            sprintf_s	(temp,sizeof(temp),"%8s%-32s = %-32s ;%s"," ",*I.first,val,*I.comment);
                         } else
 #endif
 						{
                             // only name and value
-                            sprintf	(temp,"%8s%-32s = %-32s"," ",*I.first,val);
+                            sprintf_s	(temp,sizeof(temp),"%8s%-32s = %-32s"," ",*I.first,val);
                         }
                     } else {
 #ifdef DEBUG
                         if (*I.comment) {
                             // name and comment
-                            sprintf(temp,"%8s%-32s = ;%s"," ",*I.first,*I.comment);
+                            sprintf_s(temp,sizeof(temp),"%8s%-32s = ;%s"," ",*I.first,*I.comment);
                         } else
 #endif
 						{
                             // only name
-                            sprintf(temp,"%8s%-32s = "," ",*I.first);
+                            sprintf_s(temp,sizeof(temp),"%8s%-32s = "," ",*I.first);
                         }
                     }
                 } else {
                     // no name, so no value
 #ifdef DEBUG
                     if (*I.comment)
-						sprintf		(temp,"%8s;%s"," ",*I.comment);
+						sprintf_s		(temp,sizeof(temp),"%8s;%s"," ",*I.comment);
                     else
 #endif
 						temp[0]		= 0;
@@ -310,16 +311,16 @@ BOOL	CInifile::line_exist( LPCSTR S, LPCSTR L )
 {
 	if (!section_exist(S)) return FALSE;
 	Sect&	I = r_section(S);
-	SectIt A = std::lower_bound(I.begin(),I.end(),L,item_pred);
-	return (A!=I.end() && xr_strcmp(*A->first,L)==0);
+	SectCIt A = std::lower_bound(I.Data.begin(),I.Data.end(),L,item_pred);
+	return (A!=I.Data.end() && xr_strcmp(*A->first,L)==0);
 }
 
 u32		CInifile::line_count(LPCSTR Sname)
 {
 	Sect&	S = r_section(Sname);
-	SectIt	I = S.begin();
+	SectCIt	I = S.Data.begin();
 	u32	C = 0;
-	for (; I!=S.end(); I++)	if (*I->first) C++;
+	for (; I!=S.Data.end(); I++)	if (*I->first) C++;
 	return  C;
 }
 
@@ -335,7 +336,7 @@ BOOL			CInifile::section_exist	( const shared_str& S	)					{ return	section_exis
 //--------------------------------------------------------------------------------------
 CInifile::Sect& CInifile::r_section( LPCSTR S )
 {
-	char	section[256]; strcpy(section,S); strlwr(section);
+	char	section[256]; strcpy_s(section,sizeof(section),S); strlwr(section);
 	RootIt I = std::lower_bound(DATA.begin(),DATA.end(),section,sect_pred);
 	if (!(I!=DATA.end() && xr_strcmp(*(*I)->Name,section)==0))
 		Debug.fatal(DEBUG_INFO,"Can't open section '%s'",S);
@@ -345,8 +346,8 @@ CInifile::Sect& CInifile::r_section( LPCSTR S )
 LPCSTR	CInifile::r_string(LPCSTR S, LPCSTR L)
 {
 	Sect&	I = r_section(S);
-	SectIt	A = std::lower_bound(I.begin(),I.end(),L,item_pred);
-	if (A!=I.end() && xr_strcmp(*A->first,L)==0)	return *A->second;
+	SectCIt	A = std::lower_bound(I.Data.begin(),I.Data.end(),L,item_pred);
+	if (A!=I.Data.end() && xr_strcmp(*A->first,L)==0)	return *A->second;
 	else
 		Debug.fatal(DEBUG_INFO,"Can't find variable %s in [%s]",L,S);
 	return 0;
@@ -354,9 +355,12 @@ LPCSTR	CInifile::r_string(LPCSTR S, LPCSTR L)
 
 shared_str		CInifile::r_string_wb(LPCSTR S, LPCSTR L)	{
 	LPCSTR		_base		= r_string(S,L);
+	
 	if	(0==_base)					return	shared_str(0);
-	string512	_original;	
-	u32			_len		= xr_strlen(strcpy(_original,_base));
+
+	string512						_original;
+	strcpy_s						(_original,_base);
+	u32			_len				= xr_strlen(_original);
 	if	(0==_len)					return	shared_str("");
 	if	('"'==_original[_len-1])	_original[_len-1]=0;				// skip end
 	if	('"'==_original[0])			return	shared_str(&_original[0] + 1);	// skip begin
@@ -479,8 +483,8 @@ int		CInifile::r_token	( LPCSTR S, LPCSTR L, const xr_token *token_list)
 BOOL	CInifile::r_line( LPCSTR S, int L, const char** N, const char** V )
 {
 	Sect&	SS = r_section(S);
-	if (L>=(int)SS.size() || L<0 ) return FALSE;
-	for (SectIt I=SS.begin(); I!=SS.end(); I++)
+	if (L>=(int)SS.Data.size() || L<0 ) return FALSE;
+	for (SectCIt I=SS.Data.begin(); I!=SS.Data.end(); I++)
 		if (!(L--)){
 			*N = *I->first;
 			*V = *I->second;
@@ -524,9 +528,9 @@ void	CInifile::w_string	( LPCSTR S, LPCSTR L, LPCSTR			V, LPCSTR comment)
 #ifdef DEBUG
 	I.comment		= (comment?comment:0);
 #endif
-	SectIt	it		= std::lower_bound(data.begin(),data.end(),*I.first,item_pred);
+	SectIt_	it		= std::lower_bound(data.Data.begin(),data.Data.end(),*I.first,item_pred);
 
-    if (it != data.end()) {
+    if (it != data.Data.end()) {
 	    // Check for "first" matching
     	if (0==xr_strcmp(*it->first,*I.first)) {
             *it  = I;
@@ -539,83 +543,83 @@ void	CInifile::w_string	( LPCSTR S, LPCSTR L, LPCSTR			V, LPCSTR comment)
 }
 void	CInifile::w_u8			( LPCSTR S, LPCSTR L, u8				V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%d",V);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%d",V);
 	w_string	(S,L,temp,comment);
 }
 void	CInifile::w_u16			( LPCSTR S, LPCSTR L, u16				V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%d",V);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%d",V);
 	w_string	(S,L,temp,comment);
 }
 void	CInifile::w_u32			( LPCSTR S, LPCSTR L, u32				V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%d",V);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%d",V);
 	w_string	(S,L,temp,comment);
 }
 void	CInifile::w_s8			( LPCSTR S, LPCSTR L, s8				V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%d",V);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%d",V);
 	w_string	(S,L,temp,comment);
 }
 void	CInifile::w_s16			( LPCSTR S, LPCSTR L, s16				V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%d",V);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%d",V);
 	w_string	(S,L,temp,comment);
 }
 void	CInifile::w_s32			( LPCSTR S, LPCSTR L, s32				V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%d",V);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%d",V);
 	w_string	(S,L,temp,comment);
 }
 void	CInifile::w_float		( LPCSTR S, LPCSTR L, float				V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%f",V);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%f",V);
 	w_string	(S,L,temp,comment);
 }
 void	CInifile::w_fcolor		( LPCSTR S, LPCSTR L, const Fcolor&		V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%f,%f,%f,%f", V.r, V.g, V.b, V.a);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%f,%f,%f,%f", V.r, V.g, V.b, V.a);
 	w_string	(S,L,temp,comment);
 }
 
 void	CInifile::w_color		( LPCSTR S, LPCSTR L, u32				V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%d,%d,%d,%d", color_get_R(V), color_get_G(V), color_get_B(V), color_get_A(V));
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%d,%d,%d,%d", color_get_R(V), color_get_G(V), color_get_B(V), color_get_A(V));
 	w_string	(S,L,temp,comment);
 }
 
 void	CInifile::w_ivector2	( LPCSTR S, LPCSTR L, const Ivector2&	V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%d,%d", V.x, V.y);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%d,%d", V.x, V.y);
 	w_string	(S,L,temp,comment);
 }
 
 void	CInifile::w_ivector3	( LPCSTR S, LPCSTR L, const Ivector3&	V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%d,%d,%d", V.x, V.y, V.z);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%d,%d,%d", V.x, V.y, V.z);
 	w_string	(S,L,temp,comment);
 }
 
 void	CInifile::w_ivector4	( LPCSTR S, LPCSTR L, const Ivector4&	V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%d,%d,%d,%d", V.x, V.y, V.z, V.w);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%d,%d,%d,%d", V.x, V.y, V.z, V.w);
 	w_string	(S,L,temp,comment);
 }
 void	CInifile::w_fvector2	( LPCSTR S, LPCSTR L, const Fvector2&	V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%f,%f", V.x, V.y);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%f,%f", V.x, V.y);
 	w_string	(S,L,temp,comment);
 }
 
 void	CInifile::w_fvector3	( LPCSTR S, LPCSTR L, const Fvector3&	V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%f,%f,%f", V.x, V.y, V.z);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%f,%f,%f", V.x, V.y, V.z);
 	w_string	(S,L,temp,comment);
 }
 
 void	CInifile::w_fvector4	( LPCSTR S, LPCSTR L, const Fvector4&	V, LPCSTR comment )
 {
-	string128 temp; sprintf		(temp,"%f,%f,%f,%f", V.x, V.y, V.z, V.w);
+	string128 temp; sprintf_s		(temp,sizeof(temp),"%f,%f,%f,%f", V.x, V.y, V.z, V.w);
 	w_string	(S,L,temp,comment);
 }
 
@@ -630,8 +634,8 @@ void	CInifile::remove_line	( LPCSTR S, LPCSTR L )
 
     if (line_exist(S,L)){
 		Sect&	data	= r_section	(S);
-		SectIt A = std::lower_bound(data.begin(),data.end(),L,item_pred);
-    	R_ASSERT(A!=data.end() && xr_strcmp(*A->first,L)==0);
+		SectIt_ A = std::lower_bound(data.Data.begin(),data.Data.end(),L,item_pred);
+    	R_ASSERT(A!=data.Data.end() && xr_strcmp(*A->first,L)==0);
         data.Data.erase(A);
     }
 }

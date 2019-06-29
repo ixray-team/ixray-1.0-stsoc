@@ -4,26 +4,29 @@
 extern xr_token actor_stats_token[];
 
 
-struct SStatDetailData: public IPureSerializeObject<IReader,IWriter>
+struct SStatDetailBData: public IPureSerializeObject<IReader,IWriter>
 {
-	shared_str	key;
-	s32			count;
-	s32			points;
+	shared_str				key;
+	s32						int_count;
+	s32						int_points;
+	shared_str				str_value;
 
 	virtual void save								(IWriter &stream);
 	virtual void load								(IReader &stream);
 };
 
-typedef xr_vector<SStatDetailData>	vStatDetailData;
 
-struct SStatSectionData: public IPureSerializeObject<IReader,IWriter>{
-	int					key;
-	s32					total_points;
-	vStatDetailData		data;
+typedef xr_vector<SStatDetailBData>	vStatDetailData;
 
-	SStatDetailData&	GetData			(const shared_str&);
-	virtual void		save			(IWriter &stream);
-	virtual void		load			(IReader &stream);
+struct SStatSectionData: public IPureSerializeObject<IReader,IWriter>
+{
+	shared_str				key;
+	vStatDetailData			data;
+
+	SStatDetailBData&		GetData			(const shared_str&);
+	s32						GetTotalPoints	() const;
+	virtual void			save			(IWriter &stream);
+	virtual void			load			(IReader &stream);
 };
 
 typedef xr_vector<SStatSectionData> vStatSectionData;

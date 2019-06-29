@@ -162,7 +162,7 @@ SBError ServerBrowserBeginUpdate2(ServerBrowser sb, SBBool async, SBBool disconn
 		keylen = (int)strlen(qr2_registered_key_list[basicFields[i]]);
 		if (listLen + keylen + 1 >= MAX_FIELD_LIST_LEN)
 			break; //can't add this field, too long
-		listLen += sprintf(keyList + listLen, "\\%s", qr2_registered_key_list[basicFields[i]]);
+		listLen += sprintf_s(keyList + listLen, MAX_FIELD_LIST_LEN-listLen, "\\%s", qr2_registered_key_list[basicFields[i]]);
 		//add to the engine query list
 		SBQueryEngineAddQueryKey(&sb->engine, basicFields[i]);
 	}

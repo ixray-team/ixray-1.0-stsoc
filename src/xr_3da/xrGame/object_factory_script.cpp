@@ -6,13 +6,11 @@
 //	Description : Object factory script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "object_factory.h"
 #include "ai_space.h"
 #include "script_engine.h"
-#include "script_space.h"
 #include "object_item_script.h"
-#include <luabind/adopt_policy.hpp>
 
 void CObjectFactory::register_script_class	(LPCSTR client_class, LPCSTR server_class, LPCSTR clsid, LPCSTR script_clsid)
 {
@@ -60,9 +58,12 @@ void CObjectFactory::register_script_class			(LPCSTR unknown_class, LPCSTR clsid
 	);
 }
 
+ENGINE_API	bool g_dedicated_server;
+
 void CObjectFactory::register_script_classes()
 {
-	ai();
+	if (!g_dedicated_server)
+		ai();
 }
 
 using namespace luabind;
@@ -89,7 +90,7 @@ void CObjectFactory::script_register(lua_State *L)
 	module(L)
 	[
 		class_<CObjectFactory>("object_factory")
-			.def("register",	(void (CObjectFactory::*)(LPCSTR,LPCSTR,LPCSTR,LPCSTR))(CObjectFactory::register_script_class))
-			.def("register",	(void (CObjectFactory::*)(LPCSTR,LPCSTR,LPCSTR))(CObjectFactory::register_script_class))
+			.def("register",	(void (CObjectFactory::*)(LPCSTR,LPCSTR,LPCSTR,LPCSTR))(&CObjectFactory::register_script_class))
+			.def("register",	(void (CObjectFactory::*)(LPCSTR,LPCSTR,LPCSTR))(&CObjectFactory::register_script_class))
 	];
 }

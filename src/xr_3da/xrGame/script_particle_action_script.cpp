@@ -6,9 +6,8 @@
 //	Description : Script particle action class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_particle_action.h"
-#include "script_space.h"
 
 using namespace luabind;
 
@@ -29,6 +28,6 @@ void CScriptParticleAction::script_register(lua_State *L)
 			.def("set_position",	&CScriptParticleAction::SetPosition)
 			.def("set_angles",		&CScriptParticleAction::SetAngles)
 			.def("set_velocity",	&CScriptParticleAction::SetVelocity)
-			.def("completed",		(bool (CScriptParticleAction::*)())(CScriptParticleAction::completed))
+			.def("completed",		(bool (CScriptParticleAction::*)())(&CScriptParticleAction::completed))
 	];
 }

@@ -14,7 +14,7 @@
 game_sv_Single::game_sv_Single			()
 {
 	m_alife_simulator			= NULL;
-	type						= GAME_SINGLE;
+	m_type						= GAME_SINGLE;
 };
 
 game_sv_Single::~game_sv_Single			()
@@ -105,19 +105,20 @@ BOOL	game_sv_Single::OnTouch			(u16 eid_who, u16 eid_what, BOOL bForced)
 	return TRUE;
 }
 
-BOOL	game_sv_Single::OnDetach		(u16 eid_who, u16 eid_what)
+void game_sv_Single::OnDetach(u16 eid_who, u16 eid_what)
 {
-	if (ai().get_alife()) {
+	if (ai().get_alife()) 
+	{
 		CSE_Abstract*		e_who	= get_entity_from_eid(eid_who);		VERIFY(e_who	);
 		CSE_Abstract*		e_what	= get_entity_from_eid(eid_what);	VERIFY(e_what	);
 
 		CSE_ALifeInventoryItem *l_tpALifeInventoryItem = smart_cast<CSE_ALifeInventoryItem*>(e_what);
 		if (!l_tpALifeInventoryItem)
-			return TRUE;
+			return;
 
 		CSE_ALifeDynamicObject *l_tpDynamicObject = smart_cast<CSE_ALifeDynamicObject*>(e_who);
 		if (!l_tpDynamicObject)
-			return TRUE;
+			return;
 		
 		if	(
 				ai().alife().objects().object(e_who->ID,true) && 
@@ -147,7 +148,6 @@ BOOL	game_sv_Single::OnDetach		(u16 eid_who, u16 eid_what)
 #endif
 		}
 	}
-	return					(TRUE);
 }
 
 

@@ -1,37 +1,60 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8,00"
 	Name="xrAI"
 	ProjectGUID="{EA5932F3-02FE-4AD3-89E8-7072DC465D25}"
-	SccProjectName=""
-	SccAuxPath=""
-	SccLocalPath=""
-	SccProvider="">
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="x:\binaries"
 			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName="x:/xrAI.tlb"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				OptimizeForProcessor="0"
-				PreprocessorDefinitions="WIN32,_DEBUG,_WINDOWS,DEBUG,AI_COMPILER"
-				ExceptionHandling="TRUE"
+				PreprocessorDefinitions="WIN32,_WINDOWS,DEBUG,AI_COMPILER;_SECURE_SCL=0"
+				ExceptionHandling="1"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="2"
 				StructMemberAlignment="0"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
+				FloatingPointModel="2"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
@@ -39,83 +62,114 @@
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="4"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
-				ShowIncludes="FALSE"/>
+				ShowIncludes="false"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				LinkIncremental="2"
-				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
-				GenerateMapFile="FALSE"
+				SuppressStartupBanner="true"
+				GenerateDebugInformation="true"
+				GenerateMapFile="false"
 				MapFileName=""
-				MapExports="FALSE"
-				MapLines="FALSE"
+				MapExports="false"
 				SubSystem="2"
 				StackReserveSize="0"
 				StackCommitSize="0"
-				LargeAddressAware="0"
+				LargeAddressAware="2"
 				ImportLibrary="x:\libraries\$(ProjectName).lib"
-				TargetMachine="0"/>
+				TargetMachine="0"
+			/>
 			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName="x:/xrAI.tlb"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCWebDeploymentTool"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="x:\binaries"
 			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			WholeProgramOptimization="TRUE">
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName="x:/xrAI.tlb"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				GlobalOptimizations="TRUE"
+				Optimization="2"
 				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
+				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
-				EnableFiberSafeOptimizations="FALSE"
-				OptimizeForProcessor="3"
-				OptimizeForWindowsApplication="FALSE"
-				PreprocessorDefinitions="WIN32,NDEBUG,_WINDOWS,AI_COMPILER"
-				StringPooling="TRUE"
-				ExceptionHandling="FALSE"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
+				WholeProgramOptimization="true"
+				PreprocessorDefinitions="WIN32,NDEBUG,_WINDOWS,AI_COMPILER;_SECURE_SCL=0"
+				StringPooling="true"
+				ExceptionHandling="0"
 				RuntimeLibrary="2"
-				BufferSecurityCheck="FALSE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
+				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="false"
+				EnableEnhancedInstructionSet="1"
+				FloatingPointModel="2"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerOutput="0"
@@ -124,81 +178,111 @@
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
+				SuppressStartupBanner="true"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
-				GenerateMapFile="FALSE"
+				GenerateMapFile="false"
 				MapFileName=""
 				SubSystem="2"
 				StackReserveSize="0"
 				StackCommitSize="0"
-				LargeAddressAware="0"
+				LargeAddressAware="2"
+				LinkTimeCodeGeneration="1"
 				ImportLibrary="x:\libraries\$(ProjectName).lib"
-				TargetMachine="0"/>
+				TargetMachine="0"
+			/>
 			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName="x:/xrAI.tlb"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCWebDeploymentTool"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Mixed|Win32"
-			OutputDirectory="x:\binaries\"
+			OutputDirectory="x:\binaries"
 			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			WholeProgramOptimization="FALSE">
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName="x:/xrAI.tlb"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
+				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="FALSE"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="2"
-				OptimizeForWindowsApplication="FALSE"
-				PreprocessorDefinitions="WIN32,_DEBUG,_WINDOWS,AI_COMPILER"
-				StringPooling="TRUE"
+				OmitFramePointers="false"
+				EnableFiberSafeOptimizations="true"
+				PreprocessorDefinitions="WIN32,DEBUG,_WINDOWS,AI_COMPILER;_SECURE_SCL=0"
+				StringPooling="true"
 				RuntimeLibrary="2"
 				StructMemberAlignment="0"
-				BufferSecurityCheck="TRUE"
-				EnableFunctionLevelLinking="FALSE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
+				BufferSecurityCheck="true"
+				EnableFunctionLevelLinking="false"
+				FloatingPointModel="2"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
@@ -206,18 +290,28 @@
 				ProgramDataBaseFileName="$(IntDir)/"
 				BrowseInformation="0"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
-				GenerateMapFile="FALSE"
+				SuppressStartupBanner="true"
+				GenerateDebugInformation="true"
+				GenerateMapFile="false"
 				MapFileName="$(OutDir)/$(ProjectName).map"
 				SubSystem="2"
 				StackReserveSize="0"
@@ -225,34 +319,365 @@
 				LargeAddressAware="2"
 				TerminalServerAware="0"
 				ImportLibrary="x:\libraries\$(ProjectName).lib"
-				TargetMachine="0"/>
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Mixed_Priquel|Win32"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName="x:/xrAI.tlb"/>
+				TypeLibraryName="x:/xrAI.tlb"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="false"
+				EnableFiberSafeOptimizations="true"
+				PreprocessorDefinitions="WIN32,DEBUG,_WINDOWS,AI_COMPILER;_SECURE_SCL=0;PRIQUEL"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				StructMemberAlignment="0"
+				BufferSecurityCheck="true"
+				EnableFunctionLevelLinking="false"
+				FloatingPointModel="2"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/"
+				BrowseInformation="0"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLinkerTool"
+				AdditionalOptions="/MACHINE:I386"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				GenerateDebugInformation="true"
+				GenerateMapFile="false"
+				MapFileName="$(OutDir)/$(ProjectName).map"
+				SubSystem="2"
+				StackReserveSize="0"
+				StackCommitSize="0"
+				LargeAddressAware="2"
+				TerminalServerAware="0"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
+				TargetMachine="0"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug_Priquel|Win32"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName="x:/xrAI.tlb"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				PreprocessorDefinitions="WIN32,_WINDOWS,DEBUG,AI_COMPILER;_SECURE_SCL=0;PRIQUEL"
+				ExceptionHandling="1"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="2"
+				StructMemberAlignment="0"
+				FloatingPointModel="2"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/"
+				BrowseInformation="0"
+				WarningLevel="4"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+				ShowIncludes="false"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/MACHINE:I386"
+				LinkIncremental="2"
+				SuppressStartupBanner="true"
+				GenerateDebugInformation="true"
+				GenerateMapFile="false"
+				MapFileName=""
+				MapExports="false"
+				SubSystem="2"
+				StackReserveSize="0"
+				StackCommitSize="0"
+				LargeAddressAware="2"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release_Priquel|Win32"
+			OutputDirectory="x:\binaries"
+			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName="x:/xrAI.tlb"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
+				WholeProgramOptimization="true"
+				PreprocessorDefinitions="WIN32,NDEBUG,_WINDOWS,AI_COMPILER;_SECURE_SCL=0;PRIQUEL"
+				StringPooling="true"
+				ExceptionHandling="0"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="false"
+				EnableEnhancedInstructionSet="1"
+				FloatingPointModel="2"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
+				AssemblerOutput="0"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/"
+				BrowseInformation="0"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/MACHINE:I386"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
+				GenerateMapFile="false"
+				MapFileName=""
+				SubSystem="2"
+				StackReserveSize="0"
+				StackCommitSize="0"
+				LargeAddressAware="2"
+				LinkTimeCodeGeneration="1"
+				ImportLibrary="x:\libraries\$(ProjectName).lib"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -260,1102 +685,1586 @@
 	<Files>
 		<Filter
 			Name="Kernel"
-			Filter="">
+			>
 			<File
-				RelativePath=".\communicate.h">
+				RelativePath=".\communicate.h"
+				>
 			</File>
 			<File
-				RelativePath=".\defines.h">
+				RelativePath=".\defines.h"
+				>
 			</File>
 			<File
-				RelativePath=".\factory_api.h">
+				RelativePath=".\factory_api.h"
+				>
 			</File>
 			<File
-				RelativePath=".\FastDelegate.h">
+				RelativePath=".\FastDelegate.h"
+				>
 			</File>
 			<File
-				RelativePath=".\StdAfx.cpp">
+				RelativePath=".\StdAfx.cpp"
+				>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
+						UsePrecompiledHeader="1"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release|Win32"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
+						UsePrecompiledHeader="1"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Mixed|Win32">
+					Name="Mixed|Win32"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Mixed_Priquel|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Priquel|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Priquel|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\StdAfx.h">
+				RelativePath=".\StdAfx.h"
+				>
 			</File>
 			<File
-				RelativePath=".\tga.cpp">
+				RelativePath=".\tga.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\tga.h">
+				RelativePath=".\tga.h"
+				>
 			</File>
 			<File
-				RelativePath=".\xrAI.cpp">
+				RelativePath=".\xrAI.cpp"
+				>
 			</File>
 			<File
-				RelativePath="xrAI.h">
+				RelativePath="xrAI.h"
+				>
 			</File>
 			<File
-				RelativePath=".\xrShaderTypes.h">
+				RelativePath=".\xrShaderTypes.h"
+				>
 			</File>
 			<File
-				RelativePath=".\xrThread.cpp">
+				RelativePath=".\xrThread.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\xrThread.h">
+				RelativePath=".\xrThread.h"
+				>
 			</File>
 			<Filter
 				Name="Resource Files"
-				Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+				Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+				>
 				<File
-					RelativePath=".\resource.h">
+					RelativePath=".\resource.h"
+					>
 				</File>
 				<File
-					RelativePath=".\resource.rc">
+					RelativePath=".\resource.rc"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Log"
-				Filter="">
+				>
 				<File
-					RelativePath="cl_log.cpp">
+					RelativePath="cl_log.cpp"
+					>
 				</File>
 				<File
-					RelativePath="cl_log.h">
+					RelativePath="cl_log.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Generic"
-				Filter="">
+				>
 				<File
-					RelativePath="_d3d_extensions.h">
+					RelativePath="_d3d_extensions.h"
+					>
 				</File>
 				<File
-					RelativePath=".\FTimer.h">
+					RelativePath=".\FTimer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\light.h">
+					RelativePath=".\light.h"
+					>
 				</File>
 				<File
-					RelativePath=".\std_classes.h">
+					RelativePath=".\std_classes.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="CDB"
-				Filter="">
+				>
 				<File
-					RelativePath=".\cl_collector.cpp">
+					RelativePath=".\cl_collector.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\cl_collector.h">
+					RelativePath=".\cl_collector.h"
+					>
 				</File>
 				<File
-					RelativePath=".\cl_intersect.h">
+					RelativePath=".\cl_intersect.h"
+					>
 				</File>
 				<File
-					RelativePath=".\xrCDB.h">
+					RelativePath=".\xrCDB.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Random32"
-				Filter="">
+				>
 				<File
-					RelativePath=".\random32.cpp">
+					RelativePath=".\random32.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\random32.h">
+					RelativePath=".\random32.h"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Compiler"
-			Filter="">
+			>
 			<File
-				RelativePath=".\_buildnodes_view.cpp">
+				RelativePath=".\_buildnodes_view.cpp"
+				>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					ExcludedFromBuild="true"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
+					ExcludedFromBuild="true"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Mixed|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="AIMapExport.h">
-			</File>
-			<File
-				RelativePath=".\compiler.cpp">
-				<FileConfiguration
-					Name="Release|Win32">
+					ExcludedFromBuild="true"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						AssemblerOutput="4"/>
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Mixed|Win32">
+					Name="Mixed_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						AssemblerOutput="4"/>
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\compiler.h">
+				RelativePath="AIMapExport.h"
+				>
 			</File>
 			<File
-				RelativePath=".\compiler_build.cpp">
+				RelativePath=".\compiler.cpp"
+				>
 				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					Name="Release|Win32"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+						AssemblerOutput="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Mixed|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Mixed_Priquel|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Priquel|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="4"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\compiler_cover.cpp">
+				RelativePath=".\compiler.h"
+				>
 			</File>
 			<File
-				RelativePath=".\compiler_display.cpp">
-			</File>
-			<File
-				RelativePath=".\compiler_light.cpp">
-			</File>
-			<File
-				RelativePath=".\compiler_link.cpp">
+				RelativePath=".\compiler_build.cpp"
+				>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					ExcludedFromBuild="true"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\compiler_cover.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\compiler_display.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\compiler_light.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\compiler_link.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
+					ExcludedFromBuild="true"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Mixed|Win32"
-					ExcludedFromBuild="TRUE">
+					ExcludedFromBuild="true"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Mixed_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\compiler_load.cpp">
+				RelativePath=".\compiler_load.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\compiler_merge.cpp">
+				RelativePath=".\compiler_merge.cpp"
+				>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					ExcludedFromBuild="true"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
+					ExcludedFromBuild="true"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Mixed|Win32"
-					ExcludedFromBuild="TRUE">
+					ExcludedFromBuild="true"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Mixed_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\compiler_palettize_covers.cpp">
+				RelativePath=".\compiler_palettize_covers.cpp"
+				>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					ExcludedFromBuild="true"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
+					ExcludedFromBuild="true"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Mixed|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\compiler_save.cpp">
-				<FileConfiguration
-					Name="Release|Win32">
+					ExcludedFromBuild="true"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						AssemblerOutput="4"/>
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Mixed|Win32">
+					Name="Mixed_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						AssemblerOutput="4"/>
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Priquel|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\compiler_smooth.cpp">
+				RelativePath=".\compiler_save.cpp"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Mixed|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Mixed_Priquel|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Priquel|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="4"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\ETextureParams.h">
+				RelativePath=".\compiler_smooth.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\FreeImage.h">
+				RelativePath=".\ETextureParams.h"
+				>
 			</File>
 			<File
-				RelativePath="LevelGameDef.h">
+				RelativePath="LevelGameDef.h"
+				>
 			</File>
 			<File
-				RelativePath=".\motion_simulator.cpp">
+				RelativePath=".\motion_simulator.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\motion_simulator.h">
+				RelativePath=".\motion_simulator.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Shader_xrLC.h">
+				RelativePath=".\Shader_xrLC.h"
+				>
 			</File>
 			<File
-				RelativePath=".\xrLevel.h">
+				RelativePath=".\xrLevel.h"
+				>
 			</File>
 			<File
-				RelativePath=".\xrLoadSurface.cpp">
+				RelativePath="..\xr_3da\xrLoadSurface.cpp"
+				>
 			</File>
+			<Filter
+				Name="quad_tree"
+				>
+				<File
+					RelativePath=".\quadtree.h"
+					>
+				</File>
+				<File
+					RelativePath=".\quadtree_inline.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="cover_point"
+				>
+				<File
+					RelativePath=".\cover_point.h"
+					>
+				</File>
+				<File
+					RelativePath=".\cover_point_inline.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="ALife"
-			Filter="">
+			>
 			<Filter
 				Name="search"
-				Filter="">
+				>
 				<Filter
 					Name="path_managers"
-					Filter="">
+					>
 					<File
-						RelativePath=".\path_manager.h">
+						RelativePath=".\path_manager.h"
+						>
 					</File>
 					<Filter
 						Name="path_manager_game"
-						Filter="">
+						>
 						<File
-							RelativePath=".\path_manager_game.h">
+							RelativePath=".\path_manager_game.h"
+							>
 						</File>
 						<File
-							RelativePath=".\path_manager_game_inline.h">
+							RelativePath=".\path_manager_game_inline.h"
+							>
 						</File>
 						<Filter
 							Name="path_manager_game_vertex_type"
-							Filter="">
+							>
 							<File
-								RelativePath=".\path_manager_game_vertex_type.h">
+								RelativePath=".\path_manager_game_vertex_type.h"
+								>
 							</File>
 							<File
-								RelativePath=".\path_manager_game_vertex_type_inline.h">
+								RelativePath=".\path_manager_game_vertex_type_inline.h"
+								>
 							</File>
 						</Filter>
 						<Filter
 							Name="path_manager_game_level"
-							Filter="">
+							>
 							<File
-								RelativePath=".\path_manager_game_level.h">
+								RelativePath=".\path_manager_game_level.h"
+								>
 							</File>
 							<File
-								RelativePath=".\path_manager_game_level_inline.h">
+								RelativePath=".\path_manager_game_level_inline.h"
+								>
 							</File>
 						</Filter>
 					</Filter>
 					<Filter
 						Name="path_manager_generic"
-						Filter="">
+						>
 						<File
-							RelativePath=".\path_manager_generic.h">
+							RelativePath=".\path_manager_generic.h"
+							>
 						</File>
 						<File
-							RelativePath=".\path_manager_generic_inline.h">
+							RelativePath=".\path_manager_generic_inline.h"
+							>
 						</File>
 					</Filter>
 					<Filter
 						Name="path_manager_level"
-						Filter="">
+						>
 						<File
-							RelativePath=".\path_manager_level.h">
+							RelativePath=".\path_manager_level.h"
+							>
 						</File>
 						<File
-							RelativePath=".\path_manager_level_inline.h">
+							RelativePath=".\path_manager_level_inline.h"
+							>
 						</File>
 						<Filter
 							Name="path_manager_level_evaluator"
-							Filter="">
+							>
 							<File
-								RelativePath=".\path_manager_level_evaluator.h">
+								RelativePath=".\path_manager_level_evaluator.h"
+								>
 							</File>
 							<File
-								RelativePath=".\path_manager_level_evaluator_inline.h">
+								RelativePath=".\path_manager_level_evaluator_inline.h"
+								>
 							</File>
 						</Filter>
 						<Filter
 							Name="path_manager_level_flooder"
-							Filter="">
+							>
 							<File
-								RelativePath=".\path_manager_level_flooder.h">
+								RelativePath=".\path_manager_level_flooder.h"
+								>
 							</File>
 							<File
-								RelativePath=".\path_manager_level_flooder_inline.h">
+								RelativePath=".\path_manager_level_flooder_inline.h"
+								>
 							</File>
 						</Filter>
 						<Filter
 							Name="path_manager_level_straight_line"
-							Filter="">
+							>
 							<File
-								RelativePath=".\path_manager_level_straight_line.h">
+								RelativePath=".\path_manager_level_straight_line.h"
+								>
 							</File>
 							<File
-								RelativePath=".\path_manager_level_straight_line_inline.h">
+								RelativePath=".\path_manager_level_straight_line_inline.h"
+								>
 							</File>
 						</Filter>
 					</Filter>
 					<Filter
 						Name="path_manager_params"
-						Filter="">
+						>
 						<File
-							RelativePath=".\path_manager_params.h">
+							RelativePath=".\path_manager_params.h"
+							>
 						</File>
 						<File
-							RelativePath=".\path_manager_params_flooder.h">
+							RelativePath=".\path_manager_params_flooder.h"
+							>
 						</File>
 						<File
-							RelativePath=".\path_manager_params_game_level.h">
+							RelativePath=".\path_manager_params_game_level.h"
+							>
 						</File>
 						<File
-							RelativePath=".\path_manager_params_straight_line.h">
+							RelativePath=".\path_manager_params_straight_line.h"
+							>
 						</File>
 					</Filter>
 				</Filter>
 				<Filter
 					Name="algorithms"
-					Filter="">
+					>
 					<Filter
 						Name="A*"
-						Filter="">
+						>
 						<File
-							RelativePath=".\a_star.h">
+							RelativePath=".\a_star.h"
+							>
 						</File>
 						<File
-							RelativePath=".\a_star_inline.h">
+							RelativePath=".\a_star_inline.h"
+							>
 						</File>
 					</Filter>
 					<Filter
 						Name="Dijkstra"
-						Filter="">
+						>
 						<File
-							RelativePath=".\dijkstra.h">
+							RelativePath=".\dijkstra.h"
+							>
 						</File>
 						<File
-							RelativePath=".\dijkstra_inline.h">
+							RelativePath=".\dijkstra_inline.h"
+							>
 						</File>
 					</Filter>
 				</Filter>
 				<Filter
 					Name="data_storages"
-					Filter="">
+					>
 					<Filter
 						Name="algorithms"
-						Filter="">
+						>
 						<Filter
 							Name="priority_queues"
-							Filter="">
+							>
 							<Filter
 								Name="binary_heap"
-								Filter="">
+								>
 								<File
-									RelativePath=".\data_storage_binary_heap.h">
+									RelativePath=".\data_storage_binary_heap.h"
+									>
 								</File>
 								<File
-									RelativePath=".\data_storage_binary_heap_inline.h">
+									RelativePath=".\data_storage_binary_heap_inline.h"
+									>
 								</File>
 							</Filter>
 						</Filter>
 						<Filter
 							Name="lists"
-							Filter="">
+							>
 							<Filter
 								Name="bucket_list"
-								Filter="">
+								>
 								<File
-									RelativePath=".\data_storage_bucket_list.h">
+									RelativePath=".\data_storage_bucket_list.h"
+									>
 								</File>
 								<File
-									RelativePath=".\data_storage_bucket_list_inline.h">
+									RelativePath=".\data_storage_bucket_list_inline.h"
+									>
 								</File>
 							</Filter>
 							<Filter
 								Name="double_linked_list"
-								Filter="">
+								>
 								<File
-									RelativePath=".\data_storage_double_linked_list.h">
+									RelativePath=".\data_storage_double_linked_list.h"
+									>
 								</File>
 								<File
-									RelativePath=".\data_storage_double_linked_list_inline.h">
+									RelativePath=".\data_storage_double_linked_list_inline.h"
+									>
 								</File>
 							</Filter>
 							<Filter
 								Name="single_linked_list"
-								Filter="">
+								>
 								<File
-									RelativePath=".\data_storage_single_linked_list.h">
+									RelativePath=".\data_storage_single_linked_list.h"
+									>
 								</File>
 								<File
-									RelativePath=".\data_storage_single_linked_list_inline.h">
+									RelativePath=".\data_storage_single_linked_list_inline.h"
+									>
 								</File>
 							</Filter>
 						</Filter>
 					</Filter>
 					<Filter
 						Name="data_storage_constructors"
-						Filter="">
+						>
 						<File
-							RelativePath=".\data_storage_constructor.h">
+							RelativePath=".\data_storage_constructor.h"
+							>
 						</File>
 						<Filter
 							Name="builder_allocator"
-							Filter="">
+							>
 							<File
-								RelativePath=".\builder_allocator_constructor.h">
+								RelativePath=".\builder_allocator_constructor.h"
+								>
 							</File>
 							<File
-								RelativePath=".\builder_allocator_constructor_inline.h">
+								RelativePath=".\builder_allocator_constructor_inline.h"
+								>
 							</File>
 						</Filter>
 						<Filter
 							Name="manager_builder_allocator"
-							Filter="">
+							>
 							<File
-								RelativePath=".\manager_builder_allocator_constructor.h">
+								RelativePath=".\manager_builder_allocator_constructor.h"
+								>
 							</File>
 							<File
-								RelativePath=".\manager_builder_allocator_constructor_inline.h">
+								RelativePath=".\manager_builder_allocator_constructor_inline.h"
+								>
 							</File>
 						</Filter>
 					</Filter>
 					<Filter
 						Name="path_builders"
-						Filter="">
+						>
 						<Filter
 							Name="edge_path"
-							Filter="">
+							>
 							<File
-								RelativePath=".\edge_path.h">
+								RelativePath=".\edge_path.h"
+								>
 							</File>
 							<File
-								RelativePath=".\edge_path_inline.h">
+								RelativePath=".\edge_path_inline.h"
+								>
 							</File>
 						</Filter>
 						<Filter
 							Name="vertex_path"
-							Filter="">
+							>
 							<File
-								RelativePath=".\vertex_path.h">
+								RelativePath=".\vertex_path.h"
+								>
 							</File>
 							<File
-								RelativePath=".\vertex_path_inline.h">
+								RelativePath=".\vertex_path_inline.h"
+								>
 							</File>
 						</Filter>
 					</Filter>
 					<Filter
 						Name="vertex_allocators"
-						Filter="">
+						>
 						<Filter
 							Name="fixed"
-							Filter="">
+							>
 							<File
-								RelativePath=".\vertex_allocator_fixed.h">
+								RelativePath=".\vertex_allocator_fixed.h"
+								>
 							</File>
 							<File
-								RelativePath=".\vertex_allocator_fixed_inline.h">
+								RelativePath=".\vertex_allocator_fixed_inline.h"
+								>
 							</File>
 						</Filter>
 					</Filter>
 					<Filter
 						Name="vertex_managers"
-						Filter="">
+						>
 						<Filter
 							Name="fixed"
-							Filter="">
+							>
 							<File
-								RelativePath=".\vertex_manager_fixed.h">
+								RelativePath=".\vertex_manager_fixed.h"
+								>
 							</File>
 							<File
-								RelativePath=".\vertex_manager_fixed_inline.h">
+								RelativePath=".\vertex_manager_fixed_inline.h"
+								>
 							</File>
 						</Filter>
 						<Filter
 							Name="hash_fixed"
-							Filter="">
+							>
 							<File
-								RelativePath=".\vertex_manager_hash_fixed.h">
+								RelativePath=".\vertex_manager_hash_fixed.h"
+								>
 							</File>
 							<File
-								RelativePath=".\vertex_manager_hash_fixed_inline.h">
+								RelativePath=".\vertex_manager_hash_fixed_inline.h"
+								>
 							</File>
 						</Filter>
 					</Filter>
 				</Filter>
 				<Filter
 					Name="graphs"
-					Filter="">
+					>
 					<Filter
 						Name="abstract_graph"
-						Filter="">
+						>
 						<File
-							RelativePath=".\graph_abstract.h">
+							RelativePath=".\graph_abstract.h"
+							>
 						</File>
 						<File
-							RelativePath=".\graph_abstract_inline.h">
+							RelativePath=".\graph_abstract_inline.h"
+							>
 						</File>
 						<Filter
 							Name="graph_edge"
-							Filter="">
+							>
 							<File
-								RelativePath=".\graph_edge.h">
+								RelativePath=".\graph_edge.h"
+								>
 							</File>
 							<File
-								RelativePath=".\graph_edge_inline.h">
+								RelativePath=".\graph_edge_inline.h"
+								>
 							</File>
 						</Filter>
 						<Filter
 							Name="graph_vertex"
-							Filter="">
+							>
 							<File
-								RelativePath=".\graph_vertex.h">
+								RelativePath=".\graph_vertex.h"
+								>
 							</File>
 							<File
-								RelativePath=".\graph_vertex_inline.h">
+								RelativePath=".\graph_vertex_inline.h"
+								>
 							</File>
 						</Filter>
 					</Filter>
 					<Filter
 						Name="cross_table"
-						Filter="">
+						>
 						<File
-							RelativePath=".\game_level_cross_table.h">
+							RelativePath=".\game_level_cross_table.h"
+							>
 						</File>
 						<File
-							RelativePath=".\game_level_cross_table_inline.h">
+							RelativePath=".\game_level_cross_table_inline.h"
+							>
 						</File>
 					</Filter>
 					<Filter
 						Name="game_graph"
-						Filter="">
+						>
 						<File
-							RelativePath=".\game_graph.h">
+							RelativePath=".\game_graph.h"
+							>
 						</File>
 						<File
-							RelativePath=".\game_graph_inline.h">
+							RelativePath=".\game_graph_inline.h"
+							>
 						</File>
 						<File
-							RelativePath=".\game_graph_space.h">
+							RelativePath=".\game_graph_space.h"
+							>
 						</File>
 					</Filter>
 					<Filter
 						Name="level_graph"
-						Filter="">
+						>
 						<File
-							RelativePath=".\level_graph.cpp">
+							RelativePath=".\level_graph.cpp"
+							>
 						</File>
 						<File
-							RelativePath=".\level_graph.h">
+							RelativePath=".\level_graph.h"
+							>
 						</File>
 						<File
-							RelativePath=".\level_graph_inline.h">
+							RelativePath=".\level_graph_inline.h"
+							>
 						</File>
 						<File
-							RelativePath=".\level_graph_space.h">
+							RelativePath=".\level_graph_space.h"
+							>
 						</File>
 						<File
-							RelativePath=".\level_graph_vertex.cpp">
+							RelativePath=".\level_graph_vertex.cpp"
+							>
 						</File>
 						<File
-							RelativePath=".\level_graph_vertex_inline.h">
+							RelativePath=".\level_graph_vertex_inline.h"
+							>
 						</File>
 					</Filter>
 				</Filter>
 				<Filter
 					Name="graph_engine"
-					Filter="">
+					>
 					<File
-						RelativePath=".\graph_engine.h">
+						RelativePath=".\graph_engine.h"
+						>
 					</File>
 					<File
-						RelativePath=".\graph_engine_inline.h">
+						RelativePath=".\graph_engine_inline.h"
+						>
 					</File>
 					<File
-						RelativePath=".\graph_engine_space.h">
+						RelativePath=".\graph_engine_space.h"
+						>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="Cross"
-				Filter="">
+				>
 				<File
-					RelativePath="xrCrossTable.cpp">
+					RelativePath="xrCrossTable.cpp"
+					>
 				</File>
 				<File
-					RelativePath="xrCrossTable.h">
+					RelativePath="xrCrossTable.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Graph"
-				Filter="">
+				>
 				<File
-					RelativePath=".\game_graph_builder.cpp">
+					RelativePath=".\game_graph_builder.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\game_graph_builder.h">
+					RelativePath=".\game_graph_builder.h"
+					>
 				</File>
 				<File
-					RelativePath=".\game_graph_builder_inline.h">
+					RelativePath=".\game_graph_builder_inline.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Merge"
-				Filter="">
+				>
 				<File
-					RelativePath="xr_graph_merge.cpp">
+					RelativePath="xr_graph_merge.cpp"
+					>
 				</File>
 				<File
-					RelativePath="xr_graph_merge.h">
+					RelativePath="xr_graph_merge.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Shared"
-				Filter="">
+				>
 				<File
-					RelativePath=".\restriction_space.h">
+					RelativePath=".\restriction_space.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Sound.h">
+					RelativePath=".\Sound.h"
+					>
 				</File>
 				<Filter
 					Name="ALife"
-					Filter="">
+					>
 					<Filter
 						Name="alife_artefact_order"
-						Filter="">
+						>
 						<File
-							RelativePath=".\alife_artefact_order.cpp">
+							RelativePath=".\alife_artefact_order.cpp"
+							>
 						</File>
 						<File
-							RelativePath=".\alife_artefact_order.h">
+							RelativePath=".\alife_artefact_order.h"
+							>
 						</File>
 					</Filter>
 					<Filter
 						Name="alife_human_brain"
-						Filter="">
+						>
 						<File
-							RelativePath=".\alife_human_brain.cpp">
+							RelativePath=".\alife_human_brain.cpp"
+							>
 						</File>
 						<File
-							RelativePath=".\alife_human_brain.h">
+							RelativePath=".\alife_human_brain.h"
+							>
 						</File>
 						<File
-							RelativePath=".\alife_human_brain_inline.h">
+							RelativePath=".\alife_human_brain_inline.h"
+							>
 						</File>
 					</Filter>
 					<Filter
 						Name="alife_monster_brain"
-						Filter="">
+						>
 						<File
-							RelativePath=".\alife_monster_brain.cpp">
+							RelativePath=".\alife_monster_brain.cpp"
+							>
 						</File>
 						<File
-							RelativePath=".\alife_monster_brain.h">
+							RelativePath=".\alife_monster_brain.h"
+							>
 						</File>
 						<File
-							RelativePath=".\alife_monster_brain_inline.h">
+							RelativePath=".\alife_monster_brain_inline.h"
+							>
 						</File>
 					</Filter>
 					<Filter
 						Name="alife_space"
-						Filter="">
+						>
 						<File
-							RelativePath=".\alife_space.cpp">
+							RelativePath=".\alife_space.cpp"
+							>
 						</File>
 						<File
-							RelativePath=".\alife_space.h">
+							RelativePath=".\alife_space.h"
+							>
 						</File>
 					</Filter>
 				</Filter>
 				<Filter
 					Name="ServerEntities"
-					Filter="">
+					>
 					<File
-						RelativePath=".\bone.h">
+						RelativePath=".\bone.h"
+						>
 					</File>
 					<File
-						RelativePath=".\character_info_defs.h">
+						RelativePath=".\character_info_defs.h"
+						>
 					</File>
 					<File
-						RelativePath=".\ChooseTypes.h">
+						RelativePath=".\ChooseTypes.h"
+						>
 					</File>
 					<File
-						RelativePath=".\DrawUtils.h">
+						RelativePath=".\DrawUtils.h"
+						>
 					</File>
 					<File
-						RelativePath=".\InfoPortionDefs.h">
+						RelativePath=".\InfoPortionDefs.h"
+						>
 					</File>
 					<File
-						RelativePath=".\inventory_space.h">
+						RelativePath=".\inventory_space.h"
+						>
 					</File>
 					<File
-						RelativePath=".\ItemListTypes.h">
+						RelativePath=".\ItemListTypes.h"
+						>
 					</File>
 					<File
-						RelativePath=".\PropertiesListHelper.h">
+						RelativePath=".\PropertiesListHelper.h"
+						>
 					</File>
 					<File
-						RelativePath=".\PropertiesListTypes.h">
+						RelativePath=".\PropertiesListTypes.h"
+						>
 					</File>
 					<File
-						RelativePath=".\script_export_space.h">
+						RelativePath=".\script_export_space.h"
+						>
 					</File>
 					<File
-						RelativePath=".\script_value_container.h">
+						RelativePath=".\script_value_container.h"
+						>
 					</File>
 					<File
-						RelativePath=".\script_value_container_impl.h">
+						RelativePath=".\script_value_container_impl.h"
+						>
 					</File>
 					<File
-						RelativePath=".\ShapeData.h">
+						RelativePath=".\ShapeData.h"
+						>
 					</File>
 					<File
-						RelativePath=".\WaveForm.h">
+						RelativePath=".\WaveForm.h"
+						>
 					</File>
 					<File
-						RelativePath=".\xrEProps.h">
+						RelativePath=".\xrEProps.h"
+						>
 					</File>
 					<File
-						RelativePath=".\xrServer_Object_Base.cpp">
+						RelativePath=".\xrServer_Object_Base.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\xrServer_Object_Base.h">
+						RelativePath=".\xrServer_Object_Base.h"
+						>
 					</File>
 					<File
-						RelativePath=".\xrServer_Objects.cpp">
+						RelativePath=".\xrServer_Objects.cpp"
+						>
 					</File>
 					<File
-						RelativePath="xrServer_Objects.h">
+						RelativePath="xrServer_Objects.h"
+						>
 					</File>
 					<File
-						RelativePath=".\xrServer_Objects_Abstract.cpp">
+						RelativePath=".\xrServer_Objects_Abstract.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\xrServer_Objects_Abstract.h">
+						RelativePath=".\xrServer_Objects_Abstract.h"
+						>
 					</File>
 					<File
-						RelativePath=".\xrServer_Objects_ALife.cpp">
+						RelativePath=".\xrServer_Objects_ALife.cpp"
+						>
 					</File>
 					<File
-						RelativePath="xrServer_Objects_ALife.h">
+						RelativePath="xrServer_Objects_ALife.h"
+						>
 					</File>
 					<File
-						RelativePath="xrServer_Objects_ALife_All.h">
+						RelativePath="xrServer_Objects_ALife_All.h"
+						>
 					</File>
 					<File
-						RelativePath=".\xrServer_Objects_ALife_Items.cpp">
+						RelativePath=".\xrServer_Objects_ALife_Items.cpp"
+						>
 					</File>
 					<File
-						RelativePath="xrServer_Objects_ALife_Items.h">
+						RelativePath="xrServer_Objects_ALife_Items.h"
+						>
 					</File>
 					<File
-						RelativePath=".\xrServer_Objects_ALife_Monsters.cpp">
+						RelativePath=".\xrServer_Objects_ALife_Monsters.cpp"
+						>
 					</File>
 					<File
-						RelativePath="xrServer_Objects_ALife_Monsters.h">
+						RelativePath="xrServer_Objects_ALife_Monsters.h"
+						>
 					</File>
 					<File
-						RelativePath="xrServer_Space.h">
+						RelativePath="xrServer_Space.h"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="Server"
-					Filter="">
+					>
 					<File
-						RelativePath=".\client_id.h">
+						RelativePath=".\client_id.h"
+						>
 					</File>
 					<File
-						RelativePath=".\game_base_space.h">
+						RelativePath=".\game_base_space.h"
+						>
 					</File>
 					<File
-						RelativePath="NET_Compressor.h">
+						RelativePath="NET_Compressor.h"
+						>
 					</File>
 					<File
-						RelativePath="NET_utils.h">
+						RelativePath="NET_utils.h"
+						>
 					</File>
 					<File
-						RelativePath=".\PHNetState.cpp">
+						RelativePath=".\PHNetState.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\PHNetState.h">
+						RelativePath=".\PHNetState.h"
+						>
 					</File>
 					<File
-						RelativePath=".\PHSynchronize.cpp">
+						RelativePath=".\PHSynchronize.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\PHSynchronize.h">
+						RelativePath=".\PHSynchronize.h"
+						>
 					</File>
 					<File
-						RelativePath="xrMessages.h">
+						RelativePath="xrMessages.h"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="ObjectBroker"
-					Filter="">
+					>
 					<File
-						RelativePath=".\object_broker.h">
+						RelativePath=".\object_broker.h"
+						>
 					</File>
 					<File
-						RelativePath=".\object_cloner.h">
+						RelativePath=".\object_cloner.h"
+						>
 					</File>
 					<File
-						RelativePath=".\object_comparer.h">
+						RelativePath=".\object_comparer.h"
+						>
 					</File>
 					<File
-						RelativePath=".\object_destroyer.h">
+						RelativePath=".\object_destroyer.h"
+						>
 					</File>
 					<File
-						RelativePath=".\object_interfaces.h">
+						RelativePath=".\object_interfaces.h"
+						>
 					</File>
 					<File
-						RelativePath=".\object_loader.h">
+						RelativePath=".\object_loader.h"
+						>
 					</File>
 					<File
-						RelativePath=".\object_saver.h">
+						RelativePath=".\object_saver.h"
+						>
 					</File>
 					<File
-						RelativePath=".\object_type_traits.h">
+						RelativePath=".\object_type_traits.h"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="Common"
-					Filter="">
+					>
 					<File
-						RelativePath="clsid_game.h">
+						RelativePath="clsid_game.h"
+						>
 					</File>
 					<File
-						RelativePath=".\profiler.h">
+						RelativePath=".\profiler.h"
+						>
 					</File>
 					<File
-						RelativePath=".\smart_cast.cpp">
+						RelativePath=".\smart_cast.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\smart_cast.h">
+						RelativePath=".\smart_cast.h"
+						>
 					</File>
 					<File
-						RelativePath=".\smart_cast_impl0.h">
+						RelativePath=".\smart_cast_impl0.h"
+						>
 					</File>
 					<File
-						RelativePath=".\smart_cast_impl1.h">
+						RelativePath=".\smart_cast_impl1.h"
+						>
 					</File>
 					<File
-						RelativePath=".\smart_cast_impl2.h">
+						RelativePath=".\smart_cast_impl2.h"
+						>
 					</File>
 					<File
-						RelativePath=".\smart_cast_stats.cpp">
+						RelativePath=".\smart_cast_stats.cpp"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="IntrusivePtr"
-					Filter="">
+					>
 					<File
-						RelativePath=".\intrusive_ptr.h">
+						RelativePath=".\intrusive_ptr.h"
+						>
 					</File>
 					<File
-						RelativePath=".\intrusive_ptr_inline.h">
+						RelativePath=".\intrusive_ptr_inline.h"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="associative_vector"
-					Filter="">
+					>
 					<File
-						RelativePath=".\associative_vector.h">
+						RelativePath=".\associative_vector.h"
+						>
 					</File>
 					<File
-						RelativePath=".\associative_vector_compare_predicate.h">
+						RelativePath=".\associative_vector_compare_predicate.h"
+						>
 					</File>
 					<File
-						RelativePath=".\associative_vector_compare_predicate_inline.h">
+						RelativePath=".\associative_vector_compare_predicate_inline.h"
+						>
 					</File>
 					<File
-						RelativePath=".\associative_vector_inline.h">
+						RelativePath=".\associative_vector_inline.h"
+						>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="Spawn"
-				Filter="">
+				>
 				<File
-					RelativePath=".\spawn_constructor_space.h">
+					RelativePath=".\spawn_constructor_space.h"
+					>
 				</File>
 				<Filter
 					Name="game_spawn_constructor"
-					Filter="">
+					>
 					<File
-						RelativePath=".\game_spawn_constructor.cpp">
+						RelativePath=".\game_spawn_constructor.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\game_spawn_constructor.h">
+						RelativePath=".\game_spawn_constructor.h"
+						>
 					</File>
 					<File
-						RelativePath=".\game_spawn_constructor_inline.h">
+						RelativePath=".\game_spawn_constructor_inline.h"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="level_spawn_constructor"
-					Filter="">
+					>
 					<File
-						RelativePath=".\level_spawn_constructor.cpp">
+						RelativePath=".\level_spawn_constructor.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\level_spawn_constructor.h">
+						RelativePath=".\level_spawn_constructor.h"
+						>
 					</File>
 					<File
-						RelativePath=".\level_spawn_constructor_inline.h">
+						RelativePath=".\level_spawn_constructor_inline.h"
+						>
 					</File>
 					<Filter
 						Name="space_restrictor_wrapper"
-						Filter="">
+						>
 						<File
-							RelativePath=".\space_restrictor_wrapper.cpp">
+							RelativePath=".\space_restrictor_wrapper.cpp"
+							>
 						</File>
 						<File
-							RelativePath=".\space_restrictor_wrapper.h">
+							RelativePath=".\space_restrictor_wrapper.h"
+							>
 						</File>
 						<File
-							RelativePath=".\space_restrictor_wrapper_inline.h">
+							RelativePath=".\space_restrictor_wrapper_inline.h"
+							>
 						</File>
 					</Filter>
 				</Filter>
 				<Filter
 					Name="server_entity_wrapper"
-					Filter="">
+					>
 					<File
-						RelativePath=".\server_entity_wrapper.cpp">
+						RelativePath=".\server_entity_wrapper.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\server_entity_wrapper.h">
+						RelativePath=".\server_entity_wrapper.h"
+						>
 					</File>
 					<File
-						RelativePath=".\server_entity_wrapper_inline.h">
+						RelativePath=".\server_entity_wrapper_inline.h"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="patrol_paths"
-					Filter="">
+					>
 					<Filter
 						Name="patrol_path"
-						Filter="">
+						>
 						<File
-							RelativePath=".\patrol_path.cpp">
+							RelativePath=".\patrol_path.cpp"
+							>
 						</File>
 						<File
-							RelativePath=".\patrol_path.h">
+							RelativePath=".\patrol_path.h"
+							>
 						</File>
 						<File
-							RelativePath=".\patrol_path_inline.h">
+							RelativePath=".\patrol_path_inline.h"
+							>
 						</File>
 					</Filter>
 					<Filter
 						Name="patrol_path_storage"
-						Filter="">
+						>
 						<File
-							RelativePath=".\patrol_path_storage.cpp">
+							RelativePath=".\patrol_path_storage.cpp"
+							>
 						</File>
 						<File
-							RelativePath=".\patrol_path_storage.h">
+							RelativePath=".\patrol_path_storage.h"
+							>
 						</File>
 						<File
-							RelativePath=".\patrol_path_storage_inline.h">
+							RelativePath=".\patrol_path_storage_inline.h"
+							>
 						</File>
 					</Filter>
 					<Filter
 						Name="patrol_point"
-						Filter="">
+						>
 						<File
-							RelativePath=".\patrol_point.cpp">
+							RelativePath=".\patrol_point.cpp"
+							>
 						</File>
 						<File
-							RelativePath=".\patrol_point.h">
+							RelativePath=".\patrol_point.h"
+							>
 						</File>
 						<File
-							RelativePath=".\patrol_point_inline.h">
+							RelativePath=".\patrol_point_inline.h"
+							>
 						</File>
 					</Filter>
+				</Filter>
+				<Filter
+					Name="spawn_patcher"
+					>
+					<File
+						RelativePath=".\spawn_patcher.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\spawn_patcher.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="Verify"
-				Filter="">
+				>
 				<File
-					RelativePath=".\verify_level_graph.cpp">
+					RelativePath=".\verify_level_graph.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="guid_generator"
-				Filter="">
+				>
 				<File
-					RelativePath=".\guid_generator.cpp">
+					RelativePath=".\guid_generator.cpp"
+					>
 					<FileConfiguration
-						Name="Debug|Win32">
+						Name="Debug|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="3"/>
+							UsePrecompiledHeader="2"
+						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32">
+						Name="Release|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="3"/>
+							UsePrecompiledHeader="2"
+						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Mixed|Win32">
+						Name="Mixed|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="3"/>
+							UsePrecompiledHeader="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Mixed_Priquel|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_Priquel|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_Priquel|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="2"
+						/>
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\guid_generator.h">
+					RelativePath=".\guid_generator.h"
+					>
 				</File>
 			</Filter>
 		</Filter>
@@ -1363,6 +2272,7 @@
 	<Globals>
 		<Global
 			Name="DevPartner_IsInstrumented"
-			Value="1"/>
+			Value="1"
+		/>
 	</Globals>
 </VisualStudioProject>

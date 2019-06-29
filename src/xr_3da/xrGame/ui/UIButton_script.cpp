@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "UIButton.h"
 #include "UI3tButton.h"
 #include "UICheckButton.h"
@@ -6,8 +6,6 @@
 #include "UISpinNum.h"
 #include "UISpinText.h"
 #include "UITrackBar.h"
-#include "../script_space.h"
-#include <luabind\adopt_policy.hpp>
 
 using namespace luabind;
 
@@ -18,8 +16,8 @@ void CUIButton::script_register(lua_State *L)
 	[
 		class_<CUIButton, CUIStatic>("CUIButton")
 		.def(							constructor<>())
-		.def("Init",					(void(CUIButton::*)(float,float,float,float))CUIButton::Init )
-		.def("Init",					(void(CUIButton::*)(LPCSTR,float,float,float,float))CUIButton::Init )
+		.def("Init",					(void(CUIButton::*)(float,float,float,float))&CUIButton::Init )
+		.def("Init",					(void(CUIButton::*)(LPCSTR,float,float,float,float))&CUIButton::Init )
 		.def("SetHighlightColor",		&CUIButton::SetHighlightColor)
 		.def("EnableTextHighlighting",	&CUIButton::EnableTextHighlighting)
 /*

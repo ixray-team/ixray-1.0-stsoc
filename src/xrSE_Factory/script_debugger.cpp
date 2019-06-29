@@ -353,7 +353,7 @@ void CScriptDebugger::Eval(const char* strCode, char* res)
 	string1024 strCodeFull;
 	strCodeFull[0] = 0;
 	const char * r = "return  ";
-	strconcat(strCodeFull,r,strCode);
+	strconcat(sizeof(strCodeFull),strCodeFull,r,strCode);
 	m_lua->Eval(strCodeFull, res);
 }
 

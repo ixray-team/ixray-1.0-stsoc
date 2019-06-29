@@ -26,7 +26,7 @@ private:
 			bool operator == (const u16& _id){
 				return id == _id;
 			}
-			bool operator < (const _npc_visibility& m)
+			bool operator < (const _npc_visibility& m) const
 			{
 				return (value < m.value);
 			}

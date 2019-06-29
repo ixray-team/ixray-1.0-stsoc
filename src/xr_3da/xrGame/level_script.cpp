@@ -6,9 +6,8 @@
 //	Description : Level script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "level.h"
-#include "script_space.h"
 #include "actor.h"
 #include "script_game_object.h"
 #include "patrol_path_storage.h"
@@ -29,7 +28,6 @@
 #include "map_manager.h"
 #include "map_location.h"
 #include "phworld.h"
-#include <luabind/adopt_policy.hpp>
 
 using namespace luabind;
 
@@ -254,18 +252,19 @@ CUIDialogWnd* main_input_receiver()
 {
 	return HUD().GetUI()->MainInputReceiver();
 }
+#include "UIGameCustom.h"
 void hide_indicators()
 {
+	HUD().GetUI()->UIGame()->HideShownDialogs();
+
 	HUD().GetUI()->HideGameIndicators();
 	HUD().GetUI()->HideCrosshair();
-//.	psHUD_Flags.set(HUD_CROSSHAIR_RT, FALSE);
 }
 
 void show_indicators()
 {
 	HUD().GetUI()->ShowGameIndicators();
 	HUD().GetUI()->ShowCrosshair();
-//.	psHUD_Flags.set(HUD_CROSSHAIR_RT, TRUE);
 }
 
 
@@ -371,15 +370,16 @@ Fbox get_bounding_volume()
 void iterate_sounds					(LPCSTR prefix, u32 max_count, const CScriptCallbackEx<void> &callback)
 {
 	for (int j=0, N = _GetItemCount(prefix); j<N; ++j) {
-		string256					fn, s;
+		string_path					fn, s;
 		LPSTR						S = (LPSTR)&s;
 		_GetItem					(prefix,j,S);
 		if (FS.exist(fn,"$game_sounds$",S,".ogg"))
 			callback				(prefix);
 
-		for (u32 i=0; i<max_count; ++i){
-			string256				name;
-			sprintf					(name,"%s%d",S,i);
+		for (u32 i=0; i<max_count; ++i)
+		{
+			string_path					name;
+			sprintf_s					(name,"%s%d",S,i);
 			if (FS.exist(fn,"$game_sounds$",name,".ogg"))
 				callback			(name);
 		}
@@ -440,13 +440,19 @@ void set_snd_volume(float v)
 #include "actor_statistic_mgr.h"
 void add_actor_points(LPCSTR sect, LPCSTR detail_key, int cnt, int pts)
 {
-	return Actor()->StatisticMgr().AddPoints(_ParseItem(sect, actor_stats_token), detail_key, cnt, pts);
+	return Actor()->StatisticMgr().AddPoints(sect, detail_key, cnt, pts);
+}
+
+void add_actor_points_str(LPCSTR sect, LPCSTR detail_key, LPCSTR str_value)
+{
+	return Actor()->StatisticMgr().AddPoints(sect, detail_key, str_value);
 }
 
 int get_actor_points(LPCSTR sect)
 {
-	return Actor()->StatisticMgr().GetSectionPoints(_ParseItem(sect, actor_stats_token));
+	return Actor()->StatisticMgr().GetSectionPoints(sect);
 }
+extern int get_actor_ranking();
 extern void add_human_to_top_list		(u16 id);
 extern void remove_human_from_top_list	(u16 id);
 
@@ -612,15 +618,19 @@ void CLevel::script_register(lua_State *L)
 	module(L,"actor_stats")
 	[
 		def("add_points",						&add_actor_points),
+		def("add_points_str",					&add_actor_points_str),
 		def("get_points",						&get_actor_points),
 		def("add_to_ranking",					&add_human_to_top_list),
-		def("remove_from_ranking",				&remove_human_from_top_list)
+		def("remove_from_ranking",				&remove_human_from_top_list),
+		def("get_actor_ranking",				&get_actor_ranking)
 	];
 
 	module(L)
 	[
-		def("command_line",						&command_line)
+		def("command_line",						&command_line),
+		def("IsGameTypeSingle",					&IsGameTypeSingle)
 	];
+
 	module(L,"relation_registry")
 	[
 		def("community_goodwill",				&g_community_goodwill),

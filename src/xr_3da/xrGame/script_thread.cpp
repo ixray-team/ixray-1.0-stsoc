@@ -6,12 +6,9 @@
 //	Description : Script thread class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "script_space.h"
+#include "pch_script.h"
 extern "C" {
-	#include "lua.h"
 	#include "lstate.h"
-	#include "luajit.h"
 };
 #include "script_engine.h"
 #include "script_thread.h"
@@ -45,7 +42,7 @@ CScriptThread::CScriptThread(LPCSTR caNamespaceName, bool do_string, bool reload
 		}
 		else {
 			m_script_name	= "console command";
-			sprintf			(S,"function %s()\n%s\nend\n",main_function,caNamespaceName);
+			sprintf_s			(S,"function %s()\n%s\nend\n",main_function,caNamespaceName);
 			int				l_iErrorCode = luaL_loadbuffer(ai().script_engine().lua(),S,xr_strlen(S),"@console_command");
 			if (!l_iErrorCode) {
 				l_iErrorCode = lua_pcall(ai().script_engine().lua(),0,0,0);
@@ -86,9 +83,9 @@ CScriptThread::CScriptThread(LPCSTR caNamespaceName, bool do_string, bool reload
 #endif
 
 		if (!do_string)
-			sprintf			(S,"%s.main()",caNamespaceName);
+			sprintf_s			(S,"%s.main()",caNamespaceName);
 		else
-			sprintf			(S,"%s()",main_function);
+			sprintf_s			(S,"%s()",main_function);
 
 		if (!ai().script_engine().load_buffer(lua(),S,xr_strlen(S),"@_thread_main"))
 			return;

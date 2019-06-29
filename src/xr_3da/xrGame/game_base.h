@@ -37,11 +37,14 @@ struct Bonus_Money_Struct {
 struct	game_PlayerState 
 {
 	string64	name;
-	s16			team;
-	s16			kills;
-	s16			m_iKillsInRow;
-	s16			deaths;
-	s32			money_total;
+	u8			team;
+	
+	s16			m_iRivalKills;
+	s16			m_iSelfKills;
+	s16			m_iTeamKills;
+	s16			m_iKillsInRowCurr;
+	s16			m_iKillsInRowMax;
+	s16			m_iDeaths;
 	s32			money_for_round;	
 
 	float		experience_Real;
@@ -49,55 +52,43 @@ struct	game_PlayerState
 	float		experience_D;
 	u8			rank;
 	u8			af_count;
-	u16			flags;
+	u16			flags__;
 
-	u16			ping;		//Ping from DirectX
-	u16			Rping;		//Ping from message
+	u16			ping;
 
 	u16			GameID;
 
-	//------Dedicated-------------------
-	bool		Skip;
-	//---------------------------
 	u16			lasthitter;
 	u16			lasthitweapon;
 	s8			skin;
-	//---------------------------
 	u32			RespawnTime;
 	u32			DeathTime;
-	//---------------------------
 	s16			money_delta;
-	//---------------------------
 	u8			m_bCurrentVoteAgreed;
-	//---------------------------
 	DEF_DEQUE	(OLD_GAME_ID, u16);
 	OLD_GAME_ID	mOldIDs;
-	//-------------------------------------
 	s32			money_added;
 	DEF_VECTOR	(MONEY_BONUS, Bonus_Money_Struct);
 	MONEY_BONUS	m_aBonusMoney;
-	//-------------------------------------
 	bool		m_bPayForSpawn;
-
-/*
-private:
-	game_PlayerState(const game_PlayerState&);
-	void operator = (const game_PlayerState&);
-*/
+	u32			m_online_time;
 public:
 					game_PlayerState		();
 					~game_PlayerState		();
 	virtual void	clear					();
-			bool	testFlag				(u16 f);
+			bool	testFlag				(u16 f) const;
 			void	setFlag					(u16 f);
 			void	resetFlag				(u16 f);
 			LPCSTR	getName					(){return name;}
 			void	setName					(LPCSTR s){strcpy(name,s);}
 			void	SetGameID				(u16 NewID);
 			bool	HasOldID				(u16 ID);
+			bool	IsSkip					() const {return testFlag(GAME_PLAYER_FLAG_SKIP);}
+			
+			s16		frags					() const {return m_iRivalKills - m_iSelfKills - m_iTeamKills;} 
 
 #ifndef AI_COMPILER
-	virtual void	net_Export				(NET_Packet& P);
+	virtual void	net_Export				(NET_Packet& P, BOOL Full = FALSE);
 	virtual void	net_Import				(NET_Packet& P);
 #endif
 	//---------------------------------------
@@ -135,10 +126,13 @@ struct	game_TeamState
 class	game_GameState : public DLL_Pure
 {
 protected:
-	s32								type;
-	u16								phase;
-	s32								round;
-	u32								start_time;
+	s32								m_type;
+	u16								m_phase;
+	s32								m_round;
+	u32								m_start_time;
+
+	u32								m_round_start_time;
+	string64						m_round_start_time_str;
 //	u32								buy_time;
 //	s32								fraglimit; //dm,tdm,ah
 //	s32								timelimit; //dm
@@ -155,10 +149,10 @@ protected:
 public:
 									game_GameState			();
 	virtual							~game_GameState			()								{}
-				u32					Type					() const						{return type;};
-				u32					Phase					() const						{return phase;};
-				s32					Round					() const						{return round;};
-				s32					StartTime				() const						{return start_time;};
+				u32					Type					() const						{return m_type;};
+				u16					Phase					() const						{return m_phase;};
+				s32					Round					() const						{return m_round;};
+				u32					StartTime				() const						{return m_start_time;};
 	virtual		void				Create					(shared_str& options)				{};
 	virtual		LPCSTR				type_name				() const						{return "base game";};
 //for scripting enhancement
@@ -188,7 +182,6 @@ public:
 	virtual		float				GetEnvironmentGameTimeFactor		();
 				void				SetEnvironmentGameTimeFactor		(ALife::_TIME_ID GameTime, const float fTimeFactor);
 	virtual		void				SetEnvironmentGameTimeFactor		(const float fTimeFactor);
-
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

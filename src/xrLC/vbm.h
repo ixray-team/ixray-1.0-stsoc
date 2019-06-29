@@ -1,6 +1,6 @@
 #pragma once
 
-#include	"fmesh.h"
+#include	"..\xr_3da\fmesh.h"
 #include	"fs.h"
 
 // Vertex containers

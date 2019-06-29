@@ -75,9 +75,13 @@ void CEntity::Die(CObject* who)
 	set_ready_to_save	();
 	SetfHealth			(-1.f);
 
-	VERIFY				(m_registered_member);
+	if(IsGameTypeSingle())
+	{
+		VERIFY				(m_registered_member);
+	}
 	m_registered_member	= false;
-	Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member(this);
+	if (IsGameTypeSingle())
+		Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member(this);
 }
 
 //обновление состояния
@@ -135,8 +139,6 @@ void CEntity::Load		(LPCSTR section)
 	inherited::Load		(section);
 
 	setVisible			(FALSE);
-//	m_fMaxHealthValue = fEntityHealth = 100;
-//	SetfHealth			(100);
 	
 	// Team params
 	id_Team				= READ_IF_EXISTS(pSettings,r_s32,section,"team",-1);
@@ -146,29 +148,6 @@ void CEntity::Load		(LPCSTR section)
 #pragma todo("Jim to Dima: no specific figures or comments needed")	
 	m_fMorale			= 66.f;
 
-
-	//загрузить параметры иконки торговли
-
-/*			shared_str	first;
-		shared_str	second;
-		shared_str	comment;
-
-		Item() : first(0), second(0), comment(0) {};
-	};
-	typedef xr_vector<Item>			Items;
-	typedef Items::iterator			SectIt;
-    struct XRCORE_API Sect {
-		shared_str			Name;
-		Items			Data;
-
-		IC SectIt		begin()		{ return Data.begin();	}
-		IC SectIt		end()		{ return Data.end();	}
-		IC size_t		size()		{ return Data.size();	}
-		IC void			clear()		{ Data.clear();			}
-	    BOOL			line_exist	(LPCSTR L, LPCSTR* val=0);
-*/
-
-	//////////////////////////////////////
 	//время убирания тела с уровня
 	m_dwBodyRemoveTime	= READ_IF_EXISTS(pSettings,r_u32,section,"body_remove_time",BODY_REMOVE_TIME);
 	//////////////////////////////////////
@@ -219,12 +198,14 @@ BOOL CEntity::net_Spawn		(CSE_Abstract* DC)
 		}
 	}
 
-	if (g_Alive()) {
+	if (g_Alive() && IsGameTypeSingle()) {
 		m_registered_member		= true;
 		Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).register_member(this);
 		++Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).m_dwAliveCount;
 	}
-	else {
+
+	if(!g_Alive())
+	{
 		m_level_death_time		= Device.dwTimeGlobal;
 		m_game_death_time		= E->m_game_death_time;;
 	}
@@ -250,7 +231,8 @@ void CEntity::net_Destroy	()
 {
 	if (m_registered_member) {
 		m_registered_member	= false;
-		Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member(this);
+		if (IsGameTypeSingle())
+			Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member(this);
 	}
 
 	inherited::net_Destroy	();
@@ -290,7 +272,7 @@ void CEntity::KillEntity(u16 whoID)
 		P.w_u16			(u16(whoID));
 		P.w_u32			(0);
 		if (OnServer())
-			u_EventSend	(P);
+			u_EventSend	(P, net_flags(TRUE, TRUE, FALSE, TRUE));
 	}
 };
 
@@ -364,7 +346,10 @@ void CEntity::ChangeTeam(int team, int squad, int group)
 
 	VERIFY2					(g_Alive(), "Try to change team of a dead object");
 	
-	VERIFY					(m_registered_member);
+	if(IsGameTypeSingle())
+	{
+		VERIFY					(m_registered_member);
+	}
 	// remove from current team
 	on_before_change_team	();
 	Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member	(this);

@@ -93,7 +93,7 @@ public:
 CCrossTableBuilder::CCrossTableBuilder(LPCSTR caProjectName)
 {
 	FILE_NAME			caFileName;
-	strconcat			(caFileName,caProjectName,GAME_LEVEL_GRAPH);
+	strconcat			(sizeof(caFileName),caFileName,caProjectName,GAME_LEVEL_GRAPH);
 	
 	Phase				("Loading level graph");
 	CGameGraph			tGraph(caFileName);
@@ -181,7 +181,7 @@ CCrossTableBuilder::CCrossTableBuilder(LPCSTR caProjectName)
 	}
 	tMemoryStream.close_chunk();
 	
-	strconcat			(caFileName,caProjectName,CROSS_TABLE_NAME_RAW);
+	strconcat			(sizeof(caFileName),caFileName,caProjectName,CROSS_TABLE_NAME_RAW);
 	tMemoryStream.save_to(caFileName);
 }
 

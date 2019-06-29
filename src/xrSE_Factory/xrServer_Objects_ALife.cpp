@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "net_utils.h"
+#include "../../xrNetServer/net_utils.h"
 #include "xrServer_Objects_ALife.h"
 #include "xrServer_Objects_ALife_Monsters.h"
 #include "game_base_space.h"
@@ -82,7 +82,7 @@ struct SFillPropData{
 		for (int i=0; i<GameGraph::LOCATION_TYPE_COUNT; ++i){
             VERIFY				(locations[i].empty());
             string256			caSection, T;
-            strconcat			(caSection,SECTION_HEADER,itoa(i,T,10));
+            strconcat			(sizeof(caSection),caSection,SECTION_HEADER,itoa(i,T,10));
             R_ASSERT			(Ini->section_exist(caSection));
             for (k = 0; Ini->r_line(caSection,k,&N,&V); ++k)
                 locations[i].push_back	(xr_rtoken(V,atoi(N)));

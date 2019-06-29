@@ -57,7 +57,7 @@ void CUIOptionsManager::SeveBackupValues(const char* group)
 {
 	groups_it it = m_groups.find(group);
 
-	R_ASSERT2(m_groups.end() != it, "invalid group name");
+	R_ASSERT3(m_groups.end() != it, "invalid group name",group);
 
 	for (u32 i = 0; i < (*it).second.size(); i++){
 		(*it).second[i]->SeveBackUpValue();
@@ -67,7 +67,7 @@ void CUIOptionsManager::SeveBackupValues(const char* group)
 void CUIOptionsManager::SetCurrentValues(const char* group){
 	groups_it it = m_groups.find(group);
 
-	R_ASSERT2(m_groups.end() != it, "invalid group name");
+	R_ASSERT3(m_groups.end() != it, "invalid group name",group);
 
 	for (u32 i = 0; i < (*it).second.size(); i++){
 		(*it).second[i]->SetCurrentValue();
@@ -78,7 +78,7 @@ void CUIOptionsManager::SetCurrentValues(const char* group){
 void CUIOptionsManager::SaveValues(const char* group){
 	groups_it it = m_groups.find(group);
 
-	R_ASSERT2(m_groups.end() != it, "invalid group name");
+	R_ASSERT3(m_groups.end() != it, "invalid group name",group);
 
 	for (u32 i = 0; i < (*it).second.size(); i++){
 		if ((*it).second[i]->IsChanged())

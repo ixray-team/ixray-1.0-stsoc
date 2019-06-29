@@ -32,6 +32,7 @@ struct						dSurfaceParameters;
 #endif
 
 class CScriptEntityAction;
+class car_memory;
 
 class CCar : 
 	public CEntity, 
@@ -490,7 +491,7 @@ IC	size_t				CurrentTransmission					(){return m_current_transmission_num;}
 	void DriveForward									();
 	void DriveBack										();
 	void ParseDefinitions								();
-	void CreateSkeleton									();//creates m_pPhysicsShell
+	void CreateSkeleton									(CSE_Abstract	*po);//creates m_pPhysicsShell
 	void Init											();
 
 	void PlayExhausts									();
@@ -604,6 +605,8 @@ protected:
 public:
 	CCar(void);
 	virtual ~CCar(void);
+	virtual BOOL					AlwaysTheCrow						();
+
 public:
 	virtual CEntity*					cast_entity				()						{return this;}
 private:
@@ -623,6 +626,11 @@ private:
 	virtual CScriptEntity		*cast_script_entity			()	{return this;}
 	virtual IDamageSource		*cast_IDamageSource			()	{return this;}
 	virtual CHolderCustom		*cast_holder_custom			()	{return this;}
+
+private:
+	car_memory	*m_memory;
+
+public:
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 add_to_type_list(CCar)

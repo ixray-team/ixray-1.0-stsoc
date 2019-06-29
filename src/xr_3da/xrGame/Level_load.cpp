@@ -14,39 +14,18 @@
 #include "level_sounds.h"
 #include "GamePersistent.h"
 
-//#define	OLES_REMAPPING
-//#define	ALEX_REMAPPING
-#define	DIMA_REMAPPING
-
-#ifndef OLES_REMAPPING
-#	ifndef ALEX_REMAPPING
-#		ifndef DIMA_REMAPPING
-			STATIC_CHECK(false,You_should_define_one_of_the_three_macroses_OLES_REMAPPING_ALEX_REMAPPING_DIMA_REMAPPING)
-#		endif
-#	else
-#		ifdef DIMA_REMAPPING
-			STATIC_CHECK(false,Only_single_of_three_macroses_should_be_defined_OLES_REMAPPING_ALEX_REMAPPING_DIMA_REMAPPING)
-#		endif
-#	endif
-#else
-#	ifdef ALEX_REMAPPING
-		STATIC_CHECK	(false,Only_single_of_three_macroses_should_be_defined_OLES_REMAPPING_ALEX_REMAPPING_DIMA_REMAPPING)
-#	endif
-#	ifdef DIMA_REMAPPING
-		STATIC_CHECK	(false,Only_single_of_three_macroses_should_be_defined_OLES_REMAPPING_ALEX_REMAPPING_DIMA_REMAPPING)
-#	endif
-#endif
+ENGINE_API	bool g_dedicated_server;
 
 BOOL CLevel::Load_GameSpecific_Before()
 {
 	// AI space
 	g_pGamePersistent->LoadTitle		("st_loading_ai_objects");
-	string256							fn_game;
+	string_path							fn_game;
 	
 	if (GamePersistent().GameType() == GAME_SINGLE && !ai().get_alife() && FS.exist(fn_game,"$level$","level.ai"))
 		ai().load						(net_SessionName());
 
-	if (!ai().get_alife() && FS.exist(fn_game, "$level$", "level.game")) {
+	if (!g_dedicated_server && !ai().get_alife() && ai().get_game_graph() && FS.exist(fn_game, "$level$", "level.game")) {
 		IReader							*stream = FS.r_open		(fn_game);
 		ai().patrol_path_storage_raw	(*stream);
 		FS.r_close						(stream);
@@ -58,7 +37,7 @@ BOOL CLevel::Load_GameSpecific_Before()
 BOOL CLevel::Load_GameSpecific_After()
 {
 	// loading static particles
-	string256		fn_game;
+	string_path		fn_game;
 	if (FS.exist(fn_game, "$level$", "level.ps_static")) {
 		IReader *F = FS.r_open	(fn_game);
 		CParticlesObject* pStaticParticles;
@@ -69,71 +48,61 @@ BOOL CLevel::Load_GameSpecific_After()
 		for (IReader *OBJ = F->open_chunk_iterator(chunk); OBJ; OBJ = F->open_chunk_iterator(chunk,OBJ)) {
 			OBJ->r_stringZ				(ref_name,sizeof(ref_name));
 			OBJ->r						(&transform,sizeof(Fmatrix));transform.c.y+=0.01f;
-			pStaticParticles			= CParticlesObject::Create(ref_name,FALSE);
+			pStaticParticles			= CParticlesObject::Create(ref_name,FALSE,false);
 			pStaticParticles->UpdateParent	(transform,zero_vel);
 			pStaticParticles->Play			();
 			m_StaticParticles.push_back		(pStaticParticles);
 		}
 		FS.r_close		(F);
 	}
-	// loading static sounds
-	VERIFY								(m_level_sound_manager);
-	m_level_sound_manager->Load			();
-
-	// loading sound environment
-	if ( FS.exist(fn_game, "$level$", "level.snd_env")) {
-		IReader *F				= FS.r_open	(fn_game);
-		::Sound->set_geometry_env(F);
-		FS.r_close				(F);
-	}
-	// loading SOM
-	if (FS.exist(fn_game, "$level$", "level.som")) {
-		IReader *F				= FS.r_open	(fn_game);
-		::Sound->set_geometry_som(F);
-		FS.r_close				(F);
-	}
-
-	// loading random (around player) sounds
-	if (pSettings->section_exist("sounds_random")){ 
-		CInifile::Sect& S		= pSettings->r_section("sounds_random");
-		Sounds_Random.reserve	(S.size());
-		for (CInifile::SectIt I=S.begin(); S.end()!=I; ++I) {
-			Sounds_Random.push_back	(ref_sound());
-			Sound->create			(Sounds_Random.back(),*I->first,st_Effect,sg_SourceType);
-		}
-		Sounds_Random_dwNextTime= Device.TimerAsync	()	+ 50000;
-		Sounds_Random_Enabled	= FALSE;
-	}
 	
-	// loading scripts
-	ai().script_engine().remove_script_process(ScriptEngine::eScriptProcessorLevel);
+	if	(!g_dedicated_server)
+	{
+		// loading static sounds
+		VERIFY								(m_level_sound_manager);
+		m_level_sound_manager->Load			();
 
-	if (pLevel->section_exist("level_scripts") && pLevel->line_exist("level_scripts","script"))
-		ai().script_engine().add_script_process(ScriptEngine::eScriptProcessorLevel,xr_new<CScriptProcess>("level",pLevel->r_string("level_scripts","script")));
-	else
-		ai().script_engine().add_script_process(ScriptEngine::eScriptProcessorLevel,xr_new<CScriptProcess>("level",""));
+		// loading sound environment
+		if ( FS.exist(fn_game, "$level$", "level.snd_env")) {
+			IReader *F				= FS.r_open	(fn_game);
+			::Sound->set_geometry_env(F);
+			FS.r_close				(F);
+		}
+		// loading SOM
+		if (FS.exist(fn_game, "$level$", "level.som")) {
+			IReader *F				= FS.r_open	(fn_game);
+			::Sound->set_geometry_som(F);
+			FS.r_close				(F);
+		}
+
+		// loading random (around player) sounds
+		if (pSettings->section_exist("sounds_random")){ 
+			CInifile::Sect& S		= pSettings->r_section("sounds_random");
+			Sounds_Random.reserve	(S.Data.size());
+			for (CInifile::SectCIt I=S.Data.begin(); S.Data.end()!=I; ++I) 
+			{
+				Sounds_Random.push_back	(ref_sound());
+				Sound->create			(Sounds_Random.back(),*I->first,st_Effect,sg_SourceType);
+			}
+			Sounds_Random_dwNextTime= Device.TimerAsync	()	+ 50000;
+			Sounds_Random_Enabled	= FALSE;
+		}
+	}	
+
+	if (!g_dedicated_server) {
+		// loading scripts
+		ai().script_engine().remove_script_process(ScriptEngine::eScriptProcessorLevel);
+
+		if (pLevel->section_exist("level_scripts") && pLevel->line_exist("level_scripts","script"))
+			ai().script_engine().add_script_process(ScriptEngine::eScriptProcessorLevel,xr_new<CScriptProcess>("level",pLevel->r_string("level_scripts","script")));
+		else
+			ai().script_engine().add_script_process(ScriptEngine::eScriptProcessorLevel,xr_new<CScriptProcess>("level",""));
+	}
 		
 	BlockCheatLoad();
 	return TRUE;
 }
 
-#ifdef ALEX_REMAPPING
-struct mtl_predicate {
-	int					m_material_id;
-
-	IC					mtl_predicate	(const u16 &material_id)
-	{
-		m_material_id	= material_id;
-	}
-
-	IC	bool			operator()		(SGameMtl *material) const
-	{
-		return			(material->GetID() == m_material_id);
-	}
-};
-#endif // ALEX_REMAPPING
-
-#ifdef DIMA_REMAPPING
 struct translation_pair {
 	u32			m_id;
 	u16			m_index;
@@ -144,7 +113,7 @@ struct translation_pair {
 		m_index	= index;
 	}
 
-	IC	bool	operator==	(u16 id) const
+	IC	bool	operator==	(const u16 &id) const
 	{
 		return	(m_id == id);
 	}
@@ -154,49 +123,14 @@ struct translation_pair {
 		return	(m_id < pair.m_id);
 	}
 
-	IC	bool	operator<	(u16 id) const
+	IC	bool	operator<	(const u16 &id) const
 	{
 		return	(m_id < id);
 	}
 };
-#endif // DIMA_REMAPPING
 
 void CLevel::Load_GameSpecific_CFORM	( CDB::TRI* tris, u32 count )
 {
-/*
-#ifdef OLES_REMAPPING
-	// 1.
-	u16		default_id	= (u16)GMLib.GetMaterialIdx("default");
-
-	// 2. Build mapping
-	xr_map<u32,u16>		translator;
-	translator.insert	(mk_pair(u32(-1),default_id));
-	u16 idx				= 0;
-	for (GameMtlIt I=GMLib.FirstMaterial(); GMLib.LastMaterial()!=I; ++I)
-		translator.insert(mk_pair((*I)->GetID(),idx++));
-
-	// 3.
-	for (u32 it=0; it<count; ++it)
-	{
-		CDB::TRI* T						= tris + it;
-		xr_map<u32,u16>::iterator index	= translator.find(T->material);
-		if (index==translator.end())
-			Debug.fatal					(DEBUG_INFO,"Game material '%d' not found",T->material);
-		T->material						= index->second;
-	}
-#endif
-
-#ifdef ALEX_REMAPPING
-	for (u32 it=0; it<count; ++it) {
-		CDB::TRI			*T = tris + it;
-		GameMtlIt			I = std::find_if(GMLib.FirstMaterial(),GMLib.LastMaterial(),mtl_predicate(T->material));
-		if (I==GMLib.LastMaterial())
-			Debug.fatal		(DEBUG_INFO,"Game material '%d' not found",T->material);
-		T->material			= u16(I - GMLib.FirstMaterial());
-	}
-#endif
-*/
-#ifdef DIMA_REMAPPING
 	typedef xr_vector<translation_pair>	ID_INDEX_PAIRS;
 	ID_INDEX_PAIRS						translator;
 	translator.reserve					(GMLib.CountMaterial());
@@ -221,7 +155,7 @@ void CLevel::Load_GameSpecific_CFORM	( CDB::TRI* tris, u32 count )
 		CDB::TRI						*I = tris;
 		CDB::TRI						*E = tris + count;
 		for ( ; I != E; ++I) {
-			ID_INDEX_PAIRS::iterator	i = std::find(translator.begin(),translator.end(),(*I).material);
+			ID_INDEX_PAIRS::iterator	i = std::find(translator.begin(),translator.end(),(u16)(*I).material);
 			if (i != translator.end()) {
 				(*I).material			= (*i).m_index;
 				SGameMtl* mtl			= GMLib.GetMaterialByIdx	((*i).m_index);
@@ -240,7 +174,7 @@ void CLevel::Load_GameSpecific_CFORM	( CDB::TRI* tris, u32 count )
 		CDB::TRI						*I = tris;
 		CDB::TRI						*E = tris + count;
 		for ( ; I != E; ++I) {
-			ID_INDEX_PAIRS::iterator	i = std::lower_bound(translator.begin(),translator.end(),(*I).material);
+			ID_INDEX_PAIRS::iterator	i = std::lower_bound(translator.begin(),translator.end(),(u16)(*I).material);
 			if ((i != translator.end()) && ((*i).m_id == (*I).material)) {
 				(*I).material			= (*i).m_index;
 				SGameMtl* mtl			= GMLib.GetMaterialByIdx	((*i).m_index);
@@ -252,7 +186,6 @@ void CLevel::Load_GameSpecific_CFORM	( CDB::TRI* tris, u32 count )
 			Debug.fatal					(DEBUG_INFO,"Game material '%d' not found",(*I).material);
 		}
 	}
-#endif
 }
 
 void CLevel::BlockCheatLoad()

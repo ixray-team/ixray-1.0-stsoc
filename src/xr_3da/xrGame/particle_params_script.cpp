@@ -6,9 +6,8 @@
 //	Description : Particle parameters class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "particle_params.h"
-#include "script_space.h"
 
 using namespace luabind;
 

@@ -130,6 +130,8 @@ void CUIItemInfo::Init(float x, float y, float width, float height, LPCSTR xml_n
     Init			(xml_name);
 }
 
+bool				IsGameTypeSingle();
+
 void CUIItemInfo::InitItem(CInventoryItem* pInvItem)
 {
 	m_pInvItem				= pInvItem;
@@ -142,12 +144,12 @@ void CUIItemInfo::InitItem(CInventoryItem* pInvItem)
 	}
 	if(UIWeight)
 	{
-		sprintf				(str, "%3.2f kg", pInvItem->Weight());
+		sprintf_s				(str, "%3.2f kg", pInvItem->Weight());
 		UIWeight->SetText	(str);
 	}
-	if(UICost)
+	if( UICost && IsGameTypeSingle() )
 	{
-		sprintf				(str, "%d RU", pInvItem->Cost());		// will be owerwritten in multiplayer
+		sprintf_s				(str, "%d RU", pInvItem->Cost());		// will be owerwritten in multiplayer
 		UICost->SetText		(str);
 	}
 

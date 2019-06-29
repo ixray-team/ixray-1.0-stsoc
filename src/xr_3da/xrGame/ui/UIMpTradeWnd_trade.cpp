@@ -103,8 +103,6 @@ bool CUIMpTradeWnd::BuyItemAction(SBuyItemInfo* itm)
 
 bool CUIMpTradeWnd::TryToBuyItem(SBuyItemInfo* buy_itm, u32 buy_flags, SBuyItemInfo* itm_parent)
 {
-	Msg("--TryToBuyItem [%s]",buy_itm->m_name_sect.c_str());
-	
 	SBuyItemInfo* iinfo 			= buy_itm;
 	const shared_str& buy_item_name = iinfo->m_name_sect;
 	
@@ -139,16 +137,6 @@ bool CUIMpTradeWnd::TryToBuyItem(SBuyItemInfo* buy_itm, u32 buy_flags, SBuyItemI
 	}
 
 	R_ASSERT(cell_itm->OwnerList()==NULL);
-	for(int idx = e_first; idx<e_total_lists; ++idx)
-	{
-		CUIDragDropListEx* lst			= m_list[idx];
-		if(lst->IsOwner(cell_itm))
-		{
-			Log("b_alone=",b_alone);
-			Log("list idx is",idx);
-			R_ASSERT2(0, "broken parentless for cell item");
-		}
-	}
 
 	bool b_addon					= TryToAttachItemAsAddon(iinfo, itm_parent);
 	if(!b_addon)
@@ -189,7 +177,7 @@ bool CUIMpTradeWnd::CheckBuyPossibility(const shared_str& sect_name, u32 buy_fla
 		if( GetMoneyAmount() < _item_cost)
 		{
 			if(!b_silent)
-				sprintf					(	info_buffer,
+				sprintf_s					(	info_buffer,
 											"%s. %s. %s[%d] %s[%d]",
 											CStringTable().translate("ui_inv_cant_buy_item").c_str(),
 											CStringTable().translate("ui_inv_not_enought_money").c_str(),
@@ -204,7 +192,7 @@ bool CUIMpTradeWnd::CheckBuyPossibility(const shared_str& sect_name, u32 buy_fla
 	if(b_can_buy && (buy_flags&bf_check_rank_restr) && !g_mp_restrictions.IsAvailable(sect_name))
 	{
 		if(!b_silent)
-			sprintf					(	info_buffer,
+			sprintf_s					(	info_buffer,
 										"%s. %s. %s[%s] %s[%s] ", 
 										CStringTable().translate("ui_inv_cant_buy_item").c_str(),
 										CStringTable().translate("ui_inv_rank_restr").c_str(),
@@ -227,7 +215,7 @@ bool CUIMpTradeWnd::CheckBuyPossibility(const shared_str& sect_name, u32 buy_fla
 		if(cnt_have>=cnt_restr)
 		{
 			if(!b_silent)
-				sprintf				(	info_buffer,
+				sprintf_s				(	info_buffer,
 										"%s. %s. %s [%d]", 
 										CStringTable().translate("ui_inv_cant_buy_item").c_str(),
 										CStringTable().translate("ui_inv_count_restr").c_str(),
@@ -268,7 +256,6 @@ void CUIMpTradeWnd::RenewShopItem(const shared_str& sect_name, bool b_just_bough
 
 void CUIMpTradeWnd::ItemToBelt(const shared_str& sectionName)
 {
-	Msg("--ItemToBelt");
 	R_ASSERT2(m_item_mngr->GetItemIdx(sectionName)!=u32(-1), sectionName.c_str() );
 
 	CUIDragDropListEx*	pList			= GetMatchedListForItem(sectionName);
@@ -279,25 +266,22 @@ void CUIMpTradeWnd::ItemToBelt(const shared_str& sectionName)
 
 void CUIMpTradeWnd::ItemToRuck(const shared_str& sectionName, u8 addons)
 {
-	Msg("--ItemToRuck");
 	R_ASSERT2(m_item_mngr->GetItemIdx(sectionName)!=u32(-1), sectionName.c_str() );
 
 	CUIDragDropListEx*	pList			= GetMatchedListForItem(sectionName);
 
 	SBuyItemInfo* pitem					= CreateItem(sectionName, SBuyItemInfo::e_own, false);
-	pList->SetItem						(pitem->m_cell_item);
-
 	SetItemAddonsState_ext				(pitem, addons);
+	pList->SetItem						(pitem->m_cell_item);
 }
 
 void CUIMpTradeWnd::ItemToSlot(const shared_str& sectionName, u8 addons)
 {
-	Msg("--ItemToSlot");
 	R_ASSERT2(m_item_mngr->GetItemIdx(sectionName)!=u32(-1), sectionName.c_str() );
 
 	CUIDragDropListEx*	pList			= GetMatchedListForItem(sectionName);
 
 	SBuyItemInfo* pitem					= CreateItem(sectionName, SBuyItemInfo::e_own, false);
-	pList->SetItem						(pitem->m_cell_item);
 	SetItemAddonsState_ext				(pitem, addons);
+	pList->SetItem						(pitem->m_cell_item);
 }

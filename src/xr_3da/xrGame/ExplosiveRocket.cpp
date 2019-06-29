@@ -46,7 +46,9 @@ void CExplosiveRocket::Contact(const Fvector &pos, const Fvector &normal)
 {
 	if(eCollide == m_eState) return;
 
-	CExplosive::GenExplodeEvent(pos,normal);
+	if(m_bLaunched)
+		CExplosive::GenExplodeEvent(pos,normal);
+
 	inherited::Contact(pos, normal);
 }
 

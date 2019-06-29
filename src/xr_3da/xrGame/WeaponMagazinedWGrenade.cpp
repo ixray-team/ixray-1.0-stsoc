@@ -135,10 +135,19 @@ BOOL CWeaponMagazinedWGrenade::net_Spawn(CSE_Abstract* DC)
 			CRocketLauncher::SpawnRocket(*fake_grenade_name, this);
 		}
 	};
+	
+	xr_vector<CCartridge>* pM = NULL;
+	bool b_if_grenade_mode	= (m_bGrenadeMode && iAmmoElapsed && !getRocketCount());
+	if(b_if_grenade_mode)
+		pM = &m_magazine;
+		
+	bool b_if_simple_mode	= (!m_bGrenadeMode && m_magazine2.size() && !getRocketCount());
+	if(b_if_simple_mode)
+		pM = &m_magazine2;
 
-	if(iAmmoElapsed && m_bGrenadeMode && !getRocketCount()) 
+	if(b_if_grenade_mode || b_if_simple_mode) 
 	{
-		shared_str fake_grenade_name = pSettings->r_string(m_magazine.back().m_ammoSect, "fake_grenade_name");
+		shared_str fake_grenade_name = pSettings->r_string(pM->back().m_ammoSect, "fake_grenade_name");
 		
 		CRocketLauncher::SpawnRocket(*fake_grenade_name, this);
 	}
@@ -336,7 +345,8 @@ void CWeaponMagazinedWGrenade::SwitchState(u32 S)
 			}
 			E->g_fireParams		(this, p1,d);
 		}
-		p1.set						(get_LastFP2());
+		if (IsGameTypeSingle())
+			p1.set						(get_LastFP2());
 		
 		Fmatrix launch_matrix;
 		launch_matrix.identity();
@@ -392,8 +402,8 @@ void CWeaponMagazinedWGrenade::SwitchState(u32 S)
 		if (Local() && OnServer())
 		{
 			NET_Packet P;
-			u_EventGen(P,GE_OWNERSHIP_REJECT,ID());
-			P.w_u16(getCurrentRocket()->ID()/*m_pRocket->ID()*/);
+			u_EventGen(P,GE_LAUNCH_ROCKET,ID());
+			P.w_u16(getCurrentRocket()->ID());
 			u_EventSend(P);
 		};
 
@@ -413,9 +423,11 @@ void CWeaponMagazinedWGrenade::OnEvent(NET_Packet& P, u16 type)
 			}
 			break;
 		case GE_OWNERSHIP_REJECT :
+		case GE_LAUNCH_ROCKET : 
 			{
+				bool bLaunch = (type==GE_LAUNCH_ROCKET);
 				P.r_u16(id);
-				CRocketLauncher::DetachRocket(id);
+				CRocketLauncher::DetachRocket(id, bLaunch);
 				break;
 			}
 	}
@@ -519,13 +531,13 @@ bool CWeaponMagazinedWGrenade::Attach(PIItem pIItem, bool b_send_event)
  		//уничтожить подствольник из инвентаря
 		if(b_send_event)
 		{
-			pIItem->Drop();
+//.			pIItem->Drop();
 			if (OnServer()) 
 				pIItem->object().DestroyObject	();
 		}
-		InitAddons();
-		UpdateAddonsVisibility();
-		return true;
+		InitAddons				();
+		UpdateAddonsVisibility	();
+		return					true;
 	}
 	else
         return inherited::Attach(pIItem, b_send_event);
@@ -672,7 +684,6 @@ void CWeaponMagazinedWGrenade::PlayAnimShoot()
 
 void  CWeaponMagazinedWGrenade::PlayAnimModeSwitch()
 {
-//.	VERIFY(GetState()==eSwitch);
 	if(m_bGrenadeMode)
 		m_pHUD->animPlay(random_anim(mhud_switch_g), FALSE, this, eSwitch); //fake
 	else 
@@ -691,64 +702,59 @@ void CWeaponMagazinedWGrenade::UpdateSounds	()
 
 void CWeaponMagazinedWGrenade::UpdateGrenadeVisibility(bool visibility)
 {
-	if (H_Parent() != Level().CurrentEntity()) return;
-	CKinematics* pHudVisual = smart_cast<CKinematics*>(m_pHUD->Visual());
-	VERIFY(pHudVisual);
-	pHudVisual->LL_SetBoneVisible(pHudVisual->LL_BoneID(*grenade_bone_name),visibility,TRUE);
-	pHudVisual->CalculateBones_Invalidate();
-	pHudVisual->CalculateBones();
+	if (H_Parent() != Level().CurrentEntity())	return;
+	CKinematics* pHudVisual						= smart_cast<CKinematics*>(m_pHUD->Visual());
+	VERIFY										(pHudVisual);
+	pHudVisual->LL_SetBoneVisible				(pHudVisual->LL_BoneID(*grenade_bone_name),visibility,TRUE);
+	pHudVisual->CalculateBones_Invalidate		();
+	pHudVisual->CalculateBones					();
 }
 
 void CWeaponMagazinedWGrenade::save(NET_Packet &output_packet)
 {
-	inherited::save	(output_packet);
-	save_data		(m_bGrenadeMode, output_packet);
-	save_data		(m_magazine2.size(), output_packet);
+	inherited::save								(output_packet);
+	save_data									(m_bGrenadeMode, output_packet);
+	save_data									(m_magazine2.size(), output_packet);
 
 }
 
 void CWeaponMagazinedWGrenade::load(IReader &input_packet)
 {
-	inherited::load(input_packet);
+	inherited::load				(input_packet);
 	bool b;
-	load_data			(b, input_packet);
-	if(b!=m_bGrenadeMode)
-		SwitchMode	();
+	load_data					(b, input_packet);
+	if(b!=m_bGrenadeMode)		
+		SwitchMode				();
 
 	u32 sz;
-	load_data			(sz, input_packet);
+	load_data					(sz, input_packet);
 
-	CCartridge			l_cartridge; 
-	l_cartridge.Load	(*m_ammoTypes2[m_ammoType2], u8(m_ammoType2));
+	CCartridge					l_cartridge; 
+	l_cartridge.Load			(*m_ammoTypes2[m_ammoType2], u8(m_ammoType2));
+
 	while (sz > m_magazine2.size())
 		m_magazine2.push_back(l_cartridge);
-
 }
 
 void CWeaponMagazinedWGrenade::net_Export	(NET_Packet& P)
 {
-	P.w_u8(m_bGrenadeMode ? 1 : 0);
+	P.w_u8						(m_bGrenadeMode ? 1 : 0);
 
-	inherited::net_Export (P);
-	
+	inherited::net_Export		(P);
 }
 
 void CWeaponMagazinedWGrenade::net_Import	(NET_Packet& P)
 {
-	//	if (Level().IsDemoPlay())
-	//		Msg("CWeapon::net_Import [%d]", ID());
-	bool NewMode = FALSE;
-	NewMode = !!P.r_u8();	
+	bool NewMode				= FALSE;
+	NewMode						= !!P.r_u8();	
 	if (NewMode != m_bGrenadeMode)
-		SwitchMode	();
+		SwitchMode				();
 
-	inherited::net_Import (P);
-
+	inherited::net_Import		(P);
 }
 
 bool CWeaponMagazinedWGrenade::IsNecessaryItem	    (const shared_str& item_sect)
 {
-	
 	return (	std::find(m_ammoTypes.begin(), m_ammoTypes.end(), item_sect) != m_ammoTypes.end() ||
 				std::find(m_ammoTypes2.begin(), m_ammoTypes2.end(), item_sect) != m_ammoTypes2.end() 
 			);

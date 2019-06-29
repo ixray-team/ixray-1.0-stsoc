@@ -4,11 +4,11 @@
 #include "Rain.h"
 #include "igame_persistent.h"
 #include "environment.h"
-#include "render.h"
 
 #ifdef _EDITOR
     #include "ui_toolscustom.h"
 #else
+    #include "render.h"
 	#include "igame_level.h"
 	#include "xr_area.h"
 	#include "xr_object.h"

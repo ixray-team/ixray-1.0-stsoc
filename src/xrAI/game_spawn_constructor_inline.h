@@ -10,7 +10,7 @@
 
 extern u32	dwfGetIDByLevelName	(CInifile *ini, LPCSTR level_name);
 
-IC	const CGameGraph &CGameSpawnConstructor::game_graph	()
+IC	CGameGraph &CGameSpawnConstructor::game_graph		() const
 {
 	return						(*m_game_graph);
 }
@@ -73,6 +73,6 @@ IC	CPatrolPathStorage &CGameSpawnConstructor::patrol_path_storage	() const
 IC	void CGameSpawnConstructor::process_spawns		(xr_vector<ALife::_SPAWN_ID> &spawns)
 {
 	std::sort								(spawns.begin(),spawns.end());
-	xr_vector<ALife::_SPAWN_ID>::iterator	I = unique(spawns.begin(),spawns.end());
+	xr_vector<ALife::_SPAWN_ID>::iterator	I = std::unique(spawns.begin(),spawns.end());
 	spawns.erase							(I,spawns.end());
 }

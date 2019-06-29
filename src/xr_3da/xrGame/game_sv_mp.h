@@ -5,6 +5,7 @@
 #include "game_base_menu_events.h"
 
 class		CItemMgr;
+class		xrClientData;
 #define		VOTE_LENGTH_TIME		1
 #define		VOTE_QUOTA				0.51f
 
@@ -48,7 +49,7 @@ protected:
 	bool			m_bVotingReal;
 	u32				m_uVoteStartTime;	
 	shared_str		m_pVoteCommand;
-
+	
 	virtual		void				LoadRanks				();
 	virtual		void				Player_AddExperience	(game_PlayerState* ps, float Exp);
 	virtual		bool				Player_Check_Rank		(game_PlayerState* ps);
@@ -71,8 +72,6 @@ protected:
 				void				AllowDeadBodyRemove		(ClientID id, u16 GameID);
 				void				SpawnWeapon4Actor		(u16 actorId,  LPCSTR N, u8 Addons );
 				void				SpawnWeaponForActor		(u16 actorId,  LPCSTR N, bool isScope, bool isGrenadeLauncher, bool isSilencer);
-//	virtual		bool				GetTeamItem_ByID		(WeaponDataStruct** pRes, TEAM_WPN_LIST* pWpnList, u16 ItemID);
-//	virtual		bool				GetTeamItem_ByName		(WeaponDataStruct** pRes,TEAM_WPN_LIST* pWpnList, LPCSTR ItemName);
 
 	virtual		void				Player_AddMoney			(game_PlayerState* ps, s32 MoneyAmount);
 	virtual		void				Player_AddBonusMoney	(game_PlayerState* ps, s32 MoneyAmount, SPECIAL_KILL_TYPE Reason, u8 Kill = 0);
@@ -88,7 +87,7 @@ public:
 	virtual		void				OnPlayerConnect			(ClientID id_who);
 	virtual		void				OnPlayerDisconnect		(ClientID id_who, LPSTR Name, u16 GameID);
 	virtual		BOOL				OnTouch					(u16 eid_who, u16 eid_target, BOOL bForced = FALSE){return true;};			// TRUE=allow ownership, FALSE=denied
-	virtual		BOOL				OnDetach				(u16 eid_who, u16 eid_target){return true;};			// TRUE=allow ownership, FALSE=denied
+	virtual		void				OnDetach				(u16 eid_who, u16 eid_target){};
 	virtual		void				OnPlayerKillPlayer		(game_PlayerState* ps_killer, game_PlayerState* ps_killed, KILL_TYPE KillType, SPECIAL_KILL_TYPE SpecialKillType, CSE_Abstract* pWeaponA){};
 	virtual		void				OnPlayerKilled			(NET_Packet P);
 	virtual		bool				CheckTeams				() { return false; };
@@ -100,7 +99,7 @@ public:
 	virtual		void				net_Export_State		(NET_Packet& P, ClientID id_to);
 
 	virtual		void				OnRoundStart			();												// старт раунда
-	virtual		void				OnRoundEnd				(LPCSTR reason);								// конец раунда
+	virtual		void				OnRoundEnd				();	//round_end_reason							// конец раунда
 	virtual		bool				OnNextMap				();
 	virtual		void				OnPrevMap				();
 	
@@ -138,7 +137,14 @@ public:
 
 	virtual		u8					GetSpectatorModes		() {return m_u8SpectatorModes;};
 	virtual		u32					GetNumTeams				() {return 0;};
-    
+
+	virtual		void				DumpOnlineStatistic		();
+	void							SvSendChatMessage		(LPCSTR str);
+protected:
+	virtual		void				WriteGameState			(CInifile& ini, LPCSTR sect, bool bRoundResult);
+	virtual		void				WritePlayerStats		(CInifile& ini, LPCSTR sect, xrClientData* pCl);
+				void				DumpRoundStatistics		();
+public:
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 

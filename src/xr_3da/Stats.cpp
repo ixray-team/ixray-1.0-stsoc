@@ -151,7 +151,7 @@ void CStats::Show()
 	}
 
 	////////////////////////////////////////////////
-	if (g_pGamePersistent->bDedicatedServer) return;
+	if (g_dedicated_server) return;
 	////////////////////////////////////////////////
 	int frm = 2000;
 	div_t ddd = div(Device.dwFrame,frm);

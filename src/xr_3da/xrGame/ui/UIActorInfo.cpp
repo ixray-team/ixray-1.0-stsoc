@@ -96,32 +96,87 @@ void CUIActorInfoWnd::FillPointsInfo			()
 
 	UIMasterList->Clear						();
 
+#ifndef PRIQUEL
 	int items_num = uiXml.GetNodesNum		("actor_stats_wnd", 0, "master_part");
 	uiXml.SetLocalRoot						(uiXml.NavigateToNode("actor_stats_wnd",0));
-	string64 buff;
+	string64								buff;
 	
-	for(int i=0; i<items_num; ++i){
+	for(int i=0; i<items_num; ++i)
+	{
 		CUIActorStaticticHeader* itm		= xr_new<CUIActorStaticticHeader>(this);
 		itm->Init							(&uiXml, "master_part", i);
 		
-		if(_ParseItem("foo",actor_stats_token)!=(u32)itm->m_index){
+		if(itm->m_id!="foo")
+		{
 
-			if(_ParseItem("reputation",actor_stats_token)==(u32)itm->m_index){
+			if(itm->m_id=="reputation")
+			{
 				itm->m_text2->SetTextST				(InventoryUtilities::GetReputationAsText(Actor()->Reputation()));
 				itm->m_text2->SetTextColor			(InventoryUtilities::GetReputationColor(Actor()->Reputation()));
-			}else{
-				sprintf								(buff,"%d", Actor()->StatisticMgr().GetSectionPoints(itm->m_index));
-				itm->m_text2->SetTextST				(buff);
+			}else
+			{
+				s32 _totl = Actor()->StatisticMgr().GetSectionPoints(itm->m_id);
+				
+				if(_totl==-1)
+				{
+					itm->m_text2->SetTextST				("");
+				}else
+				{
+					sprintf_s							(buff,"%d", _totl);
+					itm->m_text2->SetTextST				(buff);
+				}
 			}
 		}
 		UIMasterList->AddWindow				(itm, true);
 	}
-
+#else
+	const vStatSectionData& _storage	= Actor()->StatisticMgr().GetCStorage();
+	vStatSectionData::const_iterator	it		= _storage.begin();
+	vStatSectionData::const_iterator	it_e	= _storage.end();
+	
+	FillMasterPart						(&uiXml, "foo");
+	
+	for(; it!=it_e; ++it)
+	{
+		FillMasterPart					(&uiXml, (*it).key);
+	}
+	FillMasterPart						(&uiXml, "total");
+#endif
 	UIMasterList->SetSelected(UIMasterList->GetItem(1) );
-
 }
 
-void CUIActorInfoWnd::FillPointsDetail	(int idx)
+void CUIActorInfoWnd::FillMasterPart(CUIXml* xml, const shared_str& key_name)
+{
+	CUIActorStaticticHeader* itm		= xr_new<CUIActorStaticticHeader>(this);
+	string128							buff;
+	strconcat							(sizeof(buff), buff, "actor_stats_wnd:master_part_", key_name.c_str() );
+	itm->Init							(xml, buff, 0);
+
+	if(key_name!="foo")
+	{
+
+		if(key_name=="reputation")
+		{
+			itm->m_text2->SetTextST				(InventoryUtilities::GetReputationAsText(Actor()->Reputation()));
+			itm->m_text2->SetTextColor			(InventoryUtilities::GetReputationColor(Actor()->Reputation()));
+		}else
+		{
+			s32 _totl = Actor()->StatisticMgr().GetSectionPoints(key_name);
+			
+			if(_totl==-1)
+			{
+				itm->m_text2->SetTextST				("");
+			}else
+			{
+				sprintf_s							(buff,"%d", _totl);
+				itm->m_text2->SetTextST				(buff);
+			}
+		}
+	}
+	UIMasterList->AddWindow							(itm, true);
+}
+
+void CUIActorInfoWnd::FillPointsDetail(const shared_str& id)
 {
 
 	UIDetailList->Clear						();
@@ -130,45 +185,54 @@ void CUIActorInfoWnd::FillPointsDetail	(int idx)
 	uiXml.SetLocalRoot						(uiXml.NavigateToNode("actor_stats_wnd",0));
 	
 	string512 path;
-	sprintf									(path,"detail_part_%d",idx);
+	sprintf_s								(path,"detail_part_%s",id.c_str());
 	
 	XML_NODE* n								= uiXml.NavigateToNode(path,0);
 	if(!n)
-		sprintf								(path,"detail_part_def");
-	if(idx==5)//reputation
+		sprintf_s								(path,"detail_part_def");
+
+	if(id=="reputation")//reputation
 	{
 		UIInfoHeader->GetTitleStatic()->SetTextST	("st_detail_list_for_community_relations");
 		FillReputationDetails						(&uiXml, path);
 		return;
 	}
-	string256	str;
-	sprintf		(str,"st_detail_list_for_%s", get_token_name(actor_stats_token,idx));
+	string256									str;
+	sprintf_s									(str,"st_detail_list_for_%s", id.c_str());
 	UIInfoHeader->GetTitleStatic()->SetTextST	(str);
 
-	SStatSectionData&	section				= Actor()->StatisticMgr().GetSection(idx);
+	SStatSectionData&	section				= Actor()->	StatisticMgr().GetSection(id);
 	vStatDetailData::const_iterator it		= section.data.begin();
 	vStatDetailData::const_iterator it_e	= section.data.end();
 
 	int _cntr = 0;
 	string64 buff;
-	for(;it!=it_e;++it,++_cntr){
+	for(;it!=it_e;++it,++_cntr)
+	{
 		CUIActorStaticticDetail* itm		= xr_new<CUIActorStaticticDetail>();
 		itm->Init							(&uiXml, path, 0);
 
-		sprintf								(buff,"%d.",_cntr);
+		sprintf_s							(buff,"%d.",_cntr);
 		itm->m_text0->SetText				(buff);
 
 		itm->m_text1->SetTextST				(*CStringTable().translate((*it).key));
 		itm->m_text1->AdjustHeightToText	();
 
-		sprintf								(buff,"x%d", (*it).count);
-		itm->m_text2->SetTextST				(buff);
+		if( 0==(*it).str_value.size() )
+		{
+			sprintf_s							(buff,"x%d", (*it).int_count);
+			itm->m_text2->SetTextST				(buff);
 
-		sprintf								(buff,"%d", (*it).points);
-		itm->m_text3->SetTextST				(buff);
+			sprintf_s							(buff,"%d", (*it).int_points);
+			itm->m_text3->SetTextST				(buff);
+		}else
+		{
+			itm->m_text2->SetTextST				((*it).str_value.c_str());
+			itm->m_text3->SetTextST				("");
+		}
+
 		Fvector2 sz							= itm->GetWndSize();
 		float _height;
-		
 		_height								= _max(sz.y, itm->m_text1->GetWndPos().y+itm->m_text1->GetWndSize().y+3);
 		sz.y								= _height;
 		itm->SetWndSize						(sz);
@@ -180,7 +244,7 @@ void	CUIActorInfoWnd::Reset()
 	inherited::Reset();
 }
 
-void	CUIActorInfoWnd::FillReputationDetails		(CUIXml* xml, LPCSTR path)
+void	CUIActorInfoWnd::FillReputationDetails(CUIXml* xml, LPCSTR path)
 {
 	XML_NODE* _list_node					= xml->NavigateToNode	("relation_communities_list",0);
 	int cnt = xml->GetNodesNum				("relation_communities_list",0,"r");
@@ -196,7 +260,8 @@ void	CUIActorInfoWnd::FillReputationDetails		(CUIXml* xml, LPCSTR path)
 
 
 	string64 buff;
-	for(int i=0;i<cnt;++i){
+	for(int i=0;i<cnt;++i)
+	{
 		CUIActorStaticticDetail* itm		= xr_new<CUIActorStaticticDetail>();
 		itm->Init							(xml, path, 0);
 		comm.set							(xml->Read(_list_node,"r",i,"unknown_community"));
@@ -209,7 +274,7 @@ void	CUIActorInfoWnd::FillReputationDetails		(CUIXml* xml, LPCSTR path)
 		itm->m_text2->SetTextST				(InventoryUtilities::GetGoodwillAsText(gw));
 		itm->m_text2->SetTextColor			(InventoryUtilities::GetGoodwillColor(gw));
 
-		sprintf								(buff,"%d", gw);
+		sprintf_s							(buff,"%d", gw);
 		itm->m_text3->SetTextST				(buff);
 
 		UIDetailList->AddWindow				(itm, true);
@@ -217,19 +282,19 @@ void	CUIActorInfoWnd::FillReputationDetails		(CUIXml* xml, LPCSTR path)
 }
 
 
-CUIActorStaticticHeader::CUIActorStaticticHeader	(CUIActorInfoWnd* w)
+CUIActorStaticticHeader::CUIActorStaticticHeader(CUIActorInfoWnd* w)
 :m_actorInfoWnd(w)
 {}
 
 
-void CUIActorStaticticHeader::Init	(CUIXml* xml, LPCSTR path, int idx)
+void CUIActorStaticticHeader::Init	(CUIXml* xml, LPCSTR path, int idx_in_xml)
 {
 	XML_NODE* _stored_root				= xml->GetLocalRoot();
 
 	CUIXmlInit							xml_init;
-	xml_init.InitWindow					(*xml, path, idx, this);
+	xml_init.InitWindow					(*xml, path, idx_in_xml, this);
 
-	xml->SetLocalRoot					(xml->NavigateToNode(path,idx));
+	xml->SetLocalRoot					(xml->NavigateToNode(path,idx_in_xml));
 
 	m_text1								= xr_new<CUIStatic>(); m_text1->SetAutoDelete(true);
 	AttachChild							(m_text1);
@@ -241,7 +306,12 @@ void CUIActorStaticticHeader::Init	(CUIXml* xml, LPCSTR path, int idx)
 
 	xml_init.InitAutoStaticGroup		(*xml, "auto", 0, this);
 
-	m_index								= _ParseItem(xml->ReadAttrib(xml->GetLocalRoot(),"id",0), actor_stats_token);
+#ifndef PRIQUEL
+	m_id								= xml->ReadAttrib(xml->GetLocalRoot(),"id",NULL);
+#else
+	LPCSTR _id							= strstr(path,"master_part_")+xr_strlen("master_part_");
+	m_id								= _id;
+#endif
 
 	m_stored_alpha						= color_get_A(m_text1->GetTextColor());
 	xml->SetLocalRoot					(_stored_root);
@@ -250,7 +320,8 @@ void CUIActorStaticticHeader::Init	(CUIXml* xml, LPCSTR path, int idx)
 
 bool CUIActorStaticticHeader::OnMouseDown	(int mouse_btn)
 {
-	if(mouse_btn==MOUSE_1 && m_index!=100 && m_index>0){
+	if(mouse_btn==MOUSE_1 && m_id!="total")
+	{
 		m_actorInfoWnd->MasterList().SetSelected	(this);
 		return true;
 	}else
@@ -262,7 +333,7 @@ void CUIActorStaticticHeader::SetSelected(bool b)
 	CUISelectable::SetSelected(b);
 	m_text1->SetTextColor( subst_alpha(m_text1->GetTextColor(), b?255:m_stored_alpha ));
 	if(b){ 
-		m_actorInfoWnd->FillPointsDetail			(m_index);
+		m_actorInfoWnd->FillPointsDetail			(m_id);
 	}
 }
 

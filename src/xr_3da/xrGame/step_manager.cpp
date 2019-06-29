@@ -1,11 +1,13 @@
 #include "stdafx.h"
+#include "../skeletonanimated.h"
+#include "step_manager_defs.h"
 #include "step_manager.h"
 #include "entity_alive.h"
-#include "../skeletonanimated.h"
 #include "level.h"
 #include "gamepersistent.h"
 #include "material_manager.h"
 #include "profiler.h"
+#include "IKLimbsController.h"
 
 CStepManager::CStepManager()
 {
@@ -70,6 +72,9 @@ void CStepManager::on_animation_start(MotionID motion_id, CBlend *blend)
 	m_blend	= blend;
 	if (!m_blend) return;
 
+	if(m_object->character_ik_controller	())
+		m_object->character_ik_controller	()->PlayLegs(blend);
+
 	m_time_anim_started = Device.dwTimeGlobal; 
 	
 	// искать текущую анимацию в STEPS_MAP
@@ -87,6 +92,7 @@ void CStepManager::on_animation_start(MotionID motion_id, CBlend *blend)
 		m_step_info.activity[i].handled	= false;
 		m_step_info.activity[i].cycle	= m_step_info.cur_cycle;
 	}
+
 
 	VERIFY					(m_blend);
 }
@@ -193,8 +199,8 @@ Fvector	CStepManager::get_foot_position(ELegType leg_type)
 
 void CStepManager::load_foot_bones	(CInifile::Sect &data)
 {
-	for (CInifile::SectIt I=data.begin(); I!=data.end(); ++I){
-		CInifile::Item& item	= *I;
+	for (CInifile::SectCIt I=data.Data.begin(); I!=data.Data.end(); ++I){
+		const CInifile::Item& item	= *I;
 
 		u16 index = smart_cast<CKinematics*>(m_object->Visual())->LL_BoneID(*item.second);
 		VERIFY3(index != BI_NONE, "foot bone not found", *item.second);

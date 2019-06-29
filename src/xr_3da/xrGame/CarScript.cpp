@@ -1,12 +1,6 @@
-#include "stdafx.h"
-/*#ifdef DEBUG
-#include "ode_include.h"
-#include "../StatGraph.h"
-#include "PHDebug.h"
-#endif*/
+#include "pch_script.h"
 #include "alife_space.h"
 #include "Car.h"
-#include "script_space.h"
 #include "CarWeapon.h"
 #include "script_game_object.h"
 
@@ -28,8 +22,8 @@ void CCar::script_register(lua_State *L)
 					value("eWpnToDefaultDir",						int(CCarWeapon::eWpnToDefaultDir))
 				]
 		.def("Action",			&CCar::Action)
-//		.def("SetParam",		(void (CCar::*)(int,Fvector2)) CCar::SetParam)
-		.def("SetParam",		(void (CCar::*)(int,Fvector)) CCar::SetParam)
+//		.def("SetParam",		(void (CCar::*)(int,Fvector2)) &CCar::SetParam)
+		.def("SetParam",		(void (CCar::*)(int,Fvector)) &CCar::SetParam)
 		.def("CanHit",			&CCar::WpnCanHit)
 		.def("FireDirDiff",		&CCar::FireDirDiff)
 		.def("IsObjectVisible",	&CCar::isObjectVisible)

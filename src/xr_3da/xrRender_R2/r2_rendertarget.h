@@ -154,6 +154,8 @@ public:
 	void						u_calc_tc_noise			(Fvector2& p0, Fvector2& p1);
 	void						u_calc_tc_duality_ss	(Fvector2& r0, Fvector2& r1, Fvector2& l0, Fvector2& l1);
 	BOOL						u_need_PP				();
+	BOOL						u_DBT_enable			(float zMin, float zMax);
+	void						u_DBT_disable			();
 
 	void						phase_scene_prepare		();
 	void						phase_scene_begin		();
@@ -169,6 +171,8 @@ public:
 	void						shadow_direct			(light* L, u32 dls_phase);
 	
 	BOOL						enable_scissor			(light* L);		// true if intersects near plane
+	void						enable_dbt_bounds		(light* L);
+
 	void						disable_aniso			();
 
 	void						draw_volume				(light* L);

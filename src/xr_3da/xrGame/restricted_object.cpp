@@ -54,7 +54,7 @@ IC	void construct_id_string					(LPSTR result, const xr_vector<ALife::_OBJECT_ID
 	for ( ; I != E; ++I) {
 		if (count)
 			strcat	(result,",");
-		sprintf		(temp,"%d",*I);
+		sprintf_s		(temp,"%d",*I);
 		strcat		(result,temp);
 		++count;
 	}

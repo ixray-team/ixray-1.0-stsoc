@@ -69,10 +69,13 @@ CHUDTarget::CHUDTarget	()
 	m_bShowCrosshair	= false;
 }
 
-CHUDTarget::~CHUDTarget	()
+void CHUDTarget::net_Relcase(CObject* O)
 {
-}
+	if(RQ.O == O)
+		RQ.O = NULL;
 
+	RQR.r_clear	();
+}
 
 void CHUDTarget::Load		()
 {
@@ -236,12 +239,16 @@ void CHUDTarget::Render()
 		u32			vOffset;
 		FVF::TL*	pv		= (FVF::TL*)RCache.Vertex.Lock(4,hGeom.stride(),vOffset);
 		
-		float			size_x = float(Device.dwWidth)	* di_size;
-		float			size_y = float(Device.dwHeight) * di_size;
-		size_y = size_x;
+		Fvector2		scr_size;
+//.		scr_size.set	(float(::Render->getTarget()->get_width()), float(::Render->getTarget()->get_height()));
+		scr_size.set	(float(Device.dwWidth) ,float(Device.dwHeight));
+		float			size_x = scr_size.x	* di_size;
+		float			size_y = scr_size.y * di_size;
 
-		float			w_2		= Device.fWidth_2;
-		float			h_2		= Device.fHeight_2;
+		size_y			= size_x;
+
+		float			w_2		= scr_size.x/2.0f;
+		float			h_2		= scr_size.y/2.0f;
 
 		// Convert to screen coords
 		float cx		    = (PT.p.x+1)*w_2;
@@ -263,3 +270,4 @@ void CHUDTarget::Render()
 		HUDCrosshair.OnRender		();
 	}
 }
+

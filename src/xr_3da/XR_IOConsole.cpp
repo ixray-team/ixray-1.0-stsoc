@@ -15,7 +15,7 @@
 #include "CustomHUD.h"
 #pragma warning(push)
 #pragma warning(disable:4995)
-#include <locale>
+//#include <locale>
 #pragma warning(pop)
 
 #define  LDIST .05f
@@ -88,6 +88,37 @@ void CConsole::OnFrame	()
 */
 }
 
+void out_font(CGameFont* pFont, LPCSTR text, float& pos_y)
+{
+	float str_length = pFont->SizeOf_(text);
+	if(str_length>1024.0f)
+	{
+		float _l			= 0.0f;
+		int _sz				= 0;
+		int _ln				= 0;
+		string1024			_one_line;
+		
+		while( text[_sz] )
+		{
+			_one_line[_ln+_sz]			= text[_sz];
+			_one_line[_ln+_sz+1]		= 0;
+			float _t					= pFont->SizeOf_(_one_line+_ln);
+			if(_t > 1024.0f)
+			{
+				out_font				(pFont, text+_sz, pos_y);
+				pos_y					-= LDIST;
+				pFont->OutI				(-1.0f, pos_y, "%s", _one_line+_ln);
+				_l						= 0.0f;
+				_ln						= _sz;
+			}else
+				_l	= _t;
+
+			++_sz;
+		};
+	}else
+		pFont->OutI  (-1.0f, pos_y, "%s", text);
+}
+
 void CConsole::OnRender	()
 {
 	float			fMaxY;
@@ -102,7 +133,7 @@ void CConsole::OnRender	()
 		 ( g_pGamePersistent && g_pGamePersistent->m_pMainMenu && g_pGamePersistent->m_pMainMenu->IsActive() ) )	
 		 bGame = true;
 
-	if		(g_pGamePersistent->bDedicatedServer)				bGame = false;
+	if		(g_dedicated_server)				bGame = false;
 
 	VERIFY	(HW.pDevice);
 
@@ -117,7 +148,7 @@ void CConsole::OnRender	()
 	if (bGame) { fMaxY=0.f; dwMaxY/=2; } else fMaxY=1.f;
 
 	char		buf	[MAX_LEN+5];
-	strcpy		(buf,ioc_prompt);
+	strcpy_s		(buf,ioc_prompt);
 	strcat		(buf,editor);
 	if (bCursor) strcat(buf,"|");
 
@@ -126,35 +157,47 @@ void CConsole::OnRender	()
 	pFont->OutI	( -1.f, fMaxY-LDIST, "%s", buf );
 
 	float ypos=fMaxY-LDIST-LDIST;
-	for (int i=LogFile.size()-1-scroll_delta; i>=0; i--) {
+	for (int i=LogFile->size()-1-scroll_delta; i>=0; i--) 
+	{
 		ypos-=LDIST;
 		if (ypos<-1.f)	break;
-		LPCSTR			ls = *LogFile[i];
+		LPCSTR			ls = *(*LogFile)[i];
 		if	(0==ls)		continue;
 		switch (ls[0]) {
 		case '~':
 			pFont->SetColor(color_rgba(255,255,0, 255));
-			pFont->OutI  (-1.f,ypos,"%s",&ls[2]);
+			out_font		(pFont,&ls[2],ypos);
+//.			pFont->OutI  (-1.f,ypos,"%s",&ls[2]);
 			break;
 		case '!':
 			pFont->SetColor(color_rgba(255,0  ,0  , 255));
-			pFont->OutI  (-1.f,ypos,"%s",&ls[2]);
+			out_font		(pFont,&ls[2],ypos);
+//.			pFont->OutI  (-1.f,ypos,"%s",&ls[2]);
 			break;
 		case '*':
 			pFont->SetColor(color_rgba(128,128,128, 255));
-			pFont->OutI  (-1.f,ypos,"%s",&ls[2]);
+			out_font		(pFont,&ls[2],ypos);
+//.			pFont->OutI  (-1.f,ypos,"%s",&ls[2]);
 			break;
 		case '-':
 			pFont->SetColor(color_rgba(0  ,255,0  , 255));
-			pFont->OutI  (-1.f,ypos,"%s",&ls[2]);
+			out_font		(pFont,&ls[2],ypos);
+//.			pFont->OutI  (-1.f,ypos,"%s",&ls[2]);
+			break;
+		case '#':
+			pFont->SetColor(color_rgba(0  ,222, 205  ,145));
+			out_font		(pFont,&ls[2],ypos);
+//.			pFont->OutI  (-1.f,ypos,"%s",&ls[2]);
 			break;
 		default:
 			pFont->SetColor(color_rgba(255,255,255, 255));
-			pFont->OutI  (-1.f,ypos,"%s",ls);
+			out_font		(pFont,ls,ypos);
+//.			pFont->OutI  (-1.f,ypos,"%s",ls);
 		}
 	}
 	pFont->OnRender();
 }
+
 
 void CConsole::OnPressKey(int dik, BOOL bHold)
 {
@@ -172,7 +215,7 @@ void CConsole::OnPressKey(int dik, BOOL bHold)
 		break;
 	case DIK_PRIOR:
 		scroll_delta++;
-		if (scroll_delta>int(LogFile.size())-1) scroll_delta=LogFile.size()-1;
+		if (scroll_delta>int(LogFile->size())-1) scroll_delta=LogFile->size()-1;
 		break;
 	case DIK_NEXT:
 		scroll_delta--;
@@ -180,11 +223,14 @@ void CConsole::OnPressKey(int dik, BOOL bHold)
 		break;
 	case DIK_TAB:
 		{
-			vecCMD_IT I = Commands.lower_bound(editor);
+			LPCSTR radmin_cmd_name = "ra ";
+			bool b_ra = (editor==strstr(editor, radmin_cmd_name));
+			int offset = (b_ra)?xr_strlen(radmin_cmd_name):0;
+			vecCMD_IT I = Commands.lower_bound(editor+offset);
 			if (I!=Commands.end()) {
 				IConsole_Command &O = *(I->second);
-				strcpy(editor,O.Name());
-				strcat(editor," ");
+				strcpy_s(editor+offset, sizeof(editor)-offset, O.Name());
+				strcat(editor+offset," ");
 			}
 		}
 		break;
@@ -320,10 +366,11 @@ void CConsole::OnPressKey(int dik, BOOL bHold)
 			if( hmem ){
 				LPCSTR	clipdata = (LPCSTR)GlobalLock(hmem);
 				strncpy (editor,clipdata,MAX_LEN-1); editor[MAX_LEN-1]=0;
-				std::locale loc ("English");
+//				std::locale loc ("English");
 				for (u32 i=0; i<xr_strlen(editor); i++)
 					if (isprint(editor[i]))	{
-						editor[i]=char(tolower(editor[i],loc));
+//						editor[i]=char(tolower(editor[i],loc));
+						editor[i]=char(tolower(editor[i]));
 					}else{
 						editor[i]=' ';
 					}
@@ -396,8 +443,8 @@ void CConsole::ExecuteCommand()
 	}
 outloop:
 	converted[j]=0;
-	if (converted[0]==' ')	strcpy(editor,&(converted[1]));
-	else					strcpy(editor,converted);
+	if (converted[0]==' ')	strcpy_s(editor,&(converted[1]));
+	else					strcpy_s(editor,converted);
 	if (editor[0]==0)		return;
 	if (RecordCommands)		Log("~",editor);
 	
@@ -408,7 +455,7 @@ outloop:
 		if (editor[i]!=' ') first_word[i]=editor[i];
 		else {
 			// last 'word' - exit
-			strcpy(last_word,editor+i+1);
+			strcpy_s(last_word,editor+i+1);
 			break;
 		}
 	}
@@ -454,7 +501,7 @@ void CConsole::Show			()
 void CConsole::Hide()
 {
 	if	(!bVisible)													return;
-	if	(g_pGamePersistent && g_pGamePersistent->bDedicatedServer)	return;
+	if	(g_pGamePersistent && g_dedicated_server)	return;
 
 	bVisible				= false;
 	Device.seqFrame.Remove	(this);
@@ -466,12 +513,12 @@ void CConsole::SelectCommand()
 {
 	int		p,k;
 	BOOL	found=false;
-	for (p=LogFile.size()-1, k=0; p>=0; p--) {
-		if (0==*LogFile[p])		continue;
-		if (LogFile[p][0]=='~') {
+	for (p=LogFile->size()-1, k=0; p>=0; p--) {
+		if (0==*(*LogFile)[p])		continue;
+		if ((*LogFile)[p][0]=='~') {
 			k--;
 			if (k==cmd_delta) {
-				strcpy(editor,&(*LogFile[p])[2]);
+				strcpy_s(editor,&(*(*LogFile)[p])[2]);
 				found=true;
 			}
 		}
@@ -495,7 +542,7 @@ void CConsole::Execute		(LPCSTR cmd)
 void CConsole::ExecuteScript(LPCSTR N)
 {
 	string128		cmd;
-	strconcat		(cmd,"cfg_load ",N);
+	strconcat		(sizeof(cmd),cmd,"cfg_load ",N);
 	Execute			(cmd);
 }
 

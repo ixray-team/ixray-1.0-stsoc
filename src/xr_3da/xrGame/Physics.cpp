@@ -13,9 +13,9 @@
 ///////////////////////////////////////////////////////////////
 #pragma warning(disable:4995)
 #pragma warning(disable:4267)
-#include "../ode/src/collision_kernel.h"
-#include <../ode/src/joint.h>
-#include <../ode/src/objects.h>
+#include "../../xrODE/ode/src/collision_kernel.h"
+#include "../../xrODE/ode/src/joint.h"
+#include "../../xrODE/ode/src/objects.h"
 #pragma warning(default:4267)
 #pragma warning(default:4995)
 

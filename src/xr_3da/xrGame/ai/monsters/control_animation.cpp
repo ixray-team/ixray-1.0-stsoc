@@ -106,7 +106,11 @@ void CControlAnimation::play_part(SAnimationPart &part, PlayCallback callback)
 	float pos		= -1.f;
 	if (part.blend && !part.blend->stop_at_end) 
 		pos			= fmod(part.blend->timeCurrent,part.blend->timeTotal)/part.blend->timeTotal;
-
+#ifdef DEBUG
+	//CKinematicsAnimated * K = m_object->Visual()->dcast_PKinematicsAnimated();
+	//Msg				("%6d Playing animation : %s , %s , Object %s",Device.dwTimeGlobal, K->LL_MotionDefName_dbg(part.motion).first,K->LL_MotionDefName_dbg(part.motion).second, *(m_object->cName()));
+#endif
+	
 	part.blend			= m_skeleton_animated->LL_PlayCycle(bone_or_part,part.motion, TRUE, callback, this);
 	
 	

@@ -13,7 +13,7 @@
 
 class CCustomMonster;
 class CAI_Stalker;
-class CActor;
+class vision_client;
 
 class CVisualMemoryManager {
 #ifdef DEBUG
@@ -38,7 +38,7 @@ private:
 private:
 	CCustomMonster		*m_object;
 	CAI_Stalker			*m_stalker;
-	CActor				*m_actor;
+	vision_client		*m_client;
 
 private:
 	RAW_VISIBLES		m_visible_objects;
@@ -76,10 +76,14 @@ protected:
 			void	add_not_yet_visible_object				(const CNotYetVisibleObject &not_yet_visible_object);
 			CNotYetVisibleObject *not_yet_visible_object	(const CGameObject *game_object);
 
+private:
+			void	initialize				();
+
 public:
-					CVisualMemoryManager	(CCustomMonster *object, CAI_Stalker *stalker, CActor *actor);
+					CVisualMemoryManager	(CCustomMonster *object);
+					CVisualMemoryManager	(CAI_Stalker *stalker);
+					CVisualMemoryManager	(vision_client *client);
 	virtual			~CVisualMemoryManager	();
-	virtual	void	Load					(LPCSTR section);
 	virtual	void	reinit					();
 	virtual	void	reload					(LPCSTR section);
 	virtual	void	update					(float time_delta);

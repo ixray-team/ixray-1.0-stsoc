@@ -12,18 +12,22 @@ class CParticlesObject		:	public CPS_Instance
 	u32					dwLastTime;
 	void				Init				(LPCSTR p_name, IRender_Sector* S, BOOL bAutoRemove);
 	void				UpdateSpatial		();
+
 protected:
 	bool				m_bLooped;			//флаг, что система зациклена
 	bool				m_bStopping;		//вызвана функция Stop()
+
 protected:
 	u32					mt_dt;
+
 protected:
 	virtual				~CParticlesObject	();
-public:
-						CParticlesObject	(LPCSTR p_name, BOOL bAutoRemove);
 
-	virtual bool		shedule_Needed		()			{return true;};
-	virtual float		shedule_Scale		()	{ return Device.vCameraPosition.distance_to(Position())/200.f; }
+public:
+						CParticlesObject	(LPCSTR p_name, BOOL bAutoRemove, bool destroy_on_game_load);
+
+	virtual bool		shedule_Needed		()	{return true;};
+	virtual float		shedule_Scale		()	;
 	virtual void		shedule_Update		(u32 dt);
 	virtual void		renderable_Render	();
 	void				PerformAllTheWork	(u32 dt);
@@ -46,9 +50,9 @@ public:
 
 	const shared_str			Name		();
 public:
-	static CParticlesObject*	Create		(LPCSTR p_name, BOOL bAutoRemove=TRUE)
+	static CParticlesObject*	Create		(LPCSTR p_name, BOOL bAutoRemove=TRUE, bool remove_on_game_load = true)
 	{
-		return xr_new<CParticlesObject>(p_name, bAutoRemove);
+		return xr_new<CParticlesObject>(p_name, bAutoRemove, remove_on_game_load);
 	}
 	static void					Destroy		(CParticlesObject*& p)
 	{

@@ -71,7 +71,8 @@ protected:
 
 	enum EStats{
 		eTorchActive				= (1<<0),
-		eNightVisionActive			= (1<<1)	
+		eNightVisionActive			= (1<<1),
+		eAttached					= (1<<2)
 	};
 
 public:

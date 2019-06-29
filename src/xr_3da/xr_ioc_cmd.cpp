@@ -62,8 +62,8 @@ public:
 	CCC_MemStat(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = TRUE; };
 	virtual void Execute(LPCSTR args) {
 		string_path fn;
-		if (args&&args[0])	sprintf	(fn,"%s.dump",args);
-		else				strcpy	(fn,"x:\\$memory$.dump");
+		if (args&&args[0])	sprintf_s	(fn,sizeof(fn),"%s.dump",args);
+		else				strcpy_s_s	(fn,sizeof(fn),"x:\\$memory$.dump");
 		Memory.mem_statistic				(fn);
 //		g_pStringContainer->dump			();
 //		g_pSharedMemoryContainer->dump		();
@@ -223,7 +223,7 @@ public:
 	virtual void Execute(LPCSTR args) 
 	{
 		string_path			cfg_full_name;
-		strcpy				(cfg_full_name, (xr_strlen(args)>0)?args:Console->ConfigFile);
+		strcpy_s			(cfg_full_name, (xr_strlen(args)>0)?args:Console->ConfigFile);
 
 		bool b_abs_name = xr_strlen(cfg_full_name)>2 && cfg_full_name[1]==':';
 
@@ -257,7 +257,7 @@ void CCC_LoadCFG::Execute(LPCSTR args)
 		Msg("Executing config-script \"%s\"...",args);
 		string_path						cfg_name;
 
-		strcpy							(cfg_name, args);
+		strcpy_s							(cfg_name, args);
 		if (strext(cfg_name))			*strext(cfg_name) = 0;
 		strcat							(cfg_name,".ltx");
 
@@ -266,7 +266,7 @@ void CCC_LoadCFG::Execute(LPCSTR args)
 		FS.update_path					(cfg_full_name, "$app_data_root$", cfg_name);
 		
 		if( NULL == FS.exist(cfg_full_name) )
-			strcpy						(cfg_full_name, cfg_name);
+			strcpy_s						(cfg_full_name, cfg_name);
 		
 		IReader* F						= FS.r_open(cfg_full_name);
 		
@@ -287,7 +287,7 @@ void CCC_LoadCFG::Execute(LPCSTR args)
 CCC_LoadCFG_custom::CCC_LoadCFG_custom(LPCSTR cmd)
 :CCC_LoadCFG(cmd)
 {
-	strcpy(m_cmd, cmd);
+	strcpy_s(m_cmd, cmd);
 };
 bool CCC_LoadCFG_custom::allow(LPCSTR cmd)
 {
@@ -311,7 +311,7 @@ public:
 			return;
 		}
 */
-		string256	op_server,op_client;
+		string4096	op_server,op_client;
 		op_server[0] = 0;
 		op_client[0] = 0;
 		
@@ -319,7 +319,7 @@ public:
 		parse		(op_client,args,"client");	// 2. client
 		
 		if(!op_client[0] && strstr(op_server,"single"))
-			strcpy(op_client, "localhost");
+			strcpy_s(op_client, "localhost");
 
 		if (0==xr_strlen(op_client))	
 		{
@@ -367,12 +367,12 @@ public :
 	}
 	virtual void	Status	(TStatus& S)	
 	{ 
-		sprintf(S,"%dx%d",psCurrentVidMode[0],psCurrentVidMode[1]); 
+		sprintf_s(S,sizeof(S),"%dx%d",psCurrentVidMode[0],psCurrentVidMode[1]); 
 	}
 	virtual xr_token* GetToken()				{return vid_mode_token;}
 	virtual void	Info	(TInfo& I)
 	{	
-		strcpy(I,"change screen resolution WxH");
+		strcpy_s(I,sizeof(I),"change screen resolution WxH");
 	}
 
 
@@ -405,7 +405,7 @@ public:
 };
 
 //-----------------------------------------------------------------------
-#ifdef	DEBUG
+
 extern  INT	g_bDR_LM_UsePointsBBox;
 extern	INT	g_bDR_LM_4Steps;
 extern	INT g_iDR_LM_Step;
@@ -449,7 +449,7 @@ public:
 	CCC_DR_UsePoints(LPCSTR N, int* V, int _min=0, int _max=999) : CCC_Integer(N, V, _min, _max)	{};
 	virtual void	Save	(IWriter *F)	{};
 };
-#endif
+
 
 
 ENGINE_API BOOL r2_sun_static = TRUE;
@@ -459,14 +459,18 @@ class CCC_r2 : public CCC_Token
 {
 	typedef CCC_Token inherited;
 public:
-	CCC_r2(LPCSTR N) :inherited(N, &renderer_value, vid_quality_token){renderer_value=0;};
-	
+	CCC_r2(LPCSTR N) : inherited(N, &renderer_value, vid_quality_token){renderer_value=0;};
+
 	virtual void	Execute	(LPCSTR args)
 	{
+#ifdef DEDICATED_SERVER
+		inherited::Execute	("renderer_r1");
+#else
 		inherited::Execute	(args);
-		psDeviceFlags.set(rsR2, (renderer_value>0) );
+#endif // DEDICATED_SERVER
 
-		r2_sun_static	= (renderer_value!=2);
+		psDeviceFlags.set	(rsR2, (renderer_value>0) );
+		r2_sun_static =		(renderer_value!=2);
 	}
 
 	virtual void	Save	(IWriter *F)	{
@@ -616,23 +620,22 @@ void CCC_Register()
 	//psSoundRolloff	= pSettings->r_float	("sound","rolloff");		clamp(psSoundRolloff,			EPS_S,	2.f);
 	psSoundOcclusionScale	= pSettings->r_float	("sound","occlusion_scale");clamp(psSoundOcclusionScale,	0.1f,	.5f);
 
-#ifdef DEBUG
-	extern	INT	g_Dump_Export_Obj;
-	extern	INT	g_Dump_Import_Obj;
+	extern	int	g_Dump_Export_Obj;
+	extern	int	g_Dump_Import_Obj;
 	CMD4(CCC_Integer,	"net_dbg_dump_export_obj",	&g_Dump_Export_Obj, 0, 1);
 	CMD4(CCC_Integer,	"net_dbg_dump_import_obj",	&g_Dump_Import_Obj, 0, 1);
-#endif
 
-#ifdef DEBUG	
+if(strstr(Core.Params,"designer"))	
+{
 	CMD1(CCC_DR_TakePoint,		"demo_record_take_point");
 	CMD1(CCC_DR_ClearPoint,		"demo_record_clear_points");
 	CMD4(CCC_DR_UsePoints,		"demo_record_use_points",	&g_bDR_LM_UsePointsBBox, 0, 1);
-	CMD4(CCC_DR_UsePoints,		"demo_record_4step",	&g_bDR_LM_4Steps, 0, 1);
-	CMD4(CCC_DR_UsePoints,		"demo_record_step",	&g_iDR_LM_Step, 0, 3);
-
+	CMD4(CCC_DR_UsePoints,		"demo_record_4step",		&g_bDR_LM_4Steps, 0, 1);
+	CMD4(CCC_DR_UsePoints,		"demo_record_step",			&g_iDR_LM_Step, 0, 3);
+}
 	CMD1(CCC_DumpResources,		"dump_resources");
 	CMD1(CCC_DumpOpenFiles,		"dump_open_files");
-#endif
+//#endif
 
 
 	extern int g_svTextConsoleUpdateRate;

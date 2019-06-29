@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "WeaponFN2000.h"
 
 
@@ -14,8 +14,6 @@ CWeaponFN2000::CWeaponFN2000() : CWeaponMagazined("FN2000",SOUND_TYPE_WEAPON_SNI
 CWeaponFN2000::~CWeaponFN2000()
 {
 }
-
-#include "script_space.h"
 
 using namespace luabind;
 

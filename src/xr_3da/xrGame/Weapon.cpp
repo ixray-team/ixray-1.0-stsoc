@@ -25,6 +25,7 @@
 #include "clsid_game.h"
 #include "mathutils.h"
 #include "object_broker.h"
+#include "../igame_persistent.h"
 
 #define WEAPON_REMOVE_TIME		60000
 #define ROTATION_TIME			0.25f
@@ -49,13 +50,12 @@ CWeapon::CWeapon(LPCSTR name)
 
 	iAmmoElapsed			= -1;
 	iMagazineSize			= -1;
-	iBuckShot				= 1;
 	m_ammoType				= 0;
 	m_ammoName				= NULL;
 
 	eHandDependence			= hdNone;
 
-	m_fZoomFactor			= DEFAULT_FOV;
+	m_fZoomFactor			= g_fov;
 	m_fZoomRotationFactor	= 0.f;
 
 
@@ -108,7 +108,12 @@ void CWeapon::UpdateXForm	()
 		// Get access to entity and its visual
 		CEntityAlive*	E		= smart_cast<CEntityAlive*>(H_Parent());
 		
-		if(!E) return;
+		if(!E) 
+		{
+			if (!IsGameTypeSingle())
+				UpdatePosition(H_Parent()->XFORM());
+			return;
+		}
 
 		const CInventoryOwner	*parent = smart_cast<const CInventoryOwner*>(E);
 		if (parent && parent->use_simplified_visual())
@@ -410,6 +415,12 @@ void CWeapon::Load		(LPCSTR section)
 
 	m_bHasTracers = READ_IF_EXISTS(pSettings, r_bool, section, "tracers", true);
 	m_u8TracerColorID = READ_IF_EXISTS(pSettings, r_u8, section, "tracers_color_ID", u8(-1));
+
+	string256						temp;
+	for (int i=egdNovice; i<egdCount; ++i) {
+		strconcat					(sizeof(temp),temp,"hit_probability_",get_token_name(difficulty_type_token,i));
+		m_hit_probability[i]		= READ_IF_EXISTS(pSettings,r_float,section,temp,1.f);
+	}
 }
 
 void CWeapon::LoadFireParams		(LPCSTR section, LPCSTR prefix)
@@ -431,9 +442,9 @@ void CWeapon::LoadFireParams		(LPCSTR section, LPCSTR prefix)
 void CWeapon::LoadZoomOffset (LPCSTR section, LPCSTR prefix)
 {
 	string256 full_name;
-	m_pHUD->SetZoomOffset(pSettings->r_fvector3	(hud_sect, strconcat(full_name, prefix, "zoom_offset")));
-	m_pHUD->SetZoomRotateX(pSettings->r_float	(hud_sect, strconcat(full_name, prefix, "zoom_rotate_x")));
-	m_pHUD->SetZoomRotateY(pSettings->r_float	(hud_sect, strconcat(full_name, prefix, "zoom_rotate_y")));
+	m_pHUD->SetZoomOffset(pSettings->r_fvector3	(hud_sect, strconcat(sizeof(full_name),full_name, prefix, "zoom_offset")));
+	m_pHUD->SetZoomRotateX(pSettings->r_float	(hud_sect, strconcat(sizeof(full_name),full_name, prefix, "zoom_rotate_x")));
+	m_pHUD->SetZoomRotateY(pSettings->r_float	(hud_sect, strconcat(sizeof(full_name),full_name, prefix, "zoom_rotate_y")));
 
 	if(pSettings->line_exist(hud_sect, "zoom_rotate_time"))
 		m_fZoomRotateTime = pSettings->r_float(hud_sect,"zoom_rotate_time");
@@ -446,7 +457,7 @@ void CWeapon::animGet	(MotionSVec& lst, LPCSTR prefix)
 	for (int i=0; i<MAX_ANIM_COUNT; ++i)
 	{
 		string128		sh_anim;
-		sprintf			(sh_anim,"%s%d",prefix,i);
+		sprintf_s			(sh_anim,"%s%d",prefix,i);
 		const MotionID	&M = m_pHUD->animGet(sh_anim);
 		if (M)			lst.push_back(M);
 	}
@@ -464,8 +475,8 @@ BOOL CWeapon::net_Spawn		(CSE_Abstract* DC)
 	iAmmoElapsed					= E->a_elapsed;
 	m_flagsAddOnState				= E->m_addon_flags.get();
 	m_ammoType						= E->ammo_type;
-	SetState						(E->state);
-	SetNextState					(E->state);
+	SetState						(E->wpn_state);
+	SetNextState					(E->wpn_state);
 	
 	m_DefaultCartridge.Load(*m_ammoTypes[m_ammoType], u8(m_ammoType));	
 	if(iAmmoElapsed) 
@@ -501,38 +512,40 @@ void CWeapon::net_Destroy	()
 	while (m_magazine.size()) m_magazine.pop_back();
 }
 
-void CWeapon::net_Export	(NET_Packet& P)
+BOOL CWeapon::IsUpdating()
+{	
+	bool bIsActiveItem = m_pCurrentInventory && m_pCurrentInventory->ActiveItem()==this;
+	return bIsActiveItem || bWorking || m_bPending || getVisible();
+}
+
+void CWeapon::net_Export(NET_Packet& P)
 {
-	inherited::net_Export (P);
+	inherited::net_Export	(P);
 
-	u8 flags				=	u8(IsUpdating()? M_UPDATE_WEAPON_wfVisible:0);
-	flags					|=	u8(IsWorking() ? M_UPDATE_WEAPON_wfWorking:0);
+	P.w_float_q8			(m_fCondition,0.0f,1.0f);
 
-	P.w_u8					(flags);
-
+	u8 need_upd				= IsUpdating() ? 1 : 0;
+	P.w_u8					(need_upd);
 	P.w_u16					(u16(iAmmoElapsed));
-
 	P.w_u8					(m_flagsAddOnState);
 	P.w_u8					((u8)m_ammoType);
 	P.w_u8					((u8)GetState());
 	P.w_u8					((u8)m_bZoomMode);
 }
 
-void CWeapon::net_Import	(NET_Packet& P)
+void CWeapon::net_Import(NET_Packet& P)
 {
-//	if (Level().IsDemoPlay())
-//		Msg("CWeapon::net_Import [%d]", ID());
-
 	inherited::net_Import (P);
 
-	u8 flags = 0;
+	P.r_float_q8			(m_fCondition,0.0f,1.0f);
+
+	u8 flags				= 0;
 	P.r_u8					(flags);
 
 	u16 ammo_elapsed = 0;
 	P.r_u16					(ammo_elapsed);
 
-	u8 NewAddonState;
-//	P.r_u8					(m_flagsAddOnState);
+	u8						NewAddonState;
 	P.r_u8					(NewAddonState);
 
 	m_flagsAddOnState		= NewAddonState;
@@ -557,9 +570,6 @@ void CWeapon::net_Import	(NET_Packet& P)
 	case eSwitch:
 	case eReload:
 		{
-#ifdef DEBUG
-			
-#endif
 		}break;	
 	default:
 		{
@@ -567,8 +577,6 @@ void CWeapon::net_Import	(NET_Packet& P)
 				Msg("!! Weapon [%d], State - [%d]", ID(), wstate);
 			else
 			{
-//				if (m_ammoType != ammoType)
-//					Msg("Old AmmoType - %d; NewAmmoType - %d; State - %d", m_ammoType, ammoType, wstate);
 				m_ammoType = ammoType;
 				SetAmmoElapsed((ammo_elapsed));
 			}
@@ -601,7 +609,7 @@ void CWeapon::load(IReader &input_packet)
 }
 
 
-void CWeapon::OnEvent				(NET_Packet& P, u16 type) 
+void CWeapon::OnEvent(NET_Packet& P, u16 type) 
 {
 	switch (type)
 	{
@@ -782,11 +790,11 @@ bool CWeapon::Action(s32 cmd, u32 flags)
 		case kWPN_FIRE: 
 			{
 				//если оружие чем-то занято, то ничего не делать
-				if(IsPending()) return false;
-
 				{				
-					if(flags&CMD_START) {
-						FireStart();
+					if(flags&CMD_START) 
+					{
+						if(IsPending())		return false;
+						FireStart			();
 					}else 
 						FireEnd();
 				};
@@ -808,7 +816,7 @@ bool CWeapon::Action(s32 cmd, u32 flags)
 					{
 						l_newType = (l_newType+1)%m_ammoTypes.size();
 						b1 = l_newType != m_ammoType;
-						b2 = unlimited_ammo() ? false : (!m_pInventory->GetAny(*m_ammoTypes[l_newType]));						
+						b2 = unlimited_ammo() ? false : (!m_pCurrentInventory->GetAny(*m_ammoTypes[l_newType]));						
 					} while( b1 && b2);
 
 					if(l_newType != m_ammoType) 
@@ -867,7 +875,10 @@ void CWeapon::SpawnAmmo(u32 boxCurr, LPCSTR ammoSect, u32 ParentID)
 
 	CSE_Abstract *D					= F_entity_Create(ammoSect);
 
-	if (D->m_tClassID==CLSID_OBJECT_AMMO ||D->m_tClassID==CLSID_OBJECT_A_M209||D->m_tClassID==CLSID_OBJECT_A_VOG25)
+	if (D->m_tClassID==CLSID_OBJECT_AMMO	||
+		D->m_tClassID==CLSID_OBJECT_A_M209	||
+		D->m_tClassID==CLSID_OBJECT_A_VOG25	||
+		D->m_tClassID==CLSID_OBJECT_A_OG7B)
 	{	
 		CSE_ALifeItemAmmo *l_pA		= smart_cast<CSE_ALifeItemAmmo*>(D);
 		R_ASSERT					(l_pA);
@@ -885,7 +896,7 @@ void CWeapon::SpawnAmmo(u32 boxCurr, LPCSTR ammoSect, u32 ParentID)
 		D->ID_Phantom				= 0xffff;
 		D->s_flags.assign			(M_SPAWN_OBJECT_LOCAL);
 		D->RespawnTime				= 0;
-		l_pA->m_tNodeID				= ai_location().level_vertex_id();
+		l_pA->m_tNodeID				= g_dedicated_server ? u32(-1) : ai_location().level_vertex_id();
 
 		if(boxCurr == 0xffffffff) 	
 			boxCurr					= l_pA->m_boxSize;
@@ -909,10 +920,10 @@ void CWeapon::SpawnAmmo(u32 boxCurr, LPCSTR ammoSect, u32 ParentID)
 int CWeapon::GetAmmoCurrent(bool use_item_to_spawn) const
 {
 	int l_count = iAmmoElapsed;
-	if(!m_pInventory) return l_count;
+	if(!m_pCurrentInventory) return l_count;
 
 	//чтоб не делать лишних пересчетов
-	if(m_pInventory->ModifyFrame()<=m_dwAmmoCurrentCalcFrame)
+	if(m_pCurrentInventory->ModifyFrame()<=m_dwAmmoCurrentCalcFrame)
 		return l_count + iAmmoCurrent;
 
  	m_dwAmmoCurrentCalcFrame = Device.dwFrame;
@@ -922,7 +933,7 @@ int CWeapon::GetAmmoCurrent(bool use_item_to_spawn) const
 	{
 		LPCSTR l_ammoType = *m_ammoTypes[i];
 
-		for(TIItemContainer::iterator l_it = m_pInventory->m_belt.begin(); m_pInventory->m_belt.end() != l_it; ++l_it) 
+		for(TIItemContainer::iterator l_it = m_pCurrentInventory->m_belt.begin(); m_pCurrentInventory->m_belt.end() != l_it; ++l_it) 
 		{
 			CWeaponAmmo *l_pAmmo = smart_cast<CWeaponAmmo*>(*l_it);
 
@@ -932,7 +943,7 @@ int CWeapon::GetAmmoCurrent(bool use_item_to_spawn) const
 			}
 		}
 
-		for(TIItemContainer::iterator l_it = m_pInventory->m_ruck.begin(); m_pInventory->m_ruck.end() != l_it; ++l_it) 
+		for(TIItemContainer::iterator l_it = m_pCurrentInventory->m_ruck.begin(); m_pCurrentInventory->m_ruck.end() != l_it; ++l_it) 
 		{
 			CWeaponAmmo *l_pAmmo = smart_cast<CWeaponAmmo*>(*l_it);
 			if(l_pAmmo && !xr_strcmp(l_pAmmo->cNameSect(), l_ammoType)) 
@@ -1208,7 +1219,7 @@ void CWeapon::OnZoomIn()
 void CWeapon::OnZoomOut()
 {
 	m_bZoomMode = false;
-	m_fZoomFactor = DEFAULT_FOV;
+	m_fZoomFactor = g_fov;
 
 	StartHudInertion();
 }
@@ -1227,7 +1238,7 @@ void CWeapon::SwitchState(u32 S)
 
 	SetNextState		( S );	// Very-very important line of code!!! :)
 	if (CHudItem::object().Local() && !CHudItem::object().getDestroy()/* && (S!=NEXT_STATE)*/ 
-		&& m_pInventory && OnServer())	
+		&& m_pCurrentInventory && OnServer())	
 	{
 		// !!! Just single entry for given state !!!
 		NET_Packet		P;
@@ -1237,7 +1248,7 @@ void CWeapon::SwitchState(u32 S)
 		P.w_u8			(u8(m_ammoType& 0xff));
 		P.w_u8			(u8(iAmmoElapsed & 0xff));
 		P.w_u8			(u8(m_set_next_ammoType_on_reload & 0xff));
-		CHudItem::object().u_EventSend		(P);
+		CHudItem::object().u_EventSend		(P, net_flags(TRUE, TRUE, FALSE, TRUE));
 	}
 }
 
@@ -1323,19 +1334,14 @@ void CWeapon::setup_physic_shell()
 	CPhysicsShellHolder::setup_physic_shell();
 }
 
-INT		g_iWeaponRemove = 1;
+int		g_iWeaponRemove = 1;
 
 bool CWeapon::NeedToDestroyObject()	const
 {
-	if (GameID() == GAME_SINGLE) return false;
-	if (Remote()) return false;
 	if (H_Parent()) return false;
 	if (g_iWeaponRemove == -1) return false;
 	if (g_iWeaponRemove == 0) return true;
-	if (TimePassedAfterIndependant() > m_dwWeaponRemoveTime)
-		return true;
-
-	return false;
+	return (TimePassedAfterIndependant() > m_dwWeaponRemoveTime);
 }
 
 ALife::_TIME_ID	 CWeapon::TimePassedAfterIndependant()	const
@@ -1579,4 +1585,10 @@ BOOL CWeapon::ParentIsActor	()
 	CObject* O=H_Parent();
 	CEntityAlive* EA=smart_cast<CEntityAlive*>(O);
 	return EA->cast_actor()!=0;
+}
+
+const float &CWeapon::hit_probability	() const
+{
+	VERIFY					((g_SingleGameDifficulty >= egdNovice) && (g_SingleGameDifficulty <= egdMaster)); 
+	return					(m_hit_probability[egdNovice]);
 }

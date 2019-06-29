@@ -4,4 +4,4 @@ typedef xr_string::size_type StrSize;
 #define END  "]"
 //#define xr_string::npos npos
 
-const StrSize npos = xr_string::npos;
+const StrSize npos = (StrSize)xr_string::npos;

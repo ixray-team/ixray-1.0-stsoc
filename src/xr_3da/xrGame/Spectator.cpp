@@ -250,7 +250,7 @@ void CSpectator::IR_OnMouseMove(int dx, int dy)
 	if (Remote())	return;
 
 	CCameraBase* C	= cameras	[cam_active];
-	float scale		= (C->f_fov/DEFAULT_FOV)*psMouseSens * psMouseSensScale/50.f;
+	float scale		= (C->f_fov/g_fov)*psMouseSens * psMouseSensScale/50.f;
 	if (dx){
 		float d = float(dx)*scale;
 		cameras[cam_active]->Move((d<0)?kLEFT:kRIGHT, _abs(d));
@@ -394,10 +394,12 @@ BOOL			CSpectator::net_Spawn				( CSE_Abstract*	DC )
 	return TRUE;
 };
 
+#include "../IGame_Persistent.h"
 void			CSpectator::net_Destroy	()
 {
 	inherited::net_Destroy	();
-	Level().MapManager		().RemoveMapLocationByObjectID(ID());
+	if(!g_dedicated_server)
+		Level().MapManager		().RemoveMapLocationByObjectID(ID());
 }
 
 bool			CSpectator::SelectNextPlayerToLook	()
@@ -445,7 +447,7 @@ void			CSpectator::net_Relcase				(CObject *O)
 	if (!m_pActorToLookAt) cam_Set(eacFreeFly);
 };
 
-void			CSpectator::GetSpectatorString		(LPTSTR pStr)
+void CSpectator::GetSpectatorString		(string1024& pStr)
 {
 	if (!pStr) return;
 	if (GameID() == GAME_SINGLE) return;
@@ -489,5 +491,5 @@ void			CSpectator::GetSpectatorString		(LPTSTR pStr)
 			SpectatorMsg += m_pActorToLookAt->Name();
 		}break;
 	};
-	strcpy(pStr, SpectatorMsg.c_str());
+	strcpy_s(pStr, SpectatorMsg.c_str());
 };

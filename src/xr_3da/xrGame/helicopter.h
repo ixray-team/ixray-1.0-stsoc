@@ -80,9 +80,10 @@ struct SHeliMovementState{
 	float							maxLinearSpeed;
 	float							LinearAcc_fw;
 	float							LinearAcc_bk;
+	float							isAdnAcc;
 protected:
 	float							HeadingSpK,	HeadingSpB;
-	float							PitchSpK,	PitchSpB;
+	float							PitchSpK,	PitchSpB, AngSP, AngSH;
 	float							speedInDestPoint;
 	void							SetPointFlags(u32 idx, u32 new_flags);
 public:
@@ -107,6 +108,7 @@ public:
 	void	SetSpeedInDestPoint			(float);
 	float	GetAngSpeedPitch			(float speed);
 	float	GetAngSpeedHeading			(float speed);
+
 
 	float	GetSafeAltitude				();
 	void	reinit						();
@@ -175,7 +177,8 @@ public:
 
 	shared_str						m_sAmmoType, m_sRocketSection;
 	CCartridge						m_CurrentAmmo;
-
+	float							delta_t;
+	float							flag_by_fire;
 	Fmatrix							m_left_rocket_bone_xform, m_right_rocket_bone_xform;
 
 	static void 					BoneMGunCallbackX		(CBoneInstance *B);
@@ -319,6 +322,9 @@ public:
 	float					GetCurrVelocity					();
 	float					GetMaxVelocity					();
 	void					SetMaxVelocity					(float v);
+	//////////////////////Start By JoHnY///////////////////////
+	void					SetLinearAcc					(float LAcc_fw, float LAcc_bw);
+	//////////////////////End By JoHnY/////////////////////////
 	Fvector					GetCurrVelocityVec				();
 	void					SetBarrelDirTolerance			(float val){m_barrel_dir_tolerance = val;};
 	void					SetEnemy						(CScriptGameObject* e);

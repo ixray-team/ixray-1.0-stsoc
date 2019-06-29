@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include "script_space.h"
 #include "ai_space.h"
 #include "script_engine.h"
 

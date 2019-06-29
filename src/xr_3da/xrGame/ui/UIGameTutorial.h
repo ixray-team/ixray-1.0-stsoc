@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../script_space.h"
-
 class CUIWindow;
 class CUIStatic;
 class CUISequenceItem;

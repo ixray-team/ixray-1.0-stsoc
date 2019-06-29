@@ -11,6 +11,7 @@ class CWeapon;
 class CUIGameCustom;
 class CUIMainIngameWnd;
 class CUIMessagesWindow;
+struct SDrawStaticStruct;
 
 class CUI			: public CDialogHolder
 {
@@ -48,7 +49,7 @@ public:
 	void					HideCrosshair			();
 	bool					CrosshairShown			();
 
-	void					AddInfoMessage			(LPCSTR message);
+	SDrawStaticStruct*		AddInfoMessage			(LPCSTR message);
 	void					OnConnected				();
 };
 

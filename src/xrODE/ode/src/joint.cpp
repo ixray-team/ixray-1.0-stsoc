@@ -2778,6 +2778,31 @@ extern "C" void dJointSetFixed (dxJointFixed *joint)
   }
 }
 
+extern "C" void dJointSetFixedQuaternionPos (dxJointFixed *joint,dQuaternion quaternion,dReal* pos)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dfixed_vtable,"joint is not fixed");
+  int i;
+
+  // This code is taken from sJointSetSliderAxis(), we should really put the
+  // common code in its own function.
+  // compute the offset between the bodies
+  if (joint->node[0].body) {
+    if (joint->node[1].body) {
+     /* dQMultiply1 (joint->qrel,joint->node[0].body->q,joint->node[1].body->q);
+      dReal ofs[4];
+      for (i=0; i<4; i++) ofs[i] = joint->node[0].body->pos[i];
+      for (i=0; i<4; i++) ofs[i] -= joint->node[1].body->pos[i];
+      dMULTIPLY1_331 (joint->offset,joint->node[0].body->R,ofs);*/
+    }
+    else {
+      // set joint->qrel to the transpose of the first body's q
+      joint->qrel[0] = quaternion[0];//joint->node[0].body->q[0];
+      for (i=1; i<4; i++) joint->qrel[i] = -quaternion[i];//-joint->node[0].body->q[i];
+      for (i=0; i<4; i++) joint->offset[i] = pos[i];//joint->node[0].body->pos[i];
+    }
+  }
+}
 
 dxJoint::Vtable __dfixed_vtable = {
   sizeof(dxJointFixed),

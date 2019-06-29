@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "Level.h"
 #include "Level_Bullet_Manager.h"
 #include "xrserver.h"
@@ -14,6 +14,8 @@
 #include "client_spawn_manager.h"
 #include "seniority_hierarchy_holder.h"
 
+ENGINE_API bool g_dedicated_server;
+
 const int max_objects_size			= 2*1024;
 const int max_objects_size_in_save	= 6*1024;
 
@@ -21,7 +23,7 @@ extern bool	g_b_ClearGameCaptions;
 
 void CLevel::remove_objects	()
 {
-	Memory.dbg_check();
+	if (!IsGameTypeSingle()) Msg("CLevel::remove_objects - Start");
 	BOOL						b_stored = psDeviceFlags.test(rsDisableObjectsAsCrows);
 
 	Game().reset_ui				();
@@ -31,9 +33,6 @@ void CLevel::remove_objects	()
 		Server->SLS_Clear		();
 	}
 	
-	if (OnClient())
-		ClearAllObjects			();
-
 	snd_Events.clear			();
 	for (int i=0; i<6; ++i) {
 		psNET_Flags.set			(NETFLAG_MINIMIZEUPDATES,FALSE);
@@ -44,26 +43,25 @@ void CLevel::remove_objects	()
 		ClientReceive			();
 		ProcessGameEvents		();
 		Objects.Update			(true);
+		Sleep					(100);
 	}
 
-//	Memory.dbg_check();
+	if (OnClient())
+		ClearAllObjects			();
 
 	BulletManager().Clear		();
 	ph_commander().clear		();
 	ph_commander_scripts().clear();
 
-//	Memory.dbg_check();
-
-	space_restriction_manager().clear	();
-
-//	Memory.dbg_check();
+	if(!g_dedicated_server)
+		space_restriction_manager().clear	();
 
 	psDeviceFlags.set			(rsDisableObjectsAsCrows, b_stored);
 	g_b_ClearGameCaptions		= true;
 
-//	Memory.dbg_check();
+	if (!g_dedicated_server)
+		ai().script_engine().collect_all_garbage	();
 
-	ai().script_engine().collect_all_garbage	();
 	stalker_animation_data_storage().clear		();
 	
 	VERIFY										(Render);
@@ -71,15 +69,27 @@ void CLevel::remove_objects	()
 	Render->clear_static_wallmarks				();
 
 #ifdef DEBUG
-	if (!client_spawn_manager().registry().empty())
-		client_spawn_manager().dump				();
+	if(!g_dedicated_server)
+		if (!client_spawn_manager().registry().empty())
+			client_spawn_manager().dump				();
 #endif // DEBUG
-	VERIFY										(client_spawn_manager().registry().empty());
-	client_spawn_manager().clear				();
+	if(!g_dedicated_server)
+	{
+		VERIFY										(client_spawn_manager().registry().empty());
+		client_spawn_manager().clear			();
+	}
 
-	xr_delete									(m_seniority_hierarchy_holder);
-	m_seniority_hierarchy_holder				= xr_new<CSeniorityHierarchyHolder>();
-//	Memory.dbg_check();
+	for (int i=0; i<6; i++)
+	{
+		++(Device.dwFrame);
+		Objects.Update(true);
+	}
+
+	g_pGamePersistent->destroy_particles		(false);
+
+//.	xr_delete									(m_seniority_hierarchy_holder);
+//.	m_seniority_hierarchy_holder				= xr_new<CSeniorityHierarchyHolder>();
+	if (!IsGameTypeSingle()) Msg("CLevel::remove_objects - End");
 }
 
 #ifdef DEBUG
@@ -90,6 +100,8 @@ void CLevel::net_Stop		()
 {
 	Msg							("- Disconnect");
 	bReady						= false;
+	m_bGameConfigStarted		= FALSE;
+	game_configured				= FALSE;
 
 	remove_objects				();
 	
@@ -101,26 +113,25 @@ void CLevel::net_Stop		()
 		xr_delete				(Server);
 	}
 
-	ai().script_engine().collect_all_garbage	();
+	if (!g_dedicated_server)
+		ai().script_engine().collect_all_garbage	();
+
 #ifdef DEBUG
 	show_animation_stats		();
 #endif // DEBUG
 }
 
-#ifdef DEBUG
-	BOOL	g_bCalculatePing = FALSE;
-#endif // DEBUG
 
-void CLevel::ClientSend	()
+void CLevel::ClientSend()
 {
 	if (GameID() == GAME_SINGLE || OnClient())
 	{
 		if ( !net_HasBandwidth() ) return;
 	};
-#ifdef DEBUG
-	if (g_bCalculatePing)
-		SendPingMessage();
-#endif // DEBUG
+
+#ifdef BATTLEYE
+	battleye_system.UpdateClient();
+#endif // BATTLEYE
 
 	NET_Packet				P;
 	u32						start	= 0;
@@ -158,7 +169,11 @@ void CLevel::ClientSend	()
 			}			
 		}		
 	};
-	if (OnClient()) return;
+	if (OnClient()) 
+	{
+		Flush_Send_Buffer();
+		return;
+	}
 	//-------------------------------------------------
 	while (1)
 	{
@@ -275,6 +290,8 @@ struct _NetworkProcessor	: public pureFrame
 
 pureFrame*	g_pNetProcessor	= &NET_processor;
 
+const int ConnectionTimeOut = 60000; //1 min
+
 BOOL			CLevel::Connect2Server				(LPCSTR options)
 {
 	NET_Packet					P;
@@ -283,11 +300,33 @@ BOOL			CLevel::Connect2Server				(LPCSTR options)
 	if (!Connect(options))		return	FALSE;
 	//---------------------------------------------------------------------------
 	if(psNET_direct_connect) m_bConnectResultReceived = true;
+	u32 EndTime = GetTickCount() + ConnectionTimeOut;
 	while	(!m_bConnectResultReceived)		{ 
 		ClientReceive	();
 		Sleep			(5); 
 		if(Server)
 			Server->Update()	;
+		//-----------------------------------------
+		u32 CurTime = GetTickCount();
+		if (CurTime > EndTime)
+		{
+			NET_Packet	P;
+			P.B.count = 0;
+			P.r_pos = 0;
+
+			P.w_u8(0);
+			P.w_u8(0);
+			P.w_stringZ("Data verification failed. Cheater? [1]");
+
+			OnConnectResult(&P);			
+		}
+		if (net_isFails_Connect())
+		{
+			OnConnectRejected	();	
+			Disconnect		()	;
+			return	FALSE;
+		}
+		//-----------------------------------------
 	}
 	Msg							("%c client : connection %s - <%s>", m_bConnectResult ?'*':'!', m_bConnectResult ? "accepted" : "rejected", m_sConnectResult.c_str());
 	if		(!m_bConnectResult) 
@@ -308,7 +347,7 @@ BOOL			CLevel::Connect2Server				(LPCSTR options)
 
 	//---------------------------------------------------------------------------
 	P.w_begin	(M_CLIENT_REQUEST_CONNECTION_DATA);
-	Send		(P);
+	Send		(P, net_flags(TRUE, TRUE, TRUE, TRUE));
 	//---------------------------------------------------------------------------
 	return TRUE;
 };
@@ -319,7 +358,7 @@ void			CLevel::OnBuildVersionChallenge		()
 	P.w_begin				(M_CL_AUTH);
 	u64 auth = FS.auth_get();
 	P.w_u64					(auth);
-	Send					(P);
+	Send					(P, net_flags(TRUE, TRUE, TRUE, TRUE));
 };
 
 void			CLevel::OnConnectResult				(NET_Packet*	P)
@@ -337,7 +376,7 @@ void			CLevel::OnConnectResult				(NET_Packet*	P)
 		{
 		case 0:		//Standart error
 			{
-				if (!xr_strcmp(ResultStr, "Data verification failed. Cheater?"))
+				if (!xr_strcmp(ResultStr, "Data verification failed. Cheater? [2]"))
 					MainMenu()->SetErrorDialog(CMainMenu::ErrDifferentVersion);
 			}break;
 		case 1:		//GameSpy CDKey
@@ -348,6 +387,10 @@ void			CLevel::OnConnectResult				(NET_Packet*	P)
 					MainMenu()->SetErrorDialog(CMainMenu::ErrCDKeyInUse);//, ResultStr);
 				if (!xr_strcmp(ResultStr, "Your CD Key is disabled. Contact customer service."))
 					MainMenu()->SetErrorDialog(CMainMenu::ErrCDKeyDisabled);//, ResultStr);
+			}break;		
+		case 2:		//login+password
+			{
+				MainMenu()->SetErrorDialog(CMainMenu::ErrInvalidPassword);
 			}break;		
 		}
 	};	
@@ -374,51 +417,44 @@ void			CLevel::OnConnectResult				(NET_Packet*	P)
 	};	
 };
 
-void			CLevel::SendPingMessage				()
-{
-	u32 CurTime = timeServer_Async();
-	if (CurTime < (m_dwCL_PingLastSendTime + m_dwCL_PingDeltaSend)) return;
-	u32 m_dwCL_PingLastSendTime = CurTime;
-	NET_Packet P;
-	P.w_begin		(M_CL_PING_CHALLENGE);
-	P.w_u32			(m_dwCL_PingLastSendTime);
-	P.w_u32			(m_dwCL_PingLastSendTime);
-	P.w_u32			(m_dwRealPing);
-	Send	(P, net_flags(FALSE));
-};
-
 void			CLevel::ClearAllObjects				()
 {
-	u32 CLObjNum = Level().Objects.o_count();
 
 	bool ParentFound = true;
 	
 	while (ParentFound)
 	{	
-		ParentFound = false;
+		ProcessGameEvents				();
+
+		u32 CLObjNum					= Level().Objects.o_count();
+		ParentFound						= false;
+
 		for (u32 i=0; i<CLObjNum; i++)
 		{
-			CObject* pObj = Level().Objects.o_get_by_iterator(i);
-			if (!pObj->H_Parent()) continue;
+			CObject* pObj				= Level().Objects.o_get_by_iterator(i);
+			if (!pObj->H_Parent()) 
+				continue;
 			//-----------------------------------------------------------
-			NET_Packet			GEN;
-			GEN.w_begin			(M_EVENT);
-			//---------------------------------------------		
-			GEN.w_u32			(Level().timeServer());
-			GEN.w_u16			(GE_OWNERSHIP_REJECT);
-			GEN.w_u16			(pObj->H_Parent()->ID());
-			GEN.w_u16			(u16(pObj->ID()));
-			game_events->insert	(GEN);
-			if (g_bDebugEvents)	ProcessGameEvents();
+			NET_Packet					GEN;
+			GEN.w_begin					(M_EVENT);
+			//------------------		---------------------------		
+			GEN.w_u32					(Level().timeServer());
+			GEN.w_u16					(GE_OWNERSHIP_REJECT);
+			GEN.w_u16					(pObj->H_Parent()->ID());
+			GEN.w_u16					(u16(pObj->ID()));
+			game_events->insert			(GEN);
+			if (g_bDebugEvents)	
+				ProcessGameEvents		();
 			//-------------------------------------------------------------
-			ParentFound = true;
+			ParentFound					= true;
 			//-------------------------------------------------------------
 #ifdef DEBUG
 			Msg ("Rejection of %s[%d] from %s[%d]", *(pObj->cNameSect()), pObj->ID(), *(pObj->H_Parent()->cNameSect()), pObj->H_Parent()->ID());
 #endif
 		};
-		ProcessGameEvents();
 	};
+
+	u32 CLObjNum = Level().Objects.o_count();
 
 	for (u32 i=0; i<CLObjNum; i++)
 	{
@@ -479,20 +515,20 @@ void				CLevel::net_OnChangeSelfName			(NET_Packet* P)
 	if (!strstr(*m_caClientOptions, "/name="))
 	{
 		string1024 tmpstr;
-		strcpy(tmpstr, *m_caClientOptions);
-		strcat(tmpstr, "/name=");
-		strcat(tmpstr, NewName);
+		strcpy_s(tmpstr, *m_caClientOptions);
+		strcat_s(tmpstr, "/name=");
+		strcat_s(tmpstr, NewName);
 		m_caClientOptions = tmpstr;
 	}
 	else
 	{
 		string1024 tmpstr;
-		strcpy(tmpstr, *m_caClientOptions);
+		strcpy_s(tmpstr, *m_caClientOptions);
 		*(strstr(tmpstr, "name=")+5) = 0;
-		strcat(tmpstr, NewName);
-		char* ptmp = strstr(strstr(*m_caClientOptions, "name="), "/");
+		strcat_s(tmpstr, NewName);
+		const char* ptmp = strstr(strstr(*m_caClientOptions, "name="), "/");
 		if (ptmp)
-			strcat(tmpstr, ptmp);
+			strcat_s(tmpstr, ptmp);
 		m_caClientOptions = tmpstr;
 	}
 }

@@ -63,7 +63,7 @@ enum
 	phDbgAlwaysUseAiPhMove		=		1<<23,
 	phDbgNeverUseAiPhMove		=		1<<24,
 	phDbgDispObjCollisionDammage=		1<<25,
-	phDbgIKAnimGoalOnly			=		1<<26,
+	phDbgIK						=		1<<26,
 	phDbgDrawIKGoal				=		1<<27,
 	phDbgIKLimits				=		1<<28,
 	phDbgCharacterControl		=		1<<29,
@@ -75,7 +75,10 @@ enum
 enum
 {
 	ph_m1_DbgTrackObject		=		1<<0,
-	ph_m1_DbgActorRestriction	=		1<<1
+	ph_m1_DbgActorRestriction	=		1<<1,
+	phDbgIKOff					=		1<<2,
+	phDbgHitAnims				=		1<<3,
+	phDbgDrawIKLimits			=		1<<4
 };
 struct SPHObjDBGDraw
 {
@@ -83,7 +86,7 @@ struct SPHObjDBGDraw
 	Fvector AABB_center;
 };
 
-DEFINE_VECTOR(SPHObjDBGDraw,PHOBJ_DBG_V,PHOBJ_DBG_I);
+DEFINE_VECTOR( SPHObjDBGDraw, PHOBJ_DBG_V, PHOBJ_DBG_I );
 extern PHOBJ_DBG_V	dbg_draw_objects0;
 extern PHOBJ_DBG_V	dbg_draw_objects1;
 class CPHObject;
@@ -91,32 +94,35 @@ class CPHObject;
 
 struct SPHDBGDrawAbsract
 {
-	virtual void				render				()						=0;
-	virtual						~SPHDBGDrawAbsract	()						{};
+	virtual void				render				( )						=0;
+	virtual						~SPHDBGDrawAbsract	( )						{ };
 };
-DEFINE_VECTOR(SPHDBGDrawAbsract*,PHABS_DBG_V,PHABS_DBG_I)					;
+DEFINE_VECTOR( SPHDBGDrawAbsract*, PHABS_DBG_V, PHABS_DBG_I )					;
 extern PHABS_DBG_V	dbg_draw_abstruct0;
 extern PHABS_DBG_V	dbg_draw_abstruct1;
-void DBG_DrawStatBeforeFrameStep();
-void DBG_DrawStatAfterFrameStep();
-void DBG_OpenCashedDraw();
-void DBG_ClosedCashedDraw(u32 remove_time);
-void DBG_DrawPHAbstruct(SPHDBGDrawAbsract* a);
-void DBG_DrawPHObject(CPHObject* obj);
-void DBG_DrawContact (dContact& c);
-void DBG_DrawTri(CDB::RESULT* T,u32 c);
-void DBG_DrawTri(CDB::TRI* T,const Fvector* V_verts,u32 c);
-void DBG_DrawLine(const Fvector& p0,const Fvector& p1,u32 c);
-void DBG_DrawAABB(const Fvector& center,const Fvector& AABB,u32 c);
-void DBG_DrawOBB(const Fmatrix& m,const Fvector h,u32 c);
-void DBG_DrawPoint(const Fvector& p,float size,u32 c);
-void DBG_DrawMatrix(const Fmatrix m,float size);
-void _cdecl DBG_OutText(LPCSTR s,...);
-void DBG_DrawFrameStart();
-void PH_DBG_Render();
-void PH_DBG_Clear();
-LPCSTR PH_DBG_ObjectTrack();
-void PH_DBG_SetTrackObject(LPCSTR obj);
+void DBG_DrawStatBeforeFrameStep( );
+void DBG_DrawStatAfterFrameStep( );
+void DBG_OpenCashedDraw( );
+void DBG_ClosedCashedDraw( u32 remove_time );
+void DBG_DrawPHAbstruct( SPHDBGDrawAbsract* a );
+void DBG_DrawPHObject( CPHObject *obj );
+void DBG_DrawContact ( dContact &c );
+void DBG_DrawTri( CDB::RESULT *T, u32 c );
+void DBG_DrawTri(CDB::TRI *T, const Fvector *V_verts, u32 c );
+void DBG_DrawLine( const Fvector &p0, const Fvector &p1, u32 c );
+void DBG_DrawAABB( const Fvector &center, const Fvector& AABB, u32 c );
+void DBG_DrawOBB( const Fmatrix &m, const Fvector h, u32 c );
+void DBG_DrawPoint( const Fvector& p, float size, u32 c );
+void DBG_DrawMatrix( const Fmatrix &m, float size, u8 a=255 );
+void DBG_DrawRotationX( const Fmatrix &m, float ang0, float ang1, float size, u32 ac, bool solid = false, u32 tessel = 7 );
+void DBG_DrawRotationY( const Fmatrix &m, float ang0, float ang1, float size, u32 ac, bool solid = false, u32 tessel = 7 );
+void DBG_DrawRotationZ( const Fmatrix &m, float ang0, float ang1, float size, u32 ac, bool solid = false, u32 tessel = 7 );
+void _cdecl DBG_OutText( LPCSTR s,... );
+void DBG_DrawFrameStart( );
+void PH_DBG_Render( );
+void PH_DBG_Clear( );
+LPCSTR PH_DBG_ObjectTrack( );
+void PH_DBG_SetTrackObject( LPCSTR obj );
 
 
 
@@ -133,17 +139,17 @@ private:
 	//Fvector2 range;
 public:
 
-	CFunctionGraph						()																																								;
-	~CFunctionGraph						()																																								;
-	void	Init						(type_function fun,float x0,float x1,int l, int t, int w, int h,int points_num=500,u32 color=D3DCOLOR_XRGB(0,255,0),u32 bk_color=D3DCOLOR_XRGB(255,255,255))	;
-	void	Clear						()																																								;
-	bool	IsActive					()																																								;
-	void	AddMarker					(CStatGraph::EStyle Style, float pos, u32 Color)																												;
-	void	UpdateMarker				(u32 ID, float M1)																																				;
-IC	float	ScaleX						(float x)																												{VERIFY(IsActive());return(x-x_min)/s	;}	
-	void	ScaleMarkerPos				(u32 ID, float &p)																																				;
-	void	ScaleMarkerPos				(CStatGraph::EStyle Style, float &p)																															;
-IC	float	ResolutionX					(){VERIFY(IsActive());return s;} 
+	CFunctionGraph						( )																																								;
+	~CFunctionGraph						( )																																								;
+	void	Init						( type_function fun, float x0, float x1, int l, int t, int w, int h, int points_num=500, u32 color=D3DCOLOR_XRGB( 0, 255, 0 ), u32 bk_color=D3DCOLOR_XRGB( 255, 255, 255 ) )	;
+	void	Clear						( )																																								;
+	bool	IsActive					( )																																								;
+	void	AddMarker					( CStatGraph::EStyle Style, float pos, u32 Color )																												;
+	void	UpdateMarker				( u32 ID, float M1 )																																				;
+IC	float	ScaleX						( float x )																												{ VERIFY( IsActive( ) ); return( x-x_min )/s; }	
+	void	ScaleMarkerPos				( u32 ID, float &p )																																				;
+	void	ScaleMarkerPos				( CStatGraph::EStyle Style, float &p )																															;
+IC	float	ResolutionX					( ){ VERIFY( IsActive( ) ); return s; } 
 };
 #endif
 #endif

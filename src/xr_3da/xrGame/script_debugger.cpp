@@ -119,7 +119,7 @@ LRESULT CScriptDebugger::DebugMessage(UINT nMsg, WPARAM wParam, LPARAM lParam)
 
 	case DMSG_EVAL_WATCH:{
 			string2048 res; res[0]=0;
-			Eval((const char*)wParam,res);
+			Eval((const char*)wParam,res, sizeof(res) );
 
 			msg.w_int(DMSG_EVAL_WATCH);
 			msg.w_string(res);
@@ -348,13 +348,13 @@ void CScriptDebugger::AddGlobalVariable(const char *name, const char *type, cons
 }
 
 
-void CScriptDebugger::Eval(const char* strCode, char* res)
+void CScriptDebugger::Eval(const char* strCode, char* res, int res_sz)
 {
 	string1024 strCodeFull;
 	strCodeFull[0] = 0;
 	const char * r = "return  ";
-	strconcat(strCodeFull,r,strCode);
-	m_lua->Eval(strCodeFull, res);
+	strconcat(sizeof(strCodeFull),strCodeFull,r,strCode);
+	m_lua->Eval(strCodeFull, res, res_sz);
 }
 
 void CScriptDebugger::CheckNewMessages()

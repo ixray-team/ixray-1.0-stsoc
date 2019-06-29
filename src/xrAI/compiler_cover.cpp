@@ -4,12 +4,25 @@
 #include "xrThread.h"
 #include <mmsystem.h>
 
+#include "quadtree.h"
+#include "cover_point.h"
+#include "object_broker.h"
+
 Shader_xrLC_LIB*			g_shaders_xrlc	;
 xr_vector<b_material>		g_materials		;
 xr_vector<b_shader>			g_shader_render	;
 xr_vector<b_shader>			g_shader_compile;
 xr_vector<b_BuildTexture>	g_textures		;
 xr_vector<b_rc_face>		g_rc_faces		;
+
+#ifdef PRIQUEL
+	typedef xr_vector<bool>		COVER_NODES;
+	COVER_NODES					g_cover_nodes;
+
+	typedef CQuadTree<CCoverPoint>	CPointQuadTree;
+	CPointQuadTree					*g_covers = 0;
+	typedef xr_vector<CCoverPoint*>	COVERS;
+#endif // PRIQUEL
 
 // -------------------------------- Ray pick
 typedef Fvector	RayCache[3];
@@ -242,11 +255,21 @@ public:
 		FPU::m24r		();
 		Query			Q;
 		Q.Begin			(g_nodes.size());
-		for (u32 N=Nstart; N<Nend; N++)
-		{
+		for (u32 N=Nstart; N<Nend; N++) {
 			// initialize process
 			thProgress	= float(N-Nstart)/float(Nend-Nstart);
 			vertex&		BaseNode= g_nodes[N];
+
+#ifdef PRIQUEL
+			if (!g_cover_nodes[N]) {
+				BaseNode.cover[0]	= flt_max;
+				BaseNode.cover[1]	= flt_max;
+				BaseNode.cover[2]	= flt_max;
+				BaseNode.cover[3]	= flt_max;
+				continue;
+			}
+#endif // PRIQUEL
+
 			Fvector&	BasePos	= BaseNode.Pos;
 			Fvector		TestPos = BasePos; TestPos.y+=cover_height;
 			
@@ -286,6 +309,10 @@ public:
 				else					value[dirs]	= float(c_passed[dirs])/float(c_total[dirs]);
 				clamp(value[dirs],0.f,1.f);
 			}
+
+			if (value[0] < .999f) {
+				value[0] = value[0];
+			}
 			
 			BaseNode.cover	[0]	= (value[2]+value[3]+value[4]+value[5])/4.f; clamp(BaseNode.cover[0],0.f,1.f);	// left
 			BaseNode.cover	[1]	= (value[0]+value[1]+value[2]+value[3])/4.f; clamp(BaseNode.cover[1],0.f,1.f);	// forward
@@ -295,11 +322,232 @@ public:
 	}
 };
 
+#ifdef PRIQUEL
+bool valid_vertex_id		(const u32 &vertex_id)
+{
+	return					(vertex_id != InvalidNode);
+}
+
+bool cover					(const vertex &v, u32 index0, u32 index1)
+{
+	return					(
+		valid_vertex_id(v.n[index0]) &&
+		valid_vertex_id(g_nodes[v.n[index0]].n[index1])
+	);
+}
+
+bool critical_point			(const vertex &v, u32 index, u32 index0, u32 index1)
+{
+	return					(
+		!valid_vertex_id(v.n[index]) &&
+		(
+			!valid_vertex_id(v.n[index0]) || 
+			!valid_vertex_id(v.n[index1]) ||
+			cover(v,index0,index) || 
+			cover(v,index1,index)
+		)
+	);
+}
+
+bool is_cover				(const vertex &v)
+{
+	return					(
+		critical_point(v,0,1,3) || 
+		critical_point(v,2,1,3) || 
+		critical_point(v,1,0,2) || 
+		critical_point(v,3,0,2)
+	);
+}
+
+extern float	CalculateHeight(Fbox& BB);
+
+void compute_cover_nodes	()
+{
+	Fbox					aabb;
+	CalculateHeight			(aabb);
+	VERIFY					(!g_covers);
+	g_covers				= xr_new<CPointQuadTree>(aabb,g_params.fPatchSize*.5f,4*65536,2*65536);
+
+	g_cover_nodes.assign	(g_nodes.size(),false);
+
+	Nodes::const_iterator	B = g_nodes.begin(), I = B;
+	Nodes::const_iterator	E = g_nodes.end();
+	COVER_NODES::iterator	J = g_cover_nodes.begin();
+	for ( ; I != E; ++I, ++J) {
+		if (!is_cover(*I))
+			continue;
+
+		*J					= true;
+		g_covers->insert	(xr_new<CCoverPoint>((*I).Pos, u32(I - B)));
+	}
+}
+
+bool vertex_in_direction	(const u32 &start_vertex_id, const u32 &target_vertex_id)
+{
+	const Fvector			&finish_position = g_nodes[target_vertex_id].Pos;
+	u32						cur_vertex_id = start_vertex_id, prev_vertex_id = u32(-1);
+	Fbox2					box;
+	Fvector2				identity, start, dest, dir;
+
+	identity.x = identity.y	= g_params.fPatchSize*.5f;
+	const Fvector			&start_position = g_nodes[start_vertex_id].Pos;
+	start					= Fvector2().set(start_position.x,start_position.z);
+	dest.set				(finish_position.x,finish_position.z);
+	dir.sub					(dest,start);
+	Fvector2				temp;
+	temp					= start;
+
+	float					cur_sqr = _sqr(temp.x - dest.x) + _sqr(temp.y - dest.y);
+	for (;;) {
+		bool				found = false;
+		for (int I = 0, E = 4; I != E; ++I) {
+			u32				next_vertex_id = g_nodes[cur_vertex_id].n[I];
+			if ((next_vertex_id == prev_vertex_id) || !valid_vertex_id(next_vertex_id))
+				continue;
+
+			const Fvector	&position = g_nodes[next_vertex_id].Pos;
+			temp			= Fvector2().set(position.x,position.z);
+			box.min			= box.max = temp;
+			box.grow		(identity);
+			if (box.pick_exact(start,dir)) {
+				if (next_vertex_id == target_vertex_id)
+					return		(true);
+
+				Fvector2		temp;
+				temp.add		(box.min,box.max);
+				temp.mul		(.5f);
+				float			dist = _sqr(temp.x - dest.x) + _sqr(temp.y - dest.y);
+				if (dist > cur_sqr)
+					continue;
+
+				cur_sqr			= dist;
+				found			= true;
+				prev_vertex_id	= cur_vertex_id;
+				cur_vertex_id	= next_vertex_id;
+				break;
+			}
+		}
+
+		if (!found)
+			return			(false);
+	}
+}
+
+void compute_non_covers		()
+{
+	VERIFY					(g_covers);
+
+	COVERS					nearest;
+
+	{
+		g_covers->all			(nearest);
+		delete_data				(nearest);
+		xr_delete				(g_covers);
+
+		Fbox					aabb;
+		CalculateHeight			(aabb);
+		VERIFY					(!g_covers);
+		g_covers				= xr_new<CPointQuadTree>(aabb,g_params.fPatchSize*.5f,4*65536,2*65536);
+
+		Nodes::iterator			B = g_nodes.begin(), I = B;
+		Nodes::iterator			E = g_nodes.end();
+		COVER_NODES::iterator	J = g_cover_nodes.begin();
+		for ( ; I != E; ++I, ++J) {
+			if (!*J)
+				continue;
+
+			if (((*I).cover[0] + (*I).cover[1] + (*I).cover[2] + (*I).cover[3]) >= 4*.999f)
+				continue;
+
+			g_covers->insert	(xr_new<CCoverPoint>((*I).Pos, u32(I - B)));
+		}
+
+		VERIFY					(g_covers->size());
+	}
+
+	typedef std::pair<float,CCoverPoint*>	COVER_PAIR;
+	typedef xr_vector<COVER_PAIR>			COVER_PAIRS;
+	COVER_PAIRS				cover_pairs;
+
+	Nodes::iterator			B = g_nodes.begin(), I = B;
+	Nodes::iterator			E = g_nodes.end();
+	COVER_NODES::iterator	J = g_cover_nodes.begin();
+	for ( ; I != E; ++I, ++J) {
+		if (*J)
+			continue;
+
+		g_covers->nearest	((*I).Pos,cover_distance,nearest);
+		if (nearest.empty()) {
+			for (int i=0; i<4; ++i) {
+				VERIFY		((*I).cover[i] == flt_max);
+				(*I).cover[i]	= 1.f;
+			}
+			continue;
+		}
+
+		cover_pairs.clear_not_free		();
+		cover_pairs.reserve				(nearest.size());
+
+		float				cumulative_weight = 0.f;
+		{
+			COVERS::const_iterator		i = nearest.begin();
+			COVERS::const_iterator		e = nearest.end();
+			for ( ; i != e; ++i) {
+				if (!vertex_in_direction(u32(I - B),(*i)->level_vertex_id()))
+					continue;
+
+				float					weight = 1.f/(*i)->position().distance_to((*I).Pos);
+				cumulative_weight		+= weight;
+				cover_pairs.push_back	(
+					std::make_pair(
+						weight,
+						*i
+					)
+				);
+			}
+		}
+
+		// this is incorrect
+		if (cover_pairs.empty()) {
+			for (int i=0; i<4; ++i) {
+				VERIFY		((*I).cover[i] == flt_max);
+				(*I).cover[i]	= 1.f;
+			}
+			continue;
+		}
+		
+		for (int j=0; j<4; ++j) {
+			VERIFY						((*I).cover[j] == flt_max);
+			(*I).cover[j]				= 0.f;
+		}
+
+		COVER_PAIRS::const_iterator		i = cover_pairs.begin();
+		COVER_PAIRS::const_iterator		e = cover_pairs.end();
+		for ( ; i != e; ++i) {
+			vertex						&current = g_nodes[(*i).second->level_vertex_id()];
+			float						factor = (*i).first/cumulative_weight;
+			for (int j=0; j<4; ++j)
+				(*I).cover[j]			+= factor*current.cover[j];
+		}
+
+		for (int i=0; i<4; ++i)
+			clamp						((*I).cover[i], 0.f, 1.f);
+	}
+}
+#endif // PRIQUEL
+
 #define NUM_THREADS	3
 extern	void mem_Optimize();
-void	xrCover	()
+void	xrCover	(bool pure_covers)
 {
 	Status("Calculating...");
+
+#ifdef PRIQUEL
+	if (!pure_covers)
+		compute_cover_nodes	();
+	else
+		g_cover_nodes.assign(g_nodes.size(),true);
+#endif // PRIQUEL
 
 	// Start threads, wait, continue --- perform all the work
 	u32	start_time		= timeGetTime();
@@ -311,6 +559,18 @@ void	xrCover	()
 	Threads.wait			();
 	Msg("%d seconds elapsed.",(timeGetTime()-start_time)/1000);
 
+#ifdef PRIQUEL
+	if (!pure_covers) {
+		compute_non_covers	();
+
+		COVERS				nearest;
+		VERIFY				(g_covers);
+		g_covers->all		(nearest);
+		delete_data			(nearest);
+		xr_delete			(g_covers);
+		return;
+	}
+#endif // PRIQUEL
 	// Smooth
 	Status			("Smoothing coverage mask...");
 	mem_Optimize	();

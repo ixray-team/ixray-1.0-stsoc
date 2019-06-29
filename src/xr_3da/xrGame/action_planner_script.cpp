@@ -6,11 +6,9 @@
 //	Description : Action planner script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_action_planner_wrapper.h"
-#include "script_space.h"
 #include "script_game_object.h"
-#include <luabind/adopt_policy.hpp>
 
 using namespace luabind;
 
@@ -37,10 +35,10 @@ void CActionPlanner<CScriptGameObject>::script_register(lua_State *L)
 			.def("setup",						&CScriptActionPlanner::setup,	&CScriptActionPlannerWrapper::setup_static)
 			.def("update",						&CScriptActionPlanner::update,	&CScriptActionPlannerWrapper::update_static)
 			.def("add_action",					&CScriptActionPlanner::add_operator,adopt(_3))
-			.def("remove_action",				(void (CScriptActionPlanner::*)(const CScriptActionPlanner::_edge_type &))(CScriptActionPlanner::remove_operator))
+			.def("remove_action",				(void (CScriptActionPlanner::*)(const CScriptActionPlanner::_edge_type &))(&CScriptActionPlanner::remove_operator))
 			.def("action",						&CScriptActionPlanner::action)
 			.def("add_evaluator",				&CScriptActionPlanner::add_evaluator,adopt(_3))
-			.def("remove_evaluator",			(void (CScriptActionPlanner::*)(const CScriptActionPlanner::_condition_type &))(CScriptActionPlanner::remove_evaluator))
+			.def("remove_evaluator",			(void (CScriptActionPlanner::*)(const CScriptActionPlanner::_condition_type &))(&CScriptActionPlanner::remove_evaluator))
 			.def("evaluator",					&CScriptActionPlanner::evaluator)
 			.def("current_action_id",			&CScriptActionPlanner::current_action_id)
 			.def("current_action",				&CScriptActionPlanner::current_action)

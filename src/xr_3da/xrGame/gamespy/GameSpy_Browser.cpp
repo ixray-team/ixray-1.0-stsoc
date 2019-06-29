@@ -141,7 +141,7 @@ void	CGameSpy_Browser::LoadGameSpy(HMODULE hGameSpyDLL)
 	GAMESPY_LOAD_FN(xrGS_ServerBrowserErrorDesc);
 }
 
-static services_checked = false;
+static bool services_checked = false;
 
 bool	CGameSpy_Browser::Init(CServerList* pServerList)
 {
@@ -313,16 +313,16 @@ void CGameSpy_Browser::GetServerInfoByIndex(ServerInfo* pServerInfo, int idx)
 }
 
 #define ADD_BOOL_INFO(i, s, t, k)	i->m_aInfos.push_back(GameInfo(t, ((xrGS_SBServerGetBoolValue(s, m_pQR2->xrGS_RegisteredKey(k), SBFalse)) == SBTrue)? *st.translate("mp_si_yes") : *st.translate("mp_si_no")))
-#define ADD_INT_INFO(i, s, t, k)	{string256 tmp; sprintf(tmp, "%d", xrGS_SBServerGetIntValue(s, m_pQR2->xrGS_RegisteredKey(k), 0));\
+#define ADD_INT_INFO(i, s, t, k)	{string256 tmp; sprintf_s(tmp, "%d", xrGS_SBServerGetIntValue(s, m_pQR2->xrGS_RegisteredKey(k), 0));\
 	i->m_aInfos.push_back(GameInfo(t, tmp));}
 
 #define ADD_INT_INFO_N(i, s, m, t1, t2, k)	{if (xrGS_SBServerGetIntValue(s, m_pQR2->xrGS_RegisteredKey(k), 0))\
-{string256 tmp; sprintf(tmp, "%d" t2, xrGS_SBServerGetIntValue(s, m_pQR2->xrGS_RegisteredKey(k), 0)*m);\
+{string256 tmp; sprintf_s(tmp, "%d" t2, xrGS_SBServerGetIntValue(s, m_pQR2->xrGS_RegisteredKey(k), 0)*m);\
 	i->m_aInfos.push_back(GameInfo(t1, tmp));}\
 	else {i->m_aInfos.push_back(GameInfo(t1, *st.translate("mp_si_no")));}}
 
 #define ADD_TIME_INFO(i, s, m, t1, t2, t3, k)	{if (xrGS_SBServerGetIntValue(s, m_pQR2->xrGS_RegisteredKey(k), 0))\
-{string256 tmp; sprintf(tmp,t2, xrGS_SBServerGetFloatValue(s, m_pQR2->xrGS_RegisteredKey(k), 0)*m, t3);\
+{string256 tmp; sprintf_s(tmp,t2, xrGS_SBServerGetFloatValue(s, m_pQR2->xrGS_RegisteredKey(k), 0)*m, t3);\
 	i->m_aInfos.push_back(GameInfo(t1, tmp));}\
 	else {i->m_aInfos.push_back(GameInfo(t1, *st.translate("mp_si_no")));}}
 
@@ -331,13 +331,19 @@ void	CGameSpy_Browser::ReadServerInfo	(ServerInfo* pServerInfo, void* pServer)
 	CStringTable st;
 
 	if (!pServer || !pServerInfo) return;
-	sprintf(pServerInfo->m_Address, "%s:%d", xrGS_SBServerGetPublicAddress(pServer), xrGS_SBServerGetPublicQueryPort(pServer));
-	sprintf(pServerInfo->m_HostName, "%s", xrGS_SBServerGetPublicAddress(pServer));
-	sprintf(pServerInfo->m_ServerName, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(HOSTNAME_KEY), pServerInfo->m_HostName));
+	sprintf_s(pServerInfo->m_Address, "%s:%d", xrGS_SBServerGetPublicAddress(pServer), xrGS_SBServerGetPublicQueryPort(pServer));
+	sprintf_s(pServerInfo->m_HostName, "%s", xrGS_SBServerGetPublicAddress(pServer));
+	sprintf_s(pServerInfo->m_ServerName, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(HOSTNAME_KEY), pServerInfo->m_HostName));
 
-	sprintf(pServerInfo->m_SessionName, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(MAPNAME_KEY), "Unknown"));	
-	sprintf(pServerInfo->m_ServerGameType, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(GAMETYPE_KEY), "Unknown"));
+	sprintf_s(pServerInfo->m_SessionName, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(MAPNAME_KEY), "Unknown"));	
+	sprintf_s(pServerInfo->m_ServerGameType, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(GAMETYPE_KEY), "Unknown"));
 	pServerInfo->m_bPassword	= xrGS_SBServerGetBoolValue(pServer, m_pQR2->xrGS_RegisteredKey(PASSWORD_KEY), SBFalse) == SBTrue;
+	pServerInfo->m_bUserPass	= xrGS_SBServerGetBoolValue(pServer, m_pQR2->xrGS_RegisteredKey(G_USER_PASSWORD_KEY), SBFalse) == SBTrue;
+
+#ifdef BATTLEYE
+	pServerInfo->m_bBattlEye	= xrGS_SBServerGetBoolValue(pServer, m_pQR2->xrGS_RegisteredKey(G_BATTLEYE_KEY), SBFalse) == SBTrue;
+#endif // BATTLEYE
+
 	pServerInfo->m_Ping = (s16)(xrGS_SBServerGetPing(pServer) & 0xffff);
 	pServerInfo->m_ServerNumPlayers = (s16)xrGS_SBServerGetIntValue(pServer, m_pQR2->xrGS_RegisteredKey(NUMPLAYERS_KEY), 0);
 	pServerInfo->m_ServerMaxPlayers = (s16)xrGS_SBServerGetIntValue(pServer, m_pQR2->xrGS_RegisteredKey(MAXPLAYERS_KEY), 32);
@@ -355,7 +361,7 @@ void	CGameSpy_Browser::ReadServerInfo	(ServerInfo* pServerInfo, void* pServer)
 		else if (!xr_strcmp(pServerInfo->m_ServerGameType, "artefacthunt"))
 			pServerInfo->m_GameType = GAME_ARTEFACTHUNT;
 	}
-	sprintf(pServerInfo->m_ServerVersion, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(GAMEVER_KEY), "--"));
+	sprintf_s(pServerInfo->m_ServerVersion, "%s", xrGS_SBServerGetStringValue(pServer, m_pQR2->xrGS_RegisteredKey(GAMEVER_KEY), "--"));
 
 	//--------- Read Game Infos ---------------------------//
 	pServerInfo->m_aInfos.clear();
@@ -368,6 +374,11 @@ void	CGameSpy_Browser::ReadServerInfo	(ServerInfo* pServerInfo, void* pServer)
 	pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_servername"), pServerInfo->m_ServerName));
 	pServerInfo->m_aInfos.push_back(GameInfo(*st.translate("mp_si_version"), pServerInfo->m_ServerVersion));
 	
+#ifdef BATTLEYE
+	ADD_BOOL_INFO(pServerInfo, pServer, "BattlEye", G_BATTLEYE_KEY);
+#endif // BATTLEYE
+
+	ADD_INT_INFO_N (pServerInfo, pServer, 1, "Max ping", "", G_MAX_PING_KEY);	
 	ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_maprotation"), G_MAP_ROTATION_KEY);
 	
 	pServerInfo->m_aInfos.push_back(
@@ -392,6 +403,7 @@ void	CGameSpy_Browser::ReadServerInfo	(ServerInfo* pServerInfo, void* pServer)
 	{
 		ADD_INT_INFO_N (pServerInfo, pServer, 1, *st.translate("mp_si_fraglimit"), "", G_FRAG_LIMIT_KEY);	
 	}
+
 	ADD_TIME_INFO(pServerInfo, pServer, 1.0f, *st.translate("mp_si_time_limit"), "%.0f %s",*st.translate("mp_si_min"), G_TIME_LIMIT_KEY);
 
 	if (xrGS_SBServerGetIntValue(pServer, m_pQR2->xrGS_RegisteredKey(G_DAMAGE_BLOCK_TIME_KEY), 0) != 0)
@@ -414,7 +426,7 @@ void	CGameSpy_Browser::ReadServerInfo	(ServerInfo* pServerInfo, void* pServer)
 
 	ADD_TIME_INFO(pServerInfo, pServer, 1.0f, *st.translate("mp_si_forcerespawn"), "%.f %s",*st.translate("mp_si_sec"), G_FORCE_RESPAWN_KEY);
 	ADD_TIME_INFO(pServerInfo, pServer, 1.0f, *st.translate("mp_si_warmuptime"), "%.0f %s",*st.translate("mp_si_sec"), G_WARM_UP_TIME_KEY);
-/*
+
 	if (pServerInfo->m_GameType == GAME_TEAMDEATHMATCH || pServerInfo->m_GameType == GAME_ARTEFACTHUNT)
 	{
 		ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_autoteam_balance"), G_AUTO_TEAM_BALANCE_KEY);
@@ -451,12 +463,12 @@ void	CGameSpy_Browser::ReadServerInfo	(ServerInfo* pServerInfo, void* pServer)
 		ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_return_players"),					G_RETURN_PLAYERS_KEY	);
 		ADD_BOOL_INFO(pServerInfo, pServer, *st.translate("mp_si_afbearer_cant_sprint"),			G_BEARER_CANT_SPRINT_KEY);
 	}
-	*/
+	
 	//--------- Read Players Info -------------------------//	
 	for (int i=0; i<pServerInfo->m_ServerNumPlayers; i++)
 	{
 		PlayerInfo PInfo;
-		sprintf(PInfo.Name, "%s", xrGS_SBServerGetPlayerStringValue(pServer, i,	"player", "Unknown"));
+		sprintf_s(PInfo.Name, "%s", xrGS_SBServerGetPlayerStringValue(pServer, i,	"player", "Unknown"));
 		PInfo.Frags =		s16(xrGS_SBServerGetPlayerIntValue(pServer, i,			"score", 0));
 		PInfo.Deaths =		u16(xrGS_SBServerGetPlayerIntValue(pServer, i,			"deaths", 0));
 		PInfo.Rank =		u8(xrGS_SBServerGetPlayerIntValue(pServer, i,			"skill", 0));

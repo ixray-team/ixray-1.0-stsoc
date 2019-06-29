@@ -97,9 +97,9 @@ void CBuild::Run	(LPCSTR P)
 	if (strstr(Core.Params,"-att"))	gl_linear	= TRUE;
 
 	//****************************************** Open Level
-	strconcat					(path,P,"\\")	;
+	strconcat					(sizeof(path),path,P,"\\")	;
 	string_path					lfn				;
-	IWriter* fs					= FS.w_open		(strconcat(lfn,path,"level."));
+	IWriter* fs					= FS.w_open		(strconcat(sizeof(lfn),lfn,path,"level."));
 	fs->open_chunk				(fsL_HEADER)	;
 	hdrLEVEL H;	
 	H.XRLC_version				= XRCL_PRODUCTION_VERSION;
@@ -113,7 +113,7 @@ void CBuild::Run	(LPCSTR P)
 	//****************************************** Saving lights
 	{
 		string256			fn;
-		IWriter*		fs	= FS.w_open	(strconcat(fn,pBuild->path,"build.lights"));
+		IWriter*		fs	= FS.w_open	(strconcat(sizeof(fn),fn,pBuild->path,"build.lights"));
 		fs->w_chunk			(0,&*L_static.rgb.begin(),L_static.rgb.size()*sizeof(R_Light));
 		fs->w_chunk			(1,&*L_static.hemi.begin(),L_static.hemi.size()*sizeof(R_Light));
 		fs->w_chunk			(2,&*L_static.sun.begin(),L_static.sun.size()*sizeof(R_Light));
@@ -273,7 +273,7 @@ void CBuild::Run	(LPCSTR P)
 		b_glow&	G	= glows[i];
 		fs->w		(&G,4*sizeof(float));
 		string1024	sid;
-		strconcat	(sid,
+		strconcat	(sizeof(sid),sid,
 			shader_render[materials[G.dwMaterial].shader].name,
 			"/",
 			textures		[materials[G.dwMaterial].surfidx].name
@@ -290,8 +290,8 @@ void CBuild::Run	(LPCSTR P)
 
 void CBuild::err_save	()
 {
-	string256		log_name;
-	strconcat		(log_name,"build_",Core.UserName,".err");
+	string_path		log_name;
+	strconcat		(sizeof(log_name),log_name,"build_",Core.UserName,".err");
 	FS.update_path	(log_name,"$logs$",log_name);
 
 	IWriter*		fs	= FS.w_open(log_name);

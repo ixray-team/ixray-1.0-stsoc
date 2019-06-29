@@ -13,6 +13,7 @@ class IDamageSource;
 class CPHSkeleton;
 class CCharacterPhysicsSupport;
 class ICollisionDamageInfo;
+class CIKLimbsController;
 struct SCollisionHitCallback
 {
 	typedef								void					CollisionHitCallbackFun		(CGameObject* obj,float min_cs,float max_cs,float &cs,float &hl,const ICollisionDamageInfo* di,SCollisionHitCallback* slf)		;
@@ -74,6 +75,7 @@ public:
 	virtual CPHSoundPlayer				*ph_sound_player			()  						{return NULL;}
 	virtual	CCharacterPhysicsSupport	*character_physics_support	()							{return NULL;}
 	virtual	CCharacterPhysicsSupport	*character_physics_support	() const					{return NULL;}
+	virtual	CIKLimbsController			*character_ik_controller	()							{return NULL;}
 	virtual SCollisionHitCallback		*get_collision_hit_callback ()							{return NULL;}
 	virtual bool						set_collision_hit_callback	(SCollisionHitCallback *cc)	{return false;}
 	virtual void						enable_notificate			()							{;}
@@ -113,6 +115,9 @@ public:
 
 public:
 	virtual bool			register_schedule	() const;
+
+public:
+	virtual	void			on_physics_disable	();
 };
 
 #endif

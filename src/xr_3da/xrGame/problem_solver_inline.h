@@ -79,7 +79,7 @@ IC	bool CProblemSolverAbstract::actual			() const
 
 	xr_vector<COperatorCondition>::const_iterator	I = current_state().conditions().begin();
 	xr_vector<COperatorCondition>::const_iterator	E = current_state().conditions().end();
-	EVALUATORS::const_iterator						i = evaluators().begin(), j;
+	EVALUATORS::const_iterator						i = evaluators().begin();
 	EVALUATORS::const_iterator						e = evaluators().end();
 	for ( ; I != E; ++I) {
 		if ((*i).first < (*I).condition())

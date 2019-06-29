@@ -76,6 +76,7 @@ struct file_comparer{
 };
 
 
+#ifndef MOD_COMPRESS
 
 int ProcessDifference()
 {
@@ -146,7 +147,7 @@ int ProcessDifference()
 	string_path out_path;
 	for(u32 i=0; i<target_file_list.size();++i){
 		LPCSTR fn = target_file_list[i];
-		strconcat(out_path,target_folder,"\\",fn);
+		strconcat(sizeof(out_path),out_path,target_folder,"\\",fn);
 		VerifyPath(out_path);
 		IReader* r = FS_new->r_open("$target_folder$",fn);
 		IWriter* w = FS_old->w_open(out_path);
@@ -167,3 +168,4 @@ int ProcessDifference()
 
 	return 0;
 }
+#endif

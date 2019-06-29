@@ -71,14 +71,19 @@ IC	CGraphEngine &CLevelSpawnConstructor::graph_engine			() const
 void CLevelSpawnConstructor::init								()
 {
 	// loading level graph
-	string256				file_name;
+	string_path				file_name;
 	FS.update_path			(file_name,"$game_levels$",*m_level.name());
-	strcat					(file_name,"\\");
+	strcat_s				(file_name,"\\");
 	m_level_graph			= xr_new<CLevelGraph>(file_name);
 	
-	// loading cross table 
+	// loading cross table
+#ifdef PRIQUEL
+	m_game_spawn_constructor->game_graph().set_current_level	(game_graph().header().level(*m_level.name()).id());
+	m_cross_table			= &game_graph().cross_table();
+#else // PRIQUEL
 	strcat					(file_name,CROSS_TABLE_NAME);
 	m_cross_table			= xr_new<CGameLevelCrossTable>(file_name);
+#endif // PRIQUEL
 
 	// loading patrol paths
 	FS.update_path			(file_name,"$game_levels$",*m_level.name());
@@ -186,9 +191,9 @@ void CLevelSpawnConstructor::add_free_object					(CSE_Abstract			*abstract)
 void CLevelSpawnConstructor::load_objects						()
 {
 	// loading spawn points
-	string256					file_name;
+	string_path					file_name;
 	FS.update_path				(file_name,"$game_levels$",*m_level.name());
-	strcat						(file_name,"\\level.spawn");
+	strcat_s					(file_name,"\\level.spawn");
 	IReader						*level_spawn = FS.r_open(file_name);
 	u32							id;
 	IReader						*chunk = level_spawn->open_chunk_iterator(id);
@@ -478,7 +483,7 @@ void CLevelSpawnConstructor::generate_artefact_spawn_positions	()
 		);
 		
 		l_tpaStack.erase				(
-			remove_if(
+			std::remove_if(
 				l_tpaStack.begin(),
 				l_tpaStack.end(),
 				remove_too_far_predicate(
@@ -505,7 +510,7 @@ void CLevelSpawnConstructor::generate_artefact_spawn_positions	()
 #endif
 		}
 		else
-			random_shuffle				(l_tpaStack.begin(),l_tpaStack.end());
+			std::random_shuffle			(l_tpaStack.begin(),l_tpaStack.end());
 
 		zone->m_artefact_position_offset= m_level_points.size();
 		m_level_points.resize			(zone->m_artefact_position_offset + zone->m_artefact_spawn_count);
@@ -608,7 +613,11 @@ void CLevelSpawnConstructor::Execute							()
 	verify_space_restrictors			();
 	
 	xr_delete							(m_level_graph);
+#ifdef PRIQUEL
+	m_cross_table						= 0;
+#else // PRIQUEL
 	xr_delete							(m_cross_table);
+#endif // PRIQUEL
 	xr_delete							(m_graph_engine);
 }
 

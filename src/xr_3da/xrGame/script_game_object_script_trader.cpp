@@ -6,12 +6,7 @@
 //	Description : XRay Script game object script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "script_space.h"
-#include <luabind/adopt_policy.hpp>
-#include <luabind/iterator_policy.hpp>
-#include <luabind/out_value_policy.hpp>
-
+#include "pch_script.h"
 #include "script_game_object.h"
 
 using namespace luabind;

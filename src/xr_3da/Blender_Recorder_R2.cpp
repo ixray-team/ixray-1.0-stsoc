@@ -48,7 +48,7 @@ u32		CBlender_Compile::i_Sampler		(LPCSTR _name)
 {
 	//
 	string256				name;
-	strcpy					(name,_name);
+	strcpy_s					(name,_name);
 //. andy	if (strext(name)) *strext(name)=0;
 	fix_texture_name		(name);
 

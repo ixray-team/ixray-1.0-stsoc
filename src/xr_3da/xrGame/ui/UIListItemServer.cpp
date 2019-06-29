@@ -9,6 +9,8 @@ CUIListItemServer::CUIListItemServer()
 	m_icon.AttachChild			(&m_iconPass);
 	m_icon.AttachChild			(&m_iconDedicated);
 	m_icon.AttachChild			(&m_iconPunkBuster);
+	m_icon.AttachChild			(&m_iconUserPass);
+
 	AttachChild					(&m_server);
 	AttachChild					(&m_map);
 	AttachChild					(&m_game);
@@ -53,26 +55,20 @@ void CUIListItemServer::Init(LIST_SRV_ITEM& params, float x, float y, float widt
 	m_version.Init(offset, 0, params.size.version, height);
 
 	float icon_size = CUITextureMaster::GetTextureHeight("ui_icon_password");
-//	if (params.info.icons.pass)
-//	{
+
 	m_iconPass.Init(0,0,icon_size,icon_size);
 	m_iconPass.InitTexture("ui_icon_password");
-//	}
-//	if (params.info.icons.dedicated)
-//	{
+
 	m_iconDedicated.Init(icon_size,0,icon_size,icon_size);
 	m_iconDedicated.InitTexture("ui_icon_dedicated");
-//	}
-	
-//	if (params.info.icons.punkbuster)
-//	{
-	m_iconPunkBuster.Init(icon_size*2,0,icon_size,icon_size);
-	m_iconPunkBuster.InitTexture("ui_icon_punkbuster");
-//	}
+
+	//m_iconPunkBuster.Init(icon_size*2,0,icon_size,icon_size);
+	//m_iconPunkBuster.InitTexture("ui_icon_punkbuster");
+
+	m_iconUserPass.Init(icon_size*2,0,icon_size,icon_size);
+	m_iconUserPass.InitTexture("ui_icon_punkbuster"); //("ui_icon_userpass");
 
 	SetParams(params);
-
-
 
 	m_srv_info = params;
 }
@@ -101,6 +97,7 @@ void CUIListItemServer::SetParams(LIST_SRV_ITEM& params){
 	m_iconPass.Show			(params.info.icons.pass);
 	m_iconDedicated.Show	(params.info.icons.dedicated);
 	m_iconPunkBuster.Show	(params.info.icons.punkbuster);
+	m_iconUserPass.Show		(params.info.icons.user_pass);
 
 	SetValue				(params.info.Index);
 }
@@ -132,10 +129,15 @@ void CUIListItemServer::SetFont(CGameFont* pFont){
 	m_version.SetFont	(pFont);
 }
 
-void CUIListItemServer::CreateConsoleCommand(xr_string& command, LPCSTR player_name){
-	command = "start client(";
-	command+= *m_srv_info.info.address;
-	command+= "/name=";
-	command+= player_name;
-	command+= ")";
+void CUIListItemServer::CreateConsoleCommand(xr_string& command, LPCSTR player_name, LPCSTR player_pass, LPCSTR server_psw)
+{
+	command  = "start client(";
+	command += *m_srv_info.info.address;
+	command += "/name=";
+	command += player_name;
+	command += "/pass=";
+	command += player_pass;
+	command += "/psw=";
+	command += server_psw;
+	command += ")";
 }

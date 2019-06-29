@@ -38,7 +38,7 @@ class CScriptDebugger
 {
 public:
 	void			Connect				(LPCSTR mslot_name);
-	void			Eval				(const char* strCode, char* res);
+	void			Eval				(const char* strCode, char* res, int res_sz);
 	void			AddLocalVariable	(const Variable& var);
 	void			ClearLocalVariables	();
 	void			AddGlobalVariable	(const char* name, const char* type, const char* value);

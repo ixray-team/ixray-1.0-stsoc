@@ -110,8 +110,14 @@ void CSpaceRestrictionShape::build_border	()
 		fill_shape					(*I);
 	
 	{
-		xr_vector<u32>::iterator	I = remove_if(m_border.begin(),m_border.end(),CBorderMergePredicate(this));
-		m_border.erase				(I,m_border.end());
+		m_border.erase				(
+			std::remove_if(
+				m_border.begin(),
+				m_border.end(),
+				CBorderMergePredicate(this)
+			),
+			m_border.end()
+		);
 	}
 
 	process_borders					();
@@ -132,8 +138,13 @@ void CSpaceRestrictionShape::test_correctness	()
 
 	// leave only unique nodes in m_test_storage
 	std::sort					(m_test_storage.begin(),m_test_storage.end());
-	xr_vector<u32>::iterator	I = unique(m_test_storage.begin(),m_test_storage.end());
-	m_test_storage.erase		(I,m_test_storage.end());
+	m_test_storage.erase		(
+		std::unique(
+			m_test_storage.begin(),
+			m_test_storage.end()
+		),
+		m_test_storage.end()
+	);
 	
 	
 	// flood

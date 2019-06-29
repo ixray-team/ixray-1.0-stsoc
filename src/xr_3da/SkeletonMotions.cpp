@@ -19,34 +19,37 @@ u16 find_bone_id(vecBones* bones, shared_str nm)
 //-----------------------------------------------------------------------
 BOOL motions_value::load		(LPCSTR N, IReader *data, vecBones* bones)
 {
-#ifdef DEBUG
-	m_id			= N;
-#endif // DEBUG
-	bool bRes		= true;
-	// Load definitions
-	U16Vec rm_bones	(bones->size(),BI_NONE);
-	IReader* MP 	= data->open_chunk(OGF_S_SMPARAMS);
 
-	if (MP){
-		u16 		vers 			= MP->r_u16();
-		u16 		part_bone_cnt	= 0;
-		string128 	buf;
-		R_ASSERT3(vers==xrOGF_SMParamsVersion,"Invalid OGF/OMF version:",N);
+	m_id						= N;
+
+	bool bRes					= true;
+	// Load definitions
+	U16Vec rm_bones				(bones->size(),BI_NONE);
+	IReader* MP 				= data->open_chunk(OGF_S_SMPARAMS);
+
+	if (MP)
+	{
+		u16 vers 				= MP->r_u16();
+		u16 part_bone_cnt		= 0;
+		string128 				buf;
+		R_ASSERT3				(vers<=xrOGF_SMParamsVersion,"Invalid OGF/OMF version:",N);
+		
 		// partitions
-		u16 part_count;
+		u16						part_count;
 		part_count 				= MP->r_u16();
-		for (u16 part_i=0; part_i<part_count; part_i++){
-			CPartDef&	PART	= m_partition[part_i];
+
+		for (u16 part_i=0; part_i<part_count; part_i++)
+		{
+			CPartDef& PART		= m_partition[part_i];
 			MP->r_stringZ		(buf,sizeof(buf));
 			PART.Name			= _strlwr(buf);
 			PART.bones.resize	(MP->r_u16());
-//			Log					("Part:",buf);
-			for (xr_vector<u32>::iterator b_it=PART.bones.begin(); b_it<PART.bones.end(); b_it++){
+
+			for (xr_vector<u32>::iterator b_it=PART.bones.begin(); b_it<PART.bones.end(); b_it++)
+			{
 				MP->r_stringZ	(buf,sizeof(buf));
 				u16 m_idx 		= u16			(MP->r_u32());
 				*b_it			= find_bone_id	(bones,buf); 
-//				VERIFY(*b_it==m_idx);
-//				Msg				("Bone: #%2d, ID: %2d, Name: '%s'",b_it-PART.bones.begin(),*b_it,buf);
 #ifdef _EDITOR
 				if (*b_it==BI_NONE){
 					bRes		= false;
@@ -68,31 +71,39 @@ BOOL motions_value::load		(LPCSTR N, IReader *data, vecBones* bones)
 #else
 		VERIFY3(part_bone_cnt==(u16)bones->size(),"Different bone count '%s'",N);
 #endif
-		if (bRes){
+		if (bRes)
+		{
 			// motion defs (cycle&fx)
 			u16 mot_count			= MP->r_u16();
             m_mdefs.resize			(mot_count);
-			for (u16 mot_i=0; mot_i<mot_count; mot_i++){
+
+			for (u16 mot_i=0; mot_i<mot_count; mot_i++)
+			{
 				MP->r_stringZ		(buf,sizeof(buf));
 				shared_str nm		= _strlwr		(buf);
 				u32 dwFlags			= MP->r_u32		();
 				CMotionDef&	D		= m_mdefs[mot_i];
-                D.Load				(MP,dwFlags);
-                m_mdefs.push_back	(D);
-				if (dwFlags&esmFX)	m_fx.insert		(mk_pair(nm,mot_i));
-				else				m_cycle.insert	(mk_pair(nm,mot_i));
+                D.Load				(MP,dwFlags,vers);
+//.             m_mdefs.push_back	(D);
+				
+				if (dwFlags&esmFX)	
+					m_fx.insert		(mk_pair(nm,mot_i));
+				else				
+					m_cycle.insert	(mk_pair(nm,mot_i));
+
                 m_motion_map.insert	(mk_pair(nm,mot_i));
 			}
 		}
 		MP->close();
-	}else{
+	}else
+	{
 		Debug.fatal	(DEBUG_INFO,"Old skinned model version unsupported! (%s)",N);
 	}
 	if (!bRes)	return false;
 
 	// Load animation
 	IReader*	MS		= data->open_chunk(OGF_S_MOTIONS);
-	if (!MS) 	return false;
+	if (!MS) 			return false;
 
 	u32			dwCNT	= 0;
 	MS->r_chunk_safe	(0,&dwCNT,sizeof(dwCNT));
@@ -101,6 +112,7 @@ BOOL motions_value::load		(LPCSTR N, IReader *data, vecBones* bones)
 	// set per bone motion size
 	for (u32 i=0; i<bones->size(); i++)
 		m_motions[bones->at(i)->name].resize(dwCNT);
+
 	// load motions
 	for (u16 m_idx=0; m_idx<(u16)dwCNT; m_idx++){
 		string128			mname;
@@ -230,7 +242,7 @@ void motions_container::dump()
 
 //////////////////////////////////////////////////////////////////////////
 // High level control
-void CMotionDef::Load(IReader* MP, u32 fl)
+void CMotionDef::Load(IReader* MP, u32 fl, u16 version)
 {
 	// params
 	bone_or_part= MP->r_u16(); // bCycle?part_id:bone_id;
@@ -241,9 +253,66 @@ void CMotionDef::Load(IReader* MP, u32 fl)
 	falloff		= Quantize(MP->r_float());
 	flags		= (u16)fl;
 	if (!(flags&esmFX) && (falloff>=accrue)) falloff = u16(accrue-1);
+
+	if(version>=4)
+	{
+		u32	cnt				= MP->r_u32();
+        if(cnt>0)
+        {
+            marks.resize		(cnt);
+
+            for(u32 i=0; i<cnt; ++i)
+                marks[i].Load	(MP);
+        }
+	}
 }
+
 bool CMotionDef::StopAtEnd()
 {
 	return !!(flags&esmStopAtEnd);
 }
 
+bool motion_marks::pick_mark(const float& t) const
+{
+	C_ITERATOR	it		= intervals.begin();
+	C_ITERATOR	it_e	= intervals.end();
+
+	for( ;it!=it_e; ++it)
+	{
+		if( (*it).first<=t && (*it).second>=t )
+			return true;
+		
+		if((*it).first>t)
+			break;
+	}
+	return false;
+}
+
+void motion_marks::Load(IReader* R)
+{
+	xr_string 			tmp;
+	R->r_string			(tmp);
+    name				= tmp.c_str();
+	u32 cnt				= R->r_u32();
+	intervals.resize	(cnt);
+	for(u32 i=0; i<cnt; ++i)
+	{
+		interval& item		= intervals[i];
+		item.first			= R->r_float();
+		item.second			= R->r_float();
+	}
+}
+#ifdef _EDITOR
+void motion_marks::Save(IWriter* W)
+{
+	W->w_string			(name.c_str());
+	u32 cnt				= intervals.size();
+    W->w_u32			(cnt);
+	for(u32 i=0; i<cnt; ++i)
+	{
+		interval& item		= intervals[i];
+		W->w_float			(item.first);
+		W->w_float			(item.second);
+	}
+}
+#endif

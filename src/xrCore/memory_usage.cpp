@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <malloc.h>
+#include <errno.h>
 
 XRCORE_API void vminfo (size_t *_free, size_t *reserved, size_t *committed) {
 	MEMORY_BASIC_INFORMATION memory_info;

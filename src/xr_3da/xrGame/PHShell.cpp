@@ -15,14 +15,14 @@
 #include "game_object_space.h"
 //#pragma warning(disable:4995)
 //#pragma warning(disable:4267)
-//#include "../ode/src/collision_kernel.h"
+//#include "../../xrODE/ode/src/collision_kernel.h"
 //#pragma warning(default:4995)
 //#pragma warning(default:4267)
 ///////////////////////////////////////////////////////////////
 ///#pragma warning(disable:4995)
 
-//#include <../ode/src/joint.h>
-//#include <../ode/src/objects.h>
+//#include "../../xrODE/ode/src/joint.h"
+//#include "../../xrODE/ode/src/objects.h"
 
 //#pragma warning(default:4995)
 ///////////////////////////////////////////////////////////////////
@@ -32,6 +32,10 @@
 #include "PHShell.h"
 #include "PHCollideValidator.h"
 #include "PHElementInline.h"
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	#include "PhysicsShellAnimator.h"
+#endif
 
 IC		bool	PhOutOfBoundaries			(const Fvector& v)
 {
@@ -65,6 +69,11 @@ CPHShell::CPHShell()
 	m_spliter_holder=NULL;
 	m_object_in_root.identity();
 	m_active_count=0;
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	m_pPhysicsShellAnimatorC=NULL;
+#endif
+
 }
 
 void CPHShell::EnableObject(CPHObject* obj)
@@ -74,6 +83,13 @@ void CPHShell::EnableObject(CPHObject* obj)
 }
 void CPHShell::DisableObject()
 {
+
+	CPhysicsShellHolder* ref_object=(*elements.begin())->PhysicsRefObject();
+//.	if (!ref_object) return;
+
+	if (ref_object)
+		ref_object->on_physics_disable	();
+
 	//InterpolateGlobalTransform(&mXFORM);
 	CPHObject::deactivate();
 	if(m_spliter_holder)m_spliter_holder->Deactivate();
@@ -1515,10 +1531,12 @@ void	CPHShell::PureStep(float step)
 	CPHObject::Island().Step(step);
 	PhDataUpdate(step);
 }
-void	CPHShell::StaticCollideStep(float step)
+void CPHShell::CollideAll()
 {
-
+	CPHObject::Collide();
+	CPHObject::reinit_single();
 }
+
 void	CPHShell::RegisterToCLGroup	(CGID g)	
 {
 	CPHCollideValidator::RegisterObjToGroup(g,*static_cast<CPHObject*>(this));
@@ -1548,6 +1566,33 @@ void CPHShell::SetIgnoreRagDoll()
 {
 	CPHCollideValidator::SetRagDollClassNotCollide(*this);
 }
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	//Делает данный физический объек анимированным 
+	void CPHShell::SetAnimated()
+	{	
+		//Для фильтра коллизий относим данный объект к классу анимированных
+		CPHCollideValidator::SetAnimatedClass(*this);
+		m_pPhysicsShellAnimatorC=xr_new<CPhysicsShellAnimator>(this);
+		//m_pPhysicsShellAnimatorC->ResetCallbacks();
+	}
+
+	//Настраивает фильтр коллизий на игнорирование столкновенний данного
+	//физического объекта с анимированным физическим объектом
+	void CPHShell::SetIgnoreAnimated()
+	{
+		//Для фильтра коллизий указываем, что данный
+		//физический объект игнорирует анимированные физические тела
+		
+		CPHCollideValidator::SetAnimatedClassNotCollide(*this);
+	}
+
+	//Выдает информацию о том является ли данный объект анимированным
+	bool CPHShell::Animated()
+	{
+		return	CPHCollideValidator::IsAnimatedObject(*this);
+	}
+#endif
 
 void	CPHShell::				SetSmall()
 {
@@ -1591,12 +1636,42 @@ void CPHShell::get_Extensions(const Fvector& axis,float center_prg,float& lo_ext
 
 }
 
-const	CGID&	CPHShell::GetCLGroup				()const
+const	CGID&	CPHShell::GetCLGroup										()const
 {
 	return CPHCollideValidator::GetGroup(*this);
 }
+
 void*		CPHShell::				get_CallbackData						()
 {
 	VERIFY(isActive());
 	return	(*elements.begin())->get_CallbackData();
+}
+
+void	CPHShell::		SetBonesCallbacksOverwrite(bool v)
+{
+	ELEMENT_I i,e;
+	i=elements.begin(); e=elements.end();
+	for( ;i!=e;++i)	
+		(*i)->SetBoneCallbackOverwrite(v);
+}
+
+
+void		CPHShell::	ToAnimBonesPositions	()
+{
+	VERIFY(PKinematics());
+	ELEMENT_I i,e;
+	i=elements.begin(); e=elements.end();
+	for( ;i!=e;++i)	
+		(*i)->ToBonePos(&PKinematics()->LL_GetBoneInstance((*i)->m_SelfID));
+	
+}
+
+bool	CPHShell::		AnimToVelocityState		( float dt, float l_limit, float a_limit )
+{
+	ELEMENT_I i,e;
+	i=elements.begin(); e=elements.end();
+	bool ret = true;
+	for( ;i!=e;++i)
+		ret  =(*i)->AnimToVel(dt,l_limit,a_limit) && ret;
+	return ret;	
 }

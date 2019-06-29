@@ -2,7 +2,9 @@
 #pragma hdrstop
 
 #include "Environment.h"
-#include "render.h"
+#ifndef _EDITOR
+    #include "render.h"
+#endif
 #include "xr_efflensflare.h"
 #include "rain.h"
 #include "thunderbolt.h"

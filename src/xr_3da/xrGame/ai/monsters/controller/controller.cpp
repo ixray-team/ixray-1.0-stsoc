@@ -260,8 +260,15 @@ bool CController::is_community_friend_overrides(const CEntityAlive *entity_alive
 	if (!IO) return false;
 	if (const_cast<CEntityAlive *>(entity_alive)->cast_base_monster()) return false;
 	
-	xr_vector<shared_str>::const_iterator it = find(m_friend_community_overrides.begin(),m_friend_community_overrides.end(),IO->CharacterInfo().Community().id());
-	return (it != m_friend_community_overrides.end());
+	return (
+		std::find(
+			m_friend_community_overrides.begin(),
+			m_friend_community_overrides.end(),
+			IO->CharacterInfo().Community().id()
+		)
+		!=
+		m_friend_community_overrides.end()
+	);
 }
 
 BOOL CController::net_Spawn(CSE_Abstract *DC)
@@ -510,8 +517,8 @@ void CController::draw_fire_particles()
 	PlayParticles(particles_fire, my_head_pos, dir);
 
 	// check probability
-	if (Random.randI(100) > 30) {
-
+	/*if (Random.randI(100) > 30)*/
+	{
 		Hit_Psy						(enemy, m_psy_hit_damage);
 		play_control_sound_hit		();
 	}

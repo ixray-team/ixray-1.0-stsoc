@@ -6,9 +6,8 @@
 //	Description : Script sound action class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_sound_action.h"
-#include "script_space.h"
 
 using namespace luabind;
 
@@ -51,12 +50,12 @@ void CScriptSoundAction::script_register(lua_State *L)
 			// trader specific
 			.def(								constructor<LPCSTR,LPCSTR,MonsterSpace::EMonsterHeadAnimType>())
 
-			.def("set_sound",					(void (CScriptSoundAction::*)(LPCSTR))(CScriptSoundAction::SetSound))
-			.def("set_sound",					(void (CScriptSoundAction::*)(const CScriptSound &))(CScriptSoundAction::SetSound))
+			.def("set_sound",					(void (CScriptSoundAction::*)(LPCSTR))(&CScriptSoundAction::SetSound))
+			.def("set_sound",					(void (CScriptSoundAction::*)(const CScriptSound &))(&CScriptSoundAction::SetSound))
 			.def("set_sound_type",				&CScriptSoundAction::SetSoundType)
 			.def("set_bone",					&CScriptSoundAction::SetBone)
 			.def("set_position",				&CScriptSoundAction::SetPosition)
 			.def("set_angles",					&CScriptSoundAction::SetAngles)
-			.def("completed",					(bool (CScriptSoundAction::*)())(CScriptSoundAction::completed))
+			.def("completed",					(bool (CScriptSoundAction::*)())(&CScriptSoundAction::completed))
 	];
 }

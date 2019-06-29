@@ -26,7 +26,7 @@ XRCORE_API void dump_phase		()
 	static int					phase_counter = 0;
 
 	string256					temp;
-	sprintf						(temp,"x:\\$phase$%d.dump",++phase_counter);
+	sprintf_s					(temp,sizeof(temp),"x:\\$phase$%d.dump",++phase_counter);
 	Memory.mem_statistic		(temp);
 }
 #endif // DEBUG_MEMORY_MANAGER
@@ -39,7 +39,9 @@ xrMemory::xrMemory()
 #endif // DEBUG_MEMORY_MANAGER
 {
 #ifdef DEBUG_MEMORY_MANAGER
+
 	debug_mode	= FALSE;
+
 #endif // DEBUG_MEMORY_MANAGER
 	mem_copy	= xrMemCopy_x86;
 	mem_fill	= xrMemFill_x86;
@@ -140,7 +142,7 @@ void	xrMemory::mem_compact	()
 	HeapCompact						(GetProcessHeap(),0);
 	if (g_pStringContainer)			g_pStringContainer->clean		();
 	if (g_pSharedMemoryContainer)	g_pSharedMemoryContainer->clean	();
-	if (!strstr(Core.Params,"-~swap_on_compact"))
+	if (strstr(Core.Params,"-swap_on_compact"))
 		SetProcessWorkingSetSize	(GetCurrentProcess(),size_t(-1),size_t(-1));
 }
 

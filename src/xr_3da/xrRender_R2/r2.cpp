@@ -6,8 +6,8 @@
 #include "..\igame_persistent.h"
 #include "..\environment.h"
 #include "..\SkeletonCustom.h"
-#include "LightTrack.h"
- 
+#include "..\xrRender\LightTrack.h"
+
 CRender										RImplementation;
 
 //////////////////////////////////////////////////////////////////////////
@@ -71,54 +71,56 @@ void					CRender::create					()
 	// Check for NULL render target support
 	D3DFORMAT	nullrt	= (D3DFORMAT)MAKEFOURCC('N','U','L','L');
 	o.nullrt			= HW.support	(nullrt,			D3DRTYPE_SURFACE, D3DUSAGE_RENDERTARGET);
-/*
+	/*
 	if (o.nullrt)		{
-		Msg				("* NULLRT supported and used");
+	Msg				("* NULLRT supported and used");
 	};
-*/
-if (o.nullrt)		{
+	*/
+	if (o.nullrt)		{
 		Msg				("* NULLRT supported");
 
-//.	    _tzset			();
-//.		??? _strdate	( date, 128 );	???
-//.		??? if (date < 22-march-07)		
+		//.	    _tzset			();
+		//.		??? _strdate	( date, 128 );	???
+		//.		??? if (date < 22-march-07)		
+		if (0)
 		{
 			u32 device_id	= HW.Caps.id_device;
 			bool disable_nullrt = false;
-			switch (device_id)	{
-				case 0x190:
-				case 0x191:
-				case 0x192:
-				case 0x193:
-				case 0x194:
-				case 0x197:
-				case 0x19D:
-				case 0x19E:{
-					disable_nullrt = true;	//G80
-					break;
-					}
-				case 0x400:
-				case 0x401:
-				case 0x402:
-				case 0x403:
-				case 0x404:
-				case 0x405:
-				case 0x40E:
-				case 0x40F:{
-					disable_nullrt = true;	//G84
-					break;
-					}
-				case 0x420:
-				case 0x421:
-				case 0x422:
-				case 0x423:
-				case 0x424:
-				case 0x42D:
-				case 0x42E:
-				case 0x42F:{
-					disable_nullrt = true;	// G86
-					break;
-					}
+			switch (device_id)	
+			{
+			case 0x190:
+			case 0x191:
+			case 0x192:
+			case 0x193:
+			case 0x194:
+			case 0x197:
+			case 0x19D:
+			case 0x19E:{
+				disable_nullrt = true;	//G80
+				break;
+					   }
+			case 0x400:
+			case 0x401:
+			case 0x402:
+			case 0x403:
+			case 0x404:
+			case 0x405:
+			case 0x40E:
+			case 0x40F:{
+				disable_nullrt = true;	//G84
+				break;
+					   }
+			case 0x420:
+			case 0x421:
+			case 0x422:
+			case 0x423:
+			case 0x424:
+			case 0x42D:
+			case 0x42E:
+			case 0x42F:{
+				disable_nullrt = true;	// G86
+				break;
+					   }
 			}
 			if (disable_nullrt)	o.nullrt=false;
 		};
@@ -189,7 +191,7 @@ if (o.nullrt)		{
 	// options
 	o.bug				= (strstr(Core.Params,"-bug"))?			TRUE	:FALSE	;
 	o.sunfilter			= (strstr(Core.Params,"-sunfilter"))?	TRUE	:FALSE	;
-//.	o.sunstatic			= (strstr(Core.Params,"-sunstatic"))?	TRUE	:FALSE	;
+	//.	o.sunstatic			= (strstr(Core.Params,"-sunstatic"))?	TRUE	:FALSE	;
 	o.sunstatic			= r2_sun_static;
 	o.sjitter			= (strstr(Core.Params,"-sjitter"))?		TRUE	:FALSE	;
 	o.depth16			= (strstr(Core.Params,"-depth16"))?		TRUE	:FALSE	;
@@ -263,12 +265,12 @@ void CRender::reset_end()
 	R_CHK						(HW.pDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[0]));
 	R_CHK						(HW.pDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[1]));
 	HWOCC.occq_create			(occq_size);
-	
+
 	Target						=	xr_new<CRenderTarget>	();
 
 	xrRender_apply_tf			();
 }
-
+/*
 void CRender::OnFrame()
 {
 	Models->DeleteQueue			();
@@ -276,7 +278,21 @@ void CRender::OnFrame()
 		Device.seqParallel.insert	(Device.seqParallel.begin(),
 			fastdelegate::FastDelegate0<>(&HOM,&CHOM::MT_RENDER));
 	}
+}*/
+void CRender::OnFrame()
+{
+	Models->DeleteQueue			();
+	if (ps_r2_ls_flags.test(R2FLAG_EXP_MT_CALC))	{
+		// MT-details (@front)
+		Device.seqParallel.insert	(Device.seqParallel.begin(),
+			fastdelegate::FastDelegate0<>(Details,&CDetailManager::MT_CALC));
+
+		// MT-HOM (@front)
+		Device.seqParallel.insert	(Device.seqParallel.begin(),
+			fastdelegate::FastDelegate0<>(&HOM,&CHOM::MT_RENDER));
+	}
 }
+
 
 // Implementation
 IRender_ObjectSpecific*	CRender::ros_create				(IRenderable* parent)				{ return xr_new<CROS_impl>();			}
@@ -434,26 +450,26 @@ void	CRender::Statistics	(CGameFont* _F)
 /*
 extern "C"
 {
-	LPCSTR WINAPI	D3DXGetPixelShaderProfile	(LPDIRECT3DDEVICE9  pDevice);
-	LPCSTR WINAPI	D3DXGetVertexShaderProfile	(LPDIRECT3DDEVICE9	pDevice);
+LPCSTR WINAPI	D3DXGetPixelShaderProfile	(LPDIRECT3DDEVICE9  pDevice);
+LPCSTR WINAPI	D3DXGetVertexShaderProfile	(LPDIRECT3DDEVICE9	pDevice);
 };
 */
 HRESULT	CRender::shader_compile			(
-		LPCSTR							name,
-		LPCSTR                          pSrcData,
-		UINT                            SrcDataLen,
-		void*							_pDefines,
-		void*							_pInclude,
-		LPCSTR                          pFunctionName,
-		LPCSTR                          pTarget,
-		DWORD                           Flags,
-		void*							_ppShader,
-		void*							_ppErrorMsgs,
-		void*							_ppConstantTable)
+	LPCSTR							name,
+	LPCSTR                          pSrcData,
+	UINT                            SrcDataLen,
+	void*							_pDefines,
+	void*							_pInclude,
+	LPCSTR                          pFunctionName,
+	LPCSTR                          pTarget,
+	DWORD                           Flags,
+	void*							_ppShader,
+	void*							_ppErrorMsgs,
+	void*							_ppConstantTable)
 {
 	D3DXMACRO						defines			[128];
 	int								def_it			= 0;
-    CONST D3DXMACRO*                pDefines		= (CONST D3DXMACRO*)	_pDefines;
+	CONST D3DXMACRO*                pDefines		= (CONST D3DXMACRO*)	_pDefines;
 	char							c_smapsize		[32];
 	char							c_gloss			[32];
 	if (pDefines)	{
@@ -576,17 +592,22 @@ HRESULT	CRender::shader_compile			(
 	}
 
 	LPD3DXINCLUDE                   pInclude		= (LPD3DXINCLUDE)		_pInclude;
-    LPD3DXBUFFER*                   ppShader		= (LPD3DXBUFFER*)		_ppShader;
-    LPD3DXBUFFER*                   ppErrorMsgs		= (LPD3DXBUFFER*)		_ppErrorMsgs;
-    LPD3DXCONSTANTTABLE*            ppConstantTable	= (LPD3DXCONSTANTTABLE*)_ppConstantTable;
+	LPD3DXBUFFER*                   ppShader		= (LPD3DXBUFFER*)		_ppShader;
+	LPD3DXBUFFER*                   ppErrorMsgs		= (LPD3DXBUFFER*)		_ppErrorMsgs;
+	LPD3DXCONSTANTTABLE*            ppConstantTable	= (LPD3DXCONSTANTTABLE*)_ppConstantTable;
+	
+#ifdef	D3DXSHADER_USE_LEGACY_D3DX9_31_DLL	//	December 2006 and later
+	HRESULT		_result	= D3DXCompileShader(pSrcData,SrcDataLen,defines,pInclude,pFunctionName,pTarget,Flags|D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,ppShader,ppErrorMsgs,ppConstantTable);
+#else
 	HRESULT		_result	= D3DXCompileShader(pSrcData,SrcDataLen,defines,pInclude,pFunctionName,pTarget,Flags,ppShader,ppErrorMsgs,ppConstantTable);
+#endif
 	if (SUCCEEDED(_result) && o.disasm)
 	{
 		ID3DXBuffer*		code	= *((LPD3DXBUFFER*)_ppShader);
 		ID3DXBuffer*		disasm	= 0;
 		D3DXDisassembleShader		(LPDWORD(code->GetBufferPointer()), FALSE, 0, &disasm );
 		string_path			dname;
-		strconcat			(dname,"disasm\\",name,('v'==pTarget[0])?".vs":".ps" );
+		strconcat			(sizeof(dname),dname,"disasm\\",name,('v'==pTarget[0])?".vs":".ps" );
 		IWriter*			W		= FS.w_open("$logs$",dname);
 		W->w				(disasm->GetBufferPointer(),disasm->GetBufferSize());
 		FS.w_close			(W);

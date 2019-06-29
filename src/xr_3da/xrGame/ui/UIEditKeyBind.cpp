@@ -24,20 +24,29 @@ CUIEditKeyBind::~CUIEditKeyBind()
 
 u32 cut_string_by_length(CGameFont* pFont, LPCSTR src, LPSTR dst, u32 dst_size, float length)
 {
-	float	text_len					= pFont->SizeOf_(src);
-	UI()->ClientToScreenScaledWidth		(text_len);
-	VERIFY								(xr_strlen(src)<=dst_size);
-	strcpy								(dst,src);
+	if ( pFont->IsMultibyte() ) {
+		u16 nPos = pFont->GetCutLengthPos( length, src );
+		VERIFY( nPos < dst_size );
+		strncpy( dst, src , nPos );
+		dst[ nPos ] = '\0';
+		return nPos;
+	} else {
 
-	while(text_len > length)
-	{
-		dst[xr_strlen(dst)-1]			= 0;
-		VERIFY							(xr_strlen(dst));
-		text_len						= pFont->SizeOf_(dst);
-		UI()->ClientToScreenScaledWidth	(text_len);
+		float	text_len					= pFont->SizeOf_(src);
+		UI()->ClientToScreenScaledWidth		(text_len);
+		VERIFY								(xr_strlen(src)<=dst_size);
+		strcpy								(dst,src);
+
+		while(text_len > length)
+		{
+			dst[xr_strlen(dst)-1]			= 0;
+			VERIFY							(xr_strlen(dst));
+			text_len						= pFont->SizeOf_(dst);
+			UI()->ClientToScreenScaledWidth	(text_len);
+		}
+
+		return xr_strlen(dst);
 	}
-
-	return xr_strlen(dst);
 }
 
 void CUIEditKeyBind::SetText(const char* text)

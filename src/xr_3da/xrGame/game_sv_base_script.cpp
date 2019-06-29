@@ -6,12 +6,8 @@
 //	Description : Base server game script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "game_sv_base.h"
-#include "script_space.h"
-#include <luabind/iterator_policy.hpp>
-#include <luabind/operator.hpp>
-#include <luabind/out_value_policy.hpp>
 #include "xrMessages.h"
 #include "ui/UIInventoryUtilities.h"
 #include "xr_time.h"

@@ -145,14 +145,27 @@ CEffectorCam* CCameraManager::GetCamEffector(ECamEffectorType type)
 
 CEffectorCam* CCameraManager::AddCamEffector(CEffectorCam* ef)
 {
-	RemoveCamEffector(ef->eType);
-	m_EffectorsCam.push_back(ef);
-	return m_EffectorsCam.back();
+	m_EffectorsCam_added_deffered.push_back(ef);
+	return m_EffectorsCam_added_deffered.back();
 }
 
-void CCameraManager::RemoveCamEffector(ECamEffectorType type){
+void CCameraManager::UpdateDeffered()
+{
+	EffectorCamIt it		= m_EffectorsCam_added_deffered.begin();
+	EffectorCamIt it_e		= m_EffectorsCam_added_deffered.end();
+	for (; it!=it_e; ++it)
+	{
+		RemoveCamEffector			( (*it)->eType );
+		m_EffectorsCam.push_back	(*it);
+	}
+	m_EffectorsCam_added_deffered.clear	();
+}
+
+void CCameraManager::RemoveCamEffector(ECamEffectorType type)
+{
 	for (EffectorCamIt it=m_EffectorsCam.begin(); it!=m_EffectorsCam.end(); it++ )
-		if ((*it)->eType==type){ 
+		if ((*it)->eType==type)
+		{ 
 			xr_delete(*it);
 			m_EffectorsCam.erase(it);
 			return;
@@ -221,12 +234,22 @@ void CCameraManager::Update(const Fvector& P, const Fvector& D, const Fvector& N
 
 	// Effector
 	BOOL bOverlapped			= FALSE;
-	if (m_EffectorsCam.size()){
-		for (int i=m_EffectorsCam.size()-1; i>=0; i--){
+	if (m_EffectorsCam.size())
+	{
+		for (int i=m_EffectorsCam.size()-1; i>=0; i--)
+		{
 			CEffectorCam* eff		= m_EffectorsCam[i];
-			if ((eff->Valid())&&eff->Process(vPosition,vDirection,vNormal,fFov,fFar,fAspect)){
+			if(eff->Valid() && eff->Process(vPosition,vDirection,vNormal,fFov,fFar,fAspect))
+			{
 				bOverlapped		|= eff->Overlapped();
-			}else{
+			}else
+			{
+				if(eff->AllowProcessingIfInvalid())
+				{
+					eff->ProcessIfInvalid(vPosition,vDirection,vNormal,fFov,fFar,fAspect);
+					bOverlapped		|= eff->Overlapped();
+				}
+
 				m_EffectorsCam.erase(m_EffectorsCam.begin()+i);
 				xr_delete(eff);
 			}
@@ -267,6 +290,8 @@ void CCameraManager::Update(const Fvector& P, const Fvector& D, const Fvector& N
 	pp_affected.validate		("after applying pp");
 	if (FALSE==bOverlapped && m_bAutoApply)
 			ApplyDevice		(VIEWPORT_NEAR);
+
+	UpdateDeffered			();
 }
 
 void CCameraManager::ApplyDevice (float _viewport_near)
@@ -282,7 +307,7 @@ void CCameraManager::ApplyDevice (float _viewport_near)
 	// projection
 	Device.fFOV					= fFov;
 	Device.fASPECT				= fAspect;
-	Device.mProject.build_projection(deg2rad(fFov*fAspect), fAspect, _viewport_near, fFar);
+	Device.mProject.build_projection(deg2rad(fFov/**fAspect*/), fAspect, _viewport_near, fFar);
 
 	if( g_pGamePersistent && g_pGamePersistent->m_pMainMenu->IsActive() )
 		ResetPP					();

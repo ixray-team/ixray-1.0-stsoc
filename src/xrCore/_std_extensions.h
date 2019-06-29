@@ -15,9 +15,49 @@
 
 #ifdef _MIN
 #undef _MIN
+#endif
+
+#ifdef _MAX
 #undef _MAX
+#endif
+
+#ifdef min
 #undef min
+#endif
+
+#ifdef max
 #undef max
+#endif
+
+#ifdef  _EDITOR
+IC void strcpy_s(char* strDestination,   size_t sizeInBytes,   const char *strSource)
+{
+	strcpy(strDestination, strSource);
+}
+
+IC void strcpy_s(char* strDestination,   const char *strSource)
+{
+	strcpy(strDestination, strSource);
+}
+
+IC void _strlwr_s(char* strDestination, size_t sizeInBytes)
+{
+    strlwr(strDestination);
+}
+
+IC void strcat_s(char* strDestination,   size_t sizeInBytes,   const char *strSource)
+{
+	strcat(strDestination, strSource);
+}
+
+IC int sprintf_s(char* dest, size_t sizeOfBuffer, const char* format, ...)
+{
+	va_list 	mark;
+	va_start	(mark, format );
+	int sz		= _vsnprintf(dest, sizeOfBuffer, format, mark );
+    dest		[sizeOfBuffer-1]=0;
+    va_end		(mark);
+}
 #endif
 
 // token type definition
@@ -32,6 +72,14 @@ IC LPCSTR get_token_name(xr_token* tokens, int key)
     for (int k=0; tokens[k].name; k++)
     	if (key==tokens[k].id) return tokens[k].name;
     return "";
+}
+
+IC int get_token_id(xr_token* tokens, LPCSTR key)
+{
+    for (int k=0; tokens[k].name; k++)
+    	if ( stricmp(tokens[k].name,key)==0 ) 
+			return tokens[k].id;
+    return -1;
 }
 
 struct XRCORE_API xr_token2
@@ -115,26 +163,105 @@ IC s64		_abs	(s64 x)			{ return (x>=0)? x : s64(-x); }
 IC s64		_min	(s64 x, s64 y)	{ return y + ((x - y) & ((x - y) >> (sizeof(s64) * 8 - 1))); };
 IC s64		_max	(s64 x, s64 y)	{ return x - ((x - y) & ((x - y) >> (sizeof(s64) * 8 - 1))); };
 
+IC u32							xr_strlen				( const char* S );
+
+#ifndef  _EDITOR
 // string management
-IC char*						strconcat				( char* dest, const char* S1, const char* S2)
+IC LPCSTR						strconcat				( int dest_sz, char* dest, const char* S1, const char* S2)
+{
+	u32 l1 = xr_strlen(S1);
+	strcpy_s(dest,dest_sz,S1);
+	strcat_s(dest,dest_sz-l1,S2);
+	return dest;
+//.	return strcat(strcpy(dest,S1),S2);
+}
+
+// dest = S1+S2+S3
+IC LPCSTR						strconcat				( int dest_sz, char* dest, const char* S1, const char* S2, const char* S3)
+{
+	u32 l1 = xr_strlen(S1);
+	u32 l2 = xr_strlen(S2);
+	strcpy_s(dest,dest_sz,S1);
+	strcat_s(dest,dest_sz-l1,S2);
+	strcat_s(dest,dest_sz-l1-l2,S3);
+
+	return dest;
+//.	return strcat(strcat(strcpy(dest,S1),S2),S3);
+}
+
+// dest = S1+S2+S3+S4
+IC LPCSTR						strconcat				( int dest_sz, char* dest, const char* S1, const char* S2, const char* S3, const char* S4)
+{
+	u32 l1 = xr_strlen(S1);
+	u32 l2 = xr_strlen(S2);
+	u32 l3 = xr_strlen(S3);
+	strcpy_s(dest,dest_sz,S1);
+	strcat_s(dest,dest_sz-l1,S2);
+	strcat_s(dest,dest_sz-l1-l2,S3);
+	strcat_s(dest,dest_sz-l1-l2-l3,S4);
+
+	return dest;
+//.	return strcat(strcat(strcat(strcpy(dest,S1),S2),S3),S4);
+}
+
+// dest = S1+S2+S3+S4+S5
+IC LPCSTR						strconcat				( int dest_sz, char* dest, const char* S1, const char* S2, const char* S3, const char* S4, const char* S5)
+{
+	u32 l1 = xr_strlen(S1);
+	u32 l2 = xr_strlen(S2);
+	u32 l3 = xr_strlen(S3);
+	u32 l4 = xr_strlen(S4);
+	strcpy_s(dest,dest_sz,S1);
+	strcat_s(dest,dest_sz-l1,S2);
+	strcat_s(dest,dest_sz-l1-l2,S3);
+	strcat_s(dest,dest_sz-l1-l2-l3,S4);
+	strcat_s(dest,dest_sz-l1-l2-l3-l4,S5);
+
+	return dest;
+//.	return strcat(strcat(strcat(strcat(strcpy(dest,S1),S2),S3),S4),S5);
+}
+
+// dest = S1+S2+S3+S4+S5+S6
+IC LPCSTR						strconcat				( int dest_sz, char* dest, const char* S1, const char* S2, const char* S3, const char* S4, const char* S5, const char* S6)
+{
+	u32 l1 = xr_strlen(S1);
+	u32 l2 = xr_strlen(S2);
+	u32 l3 = xr_strlen(S3);
+	u32 l4 = xr_strlen(S4);
+	u32 l5 = xr_strlen(S5);
+	strcpy_s(dest,dest_sz,S1);
+	strcat_s(dest,dest_sz-l1,S2);
+	strcat_s(dest,dest_sz-l1-l2,S3);
+	strcat_s(dest,dest_sz-l1-l2-l3,S4);
+	strcat_s(dest,dest_sz-l1-l2-l3-l4,S5);
+	strcat_s(dest,dest_sz-l1-l2-l3-l4-l5,S6);
+
+	return dest;
+	//.	return strcat(strcat(strcat(strcat(strcat(strcpy(dest,S1),S2),S3),S4),S5),S6);
+}
+
+#else
+
+IC char*						strconcat				( int dest_sz,  char* dest, const char* S1, const char* S2)
 {	return strcat(strcpy(dest,S1),S2); }
 
 // dest = S1+S2+S3
-IC char*						strconcat				( char* dest, const char* S1, const char* S2, const char* S3)
+IC char*						strconcat				( int dest_sz,  char* dest, const char* S1, const char* S2, const char* S3)
 {	return strcat(strcat(strcpy(dest,S1),S2),S3); }
 
 // dest = S1+S2+S3+S4
-IC char*						strconcat				( char* dest, const char* S1, const char* S2, const char* S3, const char* S4)
+IC char*						strconcat				( int dest_sz,  char* dest, const char* S1, const char* S2, const char* S3, const char* S4)
 {	return strcat(strcat(strcat(strcpy(dest,S1),S2),S3),S4); }
 
 // dest = S1+S2+S3+S4+S5
-IC char*						strconcat				( char* dest, const char* S1, const char* S2, const char* S3, const char* S4, const char* S5)
+IC char*						strconcat				( int dest_sz,  char* dest, const char* S1, const char* S2, const char* S3, const char* S4, const char* S5)
 {	return strcat(strcat(strcat(strcat(strcpy(dest,S1),S2),S3),S4),S5); }
 
 // dest = S1+S2+S3+S4+S5+S6
-IC char*						strconcat				( char* dest, const char* S1, const char* S2, const char* S3, const char* S4, const char* S5, const char* S6)
+IC char*						strconcat				( int dest_sz,  char* dest, const char* S1, const char* S2, const char* S3, const char* S4, const char* S5, const char* S6)
 {	return strcat(strcat(strcat(strcat(strcat(strcpy(dest,S1),S2),S3),S4),S5),S6); }
 
+#endif
 // return pointer to ".ext"
 IC char*						strext					( const char* S )
 {	return (char*) strrchr(S,'.');	}

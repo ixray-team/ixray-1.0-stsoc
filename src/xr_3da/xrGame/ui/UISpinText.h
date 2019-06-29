@@ -21,8 +21,10 @@ public:
 			void	AddItem_(const char* item, int id);
 			LPCSTR	GetTokenText();
 protected:
-	virtual bool	CanPressUp();
-	virtual bool	CanPressDown();
+	virtual bool	CanPressUp		();
+	virtual bool	CanPressDown	();
+	virtual void	IncVal			(){};
+	virtual void	DecVal			(){};
 			void	SetItem();
 			struct SInfo{
 				shared_str	_orig;

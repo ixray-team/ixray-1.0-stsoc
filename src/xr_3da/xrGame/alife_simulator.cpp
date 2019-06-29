@@ -6,7 +6,7 @@
 //	Description : ALife Simulator
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "alife_simulator.h"
 #include "xrServer_Objects_ALife.h"
 #include "ai_space.h"
@@ -14,11 +14,6 @@
 #include "script_engine.h"
 #include "mainmenu.h"
 #include "object_factory.h"
-
-#pragma warning(push)
-#pragma warning(disable:4995)
-#include <luabind/functor.hpp>
-#pragma warning(pop)
 
 LPCSTR alife_section = "alife";
 
@@ -42,8 +37,8 @@ CALifeSimulator::CALifeSimulator		(xrServer *server, shared_str *command_line) :
 {
 	restart_all					();
 
-	VERIFY						(!ai().get_alife());
 	ai().set_alife				(this);
+
 	setup_command_line			(command_line);
 
 	typedef IGame_Persistent::params params;
@@ -79,6 +74,7 @@ CALifeSimulator::~CALifeSimulator		()
 
 void CALifeSimulator::destroy			()
 {
+//	validate					();
 	CALifeUpdateManager::destroy();
 	VERIFY						(ai().get_alife());
 	ai().set_alife				(0);

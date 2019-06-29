@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "PHSimpleCalls.h"
-#include "script_space.h"
 #include "PhysicsShell.h"
 
 using namespace luabind;

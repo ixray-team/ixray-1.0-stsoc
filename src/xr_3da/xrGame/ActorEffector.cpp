@@ -167,22 +167,6 @@ BOOL CAnimatorCamEffector::Process (Fvector &p, Fvector &d, Fvector &n, float& f
 	return						TRUE;
 }
 
-#include "ai_space.h"
-#include "script_space.h"
-#include "script_engine.h"
-
-BOOL CAnimatorCamEffectorScriptCB::Valid()
-{
-	BOOL res = inherited::Valid();
-	if(!res && cb_name.size() )
-	{
-		luabind::functor<LPCSTR>			fl;
-		R_ASSERT							(ai().script_engine().functor<LPCSTR>(*cb_name,fl));
-		fl									();
-	}
-	return res;
-}
-
 BOOL CAnimatorCamLerpEffector::Process(Fvector &p, Fvector &d, Fvector &n, float& fFov, float& fFar, float& fAspect)
 {
 	if(!inherited::inherited::Process(p,d,n,fFov,fFar,fAspect))	return FALSE;

@@ -6,7 +6,7 @@
 //	Description : Script game object class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_game_object.h"
 #include "script_game_object_impl.h"
 #include "ai_space.h"
@@ -218,14 +218,15 @@ LPCSTR CScriptGameObject::GetPatrolPathName()
 		return			(*stalker->movement().patrol().path_name());
 }
 
-void CScriptGameObject::add_animation			(LPCSTR animation, bool hand_usage)
+void CScriptGameObject::add_animation			(LPCSTR animation, bool hand_usage, bool use_movement_controller)
 {
 	CAI_Stalker			*stalker = smart_cast<CAI_Stalker*>(&object());
 	if (!stalker) {
 		ai().script_engine().script_log		(ScriptStorage::eLuaMessageTypeError,"CGameObject : cannot access class member add_animation!");
 		return;
 	}
-	stalker->animation().add_script_animation(animation,hand_usage);
+	
+	stalker->animation().add_script_animation(animation,hand_usage,use_movement_controller);
 }
 
 void CScriptGameObject::clear_animations		()

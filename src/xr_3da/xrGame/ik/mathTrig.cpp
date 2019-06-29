@@ -106,8 +106,8 @@ int solve_trig1(float a, float b, float c, float theta[2])
         theta[1] = theta[0] - temp;
         theta[0] += temp;
 
-	theta[0] = angle_normalize_signed(theta[0]);
-	theta[1] = angle_normalize_signed(theta[1]);
+	//theta[0] = angle_normalize_signed(theta[0]);
+	//theta[1] = angle_normalize_signed(theta[1]);
     }
     return num;
 }

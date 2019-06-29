@@ -252,7 +252,7 @@ bool CDetailPathManager::build_circle_trajectory(
 		*vertex_id		= curr_vertex_id;
 	else
 		if (path)
-			reverse		(path->begin() + size,path->end());
+			std::reverse(path->begin() + size,path->end());
 
 	return				(true);
 }
@@ -404,7 +404,7 @@ bool CDetailPathManager::compute_path(
 	float						min_time = flt_max, time;
 	u32							size = m_tpTravelLine ? m_tpTravelLine->size() : 0;
 	u32							real_straight_line_index;
-	xr_vector<STravelParamsIndex>::const_iterator I = start_params.begin(), B = I;
+	xr_vector<STravelParamsIndex>::const_iterator I = start_params.begin();
 	xr_vector<STravelParamsIndex>::const_iterator E = start_params.end();
 	for ( ; I != E; ++I) {
 		EDirectionType				direction_type = eDirectionTypePP;
@@ -416,7 +416,7 @@ bool CDetailPathManager::compute_path(
 			direction_type			= EDirectionType(direction_type | eDirectionTypeFN);
 			start.direction.mul		(-1.f);
 		}
-		xr_vector<STravelParamsIndex>::const_iterator i = dest_params.begin(), b = i;
+		xr_vector<STravelParamsIndex>::const_iterator i = dest_params.begin();
 		xr_vector<STravelParamsIndex>::const_iterator e = dest_params.end();
 		for ( ; i != e; ++i) {
 			dest					= _dest;
@@ -520,7 +520,7 @@ bool CDetailPathManager::init_build(
 	straight_line_index					= u32(-1);
 	straight_line_index_negative		= u32(-1);
 	m_start_params.clear				();
-	VELOCITIES::const_iterator			I = m_movement_params.begin(), B = I;
+	VELOCITIES::const_iterator			I = m_movement_params.begin();
 	VELOCITIES::const_iterator			E = m_movement_params.end();
 	for ( ; I != E; ++I) {
 		if (!check_mask(m_velocity_mask,(*I).first))

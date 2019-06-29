@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "zombie.h"
-#include "../../../script_space.h"
 
 using namespace luabind;
 

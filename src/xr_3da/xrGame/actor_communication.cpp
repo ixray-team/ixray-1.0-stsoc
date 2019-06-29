@@ -1,9 +1,5 @@
-// actor_communication.cpp:	 связь по PDA и диалоги
-//////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
-
+#include "pch_script.h"
 #include "actor.h"
-
 #include "UIGameSP.h"
 #include "UI.h"
 #include "PDA.h"
@@ -13,22 +9,15 @@
 #include "PhraseDialog.h"
 #include "character_info.h"
 #include "relation_registry.h"
-
-
 #include "ai_space.h"
 #include "alife_simulator.h"
 #include "alife_registry_container.h"
-
 #include "script_game_object.h"
-
 #include "game_cl_base.h"
-
 #include "xrServer.h"
 #include "xrServer_Objects_ALife_Monsters.h"
 #include "alife_registry_wrappers.h"
-
 #include "map_manager.h"
-
 #include "ui/UIMainIngameWnd.h"
 #include "ui/UIPdaWnd.h"
 #include "ui/UIDiaryWnd.h"
@@ -39,7 +28,6 @@
 #include "GameTaskManager.h"
 #include "GameTaskdefs.h"
 #include "infoportion.h"
-
 #include "ai/monsters/basemonster/base_monster.h"
 #include "ai/trader/ai_trader.h"
 

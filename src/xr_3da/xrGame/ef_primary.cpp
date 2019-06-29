@@ -144,8 +144,8 @@ float CPersonalWeaponTypeFunction::ffGetTheBestWeapon()
 	if (ef_storage().non_alife().member()) {
 		const CInventoryOwner *tpInventoryOwner = smart_cast<const CInventoryOwner*>(ef_storage().non_alife().member());
 		if (tpInventoryOwner) {
-			svector<CInventorySlot,SLOTS_TOTAL>::const_iterator I = tpInventoryOwner->inventory().m_slots.begin();
-			svector<CInventorySlot,SLOTS_TOTAL>::const_iterator E = tpInventoryOwner->inventory().m_slots.end();
+			xr_vector<CInventorySlot>::const_iterator I = tpInventoryOwner->inventory().m_slots.begin();
+			xr_vector<CInventorySlot>::const_iterator E = tpInventoryOwner->inventory().m_slots.end();
 			for ( ; I != E; ++I)
 				if ((*I).m_pIItem) {
 					CWeapon *tpCustomWeapon = smart_cast<CWeapon*>((*I).m_pIItem);

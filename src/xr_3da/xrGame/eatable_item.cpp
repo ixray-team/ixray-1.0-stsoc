@@ -14,6 +14,7 @@
 #include "Level.h"
 #include "entity_alive.h"
 #include "EntityCondition.h"
+#include "InventoryOwner.h"
 
 CEatableItem::CEatableItem()
 {
@@ -67,17 +68,9 @@ bool CEatableItem::Useful() const
 	if(!inherited::Useful()) return false;
 
 	//проверить не все ли еще съедено
-	if(m_iPortionsNum == 0) return false;
+	if(Empty()) return false;
 
 	return true;
-}
-
-void CEatableItem::OnH_A_Independent() 
-{
-	inherited::OnH_A_Independent();
-	if(!Useful()) {
-		if (object().Local() && OnServer())	object().DestroyObject	();
-	}	
 }
 
 void CEatableItem::OnH_B_Independent(bool just_before_destroy)
@@ -94,6 +87,10 @@ void CEatableItem::OnH_B_Independent(bool just_before_destroy)
 
 void CEatableItem::UseBy (CEntityAlive* entity_alive)
 {
+	CInventoryOwner* IO	= smart_cast<CInventoryOwner*>(entity_alive);
+	R_ASSERT		(IO);
+	R_ASSERT		(m_pCurrentInventory==IO->m_inventory);
+	R_ASSERT		(object().H_Parent()->ID()==entity_alive->ID());
 	entity_alive->conditions().ChangeHealth		(m_fHealthInfluence);
 	entity_alive->conditions().ChangePower		(m_fPowerInfluence);
 	entity_alive->conditions().ChangeSatiety	(m_fSatietyInfluence);

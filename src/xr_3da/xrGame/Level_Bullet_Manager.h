@@ -7,7 +7,6 @@
 
 #include "weaponammo.h"
 #include "tracer.h"
-
 //структура, описывающая пулю и ее свойства в полете
 struct SBullet
 {
@@ -189,4 +188,10 @@ public:
 	void					CommitEvents		();	// @ the start of frame
 	void					CommitRenderSet		();	// @ the end of frame
 	void 					Render				();
+};
+
+struct bullet_test_callback_data
+{
+	SBullet*		pBullet;
+	bool			bStopTracing;
 };

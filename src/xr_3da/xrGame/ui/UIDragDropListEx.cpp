@@ -240,7 +240,7 @@ void CUIDragDropListEx::Draw()
 		F->SetHeightI		(0.02f);
 		F->OutSetI			(0.f,-0.5f);
 		F->SetColor			(0xffffffff);
-		Ivector2			pt = m_container->PickCell(GetUICursor()->GetPos());
+		Ivector2			pt = m_container->PickCell(GetUICursor()->GetCursorPosition());
 		F->OutNext			("%d-%d",pt.x, pt.y);
 	};
 
@@ -253,7 +253,7 @@ void CUIDragDropListEx::Update()
 	if( m_drag_item ){
 		Frect	wndRect;
 		GetAbsoluteRect(wndRect);
-		Fvector2 cp			= GetUICursor()->GetPos();
+		Fvector2 cp			= GetUICursor()->GetCursorPosition();
 		if(wndRect.in(cp)){
 			if(NULL==m_drag_item->BackList())
 				m_drag_item->SetBackList(this);

@@ -22,10 +22,21 @@ CALifeSpawnRegistry::CALifeSpawnRegistry	(LPCSTR section)
 {
 	m_spawn_name				= "";
 	seed						(u32(CPU::QPC() & 0xffffffff));
+
+#ifdef PRIQUEL
+	m_game_graph				= 0;
+	m_chunk						= 0;
+	m_file						= 0;
+#endif // PRIQUEL
 }
 
 CALifeSpawnRegistry::~CALifeSpawnRegistry	()
 {
+#ifdef PRIQUEL
+	xr_delete					(m_game_graph);
+	m_chunk->close				();
+	FS.r_close					(m_file);
+#endif // PRIQUEL
 }
 
 void CALifeSpawnRegistry::save				(IWriter &memory_stream)
@@ -61,13 +72,19 @@ void CALifeSpawnRegistry::load				(IReader &file_stream, LPCSTR game_name)
 	chunk->r					(&guid,sizeof(guid));
 	chunk->close				();
 
-	string256					file_name;
-	IReader						*stream;
+	string_path					file_name;
 	bool						file_exists = !!FS.exist(file_name, "$game_spawn$", *m_spawn_name, ".spawn");
 	R_ASSERT3					(file_exists,"Can't find spawn file:",*m_spawn_name);
-	stream						= FS.r_open(file_name);
-	load						(*stream,&guid);
-	FS.r_close					(stream);
+	
+#ifndef PRIQUEL
+	IReader						*m_file = 0;
+#endif // PRIQUEL
+	VERIFY						(!m_file);
+	m_file						= FS.r_open(file_name);
+	load						(*m_file,&guid);
+#ifndef PRIQUEL
+	FS.r_close					(m_file);
+#endif // PRIQUEL
 
 	chunk0->close				();
 }
@@ -76,12 +93,27 @@ void CALifeSpawnRegistry::load				(LPCSTR spawn_name)
 {
 	Msg							("* Loading spawn registry...");
 	m_spawn_name				= spawn_name;
-	string256					file_name;
+	string_path					file_name;
 	R_ASSERT3					(FS.exist(file_name, "$game_spawn$", *m_spawn_name, ".spawn"),"Can't find spawn file:",*m_spawn_name);
-	IReader						*stream = FS.r_open(file_name);
-	load						(*stream);
-	FS.r_close					(stream);
+	
+#ifndef PRIQUEL
+	IReader						*m_file = 0;
+#endif // PRIQUEL
+	VERIFY						(!m_file);
+	m_file						= FS.r_open(file_name);
+	load						(*m_file);
+#ifndef PRIQUEL
+	FS.r_close					(m_file);
+#endif // PRIQUEL
 }
+
+struct dummy {
+    int count;
+    lua_State* state;
+    int ref;
+};
+
+//#include "pch_script.h"
 
 void CALifeSpawnRegistry::load				(IReader &file_stream, xrGUID *save_guid)
 {
@@ -90,11 +122,28 @@ void CALifeSpawnRegistry::load				(IReader &file_stream, xrGUID *save_guid)
 	m_header.load				(*chunk);
 	chunk->close				();
 	R_ASSERT2					(!save_guid || (*save_guid == header().guid()),"Saved game doesn't correspond to the spawn : DELETE SAVED GAME!");
-	R_ASSERT2					(header().graph_guid() == ai().game_graph().header().guid(),"Spawn doesn't correspond to the graph : REBUILD SPAWN!");
 
 	chunk						= file_stream.open_chunk(1);
 	m_spawns.load				(*chunk);
 	chunk->close				();
+
+#if 0
+	SPAWN_GRAPH::vertex_iterator			I = m_spawns.vertices().begin();
+	SPAWN_GRAPH::vertex_iterator			E = m_spawns.vertices().end();
+	for ( ; I != E; ++I) {
+		luabind::wrap_base		*base = smart_cast<luabind::wrap_base*>(&(*I).second->data()->object());
+		if (!base)
+			continue;
+
+		if (xr_strcmp((*I).second->data()->object().name_replace(),"rostok_stalker_outfit"))
+			continue;
+
+		dummy					*_dummy = (dummy*)((void*)base->m_self.m_impl);
+		lua_State				**_state = &_dummy->state;
+		Msg						("0x%08x",*(int*)&_state);
+		break;
+	}
+#endif
 
 	chunk						= file_stream.open_chunk(2);
 	load_data					(m_artefact_spawn_positions,*chunk);
@@ -104,6 +153,18 @@ void CALifeSpawnRegistry::load				(IReader &file_stream, xrGUID *save_guid)
 	R_ASSERT2					(chunk,"Spawn version mismatch - REBUILD SPAWN!");
 	ai().patrol_path_storage	(*chunk);
 	chunk->close				();
+
+#ifdef PRIQUEL
+	VERIFY						(!m_chunk);
+	m_chunk						= file_stream.open_chunk(4);
+	R_ASSERT2					(m_chunk,"Spawn version mismatch - REBUILD SPAWN!");
+
+	VERIFY						(!m_game_graph);
+	m_game_graph				= xr_new<CGameGraph>(*m_chunk);
+	ai().game_graph				(m_game_graph);
+#endif // PRIQUEL
+
+	R_ASSERT2					(header().graph_guid() == ai().game_graph().header().guid(),"Spawn doesn't correspond to the graph : REBUILD SPAWN!");
 
 	build_story_spawns			();
 
@@ -161,7 +222,7 @@ void CALifeSpawnRegistry::build_root_spawns	()
 	process_spawns							(m_temp1);
 	
 	m_spawn_roots.resize					(m_temp0.size() + m_temp1.size());
-	xr_vector<ALife::_SPAWN_ID>::iterator	I = set_difference(
+	xr_vector<ALife::_SPAWN_ID>::iterator	I = std::set_difference(
 		m_temp0.begin(),
 		m_temp0.end(),
 		m_temp1.begin(),

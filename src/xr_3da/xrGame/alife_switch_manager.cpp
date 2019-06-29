@@ -80,8 +80,14 @@ void CALifeSwitchManager::remove_online(CSE_ALifeDynamicObject *object, bool upd
 	m_saved_chidren				= object->children;
 	CSE_ALifeTraderAbstract		*inventory_owner = smart_cast<CSE_ALifeTraderAbstract*>(object);
 	if (inventory_owner) {
-		OBJECT_VECTOR::iterator	I = remove_if(m_saved_chidren.begin(),m_saved_chidren.end(),remove_non_savable_predicate(&server()));
-		m_saved_chidren.erase	(I,m_saved_chidren.end());
+		m_saved_chidren.erase	(
+			std::remove_if(
+				m_saved_chidren.begin(),
+				m_saved_chidren.end(),
+				remove_non_savable_predicate(&server())
+			),
+			m_saved_chidren.end()
+		);
 	}
 
 	server().Perform_destroy	(object,net_flags(TRUE,TRUE));
@@ -126,14 +132,16 @@ bool CALifeSwitchManager::synchronize_location(CSE_ALifeDynamicObject *I)
 	START_PROFILE("ALife/switch/synchronize_location")
 #ifdef DEBUG
 	VERIFY3					(ai().level_graph().level_id() == ai().game_graph().vertex(I->m_tGraphID)->level_id(),*I->s_name,I->name_replace());
-	u32						size = I->children.size();
-	ALife::_OBJECT_ID		*test = (ALife::_OBJECT_ID*)_alloca(size*sizeof(ALife::_OBJECT_ID));
-	Memory.mem_copy			(test,&*I->children.begin(),size*sizeof(ALife::_OBJECT_ID));
-	std::sort				(test,test + size);
-	for (u32 i=1; i<size; ++i) {
-		VERIFY3				(test[i - 1] != test[i],"Child is registered twice in the child list",(*I).name_replace());
+	if (!I->children.empty()) {
+		u32					size = I->children.size();
+		ALife::_OBJECT_ID	*test = (ALife::_OBJECT_ID*)_alloca(size*sizeof(ALife::_OBJECT_ID));
+		Memory.mem_copy		(test,&*I->children.begin(),size*sizeof(ALife::_OBJECT_ID));
+		std::sort			(test,test + size);
+		for (u32 i=1; i<size; ++i) {
+			VERIFY3			(test[i - 1] != test[i],"Child is registered twice in the child list",(*I).name_replace());
+		}
 	}
-#endif
+#endif // DEBUG
 
 	// check if we do not use ai locations
 	if (!I->used_ai_locations())

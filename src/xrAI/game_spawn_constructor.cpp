@@ -17,6 +17,7 @@
 #include "patrol_path_storage.h"
 
 extern LPCSTR GAME_CONFIG;
+extern LPCSTR generate_temp_file_name			(LPCSTR header0, LPCSTR header1, string_path& buffer);
 
 #define NO_MULTITHREADING
 
@@ -45,6 +46,7 @@ IC	shared_str CGameSpawnConstructor::actor_level_name()
 	string256						temp;
 	return							(
 		strconcat(
+			sizeof(temp),
 			temp,
 			*game_graph().header().level(
 				game_graph().vertex(
@@ -55,7 +57,11 @@ IC	shared_str CGameSpawnConstructor::actor_level_name()
 	);
 }
 
-extern void read_levels			(CInifile *ini, xr_set<CLevelInfo> &m_levels, bool rebuild_graph);
+extern void read_levels			(CInifile *ini, xr_set<CLevelInfo> &m_levels, bool rebuild_graph, xr_vector<LPCSTR> *);
+
+#ifdef PRIQUEL
+void fill_needed_levels	(LPSTR levels, xr_vector<LPCSTR> &result);
+#endif // PRIQUEL
 
 void CGameSpawnConstructor::load_spawns	(LPCSTR name, bool no_separator_check)
 {
@@ -71,23 +77,47 @@ void CGameSpawnConstructor::load_spawns	(LPCSTR name, bool no_separator_check)
 	// init patrol path storage
 	m_patrol_path_storage				= xr_new<CPatrolPathStorage>();
 
-	// init game graph
-	string256							game_graph_name;
-	FS.update_path						(game_graph_name,"$game_data$",GRAPH_NAME);
-	m_game_graph						= xr_new<CGameGraph>(game_graph_name);
+#ifdef PRIQUEL
+	xr_vector<LPCSTR>					needed_levels;
+	string4096							levels_string;
+	strcpy								(levels_string,name);
+	strlwr								(levels_string);
+	fill_needed_levels					(levels_string,needed_levels);
+#endif // PRIQUEL
 
 	// fill level info
-	read_levels							(&game_info(),m_levels,false);
+	read_levels							(
+		&game_info(),
+		m_levels,
+		false,
+#ifdef PRIQUEL
+		&needed_levels
+#else // PRIQUEL
+		0
+#endif // PRIQUEL
+	);
+
+	// init game graph
+#ifndef PRIQUEL
+	string_path							game_graph_name;
+	FS.update_path						(game_graph_name,"$game_data$",GRAPH_NAME);
+	m_game_graph						= xr_new<CGameGraph>(game_graph_name);
+#else // PRIQUEL
+	generate_temp_file_name				("game_graph","",m_game_graph_id);
+	xrMergeGraphs						(m_game_graph_id,name,false);
+	m_game_graph						= xr_new<CGameGraph>(m_game_graph_id);
+#endif // PRIQUEL
 
 	// load levels
 	GameGraph::SLevel					level;
-	string256							J;
 	LEVEL_INFO_STORAGE::const_iterator	I = m_levels.begin();
 	LEVEL_INFO_STORAGE::const_iterator	E = m_levels.end();
 	for ( ; I != E; ++I) {
+#ifndef PRIQUEL
 		if (xr_strlen(name)) {
 			u32							N = _GetItemCount(name);
 			bool						found = false;
+			string256					J;
 			for (u32 i=0; i<N; ++i)
 				if (!xr_strcmp(_GetItem(name,i,J),(*I).m_name)) {
 					found				= true;
@@ -96,6 +126,7 @@ void CGameSpawnConstructor::load_spawns	(LPCSTR name, bool no_separator_check)
 			if (!found)
 				continue;
 		}
+#endif // PRIQUEL
 		level.m_offset					= (*I).m_offset;
 		level.m_name					= (*I).m_name;
 		level.m_id						= (*I).m_id;
@@ -195,18 +226,24 @@ void CGameSpawnConstructor::save_spawn				(LPCSTR name, LPCSTR output)
 	save_data						(m_patrol_path_storage,stream);
 	stream.close_chunk				();
 
+#ifdef PRIQUEL
+	stream.open_chunk				(4);
+	m_game_graph->save				(stream);
+	stream.close_chunk				();
+#endif // PRIQUEL
+
 	stream.save_to					(*spawn_name(output));
 }
 
 shared_str CGameSpawnConstructor::spawn_name	(LPCSTR output)
 {
-	string256					file_name;
+	string_path					file_name;
 	if (!output)
 		FS.update_path			(file_name,"$game_spawn$",*actor_level_name());
 	else {
 		actor_level_name		();
-		string256				out;
-		strconcat				(out,output,".spawn");
+		string_path				out;
+		strconcat				(sizeof(out),out,output,".spawn");
 		FS.update_path			(file_name,"$game_spawn$",out);
 	}
 	return						(file_name);
@@ -297,3 +334,36 @@ void CGameSpawnConstructor::process_actor			(LPCSTR start_level_name)
 
 	xr_delete						(graph_engine);
 }
+
+#ifdef PRIQUEL
+void clear_temp_folder	()
+{
+	string_path		query;
+	FS.update_path	(query,"$app_data_root$","temp\\*.*");
+	_finddata_t		file;
+	intptr_t		handle = _findfirst(query, &file);
+	if (handle == intptr_t(-1))
+		return;
+
+	typedef xr_vector<shared_str>	FILES;
+	FILES			files;
+	do {
+		if (file.attrib & _A_SUBDIR)
+			continue;
+
+		files.push_back		(file.name);
+	}
+    while (!_findnext(handle, &file));
+
+	_findclose		(handle);
+
+	FILES::const_iterator	I = files.begin();
+	FILES::const_iterator	E = files.end();
+	for ( ; I != E; ++I) {
+		if (DeleteFile(**I))
+			Msg		("file %s is successfully deleted",**I);
+		else
+			Msg		("cannot delete file %s",**I);
+	}
+}
+#endif // PRIQUEL

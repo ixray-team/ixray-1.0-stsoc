@@ -139,7 +139,7 @@ void	xrLoad			(LPCSTR name, bool draft_mode);
 void	xrBuildNodes	();
 void	xrSmoothNodes	();
 void	xrLight			();
-void	xrCover			();
+void	xrCover			(bool pure_covers);
 void	xrMerge			();
 void	xrConvertAndLink();
 void	xrDisplay		();

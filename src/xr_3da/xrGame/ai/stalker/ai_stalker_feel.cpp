@@ -48,6 +48,9 @@ void CAI_Stalker::renderable_Render	()
 
 void CAI_Stalker::Exec_Look			(float dt)
 {
+	if (animation_movement_controlled())
+		return;
+
 	sight().Exec_Look				(dt);
 }
 

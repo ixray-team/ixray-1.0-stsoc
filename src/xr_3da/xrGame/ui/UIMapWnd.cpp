@@ -21,9 +21,9 @@
 #include <dinput.h>				//remove me !!!
 #include "../../xr_input.h"		//remove me !!!
 
-const				SCROLLBARS_SHIFT			= 5;
-const				VSCROLLBAR_STEP				= 20; // В пикселях
-const				HSCROLLBAR_STEP				= 20; // В пикселях
+const	int			SCROLLBARS_SHIFT			= 5;
+const	int			VSCROLLBAR_STEP				= 20; // В пикселях
+const	int			HSCROLLBAR_STEP				= 20; // В пикселях
 
 static bool			MAP_FLY_MODE				= true;
 
@@ -57,18 +57,18 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 	string512	pth;
 	// load map background
 	CUIXmlInit xml_init;
-	strconcat(pth,start_from,":main_wnd");
+	strconcat(sizeof(pth),pth,start_from,":main_wnd");
 	xml_init.InitWindow				(uiXml, pth, 0, this);
 
 
 
 	m_UIMainFrame					= xr_new<CUIFrameWindow>(); m_UIMainFrame->SetAutoDelete(true);
 	AttachChild						(m_UIMainFrame);
-	strconcat(pth,start_from,":main_wnd:main_map_frame");
+	strconcat(sizeof(pth),pth,start_from,":main_wnd:main_map_frame");
 	xml_init.InitFrameWindow		(uiXml, pth, 0, m_UIMainFrame);
 
 	m_UILevelFrame					= xr_new<CUIWindow>(); m_UILevelFrame->SetAutoDelete(true);
-	strconcat(pth,start_from,":main_wnd:main_map_frame:level_frame");
+	strconcat(sizeof(pth),pth,start_from,":main_wnd:main_map_frame:level_frame");
 	xml_init.InitWindow				(uiXml, pth, 0, m_UILevelFrame);
 	m_UIMainFrame->AttachChild		(m_UILevelFrame);
 
@@ -94,7 +94,7 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 
 	UIMainMapHeader					= xr_new<CUIFrameLineWnd>(); UIMainMapHeader->SetAutoDelete(true);
 	m_UIMainFrame->AttachChild		(UIMainMapHeader);
-	strconcat(pth,start_from,":main_wnd:map_header_frame_line");
+	strconcat(sizeof(pth),pth,start_from,":main_wnd:map_header_frame_line");
 	xml_init.InitFrameLine			(uiXml, pth, 0, UIMainMapHeader);
 
 	ZeroMemory						(m_ToolBar,sizeof(m_ToolBar));
@@ -103,7 +103,7 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 
 	EMapToolBtn		btnIndex;
 	btnIndex		= eGlobalMap;
-	strconcat(pth, sToolbar.c_str(), ":global_map_btn");
+	strconcat(sizeof(pth),pth, sToolbar.c_str(), ":global_map_btn");
 	if(uiXml.NavigateToNode(pth,0)){
 		m_ToolBar[btnIndex]				= xr_new<CUI3tButton>(); m_ToolBar[btnIndex]->SetAutoDelete(true);
 		xml_init.Init3tButton			(uiXml, pth, 0, m_ToolBar[btnIndex]);
@@ -113,7 +113,7 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 	}
 
 	btnIndex		= eActor;
-	strconcat(pth, sToolbar.c_str(), ":actor_btn");
+	strconcat(sizeof(pth),pth, sToolbar.c_str(), ":actor_btn");
 	if(uiXml.NavigateToNode(pth,0)){
 		m_ToolBar[btnIndex]				= xr_new<CUI3tButton>(); m_ToolBar[btnIndex]->SetAutoDelete(true);
 		xml_init.Init3tButton			(uiXml, pth, 0, m_ToolBar[btnIndex]);
@@ -124,7 +124,7 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 
 
 	btnIndex		= eZoomIn;
-	strconcat(pth, sToolbar.c_str(), ":zoom_in_btn");
+	strconcat(sizeof(pth),pth, sToolbar.c_str(), ":zoom_in_btn");
 	if(uiXml.NavigateToNode(pth,0)){
 		m_ToolBar[btnIndex]				= xr_new<CUI3tButton>(); m_ToolBar[btnIndex]->SetAutoDelete(true);
 		xml_init.Init3tButton			(uiXml, pth, 0, m_ToolBar[btnIndex]);
@@ -133,7 +133,7 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 		AddCallback						(*m_ToolBar[btnIndex]->WindowName(),BUTTON_CLICKED,CUIWndCallback::void_function(this, &CUIMapWnd::OnToolZoomInClicked));
 	}
 	btnIndex		= eZoomOut;
-	strconcat(pth, sToolbar.c_str(), ":zoom_out_btn");
+	strconcat(sizeof(pth),pth, sToolbar.c_str(), ":zoom_out_btn");
 	if(uiXml.NavigateToNode(pth,0)){
 		m_ToolBar[btnIndex]				= xr_new<CUI3tButton>(); m_ToolBar[btnIndex]->SetAutoDelete(true);
 		xml_init.Init3tButton			(uiXml, pth, 0, m_ToolBar[btnIndex]);
@@ -172,7 +172,7 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 	}
 */
 	m_text_hint							= xr_new<CUIStatic>();
-	strconcat							(pth,start_from,":main_wnd:text_hint");
+	strconcat							(sizeof(pth),pth,start_from,":main_wnd:text_hint");
 	xml_init.InitStatic					(uiXml, pth, 0, m_text_hint);
 
 	m_hint								= xr_new<CUIMapHint>();
@@ -201,7 +201,7 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 
 	if (gameLtx.section_exist(sect_name.c_str())){
 		CInifile::Sect& S		= gameLtx.r_section(sect_name.c_str());
-		CInifile::SectIt	it	= S.begin(), end = S.end();
+		CInifile::SectCIt	it	= S.Data.begin(), end = S.Data.end();
 		for (;it!=end; it++){
 			shared_str map_name = it->first;
 			xr_strlwr(map_name);
@@ -394,14 +394,14 @@ bool CUIMapWnd::OnKeyboard				(int dik, EUIMessages keyboard_action)
 bool CUIMapWnd::OnMouse(float x, float y, EUIMessages mouse_action)
 {
 	if(inherited::OnMouse(x,y,mouse_action)) return true;
-	Fvector2 cursor_pos = GetUICursor()->GetPos();
+	Fvector2 cursor_pos = GetUICursor()->GetCursorPosition();
 
 	if(GlobalMap() && !GlobalMap()->Locked() && ActiveMapRect().in( cursor_pos ) ){
 		switch (mouse_action)
 		{
 		case WINDOW_MOUSE_MOVE:
 			if( pInput->iGetAsyncBtnState(0) ){
-				GlobalMap()->MoveWndDelta	(GetUICursor()->GetPosDelta());
+				GlobalMap()->MoveWndDelta	(GetUICursor()->GetCursorPositionDelta());
 				UpdateScroll					();
 				m_hint->SetOwner				(NULL);
 				return							true;
@@ -721,7 +721,8 @@ bool is_in(const Frect& b1, const Frect& b2){
 void CUIMapWnd::ShowHint					(CUIWindow* parent, LPCSTR text)
 {
 	if(m_hint->GetOwner())	return;
-	Fvector2 c_pos			= GetUICursor()->GetPos();
+	if(!text)				return;
+	Fvector2 c_pos			= GetUICursor()->GetCursorPosition();
 	Frect vis_rect			= ActiveMapRect				();
 	if(FALSE==vis_rect.in(c_pos)) return;
 

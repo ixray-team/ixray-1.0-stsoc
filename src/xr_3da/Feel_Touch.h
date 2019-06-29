@@ -7,12 +7,13 @@ namespace Feel
 {
 	class ENGINE_API Touch: private pure_relcase
 	{
-	private:
+	public:
 		struct DenyTouch
 		{
 			CObject*	O;
 			DWORD		Expire;
 		};
+	protected:
 		xr_vector<DenyTouch>	feel_touch_disable;
 
 	public:

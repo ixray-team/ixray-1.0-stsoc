@@ -134,8 +134,8 @@ void CGameGraphBuilder::load_graph_points	(const float &start, const float &amou
 
 	Msg						("Loading graph points");
 
-	string256				spawn_file_name;
-	strconcat				(spawn_file_name,*m_level_name,"level.spawn");
+	string_path				spawn_file_name;
+	strconcat				(sizeof(spawn_file_name),spawn_file_name,*m_level_name,"level.spawn");
 	IReader					*reader = FS.r_open(spawn_file_name);
 	u32						id;
 	NET_Packet				net_packet;
@@ -355,9 +355,13 @@ void CGameGraphBuilder::save_cross_table	(const float &start, const float &amoun
 //	Msg						("CT:SAVE : %f",timer.GetElapsed_sec());
 //	Msg						("Flushing cross table");
 
+#ifdef PRIQUEL
+	tMemoryStream.save_to	(m_cross_table_name);
+#else // PRIQUEL
 	string_path				file_name;
-	strconcat				(file_name,*m_level_name,CROSS_TABLE_NAME_RAW);
+	strconcat				(sizeof(file_name), file_name,*m_level_name,CROSS_TABLE_NAME_RAW);
 	tMemoryStream.save_to	(file_name);
+#endif // PRIQUEL
 //	Msg						("CT:SAVE : %f",timer.GetElapsed_sec());
 
 //	Msg						("Freiing cross table resources");
@@ -401,11 +405,19 @@ void CGameGraphBuilder::load_cross_table	(const float &start, const float &amoun
 
 	Msg						("Loading cross table");
 
+#ifndef PRIQUEL
 	string_path				file_name;
-	strconcat				(file_name,*m_level_name,CROSS_TABLE_NAME_RAW);
+	strconcat				(sizeof(file_name), file_name,*m_level_name,CROSS_TABLE_NAME_RAW);
+#endif // PRIQUEL
 
 	VERIFY					(!m_cross_table);
-	m_cross_table			= xr_new<CGameLevelCrossTable>(file_name);
+	m_cross_table			= xr_new<CGameLevelCrossTable>(
+#ifdef PRIQUEL
+		m_cross_table_name
+#else // PRIQUEL
+		file_name
+#endif // PRIQUEL
+	);
 
 	Progress				(start + amount);
 }
@@ -688,9 +700,13 @@ void CGameGraphBuilder::save_graph			(const float &start, const float &amount)
 		}
 	}
 
+#ifdef PRIQUEL
+	writer.save_to				(m_graph_name);
+#else // PRIQUEL
 	string_path					file_name;
-	strconcat					(file_name,*m_level_name,GAME_LEVEL_GRAPH);
+	strconcat					(sizeof(file_name),file_name,*m_level_name,GAME_LEVEL_GRAPH);
 	writer.save_to				(file_name);
+#endif // PRIQUEL
 	Msg							("%d bytes saved",int(writer.size()));
 
 	Progress					(start + amount);
@@ -726,11 +742,21 @@ void CGameGraphBuilder::build_graph			(const float &start, const float &amount)
 	Progress				(start + amount);
 }
 
-void CGameGraphBuilder::build_graph			(LPCSTR level_name)
+void CGameGraphBuilder::build_graph			(
+#ifdef PRIQUEL
+		LPCSTR graph_name,
+		LPCSTR cross_table_name,
+#endif // PRIQUEL
+		LPCSTR level_name
+	)
 {
 	Phase					("Building level game graph");
 	Msg						("level \"%s\"",level_name);
 
+#ifdef PRIQUEL
+	m_graph_name			= graph_name;
+	m_cross_table_name		= cross_table_name;
+#endif // PRIQUEL
 	m_level_name			= level_name;
 	
 //	CTimer					timer;

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <theora/theora.h>
+#include "../xrCore/Stream_Reader.h"
 
 class ENGINE_API CTheoraStream{
 	friend	class		CTheoraSurface;
@@ -14,8 +15,11 @@ class ENGINE_API CTheoraStream{
 	theora_comment		t_comment;
 	theora_state		t_state;
 
+#ifdef _EDITOR
+	IReader		        *source;
+#else
 	CStreamReader		*source;
-
+#endif
 	yuv_buffer			t_yuv_buffer;
 
 	ogg_int64_t			d_frame;

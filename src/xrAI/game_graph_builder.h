@@ -38,8 +38,16 @@ private:
 	typedef std::pair<float,PAIR>					TRIPPLE;
 	typedef xr_vector<TRIPPLE>						TRIPPLES;
 
+#ifdef PRIQUEL
+private:
+	LPCSTR					m_graph_name;
+	LPCSTR					m_cross_table_name;
+#endif // PRIQUEL
+
 private:
 	shared_str				m_level_name;
+
+private:
 	CLevelGraph				*m_level_graph;
 	graph_type				*m_graph;
 	xrGUID					m_graph_guid;
@@ -92,7 +100,13 @@ private:
 public:
 						CGameGraphBuilder			();
 						~CGameGraphBuilder			();
-			void		build_graph					(LPCSTR level_name);
+			void		build_graph					(
+#ifdef PRIQUEL
+							LPCSTR graph_name,
+							LPCSTR cross_table_name,
+#endif // PRIQUEL
+							LPCSTR level_name
+						);
 };
 
 #include "game_graph_builder_inline.h"

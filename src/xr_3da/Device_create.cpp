@@ -68,10 +68,14 @@ void CRenderDevice::_Create	(LPCSTR shName)
 	Resources->OnDeviceCreate	(shName);
 	::Render->create			();
 	Statistic->OnDeviceCreate	();
+
+#ifndef DEDICATED_SERVER
 	m_WireShader.create			("editor\\wire");
 	m_SelectionShader.create	("editor\\selection");
 
 	DU.OnDeviceCreate			();
+#endif
+
 	dwFrame						= 0;
 }
 
@@ -95,7 +99,7 @@ void CRenderDevice::Create	()
 	fFOV				= 90.f;
 	fASPECT				= 1.f;
 
-	string256			fname; 
+	string_path			fname; 
 	FS.update_path		(fname,"$game_data$","shaders.xr");
 
 	//////////////////////////////////////////////////////////////////////////

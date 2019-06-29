@@ -137,7 +137,7 @@ void CUISleepWnd::SetRestTime(u8 hours, u8 minutes)
 	m_Hours						= hours;
 	if(m_Hours>=_h)				m_Minutes = 0;
 	clamp						(m_Hours,s8(0),_h);
-	sprintf						(buf, "%02i:%02i", m_Hours, m_Minutes);
+	sprintf_s						(buf, "%02i:%02i", m_Hours, m_Minutes);
 	UIStaticRestAmount->SetText	(buf);
 }
 

@@ -6,7 +6,7 @@
 //	Description : Sound memory manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "sound_memory_manager.h"
 #include "memory_manager.h"
 #include "hit_memory_manager.h"
@@ -23,6 +23,7 @@
 #include "profiler.h"
 #include "client_spawn_manager.h"
 #include "memory_manager.h"
+#include "../IGame_Persistent.h"
 
 #ifndef MASTER_GOLD
 #	include "clsid_game.h"
@@ -306,10 +307,14 @@ void CSoundMemoryManager::update()
 	clear_delayed_objects		();
 
 	VERIFY						(m_sounds);
-	{
-		xr_vector<CSoundObject>::iterator	I = remove_if(m_sounds->begin(),m_sounds->end(),CRemoveOfflinePredicate());
-		m_sounds->erase						(I,m_sounds->end());
-	}
+	m_sounds->erase				(
+		std::remove_if(	
+			m_sounds->begin(),
+			m_sounds->end(),
+			CRemoveOfflinePredicate()
+		),
+		m_sounds->end()
+	);
 
 #ifdef USE_SELECTED_SOUND
 	xr_delete					(m_selected_sound);
@@ -470,7 +475,8 @@ void CSoundMemoryManager::load	(IReader &packet)
 
 		const CClientSpawnManager::CSpawnCallback	*spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id,m_object->ID());
 		if (!spawn_callback || !spawn_callback->m_object_callback)
-			Level().client_spawn_manager().add	(delayed_object.m_object_id,m_object->ID(),callback);
+			if(!g_dedicated_server)
+				Level().client_spawn_manager().add	(delayed_object.m_object_id,m_object->ID(),callback);
 #ifdef DEBUG
 		else {
 			if (spawn_callback && spawn_callback->m_object_callback) {

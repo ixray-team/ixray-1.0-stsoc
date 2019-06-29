@@ -38,8 +38,9 @@ void setup_location_types_section(GameGraph::TERRAIN_VECTOR &m_vertex_types, CIn
 	GameGraph::STerrainPlace		terrain_mask;
 	terrain_mask.tMask.resize		(GameGraph::LOCATION_TYPE_COUNT);
 
-	CInifile::SectIt				I = ini->r_section(section).begin();
-	CInifile::SectIt				E = ini->r_section(section).end();
+	CInifile::Sect& sect			= ini->r_section(section);
+	CInifile::SectCIt				I = sect.Data.begin();
+	CInifile::SectCIt				E = sect.Data.end();
 	for ( ; I != E; ++I) {
 		LPCSTR						S = *(*I).first;
 		string16					I;
@@ -136,8 +137,8 @@ CSE_ALifeTraderAbstract::CSE_ALifeTraderAbstract(LPCSTR caSection)
 CSE_Abstract *CSE_ALifeTraderAbstract::init	()
 {
 	string4096					S;
-	//sprintf						(S,"%s\r\n[game_info]\r\nname_id = default\r\n",!*base()->m_ini_string ? "" : *base()->m_ini_string);
-	sprintf						(S,"%s\r\n[game_info]\r\n",!*base()->m_ini_string ? "" : *base()->m_ini_string);
+	//sprintf_s						(S,"%s\r\n[game_info]\r\nname_id = default\r\n",!*base()->m_ini_string ? "" : *base()->m_ini_string);
+	sprintf_s						(S,"%s\r\n[game_info]\r\n",!*base()->m_ini_string ? "" : *base()->m_ini_string);
 	base()->m_ini_string		= S;
 
 	return						(base());
@@ -409,8 +410,8 @@ void CSE_ALifeTraderAbstract::set_specific_character	(shared_str new_spec_char)
 		//select name and lastname
 		xr_string subset			= m_character_name.c_str()+xr_strlen(gen_name);
 
-		string32					t1;
-		strconcat					(t1,"stalker_names_",subset.c_str());
+		string_path					t1;
+		strconcat					(sizeof(t1),t1,"stalker_names_",subset.c_str());
 		u32 name_cnt				= pSettings->r_u32(t1, "name_cnt");
 		u32 last_name_cnt			= pSettings->r_u32(t1, "last_name_cnt");
 		
@@ -665,13 +666,13 @@ void CSE_ALifeCustomZone::STATE_Write	(NET_Packet	&tNetPacket)
 void CSE_ALifeCustomZone::UPDATE_Read	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Read		(tNetPacket);
-	tNetPacket.r_u32			(m_owner_id);
+//	tNetPacket.r_u32			(m_owner_id);
 }
 
 void CSE_ALifeCustomZone::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
-	tNetPacket.w_u32			(m_owner_id);
+//	tNetPacket.w_u32			(m_owner_id);
 }
 
 //xr_token TokenAnomalyType[]={
@@ -1145,7 +1146,9 @@ CSE_ALifeMonsterAbstract::CSE_ALifeMonsterAbstract(LPCSTR caSection)	: CSE_ALife
 
 	m_rank						= (pSettings->line_exist(caSection,"rank")) ? pSettings->r_s32(caSection,"rank") : 0;
 
+#ifdef XRGAME_EXPORTS
 	m_stay_after_death_time_interval	= generate_time(1,1,1,pSettings->r_u32("monsters_common","stay_after_death_time_interval"),0,0);
+#endif // XRGAME_EXPORTS
 }
 
 CSE_ALifeMonsterAbstract::~CSE_ALifeMonsterAbstract()
@@ -1266,6 +1269,7 @@ bool CSE_ALifeMonsterAbstract::need_update	(CSE_ALifeDynamicObject *object)
 ////////////////////////////////////////////////////////////////////////////
 // CSE_ALifeCreatureActor
 ////////////////////////////////////////////////////////////////////////////
+
 CSE_ALifeCreatureActor::CSE_ALifeCreatureActor	(LPCSTR caSection) : CSE_ALifeCreatureAbstract(caSection), CSE_ALifeTraderAbstract(caSection),CSE_PHSkeleton(caSection)
 {
 	if (pSettings->section_exist(caSection) && pSettings->line_exist(caSection,"visual"))
@@ -1918,9 +1922,6 @@ void CSE_ALifeOnlineOfflineGroup::STATE_Read				(NET_Packet &tNetPacket, u16 siz
 
 #if 1
 	u32							container_size = tNetPacket.r_u32();
-
-	MEMBERS::iterator			I = m_members.begin();
-	MEMBERS::iterator			E = m_members.end();
 	for (u32 i=0; i<container_size; ++i) {
 		MEMBERS::value_type		pair;
 		load_data				(pair.first,tNetPacket);

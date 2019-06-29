@@ -11,18 +11,21 @@
 // #define USE_SJITTER
 // #define USE_SUNFILTER
 //
-// #define USE_MBLUR                //- HW-options defined
-// #define USE_HWSMAP                //- HW-options defined
-// #define USE_BRANCHING        //- HW-options defined
-// #define USE_VTF                //- HW-options defined, VertexTextureFetch
-// #define FP16_FILTER                //- HW-options defined
-// #define FP16_BLEND                //- HW-options defined
+// #define USE_MBLUR                	//- HW-options defined
+// #define USE_HWSMAP                	//- HW-options defined
+
+// #define USE_HWSMAP_PCF				//- nVidia GF3+, R600+
+
+// #define USE_BRANCHING        		//- HW-options defined
+// #define USE_VTF                		//- HW-options defined, VertexTextureFetch
+// #define FP16_FILTER                	//- HW-options defined
+// #define FP16_BLEND                	//- HW-options defined
 //
-// #define USE_PARALLAX                //- shader defined
-// #define USE_TDETAIL                //- shader defined
-// #define USE_LM_HEMI                //- shader defined
-// #define USE_DISTORT                //- shader defined
-#define USE_SUNMASK                //- shader defined
+// #define USE_PARALLAX                	//- shader defined
+// #define USE_TDETAIL                	//- shader defined
+// #define USE_LM_HEMI                	//- shader defined
+// #define USE_DISTORT                	//- shader defined
+#define USE_SUNMASK                		//- shader defined
 //#define DBG_TMAPPING
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef SMAP_size
@@ -60,7 +63,7 @@ float3         calc_reflection     (float3 pos_w, float3 norm_w)
 
 float3        calc_sun_r1                (float3 norm_w)    { return L_sun_color*saturate(dot((norm_w),-L_sun_dir_w));                 }
 float3        calc_model_hemi_r1         (float3 norm_w)    { return max(0,norm_w.y)*L_hemi_color;                                         }
-float3        calc_model_lq_lighting     (float3 norm_w)        { return L_material.x*calc_model_hemi_r1(norm_w) + L_ambient + L_material.y*calc_sun_r1(norm_w);         }
+float3        calc_model_lq_lighting     (float3 norm_w)    { return L_material.x*calc_model_hemi_r1(norm_w) + L_ambient + L_material.y*calc_sun_r1(norm_w);         }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 struct         v_static                {
@@ -214,7 +217,6 @@ uniform sampler2D       s_dn_a;                	//
 uniform sampler2D       s_depth;                //
 uniform sampler2D       s_position;             //
 uniform sampler2D       s_normal;               //
-uniform sampler         s_smap;             	// 2D/cube shadowmap
 uniform sampler         s_lmap;             	// 2D/cube projector lightmap
 uniform sampler3D       s_material;             //
 uniform sampler1D       s_attenuate;        	//
@@ -233,8 +235,8 @@ uniform sampler2D       s_tonemap;              // actually MidleGray / exp(Lw +
 #define def_dbumph      half(0.333f)
 #define def_virtualh    half(.05f)              // 5cm
 #define def_distort     half(0.05f)             // we get -0.5 .. 0.5 range, this is -512 .. 512 for 1024, so scale it
-#define def_hdr         half(3.h)         		// hight luminance range half(3.h)
-#define def_hdr_clip	half(0.75h)        		// 
+#define def_hdr         half(8.h)         		// hight luminance range half(3.h)
+#define def_hdr_clip	half(0.75h)        		//
 
 //////////////////////////////////////////////////////////////////////////////////////////
 #define	LUMINANCE_VECTOR                 half3(0.3f, 0.48f, 0.22f)

@@ -57,12 +57,12 @@ protected:
 	void				InitTalkDialog			();
 	void				AskQuestion				();
 
-	void				SayPhrase				(int phrase_id);
+	void				SayPhrase				(const shared_str& phrase_id);
 
 	// Функции добавления строк в листы вопросов и ответов
 public:
-	void				AddQuestion				(LPCSTR text, int value = 0);
-	void				AddAnswer				(LPCSTR text, const char* SpeakerName);
+	void				AddQuestion				(const shared_str& text, const shared_str& id);
+	void				AddAnswer				(const shared_str& text, LPCSTR SpeakerName);
 protected:
 	//для режима торговли
 	CUITradeWnd*			UITradeWnd;

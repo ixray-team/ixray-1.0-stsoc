@@ -127,9 +127,9 @@ void CEnvDescriptor::load	(LPCSTR exec_tm, LPCSTR S, CEnvironment* parent)
 	R_ASSERT3				((tm.x>=0)&&(tm.x<24)&&(tm.y>=0)&&(tm.y<60)&&(tm.z>=0)&&(tm.z<60),"Incorrect weather time",S);
 	exec_time				= tm.x*3600.f+tm.y*60.f+tm.z;
 	exec_time_loaded		= exec_time;
-	string_path	st,st_env;
-	strcpy					(st,pSettings->r_string	(S,"sky_texture"));
-	strconcat				(st_env,st,"#small"		);
+	string_path				st,st_env;
+	strcpy_s					(st,pSettings->r_string	(S,"sky_texture"));
+	strconcat				(sizeof(st_env),st_env,st,"#small"		);
 	sky_texture_name		= st;
 	sky_texture_env_name	= st_env;
 	clouds_texture_name		= pSettings->r_string	(S,"clouds_texture");

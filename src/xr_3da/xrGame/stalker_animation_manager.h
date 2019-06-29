@@ -110,7 +110,7 @@ private:
 			MotionID				assign_head_animation	();
 			MotionID				assign_torso_animation	();
 			MotionID				assign_legs_animation	();
-			MotionID				assign_script_animation	();
+	const CStalkerAnimationScript	&assign_script_animation() const;
 
 public:
 	IC		bool					non_script_need_update	() const;
@@ -149,7 +149,7 @@ public:
 			void 					play_delayed_callbacks	();
 
 public:
-			void					add_script_animation	(LPCSTR animation, bool hand_usage = false);
+			void					add_script_animation	(LPCSTR animation, bool hand_usage = false, bool use_movement_controller = false);
 	IC		void					clear_script_animations	();
 	IC		void					pop_script_animation	();
 	IC		const SCRIPT_ANIMATIONS	&script_animations		() const;

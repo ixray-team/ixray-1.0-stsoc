@@ -122,12 +122,14 @@ class best_object_predicate2 {
 	Fvector enemy_pos;
 	Fvector monster_pos;
 public:
+	typedef CObject*	CObject_ptr;
+
 	best_object_predicate2(const Fvector &m_pos, const Fvector &pos) {
 		monster_pos = m_pos;
 		enemy_pos	= pos;
 	}
 
-	bool operator()	 (const CObject *tpObject1, const CObject *tpObject2) const
+	bool operator()	 (const CObject_ptr &tpObject1, const CObject_ptr &tpObject2) const
 	{
 		float dist1 = enemy_pos.distance_to(tpObject1->Position());
 		float dist2 = enemy_pos.distance_to(tpObject2->Position());
@@ -211,11 +213,16 @@ bool CPolterTele::tele_raise_objects()
 	tele_find_objects	(tele_objects, pos);	
 
 	// сортировать и оставить только необходимое количество объектов
-	sort(tele_objects.begin(),tele_objects.end(),best_object_predicate2(m_object->Position(), Actor()->Position()));
+	std::sort(tele_objects.begin(),tele_objects.end(),best_object_predicate2(m_object->Position(), Actor()->Position()));
 	
 	// оставить уникальные объекты
-	xr_vector<CObject*>::iterator I = unique(tele_objects.begin(),tele_objects.end());
-	tele_objects.erase(I,tele_objects.end());
+	tele_objects.erase	(
+		std::unique(
+			tele_objects.begin(),
+			tele_objects.end()
+		),
+		tele_objects.end()
+	);
 
 	// оставить необходимое количество объектов
 	//if (tele_objects.size() > m_pmt_tele_object_count) tele_objects.resize	(m_pmt_tele_object_count);

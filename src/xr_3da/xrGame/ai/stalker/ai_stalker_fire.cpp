@@ -6,7 +6,7 @@
 //	Description : Fire and enemy parameters for monster "Stalker"
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "ai_stalker.h"
 #include "ai_stalker_impl.h"
 #include "../../script_entity_action.h"
@@ -46,10 +46,10 @@
 #include "../../stalker_animation_names.h"
 #include "../../agent_corpse_manager.h"
 #include "../../CharacterPhysicsSupport.h"
-
 #include "../../stalker_planner.h"
 #include "../../stalker_decision_space.h"
 #include "../../script_game_object.h"
+#include "../../inventory.h"
 
 using namespace StalkerSpace;
 
@@ -124,7 +124,7 @@ void CAI_Stalker::g_fireParams(const CHudItem* pHudItem, Fvector& P, Fvector& D)
 		return;
 	}
 
-	if (!g_Alive()) {
+	if (!g_Alive() || !animation().script_animations().empty()) {
 		P				= weapon->get_LastFP();
 		D				= weapon->get_LastFD();
 		VERIFY			(!fis_zero(D.square_magnitude()));
@@ -177,20 +177,17 @@ void CAI_Stalker::g_WeaponBones	(int &L, int &R1, int &R2)
 	CObjectHandler::weapon_bones(r_hand, r_finger2, l_finger1);
 	R1				= r_hand;
 	R2				= r_finger2;
-	if	(
-			(GetCurrentAction() && !GetCurrentAction()->m_tAnimationAction.m_bHandUsage) ||
-			(!animation().script_animations().empty() && animation().script_animations().front().hand_usage())
-		)
-	{
-			L		= R2;
-	}
-	else {
+	if (!animation().script_animations().empty() && animation().script_animations().front().hand_usage())
+		L			= R2;
+	else
 		L			= l_finger1;
-	}
 }
 
 void			CAI_Stalker::Hit					(SHit* pHDS)
 {
+	if (invulnerable())
+		return;
+
 //	pHDS->power						*= .1f;
 
 	//хит может меняться в зависимости от ранга (новички получают больше хита, чем ветераны)
@@ -255,9 +252,9 @@ void			CAI_Stalker::Hit					(SHit* pHDS)
 					pHDS->_dump			();
 				}
 	#endif
-				int						fx_index = iFloor(tpKinematics->LL_GetBoneInstance(pHDS->bone()).get_param(1) + (angle_difference(movement().m_body.current.yaw,-yaw) <= PI_DIV_2 ? 0 : 1));
-				if (fx_index != -1)
-					animation().play_fx	(power_factor,fx_index);
+//				int						fx_index = iFloor(tpKinematics->LL_GetBoneInstance(pHDS->bone()).get_param(1) + (angle_difference(movement().m_body.current.yaw,-yaw) <= PI_DIV_2 ? 0 : 1));
+//				if (fx_index != -1)
+//					animation().play_fx	(power_factor,fx_index);
 			}
 			else {
 				if (!already_critically_wounded && became_critically_wounded) {
@@ -366,7 +363,7 @@ void CAI_Stalker::update_best_item_info	()
 				}
 
 				VERIFY					(fsimilar(value,m_best_item_value));
-				if ((*I)->object().ef_weapon_type() <= m_best_item_to_kill->object().ef_weapon_type())
+				if (m_best_item_to_kill && ((*I)->object().ef_weapon_type() <= m_best_item_to_kill->object().ef_weapon_type()))
 					continue;
 
 				m_best_item_value		= value;
@@ -987,4 +984,20 @@ void CAI_Stalker::on_enemy_wounded_or_killed	(const CAI_Stalker *wounded_or_kill
 		return;
 
 	sound().play					(eStalkerSoundEnemyKilledOrWounded);
+}
+
+bool CAI_Stalker::can_kill_member							()
+{
+	if (!animation().script_animations().empty())
+		return				(false);
+
+	update_can_kill_info	();
+	return					(m_can_kill_member);
+}
+
+bool CAI_Stalker::can_kill_enemy							()
+{
+	VERIFY					(inventory().ActiveItem());
+	update_can_kill_info	();
+	return					(m_can_kill_enemy);
 }

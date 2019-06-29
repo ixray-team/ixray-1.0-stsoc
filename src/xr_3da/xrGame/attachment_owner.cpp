@@ -42,8 +42,8 @@ void CAttachmentOwner::net_Destroy()
 #ifdef DEBUG
 	if (!attached_objects().empty()) {
 		Msg						("Object %s has attached items :",*smart_cast<CGameObject*>(this)->cName());
-		xr_vector<CAttachableItem*>::const_iterator	I = attached_objects().begin();
-		xr_vector<CAttachableItem*>::const_iterator	E = attached_objects().end();
+//		xr_vector<CAttachableItem*>::const_iterator	I = attached_objects().begin();
+//		xr_vector<CAttachableItem*>::const_iterator	E = attached_objects().end();
 //		for ( ; I != E; ++I)
 //			Msg					("* %s",*(*I)->item().object().cName());
 	}
@@ -192,7 +192,7 @@ CAttachableItem* CAttachmentOwner::attachedItem			(shared_str& section) const
 	xr_vector<CAttachableItem*>::const_iterator	I = m_attached_objects.begin();
 	xr_vector<CAttachableItem*>::const_iterator	E = m_attached_objects.end();
 	for ( ; I != E; ++I)
-		if (!xr_strcmp((*I)->item().object().cNameSect(), section) && !(*I)->item().GetDrop())
+		if (!xr_strcmp((*I)->item().object().cNameSect(), section) && !(*I)->item().IsInvalid())
 			return		(*I);
 
 	return				NULL;

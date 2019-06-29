@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "uber_deffer.h"
+#include "..\xrRender\uber_deffer.h"
 #include "Blender_deffer_aref.h"
 
 CBlender_deffer_aref::CBlender_deffer_aref	(bool _lmapped) : lmapped(_lmapped)	{	

@@ -142,6 +142,14 @@ void	CPHObject::reinit_single()
 	ContactFeedBacks.empty();
 	ContactEffectors.empty();
 }
+
+void	CPHObject::		step_prediction	(float time)
+{
+	//general idea:
+	//perform normal step by time as local as possible for this object then return world to 
+	//the pervious state
+
+}
 bool	CPHObject::step_single(dReal	step)
 {
 	

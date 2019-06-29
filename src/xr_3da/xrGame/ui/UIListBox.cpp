@@ -67,10 +67,9 @@ void CUIListBox::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 	{
 		switch (msg){
 			case LIST_ITEM_SELECT:	
-				GetMessageTarget()->SendMessage(this, LIST_ITEM_SELECT, pData);
-				break;
 			case LIST_ITEM_CLICKED:
-				GetMessageTarget()->SendMessage(this, LIST_ITEM_CLICKED, pData);
+			case LIST_ITEM_DB_CLICKED:
+				GetMessageTarget()->SendMessage(this, msg, pData);
 				break;
 			case LIST_ITEM_FOCUS_RECEIVED:
 				if (m_bImmediateSelection)
@@ -183,24 +182,24 @@ void CUIListBox::SetSelectedIDX(u32 idx)
 	SetSelected(GetItemByIDX(idx));
 }
 
-void CUIListBox::SetSelected(u32 uid)
+void CUIListBox::SetSelectedTAG(u32 tag_val)
 {
-	SetSelected(GetItemByID(uid));
+	SetSelected(GetItemByTAG(tag_val));
 }
 
-void CUIListBox::SetSelected(LPCSTR txt)
+void CUIListBox::SetSelectedText(LPCSTR txt)
 {
 	SetSelected(GetItemByText(txt));
 }
 
-CUIListBoxItem* CUIListBox::GetItemByID(u32 uid)
+CUIListBoxItem* CUIListBox::GetItemByTAG(u32 tag_val)
 {
 	for(WINDOW_LIST_it it = m_pad->GetChildWndList().begin(); m_pad->GetChildWndList().end()!=it; ++it)
 	{
 		CUIListBoxItem* item = smart_cast<CUIListBoxItem*>(*it);
 		if (item)
 		{
-			if (item->GetID() == uid)
+			if (item->GetTAG() == tag_val)
 				return item;
 		}
 		

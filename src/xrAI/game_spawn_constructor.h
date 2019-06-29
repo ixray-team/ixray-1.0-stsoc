@@ -31,7 +31,7 @@ public:
 	typedef xr_vector<CLevelSpawnConstructor*>										LEVEL_SPAWN_STORAGE;
 	typedef xr_set<CLevelInfo>														LEVEL_INFO_STORAGE;
 
-private:
+public:
 	struct CSpawnHeader {
 		u32							m_version;
 		xrGUID						m_guid;
@@ -64,7 +64,12 @@ private:
 	CInifile						*m_game_info;
 	CSE_ALifeCreatureAbstract		*m_actor;
 
-protected:
+#ifdef PRIQUEL
+private:
+	string_path						m_game_graph_id;
+#endif // PRIQUEL
+
+private:
 	IC		shared_str				actor_level_name		();
 	IC		shared_str				spawn_name				(LPCSTR output);
 			void					save_spawn				(LPCSTR name, LPCSTR output);
@@ -87,7 +92,7 @@ public:
 	IC		void					add_level_changer		(CSE_ALifeLevelChanger *level_changer);
 	IC		void					add_level_points		(const LEVEL_POINT_STORAGE &level_points);
 	IC		u32						level_id				(LPCSTR level_name);
-	IC		const CGameGraph		&game_graph				();
+	IC		CGameGraph				&game_graph				() const;
 	IC		CInifile				&game_info				();
 	IC		void					add_edge				(ALife::_SPAWN_ID id0, ALife::_SPAWN_ID id1, float weight);
 	IC		u32						level_point_count		() const;

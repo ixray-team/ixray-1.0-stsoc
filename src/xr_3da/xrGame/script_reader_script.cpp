@@ -6,10 +6,8 @@
 //	Description : Script reader
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_reader.h"
-#include "script_space.h"
-#include <luabind/operator.hpp>
 
 using namespace luabind;
 

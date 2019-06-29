@@ -114,25 +114,28 @@ static int solve_R_angle(const float g[3],
 
     if (n == 2)
     {
-	// Two positive solutions. choose first
-	if (temp[0] < 0 && temp[1] < 0)
-	{
-	    r_angle = temp[0];
-	    // printf("Two solutions: %lf %lf\n", temp[0], temp[1]);
-	    n = 1;
-	}
-	else if (temp[0] < 0)
-	{
-	    n = 1;
-	    r_angle = temp[0];
-	}
-	else if (temp[1] < 0)
-	{
-	    n = 1;
-	    r_angle = temp[1];
-	}
-	else
-	    n = 0;
+		// Two positive solutions. choose first
+		if (temp[0] < 0 && temp[1] < 0)
+		{
+			r_angle = temp[0];
+			// printf("Two solutions: %lf %lf\n", temp[0], temp[1]);
+			n = 1;
+		}
+		else if (temp[0] < 0)
+		{
+			n = 1;
+			r_angle = temp[0];
+		}
+		else if (temp[1] < 0)
+		{
+			n = 1;
+			r_angle = temp[1];
+		}
+		else
+		{
+			n = 1;
+			r_angle = temp[1];//?
+		}
     }
     else if (n == 1)
     {
@@ -237,12 +240,12 @@ int scale_goal(const float l1[3],
     float g_len = _sqrt(DOT(g,g));
     float L1    = _sqrt(DOT(l1,l1));
     float L2    = _sqrt(DOT(l2,l2));
-    float max_len = L1 + L2;
+    float max_len = (L1 + L2) * 0.9999f;
     //    float min_len = fabs(L1 - L2);
 
     if (g_len > max_len)
     {
-	vecscalarmult(g,g,max_len/(g_len*1.01f));
+	vecscalarmult(g,g,max_len/(g_len/**1.01f*/));
 	return 1;
     }	
     /*
@@ -316,7 +319,12 @@ int SRS::SetGoalPos(const float eee[3],  const Matrix  E,  float &rangle)
     return 1; 
 }
 
+void SRS::EvaluateCircle(const float p[3])
+{
+	 radius = get_circle_equation(p, proj_axis, pos_axis, 
+				 upper_len, lower_len, c, u, v, n);
 
+}
 
 //
 // Given the goal matrix and the projection axis, find the position
@@ -337,9 +345,10 @@ int SRS::SetGoal(const Matrix  GG, float &rangle)
 
     if (project_to_workspace && scale_goal(p_r1,s,ee))
         set_translation(G,ee);
-    
-    radius = get_circle_equation(ee, proj_axis, pos_axis, 
-				 upper_len, lower_len, c, u, v, n);
+
+    EvaluateCircle(ee);
+    //radius = get_circle_equation(ee, proj_axis, pos_axis, 
+	//			 upper_len, lower_len, c, u, v, n);
 
     //
     // Build rotation matrix about the R joint

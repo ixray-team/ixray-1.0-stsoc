@@ -20,7 +20,7 @@ protected:
 	virtual		void				ConsoleCommands_Clear	();
 
 public:	
-									game_sv_TeamDeathmatch	(){type = GAME_TEAMDEATHMATCH;}
+									game_sv_TeamDeathmatch	(){m_type = GAME_TEAMDEATHMATCH;}
 	virtual		void				Create					(shared_str& options);
 
 	virtual		void				OnEvent					(NET_Packet &tNetPacket, u16 type, u32 time, ClientID sender );
@@ -49,6 +49,8 @@ public:
 	virtual		void				AutoSwapTeams			();
 
 	virtual		u8					AutoTeam				( );
+	virtual		u32					GetPlayersCountInTeams	(u8 team);
+	virtual		bool				TeamSizeEqual			();
 	virtual		u32					RP_2_Use				(CSE_Abstract* E);
 
 	virtual		void				LoadTeams				();
@@ -66,5 +68,9 @@ public:
 	virtual		BOOL				Get_FriendlyIndicators	();
 	virtual		BOOL				Get_FriendlyNames		();
 
+	virtual		int					Get_TeamKillLimit		();
+	virtual		BOOL				Get_TeamKillPunishment	();
 
+protected:
+	virtual		void				WriteGameState			(CInifile& ini, LPCSTR sect, bool bRoundResult);
 };

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "UIInventoryWnd.h"
 
 #include "xrUIXmlParser.h"
@@ -13,7 +13,6 @@
 
 #include "../weapon.h"
 
-#include "../script_space.h"
 #include "../script_process.h"
 
 #include "../eatable_item.h"
@@ -216,6 +215,9 @@ CUIInventoryWnd::~CUIInventoryWnd()
 
 bool CUIInventoryWnd::OnMouse(float x, float y, EUIMessages mouse_action)
 {
+	if(m_b_need_reinit)
+		return true;
+
 	//вызов дополнительного меню по правой кнопке
 	if(mouse_action == WINDOW_RBUTTON_DOWN)
 	{
@@ -256,16 +258,22 @@ void CUIInventoryWnd::Update()
 		v = pEntityAlive->conditions().GetRadiation()*100.0f;
 		UIProgressBarRadiation.SetProgressPos	(v);
 
+		CInventoryOwner* pOurInvOwner	= smart_cast<CInventoryOwner*>(pEntityAlive);
+		u32 _money						= 0;
+
 		if (GameID() != GAME_SINGLE){
 			game_PlayerState* ps = Game().GetPlayerByGameID(pEntityAlive->ID());
-			if (ps)
-				UIProgressBarRank.SetProgressPos(ps->experience_D*100);			
+			if (ps){
+				UIProgressBarRank.SetProgressPos(ps->experience_D*100);
+				_money							= ps->money_for_round;
+			}
+		}else
+		{
+			_money							= pOurInvOwner->get_money();
 		}
-
 		// update money
-		CInventoryOwner* pOurInvOwner	= smart_cast<CInventoryOwner*>(pEntityAlive);
 		string64						sMoney;
-		sprintf							(sMoney,"%d RU", pOurInvOwner->get_money());
+		sprintf_s							(sMoney,"%d RU", _money);
 		UIMoneyWnd.SetText				(sMoney);
 
 		// update outfit parameters
@@ -273,7 +281,6 @@ void CUIInventoryWnd::Update()
 		UIOutfitInfo.Update				(outfit);		
 	}
 
-//.	UITimeWnd.Update					();
 	UIStaticTimeString.SetText(*InventoryUtilities::GetGameTimeAsString(InventoryUtilities::etpTimeToMinutes));
 
 	CUIWindow::Update					();
@@ -297,13 +304,13 @@ void CUIInventoryWnd::Show()
 		string256 _path;		
 		if (GameID() != GAME_DEATHMATCH){
 			if (1==team)
-		        sprintf(_path, "ui_hud_status_green_0%d", rank+1);
+		        sprintf_s(_path, "ui_hud_status_green_0%d", rank+1);
 			else
-				sprintf(_path, "ui_hud_status_blue_0%d", rank+1);
+				sprintf_s(_path, "ui_hud_status_blue_0%d", rank+1);
 		}
 		else
 		{
-			sprintf(_path, "ui_hud_status_green_0%d", rank+1);
+			sprintf_s(_path, "ui_hud_status_green_0%d", rank+1);
 		}
 		UIRank->InitTexture(_path);
 	}
@@ -423,42 +430,29 @@ void	CUIInventoryWnd::SendEvent_Item2Ruck			(PIItem	pItem)
 	g_pInvWnd->PlaySnd				(eInvItemToRuck);
 };
 
-void	CUIInventoryWnd::SendEvent_Item_Sell			(PIItem	pItem)
+void	CUIInventoryWnd::SendEvent_Item_Drop(PIItem	pItem)
 {
-	NET_Packet						P;
-	pItem->object().u_EventGen		(P, GEG_PLAYER_ITEM_SELL, pItem->object().H_Parent()->ID());
-	P.w_u16							(1);
-	P.w_u16							(pItem->object().ID());
-	pItem->object().u_EventSend		(P);
+	pItem->SetDropManual			(TRUE);
 
-	g_pInvWnd->PlaySnd				(eInvDropItem);
-};
-
-void	CUIInventoryWnd::SendEvent_Item_Drop			(PIItem	pItem)
-{
-	NET_Packet						P;
-	pItem->object().u_EventGen		(P, GEG_PLAYER_ITEMDROP, pItem->object().H_Parent()->ID());
-	P.w_u16							(pItem->object().ID());
-	pItem->object().u_EventSend		(P);
-
+	if( OnClient() )
+	{
+		NET_Packet					P;
+		pItem->object().u_EventGen	(P, GE_OWNERSHIP_REJECT, pItem->object().H_Parent()->ID());
+		P.w_u16						(pItem->object().ID());
+		pItem->object().u_EventSend(P);
+	}
 	g_pInvWnd->PlaySnd				(eInvDropItem);
 };
 
 void	CUIInventoryWnd::SendEvent_Item_Eat			(PIItem	pItem)
 {
+	R_ASSERT						(pItem->m_pCurrentInventory==m_pInv);
 	NET_Packet						P;
 	pItem->object().u_EventGen		(P, GEG_PLAYER_ITEM_EAT, pItem->object().H_Parent()->ID());
 	P.w_u16							(pItem->object().ID());
 	pItem->object().u_EventSend		(P);
 };
 
-void	CUIInventoryWnd::SendEvent_ActivateArtefact			(PIItem	pItem)
-{
-	NET_Packet						P;
-	pItem->object().u_EventGen		(P, GEG_PLAYER_ACTIVATEARTEFACT, pItem->object().H_Parent()->ID());
-	P.w_u16							(pItem->object().ID());
-	pItem->object().u_EventSend		(P);	
-};
 
 void CUIInventoryWnd::BindDragDropListEnents(CUIDragDropListEx* lst)
 {
@@ -475,14 +469,23 @@ void CUIInventoryWnd::BindDragDropListEnents(CUIDragDropListEx* lst)
 
 bool CUIInventoryWnd::OnKeyboard(int dik, EUIMessages keyboard_action)
 {
+	if(m_b_need_reinit)
+		return true;
+
 	if (UIPropertiesBox.GetVisible())
 		UIPropertiesBox.OnKeyboard(dik, keyboard_action);
+
+	if ( is_binded(kDROP, dik) )
+	{
+		if(WINDOW_KEY_PRESSED==keyboard_action)
+			DropCurrentItem(false);
+		return true;
+	}
+
 	if (WINDOW_KEY_PRESSED == keyboard_action)
 	{
-		if ( is_binded(kDROP, dik) )
-			DropCurrentItem(false);
 #ifdef DEBUG
-		else if(DIK_NUMPAD7 == dik && CurrentIItem())
+		if(DIK_NUMPAD7 == dik && CurrentIItem())
 		{
 			CurrentIItem()->ChangeCondition(-0.05f);
 			UIItemInfo.InitItem(CurrentIItem());
@@ -491,7 +494,6 @@ bool CUIInventoryWnd::OnKeyboard(int dik, EUIMessages keyboard_action)
 		{
 			CurrentIItem()->ChangeCondition(0.05f);
 			UIItemInfo.InitItem(CurrentIItem());
-
 		}
 #endif
 	}

@@ -8,12 +8,13 @@ CUICursor*	GetUICursor		()	{return UI()->GetUICursor();};
 ui_core*	UI				()	{return GamePersistent().m_pUI_core;};
 extern ENGINE_API Fvector2		g_current_font_scale;
 
-void S2DVert::rotate_pt(const Fvector2& pivot, float cosA, float sinA)
+void S2DVert::rotate_pt(const Fvector2& pivot, float cosA, float sinA, float kx)
 {
 	Fvector2 t		= pt;
 	t.sub			(pivot);
 	pt.x			= t.x*cosA+t.y*sinA;
 	pt.y			= t.y*cosA-t.x*sinA;
+	pt.x			*= kx;
 	pt.add			(pivot);
 }
 void C2DFrustum::CreateFromRect	(const Frect& rect)
@@ -189,8 +190,15 @@ void ui_core::PopScissor()
 
 ui_core::ui_core()
 {
-	m_pUICursor					= xr_new<CUICursor>();
-	m_pFontManager				= xr_new<CFontManager>();
+	if(!g_dedicated_server)
+	{
+		m_pUICursor					= xr_new<CUICursor>();
+		m_pFontManager				= xr_new<CFontManager>();
+	}else
+	{
+		m_pUICursor					= NULL;
+		m_pFontManager				= NULL;
+	}
 	m_bPostprocess				= false;
 	
 	OnDeviceReset				();
@@ -247,7 +255,7 @@ shared_str	ui_core::get_xml_name(LPCSTR fn)
 {
 	string_path				str;
 	if(!is_16_9_mode()){
-		sprintf(str, "%s", fn);
+		sprintf_s(str, "%s", fn);
 		if ( NULL==strext(fn) ) strcat(str, ".xml");
 	}else{
 
@@ -258,11 +266,11 @@ shared_str	ui_core::get_xml_name(LPCSTR fn)
 			*strext(str)	= 0;
 			strcat	(str, "_16.xml");
 		}else
-			sprintf				(str, "%s_16", fn);
+			sprintf_s				(str, "%s_16", fn);
 
 		if(NULL==FS.exist(str_, "$game_config$", "ui\\" , str) )
 		{
-			sprintf(str, "%s", fn);
+			sprintf_s(str, "%s", fn);
 			if ( NULL==strext(fn) ) strcat(str, ".xml");
 		}
 		Msg("[16-9] get_xml_name for[%s] returns [%s]", fn, str);

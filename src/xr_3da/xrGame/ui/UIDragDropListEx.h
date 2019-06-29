@@ -24,7 +24,7 @@ struct CUICell{
 		bool				Empty					()						{return m_item == NULL;}
 		bool				MainItem				()						{return m_bMainItem;}
 		void				Clear					();
-		bool				operator ==				(const CUICell& C)		{return (m_item == C.m_item);}
+		bool				operator ==				(const CUICell& C) const{return (m_item == C.m_item);}
 };
 
 typedef xr_vector<CUICell>			UI_CELLS_VEC;

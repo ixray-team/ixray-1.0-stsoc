@@ -31,9 +31,10 @@ protected:
 	bool							m_bArtefactWasDropped;
 
 	xr_vector<RPoint>				Artefact_rpoints;
-	xr_vector<u8>					ArtefactsRPoints_ID;
-	u8								m_LastRespawnPointID;
-	
+//.	xr_vector<u8>					ArtefactsRPoints_ID;
+//.	u8								m_LastRespawnPointID;
+	CRandom							ArtefactChooserRandom;
+
 	u16								artefactBearerID;//ah,ZoneMap
 	u16								m_iAfBearerMenaceID;
 	u8								teamInPossession;//ah,ZoneMap
@@ -63,9 +64,11 @@ protected:
 
 	virtual		bool				Player_Check_Rank		(game_PlayerState* ps);
 
+	bool		assign_rp_tmp		(game_PlayerState* ps_who, xr_vector<RPoint>& points_vec, xr_vector<u32>& dest, xr_vector<u32>& rpIDEnemy, xr_vector<u32>& EnemyIt,  bool use_safe_dist);
+
 public:
 
-									game_sv_ArtefactHunt	(){type = GAME_ARTEFACTHUNT;}
+									game_sv_ArtefactHunt	(){m_type = GAME_ARTEFACTHUNT;}
 	virtual		void				Create					(shared_str& options);
 
 	virtual		LPCSTR				type_name			() const { return "artefacthunt";};
@@ -95,18 +98,13 @@ public:
 
 	virtual		char*				GetAnomalySetBaseName	() {return "artefacthunt_game_anomaly_sets";};
 
-//	virtual		void				OnPlayerBuyFinished		(u32 id_who, NET_Packet& P);
-
 	virtual		void				OnObjectEnterTeamBase	(u16 id, u16 zone_team);
 	virtual		void				OnObjectLeaveTeamBase	(u16 id, u16 zone_team);
 	
-///	bool							IsBuyableItem			(CSE_Abstract* pItem);
-//	BOOL							CheckUpgrades			(CSE_Abstract* pItem, u8 IItem);	
-//	void							RemoveItemFromActor		(CSE_Abstract* pItem);
 	void							OnArtefactOnBase		(ClientID id_who);
 
 	virtual		BOOL				OnTouch					(u16 eid_who, u16 eid_what, BOOL bForced = FALSE);
-	virtual		BOOL				OnDetach				(u16 eid_who, u16 eid_what);
+	virtual		void				OnDetach				(u16 eid_who, u16 eid_what);
 	virtual		void				OnCreate				(u16 id_who);
 
 
@@ -142,5 +140,7 @@ public:
 	virtual		void				OnRender				();
 #endif
 	//  [7/5/2005]
+protected:
+	virtual		void				WriteGameState			(CInifile& ini, LPCSTR sect, bool bRoundResult);
 
 };

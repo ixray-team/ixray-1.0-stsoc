@@ -80,13 +80,13 @@ LPCSTR CSXML_IdToIndex::tag_name = NULL;
 
 
 TEMPLATE_SPECIALIZATION
-CSXML_IdToIndex::CSXML_IdToIndex()
+CSXML_IdToIndex::CXML_IdToIndex()
 {
 }
 
 
 TEMPLATE_SPECIALIZATION
-CSXML_IdToIndex::~CSXML_IdToIndex()
+CSXML_IdToIndex::~CXML_IdToIndex()
 {
 }
 
@@ -169,7 +169,7 @@ typename void	CSXML_IdToIndex::InitInternal ()
 			LPCSTR item_name	= uiXml->ReadAttrib(uiXml->GetRoot(), tag_name, i, "id", NULL);
 
 			string256			buf;
-			sprintf				(buf, "id for item don't set, number %d in %s", i, xml_file);
+			sprintf_s				(buf, "id for item don't set, number %d in %s", i, xml_file);
 			R_ASSERT2			(item_name, buf);
 
 

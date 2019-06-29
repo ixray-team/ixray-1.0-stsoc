@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "xrServer_Objects_ALife_All.h"
 #include "level.h"
 #include "game_cl_base.h"
@@ -8,6 +8,7 @@
 #include "level_graph.h"
 #include "client_spawn_manager.h"
 #include "../xr_object.h"
+#include "../IGame_Persistent.h"
 
 void CLevel::cl_Process_Spawn(NET_Packet& P)
 {
@@ -107,7 +108,8 @@ void CLevel::g_sv_Spawn		(CSE_Abstract* E)
 	if (0==O || (!O->net_Spawn	(E))) 
 	{
 		O->net_Destroy			( );
-		client_spawn_manager().clear(O->ID());
+		if(!g_dedicated_server)
+			client_spawn_manager().clear(O->ID());
 		Objects.Destroy			(O);
 		Msg						("! Failed to spawn entity '%s'",*E->s_name);
 #ifdef DEBUG_MEMORY_MANAGER
@@ -117,7 +119,8 @@ void CLevel::g_sv_Spawn		(CSE_Abstract* E)
 #ifdef DEBUG_MEMORY_MANAGER
 		mem_alloc_gather_stats	(!!psAI_Flags.test(aiDebugOnFrameAllocs));
 #endif // DEBUG_MEMORY_MANAGER
-		client_spawn_manager().callback(O);
+		if(!g_dedicated_server)
+			client_spawn_manager().callback(O);
 		//Msg			("--spawn--SPAWN: %f ms",1000.f*T.GetAsync());
 		if ((E->s_flags.is(M_SPAWN_OBJECT_LOCAL)) && (E->s_flags.is(M_SPAWN_OBJECT_ASPLAYER)))	{
 			if (CurrentEntity() != NULL) 
@@ -132,22 +135,11 @@ void CLevel::g_sv_Spawn		(CSE_Abstract* E)
 
 		if (0xffff != E->ID_Parent)	
 		{
-			/*
-			// Generate ownership-event
-			NET_Packet			GEN;
-			GEN.w_begin			(M_EVENT);
-			GEN.w_u32			(E->m_dwSpawnTime);//-NET_Latency);
-			GEN.w_u16			(GE_OWNERSHIP_TAKE);
-			GEN.w_u16			(E->ID_Parent);
-			GEN.w_u16			(u16(O->ID()));
-			game_events->insert	(GEN);
-			/*/
 			NET_Packet	GEN;
 			GEN.write_start();
 			GEN.read_start();
 			GEN.w_u16			(u16(O->ID()));
 			cl_Process_Event(E->ID_Parent, GE_OWNERSHIP_TAKE, GEN);
-			//*/
 		}
 	}
 	//---------------------------------------------------------
@@ -169,7 +161,7 @@ CSE_Abstract *CLevel::spawn_item		(LPCSTR section, const Fvector &position, u32 
 	CSE_ALifeDynamicObject	*dynamic_object = smart_cast<CSE_ALifeDynamicObject*>(abstract);
 	if (dynamic_object && ai().get_level_graph()) {
 		dynamic_object->m_tNodeID	= level_vertex_id;
-		if (ai().level_graph().valid_vertex_id(level_vertex_id) && ai().get_cross_table())
+		if (ai().level_graph().valid_vertex_id(level_vertex_id) && ai().get_game_graph() && ai().get_cross_table())
 			dynamic_object->m_tGraphID	= ai().cross_table().vertex(level_vertex_id).game_vertex_id();
 	}
 

@@ -1,11 +1,9 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "UIGame_custom_script.h"
-
-#include "script_space.h"
 #include "xrServer_script_macroses.h"
 #include "ui/UIMultiTextStatic.h"
-using namespace luabind;
 
+using namespace luabind;
 
 template <typename T>
 struct CWrapperBase : public T, public luabind::wrap_base {

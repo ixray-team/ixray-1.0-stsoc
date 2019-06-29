@@ -11,17 +11,23 @@ class ENGINE_API CPS_Instance	:
 	public IRenderable
 {
 	friend class			IGame_Persistent;
+
+private:
+	bool					m_destroy_on_game_load;
+
 protected:
 	int						m_iLifeTime			;
 	BOOL					m_bAutoRemove		;
 	BOOL					m_bDead				;
+
 protected:
 	virtual					~CPS_Instance		();
-
 	virtual void			PSI_internal_delete	();
-public:
-							CPS_Instance		();
 
+public:
+							CPS_Instance		(bool destroy_on_game_load);
+
+	IC		const bool		&destroy_on_game_load() const				{	return m_destroy_on_game_load;	}
 	virtual void			PSI_destroy			();
 	IC BOOL					PSI_alive			()						{	return m_iLifeTime>0;				}
 	IC BOOL					PSI_IsAutomatic		()						{	return m_bAutoRemove;				}

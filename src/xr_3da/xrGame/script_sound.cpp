@@ -16,7 +16,7 @@
 CScriptSound::CScriptSound				(LPCSTR caSoundName, ESoundTypes sound_type)
 {
 	m_caSoundToPlay			= caSoundName;
-	string256				l_caFileName;
+	string_path				l_caFileName;
 	VERIFY(::Sound)	;
 	if (FS.exist(l_caFileName,"$game_sounds$",caSoundName,".ogg"))
 		m_sound.create		(caSoundName,st_Effect,sound_type);

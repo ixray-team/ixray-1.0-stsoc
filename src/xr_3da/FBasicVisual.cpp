@@ -5,7 +5,9 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "render.h"
+#ifndef _EDITOR
+    #include "render.h"
+#endif    
 #include "fbasicvisual.h"
 #include "fmesh.h"
 

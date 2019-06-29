@@ -67,7 +67,7 @@ void CAutosaveManager::shedule_Update		(u32 dt)
 	update_autosave_time		();
 
 	string_path					temp;
-	strconcat					(temp,Core.UserName,"_","autosave");
+	strconcat					(sizeof(temp),temp,Core.UserName,"_","autosave");
 	NET_Packet					net_packet;
 	net_packet.w_begin			(M_SAVE_GAME);
 	net_packet.w_stringZ		(temp);
@@ -75,7 +75,7 @@ void CAutosaveManager::shedule_Update		(u32 dt)
 	Level().Send				(net_packet,net_flags(TRUE));
 
 	string_path					S1;
-	strcat						(temp,".dds");
+	strcat_s					(temp,sizeof(temp),".dds");
 	FS.update_path				(S1,"$game_saves$",temp);
 
 	MainMenu()->Screenshot		(IRender_interface::SM_FOR_GAMESAVE,S1);

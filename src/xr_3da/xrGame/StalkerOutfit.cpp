@@ -1,11 +1,4 @@
-///////////////////////////////////////////////////////////////
-// StalkerOutfit.cpp
-// StalkerOutfit - защитный костюм сталкера
-///////////////////////////////////////////////////////////////
-
-#pragma once
-
-#include "stdafx.h"
+#include "pch_script.h"
 #include "StalkerOutfit.h"
 
 CStalkerOutfit::CStalkerOutfit()
@@ -15,8 +8,6 @@ CStalkerOutfit::CStalkerOutfit()
 CStalkerOutfit::~CStalkerOutfit() 
 {
 }
-
-#include "script_space.h"
 
 using namespace luabind;
 

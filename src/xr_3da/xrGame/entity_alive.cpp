@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "entity_alive.h"
 #include "inventoryowner.h"
 #include "inventory.h"
@@ -12,7 +12,6 @@
 #include "relation_registry.h"
 #include "monster_community.h"
 #include "entitycondition.h"
-#include "script_space.h"
 #include "script_game_object.h"
 #include "hit.h"
 #include "PHDestroyable.h"
@@ -258,7 +257,7 @@ void CEntityAlive::HitImpulse	(float /**amount/**/, Fvector& /**vWorldDir/**/, F
 }
 
 //void CEntityAlive::Hit(float P, Fvector &dir,CObject* who, s16 element,Fvector position_in_object_space, float impulse, ALife::EHitType hit_type, float AP)
-void	CEntityAlive::Hit							(SHit* pHDS)
+void CEntityAlive::Hit(SHit* pHDS)
 {
 	SHit HDS = *pHDS;
 	//-------------------------------------------------------------------
@@ -471,7 +470,7 @@ void CEntityAlive::UpdateFireParticles()
 {
 	if(m_ParticleWounds.empty()) return;
 	
-	WOUND_VECTOR_IT last_it;
+//	WOUND_VECTOR_IT last_it;
 
 	for(WOUND_VECTOR_IT it = m_ParticleWounds.begin(); 
 					  it != m_ParticleWounds.end();)
@@ -539,7 +538,7 @@ void CEntityAlive::UpdateBloodDrops()
 		return;
 	}
 
-	WOUND_VECTOR_IT last_it;
+//	WOUND_VECTOR_IT last_it;
 
 	for(WOUND_VECTOR_IT it = m_BloodWounds.begin(); 
 		it != m_BloodWounds.end();)
@@ -669,6 +668,17 @@ void CEntityAlive::PHGetLinearVell(Fvector& velocity)
 		inherited::PHGetLinearVell(velocity);
 
 }
+CIKLimbsController*	CEntityAlive::character_ik_controller()
+{
+	if(character_physics_support())
+	{
+		return character_physics_support()->ik_controller();
+	}
+	else
+	{
+		return NULL;
+	}
+}
 CPHSoundPlayer* CEntityAlive::ph_sound_player()
 {
 	if(character_physics_support())
@@ -699,4 +709,19 @@ void CEntityAlive::net_Relcase	(CObject *object)
 {
 	inherited::net_Relcase		(object);
 	conditions().remove_links	(object);
+}
+
+void	CEntityAlive::		create_anim_mov_ctrl	( CBlend* b )
+{
+	inherited::create_anim_mov_ctrl( b ); 
+	CCharacterPhysicsSupport *cs = character_physics_support( );
+	 if( cs )
+		 cs->on_create_anim_mov_ctrl( );
+}
+void	CEntityAlive::	destroy_anim_mov_ctrl( )
+{
+	 inherited::destroy_anim_mov_ctrl(); 
+	 CCharacterPhysicsSupport *cs =character_physics_support( );
+	 if( cs )
+		cs->on_destroy_anim_mov_ctrl( );
 }

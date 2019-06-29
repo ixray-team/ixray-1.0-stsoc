@@ -6,7 +6,7 @@
 //	Description : Script game object class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_game_object.h"
 #include "script_game_object_impl.h"
 #include "script_entity_action.h"
@@ -516,3 +516,24 @@ u32	CScriptGameObject::vertex_in_direction(u32 level_vertex_id, Fvector directio
 	return			(ai().level_graph().valid_vertex_id(result) ? result : level_vertex_id);
 }
 
+bool CScriptGameObject::invulnerable		() const
+{
+	CCustomMonster	*monster = smart_cast<CCustomMonster*>(&object());
+	if (!monster) {
+		ai().script_engine().script_log			(ScriptStorage::eLuaMessageTypeError,"CCustomMonster : cannot access class member invulnerable!");
+		return		(false);
+	}
+
+	return			(monster->invulnerable());
+}
+
+void CScriptGameObject::invulnerable		(bool invulnerable)
+{
+	CCustomMonster	*monster = smart_cast<CCustomMonster*>(&object());
+	if (!monster) {
+		ai().script_engine().script_log			(ScriptStorage::eLuaMessageTypeError,"CCustomMonster : cannot access class member invulnerable!");
+		return;
+	}
+
+	monster->invulnerable	(invulnerable);
+}

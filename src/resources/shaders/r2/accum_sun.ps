@@ -1,17 +1,18 @@
 #include "common.h"
 #include "lmodel.h"
+#include "shadow.h"
 
 struct 	_input
 {
 	float2 	tc 	: TEXCOORD0;
-	float4 	tcJ 	: TEXCOORD1;
+	float4 	tcJ : TEXCOORD1;
 	float2	LT	: TEXCOORD2;
 	float2	RT	: TEXCOORD3;
 	float2	LB	: TEXCOORD4;
 	float2 	RB	: TEXCOORD5;
 };
 
-float4 	main		( _input I ) : COLOR
+float4 	main	( _input I ) : COLOR
 {
   float4 _P		= tex2D 	(s_position, 	I.tc); 
   half4  _N		= tex2D 	(s_normal,   	I.tc); 

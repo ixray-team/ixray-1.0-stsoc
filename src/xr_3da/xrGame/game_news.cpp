@@ -54,8 +54,8 @@ LPCSTR GAME_NEWS_DATA::SingleLineText()
 	u32 years, months, days, hours, minutes, seconds, milliseconds;
 	split_time		(receive_time, years, months, days, hours, minutes, seconds, milliseconds);
 #pragma todo("Satan->Satan : insert carry-over")
-	//sprintf(time, "%02i:%02i \\n", hours, minutes);
-	sprintf		(time, "%02i:%02i ", hours, minutes);
+	//sprintf_s(time, "%02i:%02i \\n", hours, minutes);
+	sprintf_s		(time, "%02i:%02i ", hours, minutes);
 //	strconcat	(result, locationName, time, newsPhrase);
 
 

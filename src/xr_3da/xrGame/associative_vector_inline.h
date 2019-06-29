@@ -246,10 +246,10 @@ IC	typename _associative_vector::iterator _associative_vector::insert						(iter
 {
 	if	(
 			(where != end()) && 
-			(operator()(*where,value))) &&
+			(operator()(*where,value)) &&
 			((where - begin()) == size()) &&
-			(!operator()(value,*(where + 1)))) &&
-			(operator()(*(where + 1),value)))
+			(!operator()(value,*(where + 1))) &&
+			(operator()(*(where + 1),value))
 		)
 			return		(inherited::insert(where,value));
 

@@ -226,6 +226,11 @@ add_to_type_list(CPhysicsJoint)
 #define script_type_list save_type_list(CPhysicsJoint)
 // ABSTRACT: 
 class CPHIsland;
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	class CPhysicsShellAnimator;
+#endif
+
 class CPhysicsShell			: public CPhysicsBase
 {
 protected:
@@ -236,6 +241,10 @@ public:
 #endif
 public:
 IC					CKinematics					*PKinematics								()																{return m_pKinematics		;}
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	virtual			CPhysicsShellAnimator*		PPhysicsShellAnimator						()																							= 0;
+#endif
 					void						set_Kinematics								(CKinematics* p)														{m_pKinematics=p	;}
 	virtual			void						set_JointResistance							(float force)																				= 0;
 	virtual			void						add_Element									(CPhysicsElement* E)																		= 0;
@@ -249,6 +258,13 @@ IC					CKinematics					*PKinematics								()																{return m_pKinemati
 	virtual			void						SetIgnoreDynamic							()																							= 0;
 	virtual			void						SetRagDoll									()																							= 0;
 	virtual			void						SetIgnoreRagDoll							()																							= 0;
+
+#ifdef ANIMATED_PHYSICS_OBJECT_SUPPORT
+	virtual			void						SetAnimated									()																							= 0;
+	virtual			void						SetIgnoreAnimated							()																							= 0;
+	virtual			bool						Animated									()																							= 0;
+#endif
+
 	virtual			void						SetSmall									()																							= 0;
 	virtual			void						SetIgnoreSmall								()																							= 0;
 	virtual			bool						isFractured									()																							= 0;
@@ -292,7 +308,7 @@ IC					CKinematics					*PKinematics								()																{return m_pKinemati
 	virtual			void						DisableCharacterCollision					()																							= 0;
 	virtual			void						PureStep									(float step = fixed_step)																	= 0;
 	virtual			void						SetGlTransformDynamic						(const Fmatrix &form)																		= 0;
-	virtual			void						StaticCollideStep							(float step = fixed_step)																	= 0;
+	virtual			void						CollideAll									()																							= 0;
 	virtual			CPhysicsElement				*NearestToPoint								(const Fvector& point)																		= 0;
 	virtual			void						build_FromKinematics						(CKinematics* K,BONE_P_MAP* p_geting_map=NULL)												= 0;
 	virtual			void						preBuild_FromKinematics						(CKinematics* K,BONE_P_MAP* p_geting_map=NULL)												= 0;
@@ -306,6 +322,9 @@ IC					CKinematics					*PKinematics								()																{return m_pKinemati
 	virtual			void						ResetCallbacks								(u16 id,Flags64 &mask)																		= 0;
 	virtual			void						SetCallbacks								(BoneCallbackFun* callback)																	= 0;
 	virtual			void						EnabledCallbacks							(BOOL val)																					= 0;
+	virtual			void						ToAnimBonesPositions						()																							= 0;
+	virtual			bool						AnimToVelocityState							(float dt, float l_limit, float a_limit )													= 0;
+	virtual 		void						SetBonesCallbacksOverwrite					(bool v)																					= 0;
 	virtual			Fmatrix						&ObjectInRoot								()																							= 0;
 	virtual			void						ObjectToRootForm							(const Fmatrix& form)							    										= 0;
 	virtual			void						SetPrefereExactIntegration					()																							= 0;
@@ -329,5 +348,6 @@ CPhysicsShell*				P_build_Shell				(CGameObject* obj,bool not_active_state,U16Ve
 CPhysicsShell*				P_build_Shell				(CGameObject* obj,bool not_active_state,BONE_P_MAP* bone_map,LPCSTR	fixed_bones)	;
 CPhysicsShell*				P_build_Shell				(CGameObject* obj,bool not_active_state,BONE_P_MAP* bone_map=NULL)					;
 CPhysicsShell*				P_build_SimpleShell			(CGameObject* obj,float mass,bool not_active_state)									;
-			void			ApplySpawnIniToPhysicShell	(CInifile* ini,CPhysicsShell* physics_shell,bool fixed)										;
+		void				ApplySpawnIniToPhysicShell	(CInifile* ini,CPhysicsShell* physics_shell,bool fixed)								;
+		void				fix_bones					(LPCSTR	fixed_bones,CPhysicsShell* shell )											;
 #endif // PhysicsShellH

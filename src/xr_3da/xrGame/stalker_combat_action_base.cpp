@@ -6,7 +6,7 @@
 //	Description : Stalker base combat action
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "stalker_combat_action_base.h"
 #include "ai/stalker/ai_stalker.h"
 #include "script_game_object.h"
@@ -19,6 +19,7 @@
 #include "agent_manager.h"
 #include "agent_member_manager.h"
 #include "agent_enemy_manager.h"
+#include "inventory_item.h"
 
 using namespace StalkerSpace;
 

@@ -6,7 +6,6 @@
 class CUIXml;
 
 #include "../script_export_space.h"
-#include "../script_space.h"
 
 struct SLuaWpnParams;
 

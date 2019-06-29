@@ -14,7 +14,6 @@ class CUIComboBox;
 class CUIXml;
 class CExtraContentFilter;
 
-#define	MAP_LIST			"mp\\map_list.ltx"
 #define	MAP_ROTATION_LIST	"maprot_list.ltx"
 
 class CUIMapList : public CUIWindow {
@@ -69,13 +68,11 @@ private:
 	CUIStatic*			m_pMapPic;
 	CUIMapInfo*			m_pMapInfo;
 
-//.	EGameTypes			m_GameType;
-	
-	DEF_VECTOR			(shared_str_vec, shared_str)
-	DEF_MAP				(storage_map, EGameTypes, shared_str_vec)
-	storage_map			m_maps;
-
-	xr_map<shared_str,int> m_mapWeather;
+	struct Sw{
+		shared_str	weather_name;
+		int			weather_time;
+	};
+	xr_vector<Sw>		m_mapWeather;
 	xr_string			m_command;
 	xr_string			m_srv_params;
 

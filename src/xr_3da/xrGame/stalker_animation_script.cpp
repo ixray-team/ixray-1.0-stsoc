@@ -6,7 +6,7 @@
 //	Description : Stalker animation manager : script animations
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "stalker_animation_manager.h"
 #include "ai/stalker/ai_stalker.h"
 #include "script_engine.h"
@@ -47,7 +47,7 @@ void CStalkerAnimationManager::script_play_callback(CBlend *blend)
 	pair.on_animation_end		();
 }
 
-void CStalkerAnimationManager::add_script_animation	(LPCSTR animation, bool hand_usage)
+void CStalkerAnimationManager::add_script_animation	(LPCSTR animation, bool hand_usage, bool use_movement_controller)
 {
 	const MotionID					&motion = m_skeleton_animated->ID_Cycle_Safe(animation);
 	if (!motion) {
@@ -55,11 +55,11 @@ void CStalkerAnimationManager::add_script_animation	(LPCSTR animation, bool hand
 		return;
 	}
 
-	m_script_animations.push_back	(CStalkerAnimationScript(hand_usage,motion));
+	m_script_animations.push_back	(CStalkerAnimationScript(motion,hand_usage,use_movement_controller));
 }
 
-MotionID CStalkerAnimationManager::assign_script_animation	()
+const CStalkerAnimationScript &CStalkerAnimationManager::assign_script_animation	() const
 {
 	VERIFY							(!script_animations().empty());
-	return							(script_animations().front().animation());
+	return							(script_animations().front());
 }

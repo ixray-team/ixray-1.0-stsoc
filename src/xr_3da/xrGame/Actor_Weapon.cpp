@@ -60,7 +60,8 @@ float CActor::GetWeaponAccuracy() const
 
 void CActor::g_fireParams	(const CHudItem* pHudItem, Fvector &fire_pos, Fvector &fire_dir)
 {
-	VERIFY			(inventory().ActiveItem());
+//	VERIFY			(inventory().ActiveItem());
+
 	fire_pos		= Cameras().Pos();
 	fire_dir		= Cameras().Dir();
 
@@ -91,7 +92,7 @@ BOOL CActor::g_State (SEntityState& state) const
 	return TRUE;
 }
 
-void		CActor::SetWeaponHideState (u32 State, bool	bSet)
+void CActor::SetWeaponHideState (u32 State, bool bSet)
 {
 	if (g_Alive() && this == Level().CurrentControlEntity())
 	{
@@ -276,8 +277,6 @@ void	CActor::SpawnAmmoForWeapon	(CInventoryItem *pIItem)
 	CWeaponMagazined* pWM = smart_cast<CWeaponMagazined*> (pIItem);
 	if (!pWM || !pWM->AutoSpawnAmmo()) return;
 
-	///	CWeaponAmmo* pAmmo = smart_cast<CWeaponAmmo*>(inventory().GetAny( *(pWM->m_ammoTypes[0]) ));
-	//	if (!pAmmo) 
 	pWM->SpawnAmmo(0xffffffff, NULL, ID());
 };
 
@@ -291,27 +290,5 @@ void	CActor::RemoveAmmoForWeapon	(CInventoryItem *pIItem)
 
 	CWeaponAmmo* pAmmo = smart_cast<CWeaponAmmo*>(inventory().GetAny(*(pWM->m_ammoTypes[0]) ));
 	if (!pAmmo) return;
-	//--- мы нашли патроны к текущему оружию	
-	/*
-	//--- проверяем не подходят ли они к чему-то еще
-	bool CanRemove = true;
-	TIItemContainer::const_iterator I = inventory().m_all.begin();//, B = I;
-	TIItemContainer::const_iterator E = inventory().m_all.end();
-	for ( ; I != E; ++I)
-	{
-	CInventoryItem* pItem = (*I);//->m_pIItem;
-	CWeaponMagazined* pWM = smart_cast<CWeaponMagazined*> (pItem);
-	if (!pWM || !pWM->AutoSpawnAmmo()) continue;
-	if (pWM == pIItem) continue;
-	if (pWM->m_ammoTypes[0] != pAmmo->CInventoryItem::object().cNameSect()) continue;
-	CanRemove = false;
-	break;
-	};
-
-	if (!CanRemove) return;
-	*/
 	pAmmo->DestroyObject();
-	//	NET_Packet			P;
-	//	u_EventGen			(P,GE_DESTROY,pAmmo->ID());
-	//	u_EventSend			(P);
 };

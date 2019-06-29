@@ -6,7 +6,7 @@
 //	Description : Enemy manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "enemy_manager.h"
 #include "memory_manager.h"
 #include "visual_memory_manager.h"
@@ -21,10 +21,7 @@
 #include "script_game_object.h"
 #include "ai_space.h"
 #include "profiler.h"
-
 #include "actor.h"
-#include "actor_memory.h"
-
 #include "ai/stalker/ai_stalker.h"
 #include "movement_manager.h"
 #include "agent_manager.h"
@@ -279,13 +276,13 @@ void CEnemyManager::on_enemy_change						(const CEntityAlive *previous_enemy)
 		return;
 	}
 
-	if (!m_object->memory().visual().visible_now(previous_enemy) && m_object->memory().visual().visible_now(selected())) {
-		m_last_enemy_change		= Device.dwTimeGlobal;
+	if (enemy_inertia(previous_enemy)) {
+		m_selected				= previous_enemy;
 		return;
 	}
 
-	if (enemy_inertia(previous_enemy)) {
-		m_selected				= previous_enemy;
+	if (!m_object->memory().visual().visible_now(previous_enemy) && m_object->memory().visual().visible_now(selected())) {
+		m_last_enemy_change		= Device.dwTimeGlobal;
 		return;
 	}
 
@@ -309,7 +306,7 @@ void CEnemyManager::remove_wounded			()
 	};
 
 	m_objects.erase				(
-		remove_if(
+		std::remove_if(
 			m_objects.begin(),
 			m_objects.end(),
 			&no_wounded::predicate

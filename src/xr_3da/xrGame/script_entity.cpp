@@ -6,7 +6,7 @@
 //	Description : Script entity class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_entity.h"
 #include "CustomMonster.h"
 #include "../feel_vision.h"
@@ -15,7 +15,6 @@
 #include "weapon.h"
 #include "ParticlesObject.h"
 #include "script_game_object.h"
-#include "script_space.h"
 #include "script_engine.h"
 #include "movement_manager_space.h"
 #include "detail_path_manager.h"
@@ -35,6 +34,7 @@ void __stdcall ActionCallback(CKinematics *tpKinematics);
 CScriptEntity::CScriptEntity()
 {
 	m_initialized						= false;
+	m_use_animation_movement_controller	= false;
 }
 
 CScriptEntity::~CScriptEntity()
@@ -66,6 +66,7 @@ void CScriptEntity::ResetScriptData(void *pointer)
 	
 	m_caScriptName		= "";
 	m_bScriptControl	= false;
+	m_use_animation_movement_controller	= false;
 }
 
 void CScriptEntity::ClearActionQueue()
@@ -81,6 +82,7 @@ void CScriptEntity::ClearActionQueue()
 	m_tpScriptAnimation.invalidate		();
 	m_tpCurrentEntityAction				= 0;
 	m_tpNextAnimation.invalidate		();
+	m_use_animation_movement_controller	= false;
 }
 
 
@@ -116,7 +118,7 @@ void CScriptEntity::SetScriptControl(const bool bScriptControl, shared_str caSci
 		object().add_visual_callback			(&ActionCallback);
 	else
 		if (!bScriptControl && m_bScriptControl)
-			object().remove_visual_callback	(&ActionCallback);
+			object().remove_visual_callback		(&ActionCallback);
 
 	m_bScriptControl	= bScriptControl;
 	m_caScriptName		= caSciptName;
@@ -144,6 +146,7 @@ bool CScriptEntity::CheckObjectVisibility(const CGameObject *tpObject)
 {
 	if (!m_monster)
 		return			(false);
+
 	return				(m_monster->memory().visual().visible_now(tpObject));
 }
 
@@ -330,14 +333,18 @@ bool CScriptEntity::bfAssignMonsterAction(CScriptEntityAction *tpEntityAction)
 
 bool CScriptEntity::bfAssignAnimation(CScriptEntityAction *tpEntityAction)
 {
-	m_tpNextAnimation.invalidate();
+	m_tpNextAnimation.invalidate	();
+
 	if (GetCurrentAction() && GetCurrentAction()->m_tAnimationAction.m_bCompleted)
-		return		(false);
+		return						(false);
+
 	if (!xr_strlen(GetCurrentAction()->m_tAnimationAction.m_caAnimationToPlay))
-		return		(true);
-	CKinematicsAnimated	&tVisualObject = *(smart_cast<CKinematicsAnimated*>(object().Visual()));
-	m_tpNextAnimation	= tVisualObject.ID_Cycle_Safe(*GetCurrentAction()->m_tAnimationAction.m_caAnimationToPlay);
-	return			(true);
+		return						(true);
+
+	CKinematicsAnimated				&tVisualObject = *(smart_cast<CKinematicsAnimated*>(object().Visual()));
+	m_tpNextAnimation				= tVisualObject.ID_Cycle_Safe(*GetCurrentAction()->m_tAnimationAction.m_caAnimationToPlay);
+	m_use_animation_movement_controller	= GetCurrentAction()->m_tAnimationAction.m_use_animation_movement_controller;
+	return							(true);
 }
 
 const Fmatrix CScriptEntity::GetUpdatedMatrix(shared_str caBoneName, const Fvector &tPositionOffset, const Fvector &tAngleOffset)
@@ -471,7 +478,7 @@ bool CScriptEntity::bfAssignMovement(CScriptEntityAction *tpEntityAction)
 #ifdef DEBUG
 			if (!ai().level_graph().valid_vertex_id(vertex_id)) {
 				string256	S;
-				sprintf		(S,"Cannot find corresponding level vertex for the specified position [%f][%f][%f] for monster %s",VPUSH(l_tMovementAction.m_tDestinationPosition),*m_monster->cName());
+				sprintf_s		(S,"Cannot find corresponding level vertex for the specified position [%f][%f][%f] for monster %s",VPUSH(l_tMovementAction.m_tDestinationPosition),*m_monster->cName());
 				THROW2		(ai().level_graph().valid_vertex_id(vertex_id),S);
 			}
 #endif
@@ -534,6 +541,7 @@ BOOL CScriptEntity::net_Spawn		(CSE_Abstract* DC)
 	m_initialized					= true;
 	object().setVisible				(TRUE);
 	object().setEnabled				(TRUE);
+
 	return							(TRUE);
 }
 
@@ -569,13 +577,35 @@ bool CScriptEntity::bfScriptAnimation()
 		!GetCurrentAction()->m_tAnimationAction.m_bCompleted && 
 		xr_strlen(GetCurrentAction()->m_tAnimationAction.m_caAnimationToPlay)) {
 
-#ifdef _DEBUG
-//			if (!xr_strcmp("m_stalker_wounded",*object().cName()))
-//				Msg				("%6d Playing animation : %s",Device.dwTimeGlobal,*GetCurrentAction()->m_tAnimationAction.m_caAnimationToPlay);
+			if (m_tpScriptAnimation == m_tpNextAnimation)
+				return			(true);
+
+#ifdef DEBUG
+			//if (!xr_strcmp("m_stalker_wounded",*object().cName()))
+			//	Msg				("%6d Playing animation : %s , Object %s",Device.dwTimeGlobal,*GetCurrentAction()->m_tAnimationAction.m_caAnimationToPlay, *object().cName());
 #endif
-			if (m_tpScriptAnimation != m_tpNextAnimation)
-				smart_cast<CKinematicsAnimated*>(object().Visual())->PlayCycle(m_tpScriptAnimation = m_tpNextAnimation,TRUE,ScriptCallBack,this);
-			return		(true);
+			m_tpScriptAnimation = m_tpNextAnimation;
+			CKinematicsAnimated	*skeleton_animated = smart_cast<CKinematicsAnimated*>(object().Visual());
+			LPCSTR				animation_id = *GetCurrentAction()->m_tAnimationAction.m_caAnimationToPlay;
+			MotionID			animation = skeleton_animated->ID_Cycle(animation_id);
+			CBlend				*result = 0;
+			for (u16 i=0; i<MAX_PARTS; ++i) {
+				CBlend			*blend = 0;
+				if (result) {
+					skeleton_animated->LL_PlayCycle(i,animation,TRUE,0,0);
+					continue;
+				}
+
+				blend			= skeleton_animated->LL_PlayCycle(i,animation,TRUE,ScriptCallBack,this);
+				if (!blend)
+					continue;
+
+				result			= blend;
+				if (m_use_animation_movement_controller)
+					m_object->create_anim_mov_ctrl	(blend);
+			}
+
+			return				(true);
 		}
 	else {
 		m_tpScriptAnimation.invalidate();

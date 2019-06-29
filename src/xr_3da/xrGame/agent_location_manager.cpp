@@ -68,7 +68,7 @@ IC	CAgentLocationManager::CDangerLocationPtr CAgentLocationManager::location	(co
 
 bool CAgentLocationManager::suitable	(CAI_Stalker *object, const CCoverPoint *location, bool use_enemy_info) const
 {
-	CAgentMemberManager::const_iterator	I = this->object().member().members().begin(), B = I;
+	CAgentMemberManager::const_iterator	I = this->object().member().members().begin();
 	CAgentMemberManager::const_iterator	E = this->object().member().members().end();
 	for ( ; I != E; ++I) {
 		if ((*I)->object().ID() == object->ID())
@@ -154,8 +154,16 @@ void CAgentLocationManager::add	(CDangerLocationPtr location)
 
 void CAgentLocationManager::remove_old_danger_covers	()
 {
-	LOCATIONS::iterator			I = remove_if(m_danger_locations.begin(),m_danger_locations.end(),CRemoveOldDangerCover(&object().member()));
-	m_danger_locations.erase	(I,m_danger_locations.end());
+	m_danger_locations.erase	(
+		std::remove_if(
+			m_danger_locations.begin(),
+			m_danger_locations.end(),
+			CRemoveOldDangerCover(
+				&object().member()
+			)
+		),
+		m_danger_locations.end()
+	);
 }
 
 float CAgentLocationManager::danger		(const CCoverPoint *cover, CAI_Stalker *member) const
@@ -189,6 +197,12 @@ void CAgentLocationManager::update	()
 
 void CAgentLocationManager::remove_links(CObject *object)
 {
-	LOCATIONS::iterator			I = remove_if(m_danger_locations.begin(),m_danger_locations.end(),CRemoveDangerObject(object));
-	m_danger_locations.erase	(I,m_danger_locations.end());
+	m_danger_locations.erase	(
+		std::remove_if(	
+			m_danger_locations.begin(),
+			m_danger_locations.end(),
+			CRemoveDangerObject(object)
+		),
+		m_danger_locations.end()
+	);
 }

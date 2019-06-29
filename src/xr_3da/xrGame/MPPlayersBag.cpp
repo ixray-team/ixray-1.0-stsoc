@@ -23,7 +23,9 @@ void CMPPlayersBag::OnEvent(NET_Packet& P, u16 type)
 		case GE_OWNERSHIP_TAKE : 
 			{
 				P.r_u16(id);
-				CObject* O = Level().Objects.net_Find(id);
+				CObject* O					= Level().Objects.net_Find(id);
+				CInventoryItem*	pIItem		= smart_cast<CInventoryItem*>(O);
+				R_ASSERT					(pIItem->m_pCurrentInventory==NULL);
 				O->H_SetParent(this);
 				O->Position().set(Position());
 			}break;
@@ -40,13 +42,8 @@ void CMPPlayersBag::OnEvent(NET_Packet& P, u16 type)
 extern INT g_iWeaponRemove;
 bool CMPPlayersBag::NeedToDestroyObject()	const
 {
-	if (GameID() == GAME_SINGLE) return false;
-	if (Remote()) return false;
 	if (H_Parent()) return false;
 	if (g_iWeaponRemove == -1) return false;
 	if (g_iWeaponRemove == 0) return true;
-	if (TimePassedAfterIndependant() > BAG_REMOVE_TIME)
-		return true;
-
-	return false;
+	return (TimePassedAfterIndependant() > BAG_REMOVE_TIME);
 }

@@ -29,15 +29,13 @@ public:
 	
 	virtual void 			OnAnimationEnd						(u32 state);
 	virtual void 			UpdateCL							();
-//	virtual bool 			Activate							();
-//	virtual void 			Deactivate							();
-	
+
 	virtual void 			Throw();
 	virtual void 			Destroy();
 
 	
 	virtual bool			Action								(s32 cmd, u32 flags);
-	virtual bool			Useful								();
+	virtual bool			Useful								() const;
 	virtual void			State								(u32 state);
 
 	virtual void			OnH_B_Chield						()				{inherited::OnH_B_Chield();}

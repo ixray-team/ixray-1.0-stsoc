@@ -112,33 +112,40 @@ void CUICustomItem::Render(FVF::TL*& Pointer, const Fvector2& pos_ns, u32 color,
 	// Check mirror mode
 	if (tmMirrorHorisontal == eMirrorMode || tmMirrorBoth == eMirrorMode)	std::swap	(LTt.x,RBt.x);
 	if (tmMirrorVertical == eMirrorMode || tmMirrorBoth == eMirrorMode)		std::swap	(LTt.y,RBt.y);
+
+	float kx = (UI()->is_16_9_mode())?0.8333f: 1.0f;
 	// clip poly
 	sPoly2D			S; S.resize(4);
 	// LT
 	S[0].set		(0.f,0.f,LTt.x,LTt.y);
-	S[0].rotate_pt	(pivot,cosA,sinA);
+	S[0].rotate_pt	(pivot,cosA,sinA,kx);
 	S[0].pt.add		(offset);
+
 	// RT
 	S[1].set		(SZ.x,0.f,RBt.x,LTt.y);
-	S[1].rotate_pt	(pivot,cosA,sinA);
+	S[1].rotate_pt	(pivot,cosA,sinA,kx);
 	S[1].pt.add		(offset);
 	// RB
 	S[2].set		(SZ.x,SZ.y,RBt.x,RBt.y);
-	S[2].rotate_pt	(pivot,cosA,sinA);
+	S[2].rotate_pt	(pivot,cosA,sinA,kx);
 	S[2].pt.add		(offset);
 	// LB
 	S[3].set		(0.f,SZ.y,LTt.x,RBt.y);
-	S[3].rotate_pt	(pivot,cosA,sinA);
+	S[3].rotate_pt	(pivot,cosA,sinA,kx);
 	S[3].pt.add		(offset);
-	
+
+	for(int i=0; i<4;++i)
+		UI()->ClientToScreenScaled		(S[i].pt);
+
 	sPoly2D D;
 	sPoly2D* R		= UI()->ScreenFrustum().ClipPoly(S,D);
 	if (R&&R->size())
 		for (u32 k=0; k<R->size(); k++,Pointer++)
 		{
-			Fvector2 _pt;
-			UI()->ClientToScreenScaled			(_pt, (*R)[k].pt.x, (*R)[k].pt.y);
-			Pointer->set						(_pt.x, _pt.y,	color, (*R)[k].uv.x, (*R)[k].uv.y); 
+//.			Fvector2 _pt;
+//.			UI()->ClientToScreenScaled			(_pt, (*R)[k].pt.x, (*R)[k].pt.y);
+//.			Pointer->set						(_pt.x, _pt.y,	color, (*R)[k].uv.x, (*R)[k].uv.y); 
+			Pointer->set						((*R)[k].pt.x, (*R)[k].pt.y,	color, (*R)[k].uv.x, (*R)[k].uv.y); 
 		}
 }
 

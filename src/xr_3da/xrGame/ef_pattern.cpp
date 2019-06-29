@@ -42,7 +42,7 @@ CPatternFunction::~CPatternFunction()
 
 void CPatternFunction::vfLoadEF(LPCSTR caFileName)
 {
-	string256		caPath;
+	string_path		caPath;
 	if (!FS.exist(caPath,"$game_ai$",caFileName)) {
 		Msg			("! Evaluation function : File not found \"%s\"",caPath);
 		R_ASSERT	(false);
@@ -128,13 +128,16 @@ float CPatternFunction::ffGetValue()
 #ifdef DEBUG	
 	if (psAI_Flags.test(aiFuncs)) {
 		float value = ffEvaluate();
-		char caString[256];
-		int j = sprintf(caString,"%32s (",m_caName);
+		string256 caString;
+		
+		int j = sprintf_s(caString,sizeof(caString),"%32s (",m_caName);
+		
 		for ( i=0; i<m_dwVariableCount; ++i)
-			j += sprintf(caString + j," %3d",m_dwaVariableValues[i] + 1);
-		sprintf(caString + j,") = %7.2f",value);
-		Msg("- %s",caString);
-		return(value);
+			j += sprintf_s(caString + j, sizeof(caString)-j, " %3d",m_dwaVariableValues[i] + 1);
+		
+		sprintf_s	(caString + j,sizeof(caString)-j, ") = %7.2f",value);
+		Msg			("- %s",caString);
+		return		(value);
 	}
 #endif
 	

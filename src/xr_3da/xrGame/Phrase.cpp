@@ -12,7 +12,7 @@
 
 CPhrase::CPhrase	(void)
 {
-	m_iIndex			= -1;
+	m_ID				= "";
 	m_iGoodwillLevel	= 0;
 }
 CPhrase::~CPhrase	(void)

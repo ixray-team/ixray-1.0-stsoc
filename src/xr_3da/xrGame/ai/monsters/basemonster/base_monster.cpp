@@ -45,7 +45,7 @@
 
 CBaseMonster::CBaseMonster()
 {
-	m_pPhysics_support=xr_new<CCharacterPhysicsSupport>(CCharacterPhysicsSupport::EType::etBitting,this);
+	m_pPhysics_support=xr_new<CCharacterPhysicsSupport>(CCharacterPhysicsSupport::etBitting,this);
 	
 	m_pPhysics_support				->in_Init();
 
@@ -163,6 +163,9 @@ void	CBaseMonster::Hit							(SHit* pHDS)
 {
 	if (ignore_collision_hit && (pHDS->hit_type == ALife::eHitTypeStrike)) return;
 	
+	if (invulnerable())
+		return;
+
 	if (g_Alive())
 		if (!critically_wounded()) 
 			update_critical_wounded(pHDS->boneID,pHDS->power);
@@ -534,16 +537,12 @@ void CBaseMonster::OnEvent(NET_Packet& P, u16 type)
 			CObject* O	= Level().Objects.net_Find	(id);
 			VERIFY		(O);
 
-			if (inventory().Drop(smart_cast<CGameObject*>(O)) && !O->getDestroy()) {
-				O->H_SetParent	(0,!P.r_eof() && P.r_u8());
+			bool just_before_destroy	= !P.r_eof() && P.r_u8();
+			O->SetTmpPreDestroy				(just_before_destroy);
+			if (inventory().DropItem(smart_cast<CGameObject*>(O)) && !O->getDestroy()) 
+			{
+				O->H_SetParent	(0,just_before_destroy);
 				feel_touch_deny	(O,2000);
-
-//				CSE_Abstract					*e	= Level().Server->game->get_entity_from_eid(ID()); 
-//				// check if we handle corpse UI, but not destroy object
-//				if (e) {
-//					CSE_ALifeMonsterBase		*se_monster = smart_cast<CSE_ALifeMonsterBase*>(e);
-//					se_monster->m_flags.set		(CSE_ALifeMonsterBase::flSkipSpawnItem, TRUE);
-//				}
 			}
 		}
 		break;

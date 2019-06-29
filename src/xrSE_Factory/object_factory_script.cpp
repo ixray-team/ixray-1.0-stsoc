@@ -89,7 +89,7 @@ void CObjectFactory::script_register(lua_State *L)
 	module(L)
 	[
 		class_<CObjectFactory>("object_factory")
-			.def("register",	(void (CObjectFactory::*)(LPCSTR,LPCSTR,LPCSTR,LPCSTR))(CObjectFactory::register_script_class))
-			.def("register",	(void (CObjectFactory::*)(LPCSTR,LPCSTR,LPCSTR))(CObjectFactory::register_script_class))
+			.def("register",	(void (CObjectFactory::*)(LPCSTR,LPCSTR,LPCSTR,LPCSTR))(&CObjectFactory::register_script_class))
+			.def("register",	(void (CObjectFactory::*)(LPCSTR,LPCSTR,LPCSTR))(&CObjectFactory::register_script_class))
 	];
 }

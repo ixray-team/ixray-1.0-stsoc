@@ -336,13 +336,13 @@ bool CScriptStorage::load_buffer	(CLuaVirtualMachine *L, LPCSTR caBuffer, size_t
 bool CScriptStorage::do_file	(LPCSTR caScriptName, LPCSTR caNameSpaceName)
 {
 	int				start = lua_gettop(lua());
-	string256		l_caLuaFileName;
+	string_path		l_caLuaFileName;
 	IReader			*l_tpFileReader = FS.r_open(caScriptName);
 	if (!l_tpFileReader) {
 		script_log	(eLuaMessageTypeError,"Cannot open file \"%s\"",caScriptName);
 		return		(false);
 	}
-	strconcat		(l_caLuaFileName,"@",caScriptName);
+	strconcat		(sizeof(l_caLuaFileName),l_caLuaFileName,"@",caScriptName);
 	
 	if (!load_buffer(lua(),static_cast<LPCSTR>(l_tpFileReader->pointer()),(size_t)l_tpFileReader->length(),l_caLuaFileName,caNameSpaceName)) {
 //		VERIFY		(lua_gettop(lua()) >= 4);
@@ -560,8 +560,8 @@ void CScriptStorage::print_error(CLuaVirtualMachine *L, int iErrorCode)
 
 void CScriptStorage::flush_log()
 {
-	string256			log_file_name;
-	strconcat           (log_file_name,Core.ApplicationName,"_",Core.UserName,"_lua.log");
+	string_path			log_file_name;
+	strconcat           (sizeof(log_file_name),log_file_name,Core.ApplicationName,"_",Core.UserName,"_lua.log");
 	FS.update_path      (log_file_name,"$logs$",log_file_name);
 	m_output.save_to	(log_file_name);
 }

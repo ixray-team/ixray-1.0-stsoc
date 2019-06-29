@@ -237,15 +237,22 @@ bool CBulletManager::CalcBullet (collide::rq_results & rq_storage, xr_vector<ISp
 	//RayQuery() она может поменяться из-за рикошетов
 	//и столкновений с объектами
 	Fvector cur_dir					= bullet->dir;
-	
+	bullet_test_callback_data		bullet_data;
+	bullet_data.pBullet				= bullet;
+	bullet_data.bStopTracing		= true;
+
 	bullet->flags.ricochet_was		= 0;
 
 	collide::ray_defs RD			(bullet->pos, bullet->dir, range, CDB::OPT_CULL, collide::rqtBoth);
 	BOOL result						= FALSE;
 	VERIFY							(!fis_zero(RD.dir.square_magnitude()));
-	result							= Level().ObjectSpace.RayQuery(rq_storage, RD, firetrace_callback, bullet, test_callback, NULL);
-	if (result) range				= (rq_storage.r_begin()+rq_storage.r_count()-1)->range;
-	range		= _max				(EPS_L,range);
+	result							= Level().ObjectSpace.RayQuery(rq_storage, RD, firetrace_callback, &bullet_data, test_callback, NULL);
+	
+	if (result && bullet_data.bStopTracing) 
+	{
+		range						= (rq_storage.r_begin()+rq_storage.r_count()-1)->range;
+	}
+	range							= _max				(EPS_L,range);
 
 	bullet->flags.skipped_frame = (Device.dwFrame >= bullet->frame_num);
 

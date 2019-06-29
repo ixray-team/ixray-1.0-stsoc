@@ -82,13 +82,13 @@ BOOL CTheoraSurface::Load(const char* fname)
 	BOOL res			= m_rgb->Load(fname);
 	if (res){
 		string_path		alpha,ext;
-		strcpy			(alpha,fname);
+		strcpy_s			(alpha,fname);
 		pstr pext		= strext(alpha);
 		if (pext){	
-			strcpy		(ext,pext);
+			strcpy_s		(ext,pext);
 			*pext		= 0;
 		}
-		strconcat		(alpha,alpha,"#alpha",ext);
+		strconcat		(sizeof(alpha),alpha,alpha,"#alpha",ext);
 		if (FS.exist(alpha)){
 			m_alpha		= xr_new<CTheoraStream>	();
 			if (!m_alpha->Load(alpha))	res = FALSE;

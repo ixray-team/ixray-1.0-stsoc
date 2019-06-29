@@ -20,12 +20,12 @@ void IGame_ObjectPool::prefetch	()
 	int	p_count			= 0;
 	::Render->model_Logging	(FALSE);
 
-	string256 section	;
+	string256				section;
 	// prefetch objects
-	strconcat				(section,"prefetch_objects_",g_pGamePersistent->m_game_params.m_game_type);
+	strconcat				(sizeof(section),section,"prefetch_objects_",g_pGamePersistent->m_game_params.m_game_type);
 	CInifile::Sect& sect	= pSettings->r_section(section);
-	for (CInifile::SectIt I=sect.begin(); I!=sect.end(); I++)	{
-		CInifile::Item& item= *I;
+	for (CInifile::SectCIt I=sect.Data.begin(); I!=sect.Data.end(); I++)	{
+		const CInifile::Item& item= *I;
 		CLASS_ID CLS		= pSettings->r_clsid(item.first.c_str(),"class");
 		p_count				++;
 		CObject* pObject	= (CObject*) NEW_INSTANCE(CLS);
@@ -114,7 +114,7 @@ void IGame_ObjectPool::clear	( )
 CObject*	IGame_ObjectPool::create			( LPCSTR	name	)
 {
 	string256			l_name;
-	POOL_IT	it			=	map_POOL.find	(shared_str(strlwr(strcpy(l_name,name))));
+	POOL_IT	it			=	map_POOL.find	(shared_str(strlwr(strcpy_s(l_name,name))));
 	if (it!=map_POOL.end())
 	{
 		// Instance found

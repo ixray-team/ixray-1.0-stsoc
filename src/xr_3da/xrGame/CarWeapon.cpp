@@ -59,21 +59,21 @@ CCarWeapon::CCarWeapon(CPhysicsShellHolder* obj)
 	m_object->XFORM().transform_dir		(m_destEnemyDir);
 
 
-
-//	static float f1 = 0.5f;
-//	static float f2 = 1.5f;
-//	static float f3 = PI_MUL_2;
-
 	inheritedShooting::Light_Create		();
 	Load								(pUserData->r_string("mounted_weapon_definition","wpn_section"));
 	SetBoneCallbacks					();
 	m_object->processing_activate		();
+
+	m_weapon_h							= matrices[m_rotate_y_bone].c.y;
+	m_fire_norm.set						(0,1,0);
+	m_fire_dir.set						(0,0,1);
+	m_fire_pos.set						(0,0,0);
 }
 
 CCarWeapon::~CCarWeapon()
 {
 	delete_data(m_Ammo);
-	m_object->processing_deactivate		();
+//.	m_object->processing_deactivate		();
 }
 
 void CCarWeapon::Load(LPCSTR section)
@@ -87,6 +87,9 @@ void CCarWeapon::UpdateCL()
 {
 	if(!m_bActive)				return;
 	UpdateBarrelDir				();
+	CKinematics* K				= smart_cast<CKinematics*>(m_object->Visual());
+	K->CalculateBones_Invalidate();
+	K->CalculateBones			();
 	UpdateFire					();
 }
 
@@ -113,6 +116,11 @@ void CCarWeapon::UpdateFire()
 		OnShot();
 		fTime += fTimeToFire;
 	}
+}
+
+void CCarWeapon::Render_internal()
+{
+	RenderLight		();	
 }
 
 void CCarWeapon::SetBoneCallbacks()
@@ -145,6 +153,8 @@ void CCarWeapon::UpdateBarrelDir()
 	m_fire_bone_xform.transform_tiny(m_fire_pos);
 	m_fire_dir.set(0,0,1);
 	m_fire_bone_xform.transform_dir(m_fire_dir);
+	m_fire_norm.set(0,1,0);
+	m_fire_bone_xform.transform_dir(m_fire_norm);
 
 
 	m_allow_fire		= true;
@@ -266,4 +276,18 @@ void CCarWeapon::SetParam			(int id, Fvector val)
 			m_destEnemyDir.sub(val,m_fire_pos).normalize_safe();
 		break;
 	}
+}
+const Fvector&	CCarWeapon::ViewCameraPos()
+{
+	return m_fire_pos;
+}
+
+const Fvector&	CCarWeapon::ViewCameraDir()
+{
+	return m_fire_dir;
+}
+
+const Fvector&	CCarWeapon::ViewCameraNorm()
+{
+	return m_fire_norm;
 }

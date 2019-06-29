@@ -54,17 +54,17 @@ void CUIPropertiesBox::SendMessage(CUIWindow *pWnd, s16 msg, void *pData)
 	inherited::SendMessage(pWnd, msg, pData);
 }
 
-bool CUIPropertiesBox::AddItem(const char*  str, void* pData, int value)
+bool CUIPropertiesBox::AddItem(const char*  str, void* pData, u32 tag_value)
 {
 	CUIListBoxItem* itm		= m_UIListWnd.AddItem(str);
-	itm->SetID				(u32(value));
+	itm->SetTAG				(tag_value);
 	itm->SetData			(pData);
 
 	return true;
 }
-void CUIPropertiesBox::RemoveItem(int index)
+void CUIPropertiesBox::RemoveItemByTAG(u32 tag)
 {
-	m_UIListWnd.RemoveWindow(m_UIListWnd.GetItemByID(index));
+	m_UIListWnd.RemoveWindow(m_UIListWnd.GetItemByTAG(tag));
 }
 
 void CUIPropertiesBox::RemoveAll()

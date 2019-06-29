@@ -17,10 +17,12 @@ void	CLocatorAPI::auth_generate		(xr_vector<xr_string>&	ignore, xr_vector<xr_str
 	auth_options*	_o	= xr_new<auth_options>	();
 	_o->ignore			= ignore	;
 	_o->important		= important	;
-	if( true || strstr(Core.CompName,"RIP") ){//stupid Prescott :(
-		FS.auth_runtime		(_o);
-	}else
-		thread_spawn		(auth_entry,"checksum",0,_o);
+
+#if 1
+	FS.auth_runtime		(_o);
+#else
+	thread_spawn		(auth_entry,"checksum",0,_o);
+#endif
 }
 
 u64		CLocatorAPI::auth_get			()
@@ -36,48 +38,60 @@ void	CLocatorAPI::auth_runtime		(void*	params)
 	auth_options*		_o	= (auth_options*)	params	;
 	m_auth_code			= 0;
 	bool				do_break = false;
-//.	bool b_extern_auth = !!strstr(Core.Params,"-auth_code");
 
-	if(true /*!b_extern_auth*/)
-		for (files_it it = files.begin(); it!=files.end(); ++it)
-		{
+#ifdef DEBUG
+	bool				b_extern_auth = !!strstr(Core.Params,"asdf");
+	if (!b_extern_auth)
+#endif // DEBUG
+	{
+		for (files_it it = files.begin(); it!=files.end(); ++it) {
 			const file&	f	=	*it;
 
 			// test for skip
 			BOOL	bSkip	=	FALSE;
-			for (u32 s=0; s<_o->ignore.size(); s++)		{
+			for (u32 s=0; s<_o->ignore.size(); s++) {
 				if (strstr(f.name,_o->ignore[s].c_str()))	
 					bSkip	=	TRUE;
 			}
-			if (bSkip)		continue	;
 
-				// test for important
-				for (s=0; s<_o->important.size(); s++)	
-				{
-					if ((f.size_real != 0) && strstr(f.name,_o->important[s].c_str()))	
-					{
-						// crc for file				
-						IReader*	r	= FS.r_open	(f.name);
-						if (!r) {
-							do_break	= true;
-							break;
-						}
-						u32 crc			= crc32		(r->pointer(),r->length());
-						
-						FS.r_close		(r);
-						m_auth_code	^=	u64(crc);
+			if (bSkip)
+				continue;
+
+			// test for important
+			for (s=0; s<_o->important.size(); s++) {
+				if ((f.size_real != 0) && strstr(f.name,_o->important[s].c_str())) {
+					// crc for file				
+					IReader*	r	= FS.r_open	(f.name);
+					if (!r) {
+						do_break	= true;
+						break;
 					}
+					u32 crc			= crc32		(r->pointer(),r->length());
+					
+#ifdef DEBUG
+					if(strstr(Core.Params,"qwerty"))
+						Msg("auth %s = %d",f.name,crc);
+#endif // DEBUG
+
+					FS.r_close		(r);
+					m_auth_code	^=	u64(crc);
 				}
+			}
 		
 			if (do_break)
 				break;
-			}
-//.	else
-//.	{
-//.		string64			c_auth_code;
-//.		sscanf				(strstr(Core.Params,"-auth_code ")+11,"%[^ ] ",c_auth_code);
-//.		m_auth_code			= _atoi64(c_auth_code);
-//.	};
+		}
+#ifdef DEBUG
+		Msg					( "auth_code = %d" , m_auth_code );
+#endif // DEBUG
+	}
+#ifdef DEBUG
+	else {
+		string64			c_auth_code;
+		sscanf				(strstr(Core.Params,"asdf ")+5,"%[^ ] ",c_auth_code);
+		m_auth_code			= _atoi64(c_auth_code);
+	}
+#endif // DEBUG
 	xr_delete			(_o);
 	m_auth_lock.Leave	()	;
 }

@@ -37,21 +37,21 @@ void CUIScrollBar::Init(float x, float y, float length, bool bIsHorizontal, LPCS
 	{
 		CUIWindow::Init				(x,y, length, height);
 
-        strconcat					(_path, profile, ":left_arrow");
+        strconcat					(sizeof(_path),_path, profile, ":left_arrow");
 		CUIXmlInit::Init3tButton	(xml_doc, _path, 0, m_DecButton);
 		m_DecButton->SetWndPos		(0.0f, 0.0f);
 
-		strconcat					(_path, profile, ":right_arrow");
+		strconcat					(sizeof(_path),_path, profile, ":right_arrow");
 		CUIXmlInit::Init3tButton	(xml_doc, _path, 0, m_IncButton);
 		m_IncButton->SetWndPos		(length - m_IncButton->GetWidth(), 0.0f);
 
 		m_ScrollBox->SetHorizontal	();
 
-		strconcat					(_path, profile, ":box");
+		strconcat					(sizeof(_path),_path, profile, ":box");
 		CUIXmlInit::InitStatic		(xml_doc, _path, 0, m_ScrollBox);
 		m_IncButton->SetWndPos		(0.0f, length/2);
 
-		strconcat					(_path, profile, ":back:texture");
+		strconcat					(sizeof(_path),_path, profile, ":back:texture");
 		LPCSTR texture				= xml_doc.Read(_path, 0, "");
 		R_ASSERT					(texture);
 		CUITextureMaster::InitTexture(texture, m_StaticBackground);
@@ -59,19 +59,19 @@ void CUIScrollBar::Init(float x, float y, float length, bool bIsHorizontal, LPCS
 	}else{
 		CUIWindow::Init				(x,y, height, length);
 
-		strconcat					(_path, profile, ":up_arrow");
+		strconcat					(sizeof(_path),_path, profile, ":up_arrow");
 		CUIXmlInit::Init3tButton	(xml_doc, _path, 0, m_DecButton);
 		m_DecButton->SetWndPos		(0.0f, 0.0f);
 
-		strconcat					(_path, profile, ":down_arrow");
+		strconcat					(sizeof(_path),_path, profile, ":down_arrow");
  		CUIXmlInit::Init3tButton	(xml_doc, _path, 0, m_IncButton);
 		m_IncButton->SetWndPos		(0.0f, length - height);
 
 		m_ScrollBox->SetVertical	();
 
-		strconcat					(_path, profile, ":box_v");
+		strconcat					(sizeof(_path),_path, profile, ":box_v");
 		CUIXmlInit::InitStatic		(xml_doc, _path, 0, m_ScrollBox);		
-		strconcat					(_path, profile, ":back_v:texture");
+		strconcat					(sizeof(_path),_path, profile, ":back_v:texture");
 		LPCSTR texture				= xml_doc.Read(_path, 0, "");
 		R_ASSERT					(texture);
 
@@ -161,7 +161,7 @@ bool CUIScrollBar::OnKeyboardHold(int dik)
 {
 	if(dik==MOUSE_1 && (last_hold_time+100)<Device.dwTimeContinual)
 	{
-		Fvector2 cursor_pos			= GetUICursor()->GetPos();
+		Fvector2 cursor_pos			= GetUICursor()->GetCursorPosition();
 		Frect	dec_rect;
 		Frect	inc_rect;
 

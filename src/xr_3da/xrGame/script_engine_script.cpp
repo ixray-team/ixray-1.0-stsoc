@@ -6,14 +6,11 @@
 //	Description : ALife Simulator script engine export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_engine.h"
-#include "script_space.h"
 #include "ai_space.h"
 #include "script_debugger.h"
-
-#include <ostream>
-#include <luabind/operator.hpp>
+//#include <ostream>
 
 using namespace luabind;
 
@@ -42,7 +39,7 @@ void FlushLogs()
 #ifdef DEBUG
 	FlushLog();
 	ai().script_engine().flush_log();
-#endif
+#endif // DEBUG
 }
 
 void verify_if_thread_is_running()
@@ -171,11 +168,11 @@ IC	profile_timer_script	operator+	(const profile_timer_script &portion0, const p
 	return					(result);
 }
 
-IC	std::ostream& operator<<(std::ostream &stream, profile_timer_script &timer)
-{
-	stream					<< timer.time();
-	return					(stream);
-}
+//IC	std::ostream& operator<<(std::ostream &stream, profile_timer_script &timer)
+//{
+//	stream					<< timer.time();
+//	return					(stream);
+//}
 
 #ifdef XRGAME_EXPORTS
 ICF	u32	script_time_global	()	{ return Device.dwTimeGlobal; }
@@ -192,7 +189,7 @@ void CScriptEngine::script_register(lua_State *L)
 			.def(constructor<profile_timer_script&>())
 			.def(const_self + profile_timer_script())
 			.def(const_self < profile_timer_script())
-			.def(tostring(self))
+//			.def(tostring(self))
 			.def("start",&profile_timer_script::start)
 			.def("stop",&profile_timer_script::stop)
 			.def("time",&profile_timer_script::time)

@@ -8,7 +8,7 @@ public:
 	dlgItem			(CUIWindow* pWnd);
 	CUIWindow*		wnd;
 	bool			enabled;
-	bool operator < (const dlgItem& itm);
+	bool operator < (const dlgItem& itm) const;
 };
 
 class recvItem{

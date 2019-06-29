@@ -13,6 +13,7 @@
 class CEnvelope;
 class IWriter;
 class IReader;
+class motion_marks;
 
 enum EChannelType{
 	ctUnsupported = -1,
@@ -59,7 +60,7 @@ public:
 					CCustomMotion	(CCustomMotion* src);
 	virtual			~CCustomMotion	();
 
-	void			SetName			(const char* n)	{string256 tmp; tmp[0]=0; if(n){strcpy(tmp,n); strlwr(tmp);} name=tmp;}
+	void			SetName			(const char* n)	{string256 tmp; tmp[0]=0; if(n){strcpy_s(tmp,n); strlwr(tmp);} name=tmp;}
 	LPCSTR			Name			()				{return name.c_str();}
     int				FrameStart		()				{return iFrameStart;}
     int				FrameEnd		()				{return iFrameEnd;}
@@ -114,6 +115,7 @@ public:
 };
 
 //--------------------------------------------------------------------------
+
 enum ESMFlags{
     esmFX		= 1<<0,
     esmStopAtEnd= 1<<1,
@@ -121,15 +123,20 @@ enum ESMFlags{
     esmSyncPart	= 1<<3
 };
 
+#ifdef _EDITOR
+	#include "SkeletonMotions.h"
+
 class ENGINE_API CSMotion: public CCustomMotion{
 	BoneMotionVec	bone_mots;
 public:
-    u16				m_BoneOrPart;
-    float			fSpeed;
-    float			fAccrue;
-    float			fFalloff;
-    float			fPower;
-	Flags8			m_Flags;
+    u16			           	        m_BoneOrPart;
+    float		           	        fSpeed;
+    float		           	        fAccrue;
+    float		           	        fFalloff;
+    float		           	        fPower;
+	Flags8		           	        m_Flags;
+
+	xr_vector<motion_marks>			marks;
 
     void			Clear			();
 public:
@@ -155,10 +162,11 @@ public:
     void			WorldRotate		(int boneId, float h, float p, float b);
 
     void			Optimize		();
-#ifdef _LW_EXPORT
+	#ifdef _LW_EXPORT
 	void			ParseBoneMotion	(LWItemID bone);
-#endif
+	#endif
 };
+#endif
 
 struct ECORE_API SAnimParams		{
     float			t;

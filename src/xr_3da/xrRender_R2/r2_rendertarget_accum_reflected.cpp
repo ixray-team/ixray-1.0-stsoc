@@ -15,6 +15,7 @@ void CRenderTarget::accum_reflected		(light* L)
 	RCache.set_xform_view		(Device.mView		);
 	RCache.set_xform_project	(Device.mProject	);
 	bIntersect					= enable_scissor	(L);
+	enable_dbt_bounds			(L);
 
 	// *****************************	Minimize overdraw	*************************************
 	// Select shader (front or back-faces), *** back, if intersect near plane
@@ -68,4 +69,7 @@ void CRenderTarget::accum_reflected		(light* L)
 		RCache.set_c				("m_texgen",		m_Texgen);
 		draw_volume					(L);
 	}
+
+	// 
+	u_DBT_disable	();
 }

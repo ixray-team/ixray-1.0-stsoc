@@ -89,8 +89,10 @@ void CPHWorld::SetStep(dReal s)
 void CPHWorld::Create()
 {
 	dWorldID phWorld=0;
+	
 	if (psDeviceFlags.test(mtPhysics))	Device.seqFrameMT.Add	(this,REG_PRIORITY_HIGH);
 	else								Device.seqFrame.Add		(this,REG_PRIORITY_LOW);
+	
 	m_commander							=xr_new<CPHCommander>();
 	//dVector3 extensions={2048,256,2048};
 	/*

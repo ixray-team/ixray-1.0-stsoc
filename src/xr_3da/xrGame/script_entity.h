@@ -57,6 +57,7 @@ protected:
 	bool						m_bScriptControl;
 	shared_str					m_caScriptName;
 	MotionID					m_tpNextAnimation;
+	bool						m_use_animation_movement_controller;
 	CScriptEntityAction			*m_tpCurrentEntityAction;
 
 public:

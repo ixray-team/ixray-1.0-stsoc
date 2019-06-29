@@ -30,9 +30,9 @@ from ODE.
 #ifndef _ODE_GEOM_H_
 #define _ODE_GEOM_H_
 
-#include <ode/common.h>
-#include <ode/space.h>
-#include <ode/contact.h>
+#include "common.h"
+#include "space.h"
+#include "contact.h"
 
 #if defined SHARED_GEOM_H_INCLUDED_FROM_DEFINING_FILE
 #define GLOBAL_SHAREDLIB_SPEC SHAREDLIBEXPORT

@@ -27,6 +27,11 @@
 #include <al.h>
 #include <alc.h>
 
+#pragma warning(push)
+#pragma warning(disable:4995)
+#include <objbase.h>
+#pragma warning(pop)
+
 
 /* 
  * Init call
@@ -54,7 +59,8 @@ void ALDeviceList::Enumerate()
 	// have a set of vectors storing the device list, selection status, spec version #, and XRAM support status
 	// -- empty all the lists and reserve space for 10 devices
 	m_devices.clear				();
-
+	
+	CoUninitialize();
 	// grab function pointers for 1.0-API functions, and if successful proceed to enumerate all devices
 	if (alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")) 
 	{
@@ -74,8 +80,11 @@ void ALDeviceList::Enumerate()
 		// Also we assume that if "Generic Hardware" exists, than "Generic Software" is also exists
 		// Maybe wrong
 		
-		m_defaultDeviceName			= AL_GENERIC_SOFTWARE;
-		Msg("SOUND: OpenAL: default SndDevice name set to %s", m_defaultDeviceName.c_str());
+		if(0==stricmp(m_defaultDeviceName.c_str(),AL_GENERIC_HARDWARE))
+		{
+			m_defaultDeviceName			= AL_GENERIC_SOFTWARE;
+			Msg("SOUND: OpenAL: default SndDevice name set to %s", m_defaultDeviceName.c_str());
+		}
 
 		index				= 0;
 		// go through device list (each device terminated with a single NULL, list terminated with double NULL)
@@ -90,7 +99,6 @@ void ALDeviceList::Enumerate()
 					alcMakeContextCurrent(context);
 					// if new actual device name isn't already in the list, then add it...
 					actualDeviceName = alcGetString(device, ALC_DEVICE_SPECIFIER);
-					Msg("SOUND: OpenAL: actualDeviceName for [%s] is [%s]",devices,actualDeviceName);
 
 					if ( (actualDeviceName != NULL) && xr_strlen(actualDeviceName)>0 ) 
 					{
@@ -124,9 +132,14 @@ void ALDeviceList::Enumerate()
 	for (int i = 0; i < GetNumDevices(); i++)
 	{
 		GetDeviceVersion		(i, &majorVersion, &minorVersion);
-		Msg	("%d. %s, Spec Version %d.%d ", 
-			i+1, GetDeviceName(i).c_str(), majorVersion, minorVersion);
+		Msg	("%d. %s, Spec Version %d.%d %s", 
+			i+1, 
+			GetDeviceName(i).c_str(), 
+			majorVersion, 
+			minorVersion,
+			(GetDeviceName(i)==m_defaultDeviceName)? "(default)":"" );
 	}
+	CoInitializeEx (NULL, COINIT_MULTITHREADED);
 }
 
 void ALDeviceList::SelectBestDevice()

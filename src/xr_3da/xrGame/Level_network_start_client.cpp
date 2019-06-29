@@ -29,7 +29,7 @@ bool	CLevel::net_start_client1				()
 
 	// Startup client
 	string256					temp;
-	sprintf						(temp,"%s %s",
+	sprintf_s						(temp,"%s %s",
 								CStringTable().translate("st_client_connecting_to").c_str(), name_of_server);
 
 	g_pGamePersistent->LoadTitle				(temp);
@@ -66,7 +66,9 @@ bool	CLevel::net_start_client3				()
 			Disconnect			();
 			pApp->LoadEnd		();
 			connected_to_server = FALSE;
-			return false;
+			m_name				= level_name;
+			m_connect_server_err = xrServer::ErrNoLevel;
+			return				false;
 		}
 		pApp->Level_Set			(level_id);
 		m_name					= level_name;
@@ -103,17 +105,32 @@ bool	CLevel::net_start_client4				()
 			Msg		("* connection sync: %d ms", timer_sync.GetElapsed_ms());
 			while	(!net_isCompleted_Sync())	{ ClientReceive(); Sleep(5); }
 		}
+
+		while(!game_configured)			
+		{ 
+			ClientReceive(); 
+			if(Server)
+				Server->Update()	;
+			Sleep(5); 
+		}
+/*
 		if(psNET_direct_connect)
 		{
 			ClientReceive(); 
+			if(Server)
+					Server->Update()	;
 			Sleep(5);
 		}else
+
 			while(!game_configured)			
 			{ 
 				ClientReceive(); 
+				if(Server)
+					Server->Update()	;
 				Sleep(5); 
 			}
-	}
+*/
+		}
 	return true;
 }
 
@@ -121,11 +138,11 @@ bool	CLevel::net_start_client5				()
 {
 	if(connected_to_server){
 		// HUD
-		pHUD->Load							();
 
 		// Textures
-		if	(!g_pGamePersistent->bDedicatedServer)
+		if	(!g_dedicated_server)
 		{
+			pHUD->Load							();
 			g_pGamePersistent->LoadTitle				("st_loading_textures");
 			Device.Resources->DeferredLoad		(FALSE);
 			Device.Resources->DeferredUpload	();

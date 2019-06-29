@@ -28,7 +28,7 @@ CScriptIniFile::~CScriptIniFile		()
 
 LPCSTR	CScriptIniFile::update		(LPCSTR file_name)
 {
-	string256			S1;
+	string_path			S1;
 	FS.update_path		(S1,"$game_config$",file_name);
 	return				(*shared_str(S1));
 }

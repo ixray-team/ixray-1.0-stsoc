@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "helicopter.h"
 #include "xrserver_objects_alife.h"
 #include "PhysicsShell.h"
@@ -302,7 +302,7 @@ void CHelicopter::MoveStep()
 		float speed_ = _min(m_movement.GetSpeedInDestPoint(), GetMaxVelocity() );
 
 		static float ang = pSettings->r_float	(cNameSect(),"magic_angle");
-		if(angle_difference(m_movement.currPathH,desired_H)>ang)
+		if(m_movement.curLinearSpeed>GetMaxVelocity() || angle_difference(m_movement.currPathH,desired_H)>ang)
 			m_movement.curLinearAcc = -m_movement.LinearAcc_bk;
 		else
 			m_movement.curLinearAcc = GetCurrAcc(	m_movement.curLinearSpeed,
@@ -406,18 +406,18 @@ void CHelicopter::UpdateCL()
 		MoveStep();
 		m_stepRemains-=STEP;
 	}
-/*
+
 #ifdef DEBUG
 	if(bDebug){
 		CGameFont* F		= UI()->Font()->pFontDI;
 		F->SetAligment		(CGameFont::alCenter);
-		F->SetSizeI			(0.02f);
+//		F->SetSizeI			(0.02f);
 		F->OutSetI			(0.f,-0.8f);
 		F->SetColor			(0xffffffff);
 		F->OutNext			("Heli: speed=%4.4f acc=%4.4f dist=%4.4f",m_movement.curLinearSpeed, m_movement.curLinearAcc, m_movement.GetDistanceToDestPosition());
 	}
 #endif
-*/
+
 	if(m_engineSound._feedback())
 		m_engineSound.set_position(XFORM().c);
 	

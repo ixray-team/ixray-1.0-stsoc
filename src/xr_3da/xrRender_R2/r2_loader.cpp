@@ -49,7 +49,7 @@ void CRender::level_Load(IReader* fs)
 	Wallmarks					= xr_new<CWallmarksEngine>	();
 	Details						= xr_new<CDetailManager>	();
 
-	if	(!g_pGamePersistent->bDedicatedServer)	{
+	if	(!g_dedicated_server)	{
 		// VB,IB,SWI
 		g_pGamePersistent->LoadTitle("st_loading_geometry");
 		{

@@ -1,6 +1,4 @@
-#include "stdafx.h"
-#pragma hdrstop
-
+#include "pch_script.h"
 #include "HangingLamp.h"
 #include "../LightAnimLibrary.h"
 #include "../xr_collide_form.h"
@@ -9,7 +7,6 @@
 #include "xrserver_objects_alife.h"
 #include "PHElement.h"
 #include "../skeletonanimated.h"
-#include "script_space.h"
 #include "game_object_space.h"
 #include "script_callback_ex.h"
 #include "script_game_object.h"
@@ -287,7 +284,7 @@ void	CHangingLamp::Hit					(SHit* pHDS)
 	if(m_pPhysicsShell) m_pPhysicsShell->applyHit(pHDS->p_in_bone_space,pHDS->dir,pHDS->impulse,pHDS->boneID,pHDS->hit_type);
 
 	if (pHDS->boneID==light_bone)fHealth =	0.f;
-	else	fHealth -=	pHDS->damage()*100.0f;
+	else	fHealth -=	pHDS->damage()*100.f;
 
 	if (bWasAlive && (!Alive()))		TurnOff	();
 }

@@ -8,16 +8,18 @@
 
 #pragma once
 
+#ifndef PRIQUEL
 #ifdef AI_COMPILER
 IC CGameLevelCrossTable::CGameLevelCrossTable(LPCSTR fName)
-#else
-IC CGameLevelCrossTable::CGameLevelCrossTable()
-#endif
+#else // AI_COMPILER
+IC CGameLevelCrossTable::CGameLevelCrossTable	()
+#endif // AI_COMPILER
 {
 #ifndef AI_COMPILER
-	string256			fName;
+	string_path			fName;
 	FS.update_path		(fName,"$level$",CROSS_TABLE_NAME);
-#endif
+#endif // AI_COMPILER
+
 	m_tpCrossTableVFS	= FS.r_open(fName);
 	R_ASSERT2			(m_tpCrossTableVFS,"Can't open cross table!");
 	
@@ -32,14 +34,27 @@ IC CGameLevelCrossTable::CGameLevelCrossTable()
 	R_ASSERT2			(m_chunk,"Cross table is corrupted!");
 	m_tpaCrossTable		= (CCell*)m_chunk->pointer();
 };
-
-IC CGameLevelCrossTable::~CGameLevelCrossTable()
+#else // PRIQUEL
+IC CGameLevelCrossTable::CGameLevelCrossTable	(const void *buffer, const u32 &buffer_size)
 {
+	Memory.mem_copy		(&m_tCrossTableHeader,buffer,sizeof(m_tCrossTableHeader));
+	buffer				= (const u8*)buffer + sizeof(m_tCrossTableHeader);
+
+	R_ASSERT2			(m_tCrossTableHeader.version() == XRAI_CURRENT_VERSION,"Cross table version mismatch!");
+	
+	m_tpaCrossTable		= (CCell*)buffer;
+}
+#endif // PRIQUEL
+
+IC CGameLevelCrossTable::~CGameLevelCrossTable	()
+{
+#ifndef PRIQUEL
 	VERIFY				(m_chunk);
 	m_chunk->close		();
 	
 	VERIFY				(m_tpCrossTableVFS);
 	FS.r_close			(m_tpCrossTableVFS);
+#endif // PRIQUEL
 };
 
 IC const CGameLevelCrossTable::CCell &CGameLevelCrossTable::vertex(u32 level_vertex_id) const

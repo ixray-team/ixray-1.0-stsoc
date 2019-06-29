@@ -1,8 +1,4 @@
-// Actor_Network.cpp:	 для работы с сетью
-//////////////////////////////////////////////////////////////////////
-
-#include "stdafx.h"
-
+#include "pch_script.h"
 #include "actor.h"
 #include "Actor_Flags.h"
 #include "inventory.h"
@@ -44,6 +40,7 @@
 #include "actor_statistic_mgr.h"
 #include "characterphysicssupport.h"
 #include "game_cl_base_weapon_usage_statistic.h"
+#include "clsid_game.h"
 
 #ifdef DEBUG
 #	include "debug_renderer.h"
@@ -585,6 +582,11 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 
 	Engine.Sheduler.Register	(this,TRUE);
 
+	if (!IsGameTypeSingle())
+	{
+		setEnabled(TRUE);
+	}
+
 	hit_slowmo				= 0.f;
 
 	OnChangeVisual();
@@ -654,7 +656,8 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 	callback.bind	(this,&CActor::on_requested_spawn);
 	m_holder_id				= E->m_holderID;
 	if (E->m_holderID != ALife::_OBJECT_ID(-1))
-		Level().client_spawn_manager().add(E->m_holderID,ID(),callback);
+		if(!g_dedicated_server)
+			Level().client_spawn_manager().add(E->m_holderID,ID(),callback);
 	//F
 	//-------------------------------------------------------------
 	m_iLastHitterID = u16(-1);
@@ -689,11 +692,14 @@ void CActor::net_Destroy	()
 	inherited::net_Destroy	();
 
 	if (m_holder_id != ALife::_OBJECT_ID(-1))
-		Level().client_spawn_manager().remove	(m_holder_id,ID());
+		if(!g_dedicated_server)
+			Level().client_spawn_manager().remove	(m_holder_id,ID());
 
 	delete_data				(m_game_task_manager);
 	delete_data				(m_statistic_manager);
-	Level().MapManager		().RemoveMapLocationByObjectID(ID());
+	
+	if(!g_dedicated_server)
+		Level().MapManager		().RemoveMapLocationByObjectID(ID());
 
 #pragma todo("Dima to MadMax : do not comment inventory owner net_Destroy!!!")
 	CInventoryOwner::net_Destroy();
@@ -751,7 +757,8 @@ void CActor::net_Relcase	(CObject* O)
 	}
 	inherited::net_Relcase	(O);
 
-	memory().remove_links	(O);
+	if (!g_dedicated_server)
+		memory().remove_links(O);
 	m_pPhysics_support->in_NetRelcase(O);
 }
 
@@ -849,31 +856,32 @@ void	CActor::ChangeVisual			( shared_str NewVisual )
 
 	cNameVisual_set(NewVisual);
 
-//	OnChangeVisual();
+	g_SetAnimation			(mstate_real);
+	Visual()->dcast_PKinematics()->CalculateBones_Invalidate();
+	Visual()->dcast_PKinematics()->CalculateBones();
 };
 
 void ACTOR_DEFS::net_update::lerp(ACTOR_DEFS::net_update& A, ACTOR_DEFS::net_update& B, float f)
 {
-	float invf		= 1.f-f;
-	// 
-	o_model			= angle_lerp	(A.o_model,B.o_model,		f);
-	o_torso.yaw		= angle_lerp	(A.o_torso.yaw,B.o_torso.yaw,f);
-	o_torso.pitch	= angle_lerp	(A.o_torso.pitch,B.o_torso.pitch,f);
-	o_torso.roll	= angle_lerp	(A.o_torso.roll,B.o_torso.roll,f);
-	p_pos.lerp		(A.p_pos,B.p_pos,f);
-	p_accel			= (f<0.5f)?A.p_accel:B.p_accel;
-	p_velocity.lerp	(A.p_velocity,B.p_velocity,f);
-	mstate			= (f<0.5f)?A.mstate:B.mstate;
-	weapon			= (f<0.5f)?A.weapon:B.weapon;
-	fHealth			= invf*A.fHealth+f*B.fHealth;
+//	float invf		= 1.f-f;
+//	// 
+//	o_model			= angle_lerp	(A.o_model,B.o_model,		f);
+//	o_torso.yaw		= angle_lerp	(A.o_torso.yaw,B.o_torso.yaw,f);
+//	o_torso.pitch	= angle_lerp	(A.o_torso.pitch,B.o_torso.pitch,f);
+//	o_torso.roll	= angle_lerp	(A.o_torso.roll,B.o_torso.roll,f);
+//	p_pos.lerp		(A.p_pos,B.p_pos,f);
+//	p_accel			= (f<0.5f)?A.p_accel:B.p_accel;
+//	p_velocity.lerp	(A.p_velocity,B.p_velocity,f);
+//	mstate			= (f<0.5f)?A.mstate:B.mstate;
+//	weapon			= (f<0.5f)?A.weapon:B.weapon;
+//	fHealth			= invf*A.fHealth+f*B.fHealth;
 //	fArmor			= invf*A.fArmor+f*B.fArmor;
-	weapon			= (f<0.5f)?A.weapon:B.weapon;
+//	weapon			= (f<0.5f)?A.weapon:B.weapon;
 }
 
 InterpData				IStartT;
 InterpData				IRecT;
 InterpData				IEndT;
-static	bool SwitchV	= true;
 
 void CActor::PH_B_CrPr		()	// actions & operations before physic correction-prediction steps
 {
@@ -885,7 +893,6 @@ void CActor::PH_B_CrPr		()	// actions & operations before physic correction-pred
 	if (g_Alive())
 	{
 		CrPr_SetActivated(true);
-//		if (!SwitchV)
 		{		
 			///////////////////////////////////////////////
 			InterpData* pIStart = &IStart;			
@@ -895,13 +902,14 @@ void CActor::PH_B_CrPr		()	// actions & operations before physic correction-pred
 			pIStart->o_torso.yaw		= angle_normalize(unaffected_r_torso.yaw);
 			pIStart->o_torso.pitch		= angle_normalize(unaffected_r_torso.pitch);
 			pIStart->o_torso.roll		= angle_normalize(unaffected_r_torso.roll);
+			if (pIStart->o_torso.roll > PI)
+					pIStart->o_torso.roll	-= PI_MUL_2;
 		}
 		///////////////////////////////////////////////
 		CPHSynchronize* pSyncObj = NULL;
 		pSyncObj = PHGetSyncItem(0);
 		if (!pSyncObj) return;
-//		if (!SwitchV) 
-			pSyncObj->get_State(LastState);
+		pSyncObj->get_State(LastState);
 		///////////////////////////////////////////////
 
 		//----------- for E3 -----------------------------
@@ -928,10 +936,7 @@ void CActor::PH_B_CrPr		()	// actions & operations before physic correction-pred
 			{
 				PHUnFreeze();
 				
-				if (SwitchV)
-					pSyncObj->set_State(N_A.State);
-				else
-					character_physics_support()->movement()->SetPosition	(N.p_pos);
+				pSyncObj->set_State(N_A.State);
 				
 				g_Physics(N.p_accel, 0.0f, 0.0f);				
 				Position().set(IStart.Pos);
@@ -1011,8 +1016,8 @@ void	CActor::CalculateInterpolationParams()
 	pSyncObj = PHGetSyncItem(0);
 	///////////////////////////////////////////////
 	InterpData* pIStart = &IStart;
-	InterpData* pIRec = &IRec; //(SwitchV)? &IRec : &IRecT;
-	InterpData* pIEnd = &IEnd; //(SwitchV)? &IEnd : &IEndT;
+	InterpData* pIRec = &IRec;
+	InterpData* pIEnd = &IEnd;
 
 	///////////////////////////////////////////////
 	/*
@@ -1247,7 +1252,7 @@ void CActor::make_Interpolation	()
 			}
 			character_physics_support()->movement()->SetPosition	(ResPosition);
 			character_physics_support()->movement()->SetVelocity	(SpeedVector);
-			cam_Active()->Set		(-unaffected_r_torso.yaw,unaffected_r_torso.pitch, unaffected_r_torso.roll);
+			cam_Active()->Set		(-unaffected_r_torso.yaw,unaffected_r_torso.pitch, 0);//, unaffected_r_torso.roll);
 		};
 	}
 	else
@@ -1729,8 +1734,10 @@ void	CActor::Check_for_AutoPickUp()
 	{
 		ISpatial*		spatial	= ISpatialResult[o_it];
 		CInventoryItem*	pIItem	= smart_cast<CInventoryItem*> (spatial->dcast_CObject        ());
-		if (0 == pIItem) continue;
-		if (!pIItem->CanTake()) continue;
+		if (0 == pIItem)							continue;
+		if (!pIItem->CanTake())						continue;
+		if (Level().m_feel_deny.is_object_denied(pIItem->cast_game_object()) )	continue;
+
 		CGrenade*	pGrenade	= smart_cast<CGrenade*> (pIItem);
 		if (pGrenade) continue;
 
@@ -1813,6 +1820,11 @@ void				CActor::OnCriticalHitHealthLoss			()
 	}	
 	//-------------------------------------------------------------------
 	SPECIAL_KILL_TYPE SpecialHit = SKT_NONE;
+	if(pLastHittingWeapon)
+	{
+		if(pLastHittingWeapon->CLS_ID==CLSID_OBJECT_W_KNIFE)
+				SpecialHit = SKT_KNIFEKILL;
+	}
 	if (m_s16LastHittedElement > 0)
 	{
 		if (m_s16LastHittedElement == m_head)
@@ -1864,7 +1876,7 @@ void				CActor::OnCriticalHitHealthLoss			()
 		Game().m_WeaponUsageStatistic->OnBullet_Check_Result(true);
 };
 
-void				CActor::OnPlayHeadShotParticle (NET_Packet P)
+void CActor::OnPlayHeadShotParticle(NET_Packet P)
 {
 	Fvector	HitDir, HitPos;
 	s16	element = P.r_s16();	
@@ -1896,7 +1908,7 @@ void				CActor::OnCriticalWoundHealthLoss		()
 	P.w_u16(u16(ID()&0xffff));
 	P.w_u8	(KT_BLEEDING);
 	P.w_u16 ((m_iLastHitterID) ? u16(m_iLastHitterID&0xffff) : 0);
-	P.w_u16	(0);
+	P.w_u16	((m_iLastHittingWeaponID && m_iLastHitterID != m_iLastHittingWeaponID) ? u16(m_iLastHittingWeaponID&0xffff) : 0);
 	P.w_u8	(SKT_NONE);
 	u_EventSend(P);
 };

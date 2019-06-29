@@ -7,8 +7,9 @@
 #include "MathUtils.h"
 #include "PhysicsShellHolder.h"
 #include "game_object_space.h"
-#include "../skeletoncustom.h"
-#include <../ode/src/util.h>
+//#include "../skeletoncustom.h"
+#include "../skeletonanimated.h"
+#include <../../xrODE/ode/src/util.h>
 #ifdef DEBUG
 #include	"PHDebug.h"
 #endif
@@ -17,7 +18,7 @@
 #pragma warning(disable:4995)
 #pragma warning(disable:4267)
 
-#include "../ode/src/collision_kernel.h"
+#include "../../xrODE/ode/src/collision_kernel.h"
 
 
 #pragma warning(default:4267)
@@ -302,7 +303,6 @@ CPHElement::~CPHElement	()
 {
 	VERIFY(!isActive());
 	DeleteFracturesHolder();
-
 }
 
 void CPHElement::Activate(const Fmatrix &transform,const Fvector& lin_vel,const Fvector& ang_vel,bool disable){
@@ -384,6 +384,7 @@ void CPHElement::PhDataUpdate(dReal step){
 	
 	///////////////skip for disabled elements////////////////////////////////////////////////////////////
 	//b_enabled_onstep=!!dBodyIsEnabled(m_body);
+	//VERIFY_BOUNDARIES2(cast_fv(dBodyGetPosition(m_body)),phBoundaries,PhysicsRefObject(),"PhDataUpdate begin, body position");
 #ifdef DEBUG
 	if(ph_dbg_draw_mask.test(phDbgDrawMassCenters))
 	{
@@ -520,6 +521,14 @@ void CPHElement::PhDataUpdate(dReal step){
 	VERIFY(dBodyStateValide(m_body));
 	VERIFY2(dV_valid(dBodyGetPosition(m_body)),"invalid body position");
 	VERIFY2(dV_valid(dBodyGetQuaternion(m_body)),"invalid body rotation");
+/*
+	if(!valid_pos(cast_fv(dBodyGetPosition(m_body)),phBoundaries)) //hack
+	{															   //hack
+		Fvector	pos;											   //hack
+		m_body_interpolation.GetPosition(pos,0);				   //hack
+		dBodySetPosition(m_body,pos.x,pos.y,pos.z);				   //hack
+	}															   //hack
+*/
 	VERIFY_BOUNDARIES2(cast_fv(dBodyGetPosition(m_body)),phBoundaries,PhysicsRefObject(),"PhDataUpdate end, body position");
 	UpdateInterpolation				();
 }
@@ -792,6 +801,109 @@ void CPHElement::StataticRootBonesCallBack(CBoneInstance* B)
 
 }
 
+void CPHElement::BoneGlPos(Fmatrix &m,CBoneInstance* B)
+{
+	VERIFY(m_shell);
+	m.mul_43(m_shell->mXFORM, B->mTransform);
+}
+
+void CPHElement::GetAnimBonePos(Fmatrix &bp)
+{
+	VERIFY(m_shell->PKinematics());
+	CKinematicsAnimated *ak = m_shell->PKinematics()->dcast_PKinematicsAnimated();
+	VERIFY(ak);
+	CBoneInstance *BI = &ak->LL_GetBoneInstance(m_SelfID);
+	if(!BI->Callback)//.
+	{
+		bp.set(BI->mTransform);
+		return;
+	}
+
+	ak->Bone_GetAnimPos( bp, m_SelfID, u8(-1), true );
+
+}
+
+IC bool put_in_range( Fvector &v, float range )
+{
+	VERIFY( range > EPS_S );
+	float sq_mag=v.square_magnitude( );
+	if( sq_mag > range*range )
+	{
+		float mag=_sqrt( sq_mag );
+		v.mul( range/mag );
+		return true;
+	}
+	return false;
+}
+
+bool CPHElement::AnimToVel(float dt, float l_limit,float a_limit )
+{
+	VERIFY(m_shell);
+	VERIFY(m_shell->PKinematics());
+	//CBoneInstance *BI = &m_shell->PKinematics()->LL_GetBoneInstance(m_SelfID);
+//
+//	Fmatrix bp;BoneGlPos(bp,BI);
+//
+	CPhysicsShellHolder	*ph = PhysicsRefObject();
+	VERIFY(ph);
+	Fmatrix bpl;GetAnimBonePos(bpl);
+	Fmatrix bp;bp.mul_43(ph->XFORM(),bpl);
+	//BoneGlPos(bp,BI);
+
+	Fmatrix cp;
+	GetGlobalTransformDynamic(&cp);
+
+	//Fquaternion q0; q0.set(cp);
+
+	cp.invert();
+	Fmatrix diff;diff.mul_43(cp,bp);
+	if(dt<EPS_S)
+		dt = EPS_S;
+	Fvector mc1;
+	CPHGeometryOwner::get_mc_vs_transform(mc1,bp);
+	Fvector mc0 = cast_fv(dBodyGetPosition(m_body));
+	//Fvector mc1;diff.transform_tiny(mc1,mc0);
+	Fvector	lv ;lv.mul(Fvector().sub(mc1,mc0),(1.f/dt));
+	Fvector aw ;aw.set((diff._32-diff._23)/2.f/dt,(diff._13-diff._31)/2.f/dt,(diff._21-diff._12)/2.f/dt);
+	
+	//Fquaternion q1; q1.set(bp);
+	//twoq_2w(q0,q1,dt,aw);
+
+	bool ret = aw.square_magnitude( ) < a_limit * a_limit && lv.square_magnitude() < l_limit * l_limit;
+
+	put_in_range(lv,m_l_limit);
+	put_in_range(aw,m_w_limit);
+
+	VERIFY(_valid(lv));
+	VERIFY(_valid(aw));
+
+	dBodySetLinearVel(m_body,lv.x,lv.y,lv.z);
+	dBodySetAngularVel(m_body,aw.x,aw.y,aw.z);
+	//set_LinearVel(lv);
+	//set_AngularVel(aw);
+	return ret;
+}
+
+void CPHElement::ToBonePos(CBoneInstance* B)
+{
+	VERIFY2(!ph_world->Processing(),*PhysicsRefObject()->cNameSect());
+	VERIFY(_valid(B->mTransform));
+	VERIFY(!m_shell->dSpace()->lock_count);
+
+	mXFORM.set(B->mTransform);
+	
+	Fmatrix global_transform;
+	BoneGlPos(global_transform,B);
+	SetTransform(global_transform);
+	FillInterpolation();
+}
+
+void	CPHElement::SetBoneCallbackOverwrite				(bool v)
+{
+	VERIFY(m_shell);
+	VERIFY(m_shell->PKinematics());
+	m_shell->PKinematics()->LL_GetBoneInstance(m_SelfID).Callback_overwrite = v;
+}
 void CPHElement::BonesCallBack(CBoneInstance* B)
 {
 	Fmatrix parent;
@@ -802,20 +914,7 @@ void CPHElement::BonesCallBack(CBoneInstance* B)
 	VERIFY_BOUNDARIES2(B->mTransform.c,phBoundaries,PhysicsRefObject(),"BonesCallBack incoming bone position");
 	if(m_flags.test(flActivating))
 	{
-		//if(!dBodyIsEnabled(m_body))
-		//	dBodyEnable(m_body);
-		VERIFY2(!ph_world->Processing(),*PhysicsRefObject()->cNameSect());
-		VERIFY(_valid(B->mTransform));
-		if(m_shell->dSpace()->lock_count) return;
-		mXFORM.set(B->mTransform);
-		//m_start_time=Device.fTimeGlobal;
-		Fmatrix global_transform;
-		//if(m_parent_element)
-		global_transform.mul_43(m_shell->mXFORM, mXFORM);
-		SetTransform(global_transform);
-
-		FillInterpolation();
-		//bActivating=false;
+		ToBonePos(B);
 		m_flags.set(flActivating,FALSE);
 		if(!m_parent_element) 
 		{
@@ -830,24 +929,12 @@ void CPHElement::BonesCallBack(CBoneInstance* B)
 		return;
 	}
 
-	
-
-//	if( !m_shell->is_active() && !m_flags.test(flUpdate)/*!bUpdate*/) return;
-/*
-	if(!m_parent_element)
-	{
-	
-		m_shell->InterpolateGlobalTransform(&(m_shell->mXFORM));
-		VERIFY(_valid(m_shell->mXFORM));
-	}
-	*/
-	//VERIFY2(fsimilar(DET(B->mTransform),1.f,DET_CHECK_EPS),"Bones callback returns 0 matrix");
-	VERIFY_RMATRIX(B->mTransform);
-	VERIFY(valid_pos(B->mTransform.c,phBoundaries));
+		VERIFY_RMATRIX(B->mTransform);
+		VERIFY(valid_pos(B->mTransform.c,phBoundaries));
 
 	
 	{
-		//InterpolateGlobalTransform(&mXFORM);
+		
 		parent.invert		(m_shell->mXFORM);
 		B->mTransform.mul_43(parent,mXFORM);
 	}
@@ -949,41 +1036,35 @@ void CPHElement::get_AngularVel	(Fvector& velocity)
 	dVectorSet((dReal*)&velocity,dBodyGetAngularVel(m_body));
 }
 
+
 void CPHElement::set_LinearVel			  (const Fvector& velocity)
 {
 
 	if(!isActive()||m_flags.test(flFixed)) return;
 	VERIFY2(_valid(velocity),"not valid arqument velocity");
-	float sq_mag=velocity.square_magnitude();
-	if(sq_mag>m_l_limit*m_l_limit)
-	{
-		float mag=_sqrt(sq_mag);
-		Fvector vel;vel.mul(velocity,m_l_limit/mag);
-		dBodySetLinearVel(m_body,vel.x,vel.y,vel.z);
+	Fvector vel = velocity;
 #ifdef DEBUG
-		Msg(" CPHElement::set_LinearVel set velocity magnitude is too large %f",mag);
+	if( velocity.magnitude() > m_l_limit )
+		Msg(" CPHElement::set_LinearVel set velocity magnitude is too large %f",velocity.magnitude());
 #endif
-		
-	}else
-		dBodySetLinearVel(m_body,velocity.x,velocity.y,velocity.z);
+	put_in_range(vel,m_l_limit);
+	dBodySetLinearVel(m_body,vel.x,vel.y,vel.z);
 	//dVectorSet(m_safe_velocity,dBodyGetLinearVel(m_body));
 }
+
+
 void CPHElement::set_AngularVel			  (const Fvector& velocity)
 {
 	VERIFY(_valid(velocity));
 	if(!isActive()||m_flags.test(flFixed)) return;
-	float sq_mag=velocity.square_magnitude();
-	if(sq_mag>m_w_limit*m_w_limit)
-	{
-		float mag=_sqrt(sq_mag);
-		Fvector vel;vel.mul(velocity,m_w_limit/mag);
-		dBodySetAngularVel(m_body,vel.x,vel.y,vel.z);
+	
+	Fvector vel = velocity;
 #ifdef DEBUG
-		Msg("CPHElement::set_AngularVel set velocity magnitude is too large %f",mag);
+	if( velocity.magnitude() > m_w_limit )
+		Msg("CPHElement::set_AngularVel set velocity magnitude is too large %f",velocity.magnitude());
 #endif
-		
-	}else
-		dBodySetAngularVel(m_body,velocity.x,velocity.y,velocity.z);
+	put_in_range(vel,m_w_limit);
+	dBodySetAngularVel(m_body,vel.x,vel.y,vel.z);
 }
 
 void	CPHElement::getForce(Fvector& force)

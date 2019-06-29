@@ -192,8 +192,14 @@ bool RemoveWoundPred(CWound* pWound)
 void  CEntityCondition::UpdateWounds		()
 {
 	//убрать все зашившие раны из списка
-	WOUND_VECTOR_IT last_it = remove_if(m_WoundVector.begin(), m_WoundVector.end(),RemoveWoundPred);
-	m_WoundVector.erase(last_it, m_WoundVector.end());
+	m_WoundVector.erase(
+		std::remove_if(
+			m_WoundVector.begin(),
+			m_WoundVector.end(),
+			&RemoveWoundPred
+		),
+		m_WoundVector.end()
+	);
 }
 
 void CEntityCondition::UpdateConditionTime()
@@ -402,6 +408,7 @@ CWound* CEntityCondition::ConditionHit(SHit* pHDS)
 		break;
 	case ALife::eHitTypeExplosion:
 	case ALife::eHitTypeStrike:
+	case ALife::eHitTypePhysicStrike:
 		hit_power *= m_HitTypeK[pHDS->hit_type];
 		m_fHealthLost = hit_power*m_fHealthHitPart;
 		m_fDeltaHealth -= CanBeHarmed() ? m_fHealthLost : 0;
@@ -414,6 +421,10 @@ CWound* CEntityCondition::ConditionHit(SHit* pHDS)
 		m_fDeltaHealth -= CanBeHarmed() ? m_fHealthLost : 0;
 		m_fDeltaPower -= hit_power*m_fPowerHitPart;
 		break;
+	default:
+		{
+			R_ASSERT2(0,"unknown hit type");
+		}break;
 	}
 
 	if (bDebug) Msg("%s hitted in %s with %f[%f]", m_object->Name(), smart_cast<CKinematics*>(m_object->Visual())->LL_BoneName_dbg(pHDS->boneID), m_fHealthLost*100.0f, hit_power_org);
@@ -535,13 +546,20 @@ void CEntityCondition::SConditionChangeV::load(LPCSTR sect, LPCSTR prefix)
 	string256				str;
 	m_fV_Circumspection		= 0.01f;
 
-	m_fV_Radiation			= pSettings->r_float(sect,strconcat(str,"radiation_v",prefix));	
-	m_fV_RadiationHealth	= pSettings->r_float(sect,strconcat(str,"radiation_health_v",prefix));
-	m_fV_EntityMorale		= pSettings->r_float(sect,strconcat(str,"morale_v",prefix));
-	m_fV_PsyHealth			= pSettings->r_float(sect,strconcat(str,"psy_health_v",prefix));	
-	m_fV_Bleeding			= pSettings->r_float(sect,strconcat(str,"bleeding_v",prefix));
-	m_fV_WoundIncarnation	= pSettings->r_float(sect,strconcat(str,"wound_incarnation_v",prefix));
-	m_fV_HealthRestore		= READ_IF_EXISTS(pSettings,r_float,sect, strconcat(str,"health_restore_v",prefix),0.0f);
+	strconcat				(sizeof(str),str,"radiation_v",prefix);
+	m_fV_Radiation			= pSettings->r_float(sect,str);
+	strconcat				(sizeof(str),str,"radiation_health_v",prefix);
+	m_fV_RadiationHealth	= pSettings->r_float(sect,str);
+	strconcat				(sizeof(str),str,"morale_v",prefix);
+	m_fV_EntityMorale		= pSettings->r_float(sect,str);
+	strconcat				(sizeof(str),str,"psy_health_v",prefix);
+	m_fV_PsyHealth			= pSettings->r_float(sect,str);	
+	strconcat				(sizeof(str),str,"bleeding_v",prefix);
+	m_fV_Bleeding			= pSettings->r_float(sect,str);
+	strconcat				(sizeof(str),str,"wound_incarnation_v",prefix);
+	m_fV_WoundIncarnation	= pSettings->r_float(sect,str);
+	strconcat				(sizeof(str),str,"health_restore_v",prefix);
+	m_fV_HealthRestore		= READ_IF_EXISTS(pSettings,r_float,sect, str,0.0f);
 }
 
 void CEntityCondition::remove_links	(const CObject *object)

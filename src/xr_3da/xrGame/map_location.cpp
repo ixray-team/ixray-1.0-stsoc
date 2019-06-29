@@ -74,10 +74,10 @@ void CMapLocation::LoadSpot(LPCSTR type, bool bReload)
 	XML_NODE* node = NULL;
 	string512 path_base, path;
 //	strconcat(path_base,"map_spots:",type);
-	strcpy(path_base,type);
-	R_ASSERT3(g_uiSpotXml->NavigateToNode(path_base,0), "XML node not found in file map_spots.xml", path_base);
-	LPCSTR s = g_uiSpotXml->ReadAttrib(path_base, 0, "hint", "no hint");
-	SetHint(s);
+	strcpy_s		(path_base,type);
+	R_ASSERT3		(g_uiSpotXml->NavigateToNode(path_base,0), "XML node not found in file map_spots.xml", path_base);
+	LPCSTR s		= g_uiSpotXml->ReadAttrib(path_base, 0, "hint", "no hint");
+	SetHint			(s);
 	
 	s = g_uiSpotXml->ReadAttrib(path_base, 0, "store", NULL);
 	if(s)
@@ -98,7 +98,7 @@ void CMapLocation::LoadSpot(LPCSTR type, bool bReload)
 		m_flags.set( ePosToActor, TRUE);
 
 
-	strconcat(path,path_base,":level_map");
+	strconcat(sizeof(path),path,path_base,":level_map");
 	node = g_uiSpotXml->NavigateToNode(path,0);
 	if(node){
 		LPCSTR str = g_uiSpotXml->ReadAttrib(path, 0, "spot", "");
@@ -120,7 +120,7 @@ void CMapLocation::LoadSpot(LPCSTR type, bool bReload)
 		}
 	};
 
-	strconcat(path,path_base,":mini_map");
+	strconcat(sizeof(path),path,path_base,":mini_map");
 	node = g_uiSpotXml->NavigateToNode(path,0);
 	if(node){
 		LPCSTR str = g_uiSpotXml->ReadAttrib(path, 0, "spot", "");
@@ -153,7 +153,7 @@ Fvector2 CMapLocation::Position()
 	Fvector2 pos;
 	pos.set(0.0f,0.0f);
 
-	if(m_flags.test( ePosToActor)){
+	if(m_flags.test( ePosToActor) && Level().CurrentEntity()){
 		m_position_global = Level().CurrentEntity()->Position();
 		pos.set(m_position_global.x, m_position_global.z);
 		m_cached.m_Position = pos;
@@ -161,7 +161,6 @@ Fvector2 CMapLocation::Position()
 	}
 
 	CObject* pObject =  Level().Objects.net_Find(m_objectID);
-//	Msg("CMapLocation::Position()[%d]", m_objectID);
 	if(!pObject){
 		if(ai().get_alife())		
 		{
@@ -173,6 +172,7 @@ Fvector2 CMapLocation::Position()
 		}
 	
 	}else{
+		//if (GameID() != GAME_SINGLE) Msg("CMapLocation::Position()[%d]", m_objectID);
 		m_position_global = pObject->Position();
 		pos.set(m_position_global.x, m_position_global.z);
 	}
@@ -387,8 +387,8 @@ void CMapLocation::UpdateSpot(CUICustomMap* map, CMapSpot* sp )
 			xr_vector<u32>::reverse_iterator it = map_point_path.rbegin();
 			xr_vector<u32>::reverse_iterator it_e = map_point_path.rend();
 
-			xr_vector<CLevelChanger*>::iterator lit,lit_e;
-			lit_e							= g_lchangers.end();
+			xr_vector<CLevelChanger*>::iterator lit = g_lchangers.begin();
+			xr_vector<CLevelChanger*>::iterator lit_e = g_lchangers.end();
 			bool bDone						= false;
 			for(; (it!=it_e)&&(!bDone) ;++it){
 				for(lit=g_lchangers.begin();lit!=lit_e; ++lit){

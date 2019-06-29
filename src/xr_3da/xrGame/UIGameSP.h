@@ -27,7 +27,7 @@ public:
 	virtual				~CUIGameSP				();
 
 	virtual	void		reset_ui				();
-	virtual	void		shedule_Update		(u32 dt);
+	virtual	void		shedule_Update			(u32 dt);
 	virtual void		SetClGame				(game_cl_GameState* g);
 	virtual bool		IR_OnKeyboardPress		(int dik);
 	virtual bool		IR_OnKeyboardRelease	(int dik);
@@ -37,6 +37,8 @@ public:
 	void				StartCarBody			(CInventoryOwner* pOurInv, CInventoryBox* pBox);
 	virtual void		ReInitShownUI			();
 	void				ChangeLevel				(GameGraph::_GRAPH_ID game_vert_id, u32 level_vert_id, Fvector pos, Fvector ang, Fvector pos2, Fvector ang2, bool b);
+
+	virtual void		HideShownDialogs		();
 
 	CUIInventoryWnd*	InventoryMenu;
 	CUIPdaWnd*			PdaMenu;

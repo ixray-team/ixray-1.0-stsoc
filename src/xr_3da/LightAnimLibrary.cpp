@@ -199,7 +199,7 @@ void ELightAnimLibrary::Unload()
 
 void ELightAnimLibrary::Load()
 {
-	string256 fn;
+	string_path fn;
     FS.update_path(fn,_game_data_,"lanims.xr");
 	IReader* fs=FS.r_open(fn);
     if (fs){
@@ -243,8 +243,9 @@ void ELightAnimLibrary::Save()
     }
 	F.close_chunk	();
 
-	string256 fn;
-    FS.update_path(fn,_game_data_,"lanims.xr");
+	string_path		fn;
+    FS.update_path	(fn,_game_data_,"lanims.xr");
+
     if (!F.save_to(fn))
         Log			("!Can't save color animations:",fn);
 }

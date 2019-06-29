@@ -1,6 +1,4 @@
-#include "stdafx.h"
-#pragma hdrstop
-
+#include "pch_script.h"
 #include "gamepersistent.h"
 #include "../fmesh.h"
 #include "../xr_ioconsole.h"
@@ -41,11 +39,14 @@
 
 CGamePersistent::CGamePersistent(void)
 {
+	m_game_params.m_e_game_type	= GAME_ANY;
 	ambient_sound_next_time		= 0;
 	ambient_effect_next_time	= 0;
 	ambient_effect_stop_time	= 0;
 	ambient_particles			= 0;
 
+	m_pUI_core					= NULL;
+	m_pMainMenu					= NULL;
 	m_intro						= NULL;
 	m_intro_event.bind			(this,&CGamePersistent::start_logo_intro);
 #ifdef DEBUG
@@ -124,7 +125,6 @@ void CGamePersistent::OnAppStart()
 	__super::OnAppStart			();
 	m_pUI_core					= xr_new<ui_core>();
 	m_pMainMenu					= xr_new<CMainMenu>();
-Memory.mem_usage();
 }
 
 
@@ -160,6 +160,7 @@ void CGamePersistent::Disconnect()
 	__super::Disconnect			();
 	// stop all played emitters
 	::Sound->stop_emitters		();
+	m_game_params.m_e_game_type	= GAME_ANY;
 }
 
 #include "xr_level_controller.h"
@@ -167,6 +168,14 @@ void CGamePersistent::Disconnect()
 void CGamePersistent::OnGameStart()
 {
 	__super::OnGameStart		();
+	
+	UpdateGameType				();
+
+}
+
+void CGamePersistent::UpdateGameType			()
+{
+	__super::UpdateGameType		();
 	//  [7/11/2005]
 	if (!xr_strcmp(m_game_params.m_game_type, "single")) m_game_params.m_e_game_type = GAME_SINGLE;
 	else
@@ -185,7 +194,6 @@ void CGamePersistent::OnGameStart()
 	g_current_keygroup = _mp;
 	else
 	g_current_keygroup = _sp;
-
 }
 
 void CGamePersistent::OnGameEnd	()
@@ -200,7 +208,8 @@ void CGamePersistent::OnGameEnd	()
 
 void CGamePersistent::WeathersUpdate()
 {
-	if (g_pGameLevel){
+	if (g_pGameLevel && !g_dedicated_server)
+	{
 		CActor* actor				= smart_cast<CActor*>(Level().CurrentViewEntity());
 		BOOL bIndoor				= TRUE;
 		if (actor) bIndoor			= actor->renderable_ROS()->get_luminocity_hemi()<0.05f;
@@ -232,7 +241,7 @@ void CGamePersistent::WeathersUpdate()
 					Environment().wind_gust_factor	= eff->wind_gust_factor;
 					ambient_effect_next_time		= Device.dwTimeGlobal + env_amb->get_rnd_effect_time();
 					ambient_effect_stop_time		= Device.dwTimeGlobal + eff->life_time;
-					ambient_particles				= CParticlesObject::Create(eff->particles.c_str(),FALSE);
+					ambient_particles				= CParticlesObject::Create(eff->particles.c_str(),FALSE,false);
 					Fvector pos; pos.add			(Device.vCameraPosition,eff->offset); 
 					ambient_particles->play_at_pos	(pos);
 					if (eff->sound._handle())		eff->sound.play_at_pos(0,pos);
@@ -262,9 +271,11 @@ void CGamePersistent::start_logo_intro		()
 		return;
 	}
 #endif
-	if (Device.dwPrecacheFrame==0){
+	if (Device.dwPrecacheFrame==0)
+	{
 		m_intro_event.bind		(this,&CGamePersistent::update_logo_intro);
-		if (0==xr_strlen(m_game_params.m_game_or_spawn) && NULL==g_pGameLevel){
+		if (!g_dedicated_server && 0==xr_strlen(m_game_params.m_game_or_spawn) && NULL==g_pGameLevel)
+		{
 			VERIFY				(NULL==m_intro);
 			m_intro				= xr_new<CUISequencer>();
 			m_intro->Start		("intro_logo");
@@ -307,12 +318,24 @@ void CGamePersistent::update_game_intro			()
 	}
 }
 #include "holder_custom.h"
+extern CUISequencer * g_tutorial;
+extern CUISequencer * g_tutorial2;
+
 void CGamePersistent::OnFrame	()
 {
+	if(g_tutorial2){ 
+		g_tutorial2->Destroy	();
+		xr_delete				(g_tutorial2);
+	}
+
+	if(g_tutorial && !g_tutorial->IsActive()){
+		xr_delete(g_tutorial);
+	}
+
 #ifdef DEBUG
 	++m_frame_counter;
 #endif
-	if (!m_intro_event.empty())	m_intro_event();
+	if (!g_dedicated_server && !m_intro_event.empty())	m_intro_event();
 
 	if( !m_pMainMenu->IsActive() )
 		m_pMainMenu->DestroyInternal(false);
@@ -403,11 +426,8 @@ void CGamePersistent::OnEvent(EVENT E, u64 P1, u64 P2)
 		
 		LPSTR		saved_name	= (LPSTR)(P1);
 
-		Log("--0");
 		Level().remove_objects	();
-		Log("--1");
 		game_sv_Single			*game = smart_cast<game_sv_Single*>(Level().Server->game);
-		Log("--2");
 		R_ASSERT				(game);
 		game->restart_simulator	(saved_name);
 		xr_free					(saved_name);
@@ -417,7 +437,7 @@ void CGamePersistent::OnEvent(EVENT E, u64 P1, u64 P2)
 	{
 		string256			cmd;
 		LPCSTR				demo	= LPCSTR(P1);
-		sprintf				(cmd,"demo_play %s",demo);
+		sprintf_s				(cmd,"demo_play %s",demo);
 		Console->Execute	(cmd);
 		xr_free				(demo);
 		uTime2Change		= Device.TimerAsync() + u32(P2)*1000;
@@ -449,6 +469,9 @@ void CGamePersistent::OnAppActivate		()
 	if( !bIsMP )
 	{
 		Device.Pause			(FALSE, !bRestorePause, TRUE, "CGP::OnAppActivate");
+	}else
+	{
+		Device.Pause			(FALSE, TRUE, TRUE, "CGP::OnAppActivate MP");
 	}
 
 	bEntryFlag = TRUE;
@@ -466,6 +489,9 @@ void CGamePersistent::OnAppDeactivate	()
 	{
 		bRestorePause			= Device.Paused();
 		Device.Pause			(TRUE, TRUE, TRUE, "CGP::OnAppDeactivate");
+	}else
+	{
+		Device.Pause			(TRUE, FALSE, TRUE, "CGP::OnAppDeactivate MP");
 	}
 	bEntryFlag = FALSE;
 }
@@ -491,6 +517,11 @@ void CGamePersistent::OnRenderPPUI_PP()
 void CGamePersistent::LoadTitle(LPCSTR str)
 {
 	string512			buff;
-	sprintf				(buff, "%s...", CStringTable().translate(str).c_str());
+	sprintf_s				(buff, "%s...", CStringTable().translate(str).c_str());
 	pApp->LoadTitleInt	(buff);
+}
+
+bool CGamePersistent::CanBePaused()
+{
+	return IsGameTypeSingle	();
 }

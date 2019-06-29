@@ -6,7 +6,7 @@
 //	Description : Stalker animation manager update cycle
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "stalker_animation_manager.h"
 #include "ai/stalker/ai_stalker.h"
 #include "game_object_space.h"
@@ -21,6 +21,7 @@ IC	void CStalkerAnimationManager::play_delayed_callbacks	()
 
 	m_call_script_callback	= false;
 	object().callback		(GameObject::eScriptAnimation)	();
+
 }
 
 IC	bool CStalkerAnimationManager::script_callback			() const
@@ -54,11 +55,12 @@ IC	void CStalkerAnimationManager::play_script_impl			()
 	torso().reset			();
 	legs().reset			();
 
-	script().animation		(assign_script_animation());
-	script().play			(m_skeleton_animated,script_play_callback,&object(),false,m_script_bone_part_mask);
+	const CStalkerAnimationScript	&selected = assign_script_animation();
+	script().animation		(selected.animation());
+	script().play			(m_skeleton_animated,script_play_callback,&object(),selected.use_movement_controller(),false,m_script_bone_part_mask);
 
 	head().animation		(assign_head_animation());
-	head().play				(m_skeleton_animated,head_play_callback,&object());
+	head().play				(m_skeleton_animated,head_play_callback,&object(),false);
 }
 #else // USE_HEAD_BONE_PART_FAKE
 IC	void CStalkerAnimationManager::play_script_impl			()
@@ -69,7 +71,7 @@ IC	void CStalkerAnimationManager::play_script_impl			()
 	legs().reset			();
 
 	script().animation		(assign_script_animation());
-	script().play			(m_skeleton_animated,script_play_callback,&object());
+	script().play			(m_skeleton_animated,script_play_callback,&object(),false);
 }
 #endif // USE_HEAD_BONE_PART_FAKE
 
@@ -92,10 +94,10 @@ IC	void CStalkerAnimationManager::play_global_impl			(const MotionID &animation)
 	legs().reset			();
 
 	global().animation		(animation);
-	global().play			(m_skeleton_animated,global_play_callback,&object(),false,m_script_bone_part_mask);
+	global().play			(m_skeleton_animated,global_play_callback,&object(),false,false,m_script_bone_part_mask);
 
 	head().animation		(assign_head_animation());
-	head().play				(m_skeleton_animated,head_play_callback,&object());
+	head().play				(m_skeleton_animated,head_play_callback,&object(),false);
 }
 #else // USE_HEAD_BONE_PART_FAKE
 IC	void CStalkerAnimationManager::play_global_impl			(const MotionID &animation)
@@ -105,7 +107,7 @@ IC	void CStalkerAnimationManager::play_global_impl			(const MotionID &animation)
 	legs().reset			();
 
 	global().animation		(animation);
-	global().play			(m_skeleton_animated,global_play_callback,&object());
+	global().play			(m_skeleton_animated,global_play_callback,&object(),false);
 }
 #endif // USE_HEAD_BONE_PART_FAKE
 
@@ -125,13 +127,13 @@ bool CStalkerAnimationManager::play_global					()
 IC	void CStalkerAnimationManager::play_head				()
 {
 	head().animation		(assign_head_animation());
-	head().play				(m_skeleton_animated,head_play_callback,&object());
+	head().play				(m_skeleton_animated,head_play_callback,&object(),false);
 }
 
 IC	void CStalkerAnimationManager::play_torso				()
 {
 	torso().animation		(assign_torso_animation());
-	torso().play			(m_skeleton_animated,torso_play_callback,&object());
+	torso().play			(m_skeleton_animated,torso_play_callback,&object(),false);
 }
 
 void CStalkerAnimationManager::play_legs					()
@@ -145,7 +147,7 @@ void CStalkerAnimationManager::play_legs					()
 		m_previous_speed	= (m_current_speed - m_previous_speed)*amount + m_previous_speed;
 	}
 
-	legs().play				(m_skeleton_animated,legs_play_callback,&object(),!fis_zero(m_current_speed));
+	legs().play				(m_skeleton_animated,legs_play_callback,&object(),!fis_zero(m_current_speed),false);
 	
 	if (result && legs().blend()) {
 		float				amount = legs().blend()->blendAmount;

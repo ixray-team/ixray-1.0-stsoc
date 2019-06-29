@@ -20,6 +20,36 @@ CPhraseDialogManager::~CPhraseDialogManager	(void)
 {
 }
 
+const DIALOG_SHARED_PTR& CPhraseDialogManager::GetDialogByID(const shared_str& dialog_id) const
+{
+	R_ASSERT2(HaveAvailableDialog(dialog_id),dialog_id.c_str());
+	DIALOG_VECTOR::const_iterator it		= m_AvailableDialogs.begin();
+	DIALOG_VECTOR::const_iterator it_e		= m_AvailableDialogs.end();
+
+	for(; it!=it_e; ++it)
+	{
+		const DIALOG_SHARED_PTR& dialog = *it;
+		if(dialog->GetDialogID()==dialog_id)
+			return dialog;
+	}
+	return m_AvailableDialogs.front();
+}
+
+bool CPhraseDialogManager::HaveAvailableDialog(const shared_str& dialog_id) const
+{
+	DIALOG_VECTOR::const_iterator it		= m_AvailableDialogs.begin();
+	DIALOG_VECTOR::const_iterator it_e	= m_AvailableDialogs.end();
+
+	for(; it!=it_e; ++it)
+	{
+		const DIALOG_SHARED_PTR& dialog = *it;
+		if(dialog->GetDialogID()==dialog_id)
+			return true;
+	}
+
+	return false;
+}
+
 void CPhraseDialogManager::InitDialog (CPhraseDialogManager* dialog_partner, DIALOG_SHARED_PTR& phrase_dialog)
 {
 	phrase_dialog->Init(this, dialog_partner);
@@ -37,14 +67,14 @@ void CPhraseDialogManager::AddDialog(DIALOG_SHARED_PTR& phrase_dialog)
 void CPhraseDialogManager::ReceivePhrase(DIALOG_SHARED_PTR& phrase_dialog)
 {
 }
-void CPhraseDialogManager::SayPhrase(DIALOG_SHARED_PTR& phrase_dialog, 
-									 int phrase_id)
+
+void CPhraseDialogManager::SayPhrase(DIALOG_SHARED_PTR& phrase_dialog, const shared_str& phrase_id)
 {
 	DIALOG_VECTOR_IT it = std::find(m_ActiveDialogs.begin(), m_ActiveDialogs.end(), phrase_dialog);
 	THROW(m_ActiveDialogs.end() != it);
 
-	THROW(phrase_dialog->IsWeSpeaking(this));
-	bool coninue_talking = CPhraseDialog::SayPhrase(phrase_dialog, phrase_id);
+	THROW(phrase_dialog->IsWeSpeaking		(this));
+	bool coninue_talking					= CPhraseDialog::SayPhrase(phrase_dialog, phrase_id);
 
 	if(!coninue_talking)
 		m_ActiveDialogs.erase(it);

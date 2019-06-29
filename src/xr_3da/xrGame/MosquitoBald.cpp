@@ -55,7 +55,7 @@ void CMosquitoBald::Affect(SZoneObjectInfo* O)
 
 #ifdef DEBUG
 	char l_pow[255]; 
-	sprintf(l_pow, "zone hit. %.1f", Power(pGameObject->Position().distance_to(P)));
+	sprintf_s(l_pow, "zone hit. %.1f", Power(pGameObject->Position().distance_to(P)));
 	if(bDebug) Msg("%s %s",*pGameObject->cName(), l_pow);
 #endif
 
@@ -87,18 +87,4 @@ void CMosquitoBald::Affect(SZoneObjectInfo* O)
 
 		PlayHitParticles(pGameObject);
 	}
-}
-
-#include "script_space.h"
-
-using namespace luabind;
-
-#pragma optimize("s",on)
-void CMosquitoBald::script_register	(lua_State *L)
-{
-	module(L)
-	[
-		class_<CMosquitoBald,CGameObject>("CMosquitoBald")
-			.def(constructor<>())
-	];
 }

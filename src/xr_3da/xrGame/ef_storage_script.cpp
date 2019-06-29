@@ -6,10 +6,9 @@
 //	Description : Evaluation functions storage class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "ef_storage.h"
 #include "ai_space.h"
-#include "script_space.h"
 #include "script_game_object.h"
 #include "entity_alive.h"
 #include "script_engine.h"

@@ -6,7 +6,7 @@
 //	Description : Space restrictor
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "space_restrictor.h"
 #include "xrServer_Objects_ALife.h"
 #include "level.h"
@@ -248,7 +248,7 @@ void CSpaceRestrictor::OnRender	()
 			break;
 		}
 	}
-	if( Level().CurrentViewEntity()->Position().distance_to(XFORM().c)<100.0f ){
+	if( Device.vCameraPosition.distance_to(XFORM().c)<100.0f ){
 	
 //DRAW name
 
@@ -295,17 +295,3 @@ void CSpaceRestrictor::OnRender	()
 
 }
 #endif
-
-#include "script_space.h"
-
-using namespace luabind;
-
-#pragma optimize("s",on)
-void CSpaceRestrictor::script_register(lua_State *L)
-{
-	module(L)
-	[
-		class_<CSpaceRestrictor,CGameObject>("CSpaceRestrictor")
-			.def(constructor<>())
-	];
-}

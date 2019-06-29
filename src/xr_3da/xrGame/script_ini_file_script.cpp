@@ -6,11 +6,8 @@
 //	Description : Script ini file class export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_ini_file.h"
-#include "script_space.h"
-#include <luabind/out_value_policy.hpp>
-#include <luabind/adopt_policy.hpp>
 
 using namespace luabind;
 

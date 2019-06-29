@@ -6,7 +6,7 @@
 //	Description : Level graph debug functions
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 
 #ifdef DEBUG
 #ifndef AI_COMPILER
@@ -93,12 +93,12 @@ void CLevelGraph::draw_nodes	()
 	
 	CLevelGraph::const_vertex_iterator	 I, E;
 	if (valid_vertex_position(min_position))
-		I = std::lower_bound(begin(),end(),vertex_position(min_position).xz());
+		I = std::lower_bound(begin(),end(),vertex_position(min_position).xz(),&vertex::predicate2);
 	else
 		I = begin();
 
 	if (valid_vertex_position(max_position)) {
-		E = std::upper_bound(begin(),end(),vertex_position(max_position).xz());
+		E = std::upper_bound(begin(),end(),vertex_position(max_position).xz(),&vertex::predicate);
 		if (E != end()) ++E;
 	}
 	else

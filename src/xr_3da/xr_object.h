@@ -26,9 +26,7 @@ class	ENGINE_API						CObject :
 	public ISpatial,
 	public ISheduled,
 	public IRenderable,
-	public ICollidable	//,
-	//public IInputReceiver,
-	//public IEventReceiver
+	public ICollidable
 {
 public:
 	struct	SavedPosition
@@ -49,6 +47,7 @@ public:
 			u32	net_Ready		:	1;
 			u32 net_SV_Update	:	1;
 			u32 crow			:	1;
+			u32	bPreDestroy		:	1;
 		};
 		u32	storage;
 	};
@@ -78,9 +77,7 @@ public:
 		void							MakeMeCrow_internal	();
 		void							MakeMeCrow			();
 
-	ICF	void							IAmNotACrowAnyMore	()					{
-		Props.crow						= false	;
-	}
+	ICF	void							IAmNotACrowAnyMore	()					{ Props.crow = false;	}
 	virtual BOOL						AlwaysTheCrow		()					{ return FALSE; }
 
 	// Network
@@ -89,6 +86,8 @@ public:
 	ICF u16								ID					()			const	{ return Props.net_ID;		}
 	ICF void							setID				(u16 _ID)			{ Props.net_ID = _ID;		}
 	virtual BOOL						Ready				()					{ return Props.net_Ready;	}
+	BOOL								GetTmpPreDestroy		()		const	{ return Props.bPreDestroy;	}
+	void								SetTmpPreDestroy	(BOOL b)			{ Props.bPreDestroy = b;}
 	virtual float						shedule_Scale		()					{ return Device.vCameraPosition.distance_to(Position())/200.f; }
 	virtual bool						shedule_Needed		()					{return processing_enabled();};
 

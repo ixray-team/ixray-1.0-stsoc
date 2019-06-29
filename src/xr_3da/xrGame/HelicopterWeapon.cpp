@@ -29,14 +29,18 @@ void CHelicopter::OnEvent(	NET_Packet& P, u16 type)
 	CExplosive::OnEvent(P,type);
 	u16 id;
 	switch (type) {
-		case GE_OWNERSHIP_TAKE : {
-			P.r_u16(id);
-			CRocketLauncher::AttachRocket(id, this);
-								 } break;
-		case GE_OWNERSHIP_REJECT : {
-			P.r_u16(id);
-			CRocketLauncher::DetachRocket(id);
-								   } break;
+		case GE_OWNERSHIP_TAKE : 
+			{
+				P.r_u16(id);
+				CRocketLauncher::AttachRocket(id, this);
+			} break;
+		case GE_OWNERSHIP_REJECT : 
+		case GE_LAUNCH_ROCKET : 
+			{
+			bool bLaunch = (type==GE_LAUNCH_ROCKET);
+				P.r_u16(id);
+				CRocketLauncher::DetachRocket(id, bLaunch);
+			} break;
 	}
 }
 
@@ -44,7 +48,23 @@ void CHelicopter::MGunUpdateFire()
 {
 
 	fTime -= Device.fTimeDelta;
+	if (delta_t < 0){
+		delta_t = Device.fTimeGlobal;
+		flag_by_fire = 0;
+	}
+	float time_f = Device.fTimeGlobal - delta_t;
 
+	float fire_time;
+	if(pSettings->line_exist(*cNameSect(),"fire_time"))
+		fire_time = pSettings->r_float(*cNameSect(),"fire_time");
+	else
+		fire_time = -1;
+
+	float no_fire_time;
+	if(pSettings->line_exist(*cNameSect(),"no_fire_time"))
+		no_fire_time = pSettings->r_float(*cNameSect(),"no_fire_time");
+	else
+		no_fire_time = -1;
 
 	CShootingObject::UpdateFlameParticles();
 	CShootingObject::UpdateLight();
@@ -52,6 +72,19 @@ void CHelicopter::MGunUpdateFire()
 	if(!IsWorking()) {
 		if(fTime<0) fTime = 0.f;
 		return;
+	}
+	if(no_fire_time > 0 && fire_time > 0) {
+		if (flag_by_fire==1 && time_f > fire_time){
+			delta_t = Device.fTimeGlobal;
+			time_f = Device.fTimeGlobal - delta_t;
+			flag_by_fire = 0;
+		}
+		if (time_f > no_fire_time && flag_by_fire ==0){
+			delta_t = Device.fTimeGlobal;
+			time_f = Device.fTimeGlobal - delta_t;
+			flag_by_fire = 1;
+		}
+		if(flag_by_fire ==0 && time_f < no_fire_time) return;
 	}
 
 	if(fTime<=0) {
@@ -73,8 +106,11 @@ void CHelicopter::OnShot		()
 
 		float	dt		= Device.fTimeGlobal - m_enemy.fStartFireTime; VERIFY(dt>=0);
 		float	dist	= m_enemy.fire_trail_length_curr - dt*fire_trail_speed;
-		if(dist<0)		
-			return;
+		if(dist<0)
+		{
+			MGunFireEnd	();
+			return		;
+		}
 
 		Fvector fp		= fire_pos;
 		fp.y			= enemy_pos.y;
@@ -270,7 +306,7 @@ void CHelicopter::startRocket(u16 idx)
 		LaunchRocket(xform,  vel, zero_vel);
 
 		NET_Packet P;
-		u_EventGen(P,GE_OWNERSHIP_REJECT,ID());
+		u_EventGen(P,GE_LAUNCH_ROCKET,ID());
 		P.w_u16(u16( getCurrentRocket()->ID()));
 		u_EventSend(P);
 

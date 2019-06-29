@@ -204,6 +204,10 @@ const CUILine* CUILine::CutByLength(CGameFont* pFont, float length, BOOL cut_wor
 		while (IncPos(pos))
 		{
 			len2w1 = GetLength_inclusiveWord_1(pos, pFont);
+			if(!pos.word_2.exist())
+			{
+				return Cut2Pos(pos);
+			}
 			len2w2 = GetLength_inclusiveWord_2(pos, pFont);
 			if (len2w1 <= length && len2w2 > length)
 				return Cut2Pos(pos);
@@ -220,23 +224,34 @@ bool CUILine::GetWord(Word& w, const xr_string& text, int begin) const{
 		return false;
 
 	StrSize first, last, lastsp/*last space*/;
-
 	first  = text.find_first_not_of(' ', begin);
-
 	last   = text.find_first_of(' ', first);
-	lastsp = text.find_first_not_of(' ', last);
+	
+	if( npos==last && npos==first )
+		return false;
+
+	if( npos==last && npos!=first )
+	{
+		w.pos		= (int)first;
+		w.len		= (int)(text.length()-first);
+		w.len_full	= w.len;
+		return		true;
+	}
+
+	lastsp			= text.find_first_not_of(' ', last);
 
 	if (npos == lastsp && npos == first) // maybe we have string only with spaces
 	{
-		first = text.find_first_of(' ',begin);
-		last  = text.find_last_of(' ',begin);
+		first		= text.find_first_of(' ',begin);
+		last		= text.find_last_of(' ',begin);
+		
 		if (npos == first) //suxxx it is empty string
-			return false;
+			return	false;
 
 		w.pos		= (int)first;
 		w.len		= (int)(last - first + 1);
 		w.len_full	= w.len;
-		return true;
+		return		true;
 	}
 	
 
@@ -255,7 +270,7 @@ bool CUILine::GetWord(Word& w, const xr_string& text, int begin) const{
 
 	first = begin;
 
-	w.pos		= (int)first;
+	w.pos		= (int) first;
 	w.len		= (int)(last - first + 1);
 	w.len_full	= (int)(lastsp - first + 1);
 
@@ -267,7 +282,8 @@ bool CUILine::GetWord(Word& w, const xr_string& text, int begin) const{
 	return true;        
 }
 
-bool CUILine::InitPos(Position& pos) const{
+bool CUILine::InitPos(Position& pos) const
+{
 	Word w;
 	pos.curr_subline = 0;
 	if (GetWord(w, m_subLines[0].m_text, 0))
@@ -387,8 +403,7 @@ const CUILine* CUILine::CutWord(CGameFont* pFont, float length){
 
 	R_ASSERT2(false, "meaningless call of CUILine::CutWord() ):");
 
-	return NULL;
-
+	return m_tmpLine;
 }
 
 float  CUILine::GetLength_inclusiveWord_1(Position& pos, CGameFont* pFont) const{

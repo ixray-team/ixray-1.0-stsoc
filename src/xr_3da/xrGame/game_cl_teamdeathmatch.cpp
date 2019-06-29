@@ -127,7 +127,7 @@ void game_cl_TeamDeathmatch::TranslateGameMessage	(u32 msg, NET_Packet& P)
 			u16 Team;
 			P.r_u16		(Team);
 
-			sprintf(Text, "%s%s %s%s %s%s",
+			sprintf_s(Text, "%s%s %s%s %s%s",
 							"",//no color
 							PlayerName,
 							Color_Main,
@@ -150,7 +150,7 @@ void game_cl_TeamDeathmatch::TranslateGameMessage	(u32 msg, NET_Packet& P)
 			game_PlayerState* pPlayer = GetPlayerByGameID(PlayerID);
 			if (!pPlayer) break;
 
-			sprintf(Text, "%s%s %s%s %s%s", 
+			sprintf_s(Text, "%s%s %s%s %s%s", 
 							CTeamInfo::GetTeam_color_tag(int(OldTeam)), 
 							pPlayer->name, 
 							Color_Main, 
@@ -350,6 +350,7 @@ bool game_cl_TeamDeathmatch::CanBeReady				()
 
 	if (!m_bTeamSelected)
 	{
+		m_bMenuCalledFromReady = FALSE;
 		if (CanCallTeamSelectMenu())
 			StartStopMenu(m_game_ui->m_pUITeamSelectWnd,true);
 		return false;
@@ -392,18 +393,18 @@ void game_cl_TeamDeathmatch::shedule_Update			(u32 dt)
 		StartStopMenu(m_game_ui->m_pUITeamSelectWnd,true);
 	//---------------------------------------------------------
 	
-	switch (phase)
+	switch (m_phase)
 	{
 	case GAME_PHASE_TEAM1_SCORES:
 		{
-			sprintf(msg, /*team %s wins*/ *st.translate("mp_team_wins"), CTeamInfo::GetTeam_name(1));
+			sprintf_s(msg, /*team %s wins*/ *st.translate("mp_team_wins"), CTeamInfo::GetTeam_name(1));
 			m_game_ui->SetRoundResultCaption(msg);
 
 			SetScore();
 		}break;
 	case GAME_PHASE_TEAM2_SCORES:
 		{
-			sprintf(msg, /*team %s wins*/ *st.translate("mp_team_wins"), CTeamInfo::GetTeam_name(2));
+			sprintf_s(msg, /*team %s wins*/ *st.translate("mp_team_wins"), CTeamInfo::GetTeam_name(2));
 			m_game_ui->SetRoundResultCaption(msg);
 			
 			SetScore();
@@ -411,38 +412,20 @@ void game_cl_TeamDeathmatch::shedule_Update			(u32 dt)
 		}break;
 	case GAME_PHASE_INPROGRESS:
 		{
-			if (local_player)
+			if (local_player && !local_player->IsSkip())
 			{			
-//				s16 lt = local_player->team;
-//				if (lt>=0)
-//				{
-//					if(m_game_ui)
-//						m_game_ui->SetScoreCaption	(teams[0].score, teams[1].score);
-
-//					if (HUD().GetUI() && HUD().GetUI()->UIMainIngameWnd)
-//					{
-//						HUD().GetUI()->UIMainIngameWnd->UpdateTeamsScore(teams[0].score, teams[1].score);
-//					}
-//				};
-/*
-				if (m_game_ui)
+				if (Level().CurrentEntity() && Level().CurrentEntity()->CLS_ID == CLSID_SPECTATOR)
 				{
-					if (m_game_ui->m_pUITeamSelectWnd->IsShown())
+					if (!(pCurBuyMenu && pCurBuyMenu->IsShown()) && 
+						!(pCurSkinMenu && pCurSkinMenu->IsShown()) &&
+						!(m_game_ui->m_pMapDesc && m_game_ui->m_pMapDesc->IsShown()) &&
+						(HUD().GetUI() && HUD().GetUI()->GameIndicatorsShown())
+						)
 					{
-//						m_game_ui->SetSpectatorMsgCaption("");
-					}
-				}
-*/
-				//---------------------------------------------------------
-/*				if (local_player->team == 0)
-				{
-					if (!m_bTeamSelected && !m_bSpectatorSelected)
-					{
-						if (CanCallTeamSelectMenu() && !pUITeamSelectWnd->IsShown())
-							StartStopMenu(pUITeamSelectWnd, true);
-					}
-				}
-*/
+						if (!m_bTeamSelected)
+							m_game_ui->SetPressJumpMsgCaption("mp_press_jump2select_team");
+					};
+				};
 				SetScore();
 			};
 		}break;
@@ -472,12 +455,15 @@ bool	game_cl_TeamDeathmatch::OnKeyboardPress			(int key)
 {
 	if (kTEAM == key )
 	{
-		if (CanCallTeamSelectMenu())
+		if (m_game_ui)
 		{
-			StartStopMenu(m_game_ui->m_pUITeamSelectWnd,true);
-		};
+			if (CanCallTeamSelectMenu())
+			{
+				StartStopMenu(m_game_ui->m_pUITeamSelectWnd,true);
+			};
 
-		return true;
+			return true;
+		}
 	};
 	
 	return inherited::OnKeyboardPress(key);
@@ -699,7 +685,7 @@ void				game_cl_TeamDeathmatch::PlayRankChangesSndMessage ()
 void				game_cl_TeamDeathmatch::OnGameMenuRespond_ChangeTeam	(NET_Packet& P)
 {
 	s16 OldTeam = local_player->team;
-	local_player->team = P.r_s16();
+	local_player->team = u8(P.r_s16() & 0x00ff);
 	if (OldTeam != local_player->team)
 		OnTeamChanged();
 

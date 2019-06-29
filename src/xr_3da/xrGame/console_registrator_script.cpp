@@ -1,7 +1,5 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "console_registrator.h"
-
-#include "script_space.h"
 #include "../xr_ioconsole.h"
 
 using namespace luabind;

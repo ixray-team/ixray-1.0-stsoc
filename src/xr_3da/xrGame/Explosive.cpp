@@ -518,12 +518,8 @@ void CExplosive::OnAfterExplosion()
 	}
 	//ликвидировать сам объект 
 	if (cast_game_object()->Local()) cast_game_object()->DestroyObject();
-	
-//	NET_Packet			P;
-//	cast_game_object()->u_EventGen			(P,GE_DESTROY,cast_game_object()->ID());
-//	//		Msg					("ge_destroy: [%d] - %s",ID(),*cName());
-//	if (cast_game_object()->Local()) cast_game_object()->u_EventSend			(P);
 }
+
 void CExplosive::OnBeforeExplosion()
 {
 	m_bAlreadyHidden = false;
@@ -784,7 +780,7 @@ void CExplosive::UpdateExplosionParticles ()
 	m_pExpParticle->UpdateParent(ParticleMatrix, Vel);
 }
 
-bool CExplosive::Useful()
+bool CExplosive::Useful() const
 {
 	return m_explosion_flags.flags == 0;
 }

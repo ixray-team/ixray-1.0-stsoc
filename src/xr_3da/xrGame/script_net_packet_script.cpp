@@ -6,13 +6,9 @@
 //	Description : XRay Script net packet class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_net_packet.h"
-#include "script_space.h"
 #include "../../xrNetServer/net_utils.h"
-#include <luabind/operator.hpp>
-//#include <luabind/adopt_policy.hpp>
-#include <luabind/out_value_policy.hpp>
 
 using namespace luabind;
 

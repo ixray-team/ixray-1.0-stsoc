@@ -18,21 +18,20 @@ public:
 	CPhrase(void);
 	virtual ~CPhrase(void);
 
-	void			SetText			(LPCSTR text)		{m_text = text;}
-	LPCSTR			GetText			()	const;
-//	LPCSTR			GetScriptText	(const CGameObject* pSpeaker1, const CGameObject* pSpeaker2, LPCSTR dialog_id, int phrase_num) const;
+	void				SetText			(LPCSTR text)		{m_text = text;}
+	LPCSTR				GetText			()	const;
 
-	void			SetIndex		(int index)			{m_iIndex = index;}
-	int				GetIndex		()	const			{return m_iIndex;}
+	void				SetID		(const shared_str& id)			{m_ID = id;}
+	const shared_str&	GetID		()	const						{return m_ID;}
 
-	int				GoodwillLevel	()	const			{return m_iGoodwillLevel;}
+	int					GoodwillLevel	()	const			{return m_iGoodwillLevel;}
 
-	bool			IsDummy			()	const;
-	CPhraseScript*	GetPhraseScript	()					{return &m_PhraseScript;};
+	bool				IsDummy			()	const;
+	CPhraseScript*		GetPhraseScript	()					{return &m_PhraseScript;};
 
 protected:
 	//уникальный индекс в списке фраз диалога
-	int				m_iIndex;
+	shared_str		m_ID;
 	//текстовое представление фразы
 	xr_string		m_text;
 	

@@ -139,8 +139,8 @@ void xrSaveNodes(LPCSTR N, LPCSTR out_name)
 
 	Msg				("Renumbering nodes...");
 
-	string256		fName; 
-	strconcat		(fName,N,out_name);
+	string_path		fName; 
+	strconcat		(sizeof(fName),fName,N,out_name);
 
 	IWriter			*fs = FS.w_open(fName);
 

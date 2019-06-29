@@ -6,6 +6,16 @@
 #include "../../xrNetServer/client_id.h"
 #include "game_sv_base_console_vars.h"
 
+enum ERoundEnd_Result
+{
+	eRoundEnd_Finish		= u32(0),
+	eRoundEnd_GameRestarted,
+	eRoundEnd_GameRestartedFast,
+	eRoundEnd_TimeLimit,
+	eRoundEnd_FragLimit,
+	eRoundEnd_ArtrefactLimit,
+	eRoundEnd_Force			= u32(-1)
+};
 
 class CSE_Abstract;
 class xrServer;
@@ -19,6 +29,7 @@ class	game_sv_GameState	: public game_GameState
 {
 	typedef game_GameState inherited;
 protected:
+
 //	u32								m_RPointFreezeTime;
 	xrServer*						m_server;
 	GameEventQueue*					m_event_queue;
@@ -36,30 +47,27 @@ protected:
 	bool							m_bMapNeedRotation;
 	bool							m_bMapSwitched;
 	bool							m_bFastRestart;
+
 	MAP_ROTATION_LIST				m_pMapRotation_List;
+
+public:
+#define		TEAM_COUNT 4
 
 	bool							NewPlayerName_Exists	(void* pClient, LPCSTR NewName);
 	void							NewPlayerName_Generate	(void* pClient, LPSTR NewPlayerName);
 	void							NewPlayerName_Replace	(void* pClient, LPCSTR NewPlayerName);
-
-public:
-#define		TEAM_COUNT 4
 
 	BOOL							sv_force_sync;
 	float							rpoints_MinDist [TEAM_COUNT];
 	xr_vector<RPoint>				rpoints	[TEAM_COUNT];
 	DEF_VECTOR(RPRef, RPoint*);
 	RPRef							rpointsBlocked;
+
+	ERoundEnd_Result				round_end_reason;
 	
 	virtual		void				SaveMapList				();
 	virtual		bool				HasMapRotation			() {return m_bMapRotation; };
 	
-/*	
-	// scripts
-	u64								m_qwStartProcessorTime;
-	u64								m_qwStartGameTime;
-	float							m_fTimeFactor;
-*/
 public:
 	virtual		void				OnPlayerConnect			(ClientID id_who);
 	virtual		void				OnPlayerDisconnect		(ClientID id_who, LPSTR Name, u16 GameID);
@@ -72,14 +80,16 @@ public:
 	
 
 	virtual		void				OnRoundStart			();									// старт раунда
-	virtual		void				OnRoundEnd				(LPCSTR reason);					// конец раунда
+	virtual		void				OnRoundEnd				();	//	round_end_reason			// конец раунда
 
 	virtual		void				MapRotation_AddMap		(LPCSTR MapName);
+	virtual		void				MapRotation_ListMaps	();
 	virtual		bool				OnNextMap				()									{return false;}
 	virtual		void				OnPrevMap				()									{}
 	virtual		bool				SwitchToNextMap			()	{ return m_bMapNeedRotation; };
 	
 	virtual		BOOL				IsVotingEnabled			();
+	virtual		BOOL				IsVotingEnabled			(u16 flag);
 	virtual		bool				IsVotingActive			()	{ return false; };
 	virtual		void				SetVotingActive			( bool Active )	{ };
 	virtual		void				OnVoteStart				(LPCSTR VoteCommand, ClientID sender)			{};
@@ -109,11 +119,9 @@ public:
 	virtual		bool				IsPointFreezed			(RPoint* rp);
 	virtual		void				SetPointFreezed			(RPoint* rp);
 
-	//  [7/5/2005]
 #ifdef DEBUG
 	virtual		void				OnRender				();
 #endif
-	//  [7/5/2005]
 	
 	virtual		void				OnSwitchPhase			(u32 old_phase, u32 new_phase);	
 				CSE_Abstract*		spawn_begin				(LPCSTR N);
@@ -126,19 +134,15 @@ public:
 	virtual		u32					get_alive_count			(u32 team);
 	virtual		xr_vector<u16>*		get_children			(ClientID id_who);
 	void							u_EventGen				(NET_Packet& P, u16 type, u16 dest	);
-	void							u_EventSend				(NET_Packet& P);
+	void							u_EventSend				(NET_Packet& P, u32 dwFlags = DPNSEND_GUARANTEED);
 
 	// Events
 	virtual		BOOL				OnPreCreate				(CSE_Abstract* E)				{return TRUE;};
 	virtual		void				OnCreate				(u16 id_who)					{};
 	virtual		void				OnPostCreate			(u16 id_who)					{};
 	virtual		BOOL				OnTouch					(u16 eid_who, u16 eid_target, BOOL bForced = FALSE)	= 0;			// TRUE=allow ownership, FALSE=denied
-	virtual		BOOL				OnDetach				(u16 eid_who, u16 eid_target)	= 0;			// TRUE=allow ownership, FALSE=denied
+	virtual		void				OnDetach				(u16 eid_who, u16 eid_target)	= 0;
 	virtual		void				OnDestroyObject			(u16 eid_who)							{};			
-
-//	virtual		void				OnPlayerBuyFinished		(u32 id_who, NET_Packet& P)				{};
-
-
 
 	virtual		void				OnHit					(u16 id_hitter, u16 id_hitted, NET_Packet& P);	//кто-то получил Hit
 	virtual		void				OnPlayerHitPlayer		(u16 id_hitter, u16 id_hitted, NET_Packet& P){}; //игрок получил Hit
@@ -149,12 +153,7 @@ public:
 	virtual		void				net_Export_State		(NET_Packet& P, ClientID id_to);				// full state
 	virtual		void				net_Export_Update		(NET_Packet& P, ClientID id_to, ClientID id);		// just incremental update for specific client
 	virtual		void				net_Export_GameTime		(NET_Packet& P);						// update GameTime only for remote clients
-/*
-	virtual		ALife::_TIME_ID		GetGameTime				();
-	virtual		float				GetGameTimeFactor		();
-	virtual		void				SetGameTime				(ALife::_TIME_ID GameTime);
-	virtual		void				SetGameTimeFactor		(const float fTimeFactor);
-*/
+
 	virtual		bool				change_level			(NET_Packet &net_packet, ClientID sender);
 	virtual		void				save_game				(NET_Packet &net_packet, ClientID sender);
 	virtual		bool				load_game				(NET_Packet &net_packet, ClientID sender);
@@ -173,6 +172,8 @@ public:
 	virtual		void				sls_default				() {};
 	virtual		shared_str			level_name				(const shared_str &server_options) const;
 	virtual		void				on_death				(CSE_Abstract *e_dest, CSE_Abstract *e_src);
+
+	virtual		void				DumpOnlineStatistic		(){};
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

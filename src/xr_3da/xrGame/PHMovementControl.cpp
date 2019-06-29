@@ -107,14 +107,17 @@ float CPHMovementControl::VelocityLimit()
 	if(!m_character || !m_character->b_exist) return 0.f;
 	return m_character->GetMaximumVelocity();
 }
-void CPHMovementControl::Calculate(Fvector& vAccel,const Fvector& camDir,float /**ang_speed/**/,float jump,float /**dt/**/,bool /**bLight/**/){
 
-	
-	
+void CPHMovementControl::in_shedule_Update(u32 DT)
+{
 	if(m_capture) 
 	{
 		if(m_capture->Failed()) xr_delete(m_capture);
 	}
+}
+
+void CPHMovementControl::Calculate(Fvector& vAccel,const Fvector& camDir,float /**ang_speed/**/,float jump,float /**dt/**/,bool /**bLight/**/)
+{
 	Fvector previous_position;previous_position.set(vPosition);
 	m_character->IPosition(vPosition);
 	if(bExernalImpulse)
@@ -183,12 +186,7 @@ void CPHMovementControl::Calculate(const xr_vector<DetailPathManager::STravelPat
 	}
 #endif
 	if(!m_character->b_exist)	return;
-	if(m_capture) 
-	{
-		if(m_capture->Failed()) xr_delete(m_capture);
-	}
 	
-
 	Fvector new_position;
 	m_character->IPosition(new_position);
 

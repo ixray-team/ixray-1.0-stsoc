@@ -10,15 +10,12 @@ class CUIListBox : 	public CUIScrollView,
 public:
 					CUIListBox						();
 	CUIListBoxItem* AddItem							(LPCSTR text);
-	CUIListBoxItem* GetItemByID						(u32 uid);
+	CUIListBoxItem* GetItemByTAG					(u32 tag_value);
 	CUIListBoxItem* GetItemByIDX					(u32 idx);
 	CUIListBoxItem* GetItemByText					(LPCSTR text);
 	CUIListBoxItem* GetSelectedItem					();
 
-//. LPCSTR			GetFirstText					();
-//.	LPCSTR			GetNextText						();
 	LPCSTR			GetSelectedText					();
-//.	LPCSTR			GetNextSelectedText				();
 	LPCSTR			GetText							(u32 idx);
 	void			MoveSelectedUp					();
 	void			MoveSelectedDown				();
@@ -30,8 +27,8 @@ public:
 	virtual	void	SetSelected						(CUIWindow* w)	{CUIScrollView::SetSelected(w);};
 		u32			GetSelectedIDX					();
 		void		SetSelectedIDX					(u32 idx);
-		void		SetSelected						(u32 uid);
-		void		SetSelected						(LPCSTR txt);
+		void		SetSelectedTAG					(u32 tag_val);
+		void		SetSelectedText					(LPCSTR txt);
 		void		SetImmediateSelection			(bool f);
 
 virtual bool		OnMouse							(float x, float y, EUIMessages mouse_action);
@@ -52,8 +49,6 @@ protected:
 	u32				m_text_color;
 	u32				m_text_color_s;
 	ETextAlignment	m_text_al;
-//.	WINDOW_LIST_it	m_cur_wnd_it;
-//.	CUIWindow*		m_last_wnd;
 	shared_str		m_selection_texture;
 
 	bool			m_bImmediateSelection;

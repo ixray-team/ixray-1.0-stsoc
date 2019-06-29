@@ -27,7 +27,7 @@ IC	void CStalkerMovementManager::set_desired_direction(const Fvector *desired_di
 	else {
 		m_target.m_use_desired_direction	= false;
 #ifdef DEBUG
-		m_target.m_desired_direction		= Fvector().set(_sqr(flt_max),_sqr(flt_max),_sqr(flt_max));
+		m_target.m_desired_direction		= Fvector().set(flt_max,flt_max,flt_max);
 #endif
 	}
 }

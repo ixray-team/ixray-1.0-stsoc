@@ -6,7 +6,7 @@
 //	Description : Visibility and look for all the biting monsters
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "base_monster.h"
 #include "../../../actor.h"
 #include "../../../ActorEffector.h"
@@ -178,7 +178,7 @@ void CBaseMonster::HitEntity(const CEntity *pEntity, float fDamage, float impuls
 					
 					string64				sect_name;
 
-					sprintf					(sect_name,"%s_%d",eff_sect.c_str(), id);
+					sprintf_s					(sect_name,"%s_%d",eff_sect.c_str(), id);
 					AddEffector				(Actor(), effBigMonsterHit, sect_name, fDamage);
 				}
 			}

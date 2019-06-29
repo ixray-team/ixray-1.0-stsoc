@@ -63,8 +63,14 @@ void CAnomalyDetector::update_schedule()
 
 	
 	// remove from storage
-	ANOMALY_INFO_VEC_IT it_remove = remove_if(m_storage.begin(), m_storage.end(), remove_predicate(m_time_to_rememeber));
-	m_storage.erase		(it_remove,m_storage.end());
+	m_storage.erase		(
+		std::remove_if(
+			m_storage.begin(),
+			m_storage.end(),
+			remove_predicate(m_time_to_rememeber)
+		),
+		m_storage.end()
+	);
 }
 
 void CAnomalyDetector::on_contact(CObject *obj)

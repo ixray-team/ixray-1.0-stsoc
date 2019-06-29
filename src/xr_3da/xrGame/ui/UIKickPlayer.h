@@ -6,7 +6,9 @@ class CUIStatic;
 class CUI3tButton;
 class CUIFrameWindow;
 class CUIListBox;
+class CUISpinNum;
 class CUIXml;
+struct game_PlayerState;
 
 class CUIKickPlayer : public CUIDialogWnd 
 {
@@ -30,18 +32,20 @@ protected:
 
 	void			Init			(CUIXml& xml_doc);
 
-	E_MODE			mode;
+	E_MODE								mode;
 
-	CUIStatic*		bkgrnd;
-	CUIStatic*		header;
-	CUIFrameWindow* lst_back;
-	CUIListBox*		lst;
+	CUIStatic*							bkgrnd;
+	CUIStatic*							header;
+	CUIFrameWindow* 					lst_back;
+	CUIListBox*							m_ui_players_list;
+	CUISpinNum*							m_spin_ban_sec;
+	CUIStatic*							m_ban_sec_label;
 
-	CUI3tButton*	btn_ok;
-	CUI3tButton*	btn_cancel;
+	CUI3tButton*						btn_ok;
+	CUI3tButton*						btn_cancel;
 
-	u32				m_prev_upd_time;
+	u32									m_prev_upd_time;
 
-	u32				selected_item_id;
-	shared_str		selected_item_text;
+	shared_str							m_selected_item_text;
+	xr_vector<game_PlayerState*>		m_current_set;
 };

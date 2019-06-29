@@ -50,7 +50,8 @@ enum ETimePrecision
 	etpTimeToHours = 0,
 	etpTimeToMinutes,
 	etpTimeToSeconds,
-	etpTimeToMilisecs
+	etpTimeToMilisecs,
+	etpTimeToSecondsAndDay
 };
 
 // Точность возвращаемого функцией GetGameDateTimeAsString значения: до года, до месяца, до дня

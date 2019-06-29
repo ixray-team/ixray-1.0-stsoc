@@ -30,6 +30,7 @@ void CHitImmunity::LoadImmunities(LPCSTR imm_sect,CInifile* ini)
 	m_HitTypeK[ALife::eHitTypeChemicalBurn] = ini->r_float(imm_sect,"chemical_burn_immunity");
 	m_HitTypeK[ALife::eHitTypeExplosion]	= ini->r_float(imm_sect,"explosion_immunity");
 	m_HitTypeK[ALife::eHitTypeFireWound]	= ini->r_float(imm_sect,"fire_wound_immunity");
+	m_HitTypeK[ALife::eHitTypePhysicStrike]	= READ_IF_EXISTS(ini, r_float, imm_sect,"physic_strike_wound_immunity", 1.0f);
 }
 
 float CHitImmunity::AffectHit (float power, ALife::EHitType hit_type)

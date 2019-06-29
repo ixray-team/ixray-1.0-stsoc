@@ -31,7 +31,7 @@ STATIC inline FILE *file()
 		string256				file_name;
 		strftime				(file_name,sizeof(file_name),"%Y.%m.%d.%H.%M.%S",&new_time);
 		string256				file;
-		strconcat				(file,output_folder,file_name,output_extension);
+		strconcat				(sizeof(file),file,output_folder,file_name,output_extension);
 
 		m_file					= fopen(file,"wb");
 		VERIFY					(m_file);

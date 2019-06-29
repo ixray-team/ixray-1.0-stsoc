@@ -56,8 +56,8 @@ void CBuild::Flex2OGF()
 				if (F->hasImplicitLighting())
 				{
 					// specific lmap
-					string512		tn;
-					strconcat		(tn,*T.name,"_lm.dds");
+					string_path		tn;
+					strconcat		(sizeof(tn),tn,*T.name,"_lm.dds");
 					T.name			= tn;
 					T.pSurface		= T.pSurface;	// Leave surface intact
 					R_ASSERT		(pOGF);
@@ -66,8 +66,8 @@ void CBuild::Flex2OGF()
 					// If lightmaps persist
 					CLightmap*	LM	= F->lmap_layer;
 					if (LM)		{
-						string256	fn;
-						sprintf		(fn,"%s_1",LM->lm_texture.name); 
+						string_path	fn;
+						sprintf_s		(fn,"%s_1",LM->lm_texture.name); 
 						T.name		= fn;
 						T.pSurface	= &(LM->lm_texture);
 						R_ASSERT	(T.pSurface);

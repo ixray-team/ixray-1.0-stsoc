@@ -155,8 +155,8 @@ protected:
 				bool		Enable						();
 				bool		Disable						();
 				void		UpdateOnOffState			();
-				void		GoEnabledState				();
-				void		GoDisabledState				();
+	virtual		void		GoEnabledState				();
+	virtual		void		GoDisabledState				();
 public:
 				bool		IsEnabled					()	{return m_eZoneState != eZoneStateDisabled; };
 				void		ZoneEnable					();	
@@ -328,6 +328,7 @@ protected:
 					void	ThrowOutArtefact			(CArtefact* pArtefact);
 	
 					void	PrefetchArtefacts			();
+	virtual BOOL		AlwaysTheCrow		();
 
 protected:
 	DEFINE_VECTOR(CArtefact*, ARTEFACT_VECTOR, ARTEFACT_VECTOR_IT);
@@ -363,7 +364,7 @@ protected:
 protected:
 	u32						m_ef_anomaly_type;
 	u32						m_ef_weapon_type;
-
+	BOOL					m_b_always_fastmode;
 public:
 	virtual u32				ef_anomaly_type				() const;
 	virtual u32				ef_weapon_type				() const;

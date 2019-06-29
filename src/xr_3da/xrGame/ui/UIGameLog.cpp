@@ -70,7 +70,8 @@ CUIPdaKillMessage* CUIGameLog::AddLogMessage(KillMessageStruct& msg){
 
 void CUIGameLog::AddChatMessage(LPCSTR msg, LPCSTR author){
 	string256 fullLine;
-	sprintf(fullLine, "%s %s", author, msg);
+	sprintf_s(fullLine, "%s %s", author, msg);
+	_TrimRight	(fullLine);
     
 	CUIStatic* pItem = NULL;
 

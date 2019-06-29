@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "HairsZone.h"
 #include "hudmanager.h"
 #include "level.h"
@@ -68,7 +68,7 @@ void CHairsZone::Affect(SZoneObjectInfo* O)
 #ifdef DEBUG
 	if(bDebug){
 		char l_pow[255]; 
-		sprintf(l_pow, "zone hit. %.1f", Power(pGameObject->Position().distance_to(P)));
+		sprintf_s(l_pow, "zone hit. %.1f", Power(pGameObject->Position().distance_to(P)));
 		Msg("%s %s",*pGameObject->cName(), l_pow);
 	}
 #endif
@@ -99,18 +99,4 @@ void CHairsZone::Affect(SZoneObjectInfo* O)
 
 		PlayHitParticles(pGameObject);
 	}
-}
-
-#include "script_space.h"
-
-using namespace luabind;
-
-#pragma optimize("s",on)
-void CHairsZone::script_register	(lua_State *L)
-{
-	module(L)
-	[
-		class_<CHairsZone,CGameObject>("CHairsZone")
-			.def(constructor<>())
-	];
 }

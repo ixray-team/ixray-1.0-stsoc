@@ -7,6 +7,7 @@ class CUI3tButton;
 class CUIFrameWindow;
 class CUIListBox;
 class CUIXml;
+class CExtraContentFilter;
 
 class CUIChangeMap : public CUIDialogWnd 
 {
@@ -14,6 +15,7 @@ public:
 	using CUIDialogWnd::Init;
 
 					CUIChangeMap			();
+					~CUIChangeMap			();
 			void	Init					(CUIXml& xml_doc);
 
 	virtual bool	OnKeyboard				(int dik, EUIMessages keyboard_action);
@@ -37,7 +39,7 @@ protected:
 	CUI3tButton*	btn_ok;
 	CUI3tButton*	btn_cancel;
 
-	u32				m_prev_upd_time;
-	u32				selected_item;
-	xr_vector<shared_str> maps;
+	CExtraContentFilter*	m_pExtraContentFilter;
+
+	u32						m_prev_upd_time;
 };

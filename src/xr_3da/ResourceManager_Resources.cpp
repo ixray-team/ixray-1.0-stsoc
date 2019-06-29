@@ -5,10 +5,10 @@
 #include <d3dx9.h>
 #ifndef _EDITOR
 	#pragma comment( lib, "d3dx9.lib"		)
+    #include "render.h"
 #endif
 #pragma warning(default:4995)
 
-#include "render.h"
 #include "ResourceManager.h"
 #include "tss.h"
 #include "blenders\blender.h"
@@ -32,8 +32,9 @@ class	includer				: public ID3DXInclude
 public:
 	HRESULT __stdcall	Open	(D3DXINCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
 	{
-		string256				pname;
-		IReader*		R		= FS.r_open	("$game_shaders$",strconcat(pname,::Render->getShaderPath(),pFileName));
+		string_path				pname;
+		strconcat				(sizeof(pname),pname,::Render->getShaderPath(),pFileName);
+		IReader*		R		= FS.r_open	("$game_shaders$",pname);
 		if (0==R)				{
 			// possibly in shared directory or somewhere else - open directly
 			R					= FS.r_open	("$game_shaders$",pFileName);
@@ -153,7 +154,7 @@ void		CResourceManager::_DeleteDecl		(const SDeclaration* dcl)
 SVS*	CResourceManager::_CreateVS		(LPCSTR _name)
 {
 	string_path			name;
-	strcpy				(name,_name);
+	strcpy_s				(name,_name);
 	if (0 == ::Render->m_skinning)	strcat(name,"_0");
 	if (1 == ::Render->m_skinning)	strcat(name,"_1");
 	if (2 == ::Render->m_skinning)	strcat(name,"_2");
@@ -175,8 +176,9 @@ SVS*	CResourceManager::_CreateVS		(LPCSTR _name)
 		LPD3DXBUFFER				pErrorBuf	= NULL;
 		LPD3DXSHADER_CONSTANTTABLE	pConstants	= NULL;
 		HRESULT						_hr			= S_OK;
-		string256					cname;
-		FS.update_path				(cname,	"$game_shaders$", strconcat(cname,::Render->getShaderPath(),_name,".vs"));
+		string_path					cname;
+		strconcat					(sizeof(cname),cname,::Render->getShaderPath(),_name,".vs");
+		FS.update_path				(cname,	"$game_shaders$", cname);
 //		LPCSTR						target		= NULL;
 
 		IReader*					fs			= FS.r_open(cname);
@@ -262,8 +264,9 @@ SPS*	CResourceManager::_CreatePS			(LPCSTR name)
 
 		// Open file
 		includer					Includer;
-		string256					cname;
-		FS.update_path				(cname,	"$game_shaders$", strconcat(cname,::Render->getShaderPath(),name,".ps"));
+		string_path					cname;
+		strconcat					(sizeof(cname), cname,::Render->getShaderPath(),name,".ps");
+		FS.update_path				(cname,	"$game_shaders$", cname);
 
 		// duplicate and zero-terminate
 		IReader*		R		= FS.r_open(cname);
@@ -310,12 +313,19 @@ SPS*	CResourceManager::_CreatePS			(LPCSTR name)
 			else	_hr = E_FAIL;
 		}else
 		{
-			Msg("error is %s", (LPCSTR)pErrorBuf->GetBufferPointer());	
+			Msg("error is %s", (LPCSTR)pErrorBuf->GetBufferPointer());
 		}
 		_RELEASE		(pShaderBuf);
 		_RELEASE		(pErrorBuf);
 		pConstants		= NULL;
-		R_CHK			(_hr);
+
+		if (FAILED(_hr))
+			Msg			("Can't compile shader %s",name);
+
+		CHECK_OR_EXIT		(
+			!FAILED(_hr),
+			make_string("Your video card doesn't meet game requirements\n\nPixel Shaders v1.1 or higher required")
+		);
 		return			_ps;
 	}
 }
@@ -468,7 +478,7 @@ CTexture* CResourceManager::_CreateTexture	(LPCSTR _Name)
 	if (0==xr_strcmp(_Name,"null"))	return 0;
 	R_ASSERT		(_Name && _Name[0]);
 	string_path		Name;
-	strcpy			(Name,_Name); //. andy if (strext(Name)) *strext(Name)=0;
+	strcpy_s			(Name,_Name); //. andy if (strext(Name)) *strext(Name)=0;
 	fix_texture_name (Name);
 	// ***** first pass - search already loaded texture
 	LPSTR N			= LPSTR(Name);
@@ -584,7 +594,7 @@ void	CResourceManager::ED_UpdateConstant	(LPCSTR Name, CConstant* data)
 }
 
 //--------------------------------------------------------------------------------------------------------------
-bool	cmp_tl	(std::pair<u32,ref_texture>& _1, std::pair<u32,ref_texture>& _2)	{
+bool	cmp_tl	(const std::pair<u32,ref_texture>& _1, const std::pair<u32,ref_texture>& _2)	{
 	return _1.first < _2.first;
 }
 STextureList*	CResourceManager::_CreateTextureList(STextureList& L)

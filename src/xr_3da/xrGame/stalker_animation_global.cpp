@@ -16,7 +16,8 @@
 #include "ai/stalker/ai_stalker_space.h"
 #include "stalker_animation_data.h"
 #include "weapon.h"
-#include "CharacterPhysicsSupport.h"
+#include "missile.h"
+#include "stalker_animation_manager_impl.h"
 
 using namespace StalkerSpace;
 

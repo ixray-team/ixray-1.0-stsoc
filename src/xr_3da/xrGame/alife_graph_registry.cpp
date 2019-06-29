@@ -14,6 +14,22 @@ using namespace ALife;
 
 CALifeGraphRegistry::CALifeGraphRegistry	()
 {
+#ifndef PRIQUEL
+	on_load							();
+#endif // PRIQUEL
+
+	m_level							= 0;
+	m_process_time					= 0;
+	m_actor							= 0;
+}
+
+CALifeGraphRegistry::~CALifeGraphRegistry	()
+{
+	xr_delete						(m_level);
+}
+
+void CALifeGraphRegistry::on_load			()
+{
 	for (int i=0; i<GameGraph::LOCATION_TYPE_COUNT; ++i) {
 		{
 			for (int j=0; j<GameGraph::LOCATION_COUNT; ++j)
@@ -24,21 +40,13 @@ CALifeGraphRegistry::CALifeGraphRegistry	()
 	}
 
 	m_objects.resize				(ai().game_graph().header().vertex_count());
+
 	{
 		GRAPH_REGISTRY::iterator	I = m_objects.begin();
 		GRAPH_REGISTRY::iterator	E = m_objects.end();
 		for ( ; I != E; ++I)
 			(*I).objects().clear	();
 	}
-
-	m_level							= 0;
-	m_process_time					= 0;
-	m_actor							= 0;
-}
-
-CALifeGraphRegistry::~CALifeGraphRegistry	()
-{
-	xr_delete						(m_level);
 }
 
 void CALifeGraphRegistry::update			(CSE_ALifeDynamicObject *object)

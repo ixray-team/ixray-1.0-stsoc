@@ -41,7 +41,6 @@ void CActor::OnEvent		(NET_Packet& P, u16 type)
 	case GE_TRADE_BUY:
 	case GE_OWNERSHIP_TAKE:
 		{
-			//Log("CActor::OnEvent - TAKE - ", *cName());
 			P.r_u16		(id);
 			CObject* O	= Level().Objects.net_Find	(id);
 			if (!O)
@@ -56,8 +55,8 @@ void CActor::OnEvent		(NET_Packet& P, u16 type)
 
 			CGameObject* _GO = smart_cast<CGameObject*>(O);
 			
-			if( inventory().CanTakeItem(smart_cast<CInventoryItem*>(_GO)) ){
-
+			if( inventory().CanTakeItem(smart_cast<CInventoryItem*>(_GO)) )
+			{
 				O->H_SetParent(smart_cast<CObject*>(this));
 
 				inventory().Take(_GO, false, true);
@@ -72,7 +71,7 @@ void CActor::OnEvent		(NET_Packet& P, u16 type)
 				};
 				
 				//добавить отсоединенный аддон в инвентарь
-				if(pGameSP/* && (pScope || pSilencer || pGrenadeLauncher)*/)
+				if(pGameSP)
 				{
 					if(pGameSP->MainInputReceiver() == pGameSP->InventoryMenu)
 					{
@@ -81,10 +80,6 @@ void CActor::OnEvent		(NET_Packet& P, u16 type)
 				}
 				
 				SelectBestWeapon(O);
-#ifdef DEBUG
-//				Msg("OnEvent - %s[%d] - TAKE - %s[%d]0x%X", *cName(), ID(), *O->cName(), id, smart_cast<CInventoryItem*>(O));
-#endif
-
 			} 
 			else 
 			{
@@ -92,17 +87,12 @@ void CActor::OnEvent		(NET_Packet& P, u16 type)
 				u_EventGen(P,GE_OWNERSHIP_REJECT,ID());
 				P.w_u16(u16(O->ID()));
 				u_EventSend(P);
-#ifdef DEBUG
-//				Msg("! OnEvent - %s[%d] - TAKE - %s[%d]0x%X - FAILED", *cName(), ID(), *O->cName(), id, smart_cast<CInventoryItem*>(O));
-#endif
 			}
 		}
 		break;
 	case GE_TRADE_SELL:
 	case GE_OWNERSHIP_REJECT:
 		{
-			// Log			("CActor::OnEvent - REJECT - : ", *cName());
-
 			P.r_u16		(id);
 			CObject* O	= Level().Objects.net_Find	(id);
 			if (!O)
@@ -110,13 +100,14 @@ void CActor::OnEvent		(NET_Packet& P, u16 type)
 				Msg("! Error: No object to reject/sell [%d]", id);
 				break;
 			}
-#ifdef DEBUG			
-//			Msg("OnEvent - %s[%d] - REJECT - %s[%d]0x%X", *cName(), ID(), *O->cName(), id, smart_cast<CInventoryItem*>(O));
-#endif
-			if (inventory().Drop(smart_cast<CGameObject*>(O)) && !O->getDestroy()) 
+			bool just_before_destroy	= !P.r_eof() && P.r_u8();
+			O->SetTmpPreDestroy				(just_before_destroy);
+			if (inventory().DropItem(smart_cast<CGameObject*>(O)) && !O->getDestroy()) 
 			{
-				O->H_SetParent(0,!P.r_eof() && P.r_u8());
-				feel_touch_deny(O,2000);
+				O->H_SetParent(0,just_before_destroy);
+//.				feel_touch_deny(O,2000);
+				Level().m_feel_deny.feel_touch_deny(O, 1000);
+
 			}
 
 			SelectBestWeapon(O);
@@ -144,43 +135,42 @@ void CActor::OnEvent		(NET_Packet& P, u16 type)
 			}
 			else
 				IR_OnKeyboardRelease(cmd);
-//			inventory().Action(cmd, flags);
 		}
 		break;
 	case GEG_PLAYER_ITEM2SLOT:
 	case GEG_PLAYER_ITEM2BELT:
 	case GEG_PLAYER_ITEM2RUCK:
-	case GEG_PLAYER_ITEMDROP:
 	case GEG_PLAYER_ITEM_EAT:
 	case GEG_PLAYER_ACTIVATEARTEFACT:
 		{
 			P.r_u16		(id);
 			CObject* O	= Level().Objects.net_Find	(id);
-			if (!O) break;
+			if(!O)		break;
 			if (O->getDestroy()) 
 			{
-#ifdef _DEBUG
+#ifdef DEBUG
 				Msg("! something to destroyed object - %s[%d]0x%X", *O->cName(), id, smart_cast<CInventoryItem*>(O));
 #endif
 				break;
 			}
 			switch (type)
 			{
-			case GEG_PLAYER_ITEM2SLOT:	/*Msg("GEG_PLAYER_ITEM2SLOT - %s[%d]0x%X", *O->cName(), id, smart_cast<CInventoryItem*>(O));*/ inventory().Slot(smart_cast<CInventoryItem*>(O)); break;
-			case GEG_PLAYER_ITEM2BELT:	/*Msg("GEG_PLAYER_ITEM2BELT - %s[%d]0x%X", *O->cName(), id, smart_cast<CInventoryItem*>(O));*/ inventory().Belt(smart_cast<CInventoryItem*>(O)); break;
-			case GEG_PLAYER_ITEM2RUCK:	/*Msg("GEG_PLAYER_ITEM2RUCK - %s[%d]0x%X", *O->cName(), id, smart_cast<CInventoryItem*>(O));*/ inventory().Ruck(smart_cast<CInventoryItem*>(O)); break;
-			case GEG_PLAYER_ITEM_EAT:	/*Msg("GEG_PLAYER_ITEM_EAT -  %s[%d]0x%X", *O->cName(), id, smart_cast<CInventoryItem*>(O));*/ inventory().Eat(smart_cast<CInventoryItem*>(O)); break;
+			case GEG_PLAYER_ITEM2SLOT:	 
+				inventory().Slot(smart_cast<CInventoryItem*>(O)); 
+				break;
+			case GEG_PLAYER_ITEM2BELT:	 
+				inventory().Belt(smart_cast<CInventoryItem*>(O)); 
+				break;
+			case GEG_PLAYER_ITEM2RUCK:	 
+				inventory().Ruck(smart_cast<CInventoryItem*>(O)); 
+				break;
+			case GEG_PLAYER_ITEM_EAT:	 
+				inventory().Eat(smart_cast<CInventoryItem*>(O)); 
+				break;
 			case GEG_PLAYER_ACTIVATEARTEFACT:
 				{
-					CArtefact* pArtefact = smart_cast<CArtefact*>(O);
-					if (!pArtefact) break;
-					pArtefact->ActivateArtefact();
-				}break;
-			case GEG_PLAYER_ITEMDROP:	
-				{
-					CInventoryItem* pIItem = smart_cast<CInventoryItem*>(O);
-					if (!pIItem) break;
-					pIItem->Drop();
+					CArtefact* pArtefact		= smart_cast<CArtefact*>(O);
+					pArtefact->ActivateArtefact	();
 				}break;
 			}
 		}break;
@@ -197,13 +187,6 @@ void CActor::OnEvent		(NET_Packet& P, u16 type)
 		{
 			u32 State		= P.r_u32();
 			BOOL	Set		= !!P.r_u8();
-#ifdef DEBUG
-			if(ph_dbg_draw_mask.test(phDbgLadder)&&(INV_STATE_LADDER==State) )
-			{
-				if(Set)Msg("OnEvent   GEG_PLAYER_WEAPON_HIDE_STATE ON LADDER");
-				else Msg("OnEvent  GEG_PLAYER_WEAPON_HIDE_STATE OFF LADDER");
-			}
-#endif
 			inventory().SetSlotsBlocked	((u16)State, !!Set);
 		}break;
 	case GE_MOVE_ACTOR:

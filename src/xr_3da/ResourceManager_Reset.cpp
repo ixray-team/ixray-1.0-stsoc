@@ -2,7 +2,9 @@
 #pragma hdrstop
 
 #include "ResourceManager.h"
-#include "Render.h"
+#ifndef _EDITOR
+    #include	"Render.h"
+#endif
 
 void	CResourceManager::reset_begin			()
 {

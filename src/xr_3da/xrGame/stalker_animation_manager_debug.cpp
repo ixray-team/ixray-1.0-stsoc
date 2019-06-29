@@ -101,7 +101,7 @@ void show_animations		()
 		*i							= (const ANIMATION_STATS_PAIR *)&(*I).first;
 
 	struct predicate {
-		static IC	bool frame_count	(const ANIMATION_STATS_PAIR *&_1, const ANIMATION_STATS_PAIR *&_2)
+		static IC	bool frame_count	(const ANIMATION_STATS_PAIR * const &_1, const ANIMATION_STATS_PAIR * const &_2)
 		{
 			return					(_1->second.m_frame_count < _2->second.m_frame_count);
 		}
@@ -132,7 +132,7 @@ void show_blends			()
 		*i							= (const BLEND_STATS_PAIR *)&(*I).first;
 
 	struct predicate {
-		static IC	bool blend_count	(const BLEND_STATS_PAIR *&_1, const BLEND_STATS_PAIR *&_2)
+		static IC	bool blend_count	(const BLEND_STATS_PAIR * const &_1, const BLEND_STATS_PAIR * const &_2)
 		{
 			return					(_1->second < _2->second);
 		}

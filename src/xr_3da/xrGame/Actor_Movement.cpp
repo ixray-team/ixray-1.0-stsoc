@@ -119,18 +119,11 @@ void CActor::g_cl_ValidateMState(float dt, u32 mstate_wf)
 
 	if (this == Level().CurrentControlEntity())
 	{
-//.		static bool					_b = false;
 		bool bOnClimbNow			= !!(mstate_real&mcClimb);
 		bool bOnClimbOld			= !!(mstate_old&mcClimb);
 
-//.		bool bMovingNow				= !!(mstate_real&mcAnyMove);
-//.		bool bMovingOld				= !!(mstate_old&mcAnyMove);
-
 		if (bOnClimbNow != bOnClimbOld )
 		{
-//.			bool bDoHide			= bOnClimbNow;
-//.			VERIFY					(_b!=bDoHide);
-//.			_b						= bDoHide;
 			SetWeaponHideState		(INV_STATE_LADDER, bOnClimbNow );
 		};
 	/*
@@ -209,8 +202,7 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 
 			//уменьшить силу игрока из-за выполненого прыжка
 			if (!GodMode())
-				conditions().ConditionJump(inventory().TotalWeight()/
-				inventory().GetMaxWeight());
+				conditions().ConditionJump(inventory().TotalWeight() / MaxCarryWeight());
 		}
 
 		/*
@@ -374,7 +366,12 @@ void CActor::g_Orientate	(u32 mstate_rl, float dt)
 
 	float tgt_roll		=	0.f;
 	if (mstate_rl&mcLookout)
+	{
 		tgt_roll		=	(mstate_rl&mcLLookout)?-ACTOR_LOOKOUT_ANGLE:ACTOR_LOOKOUT_ANGLE;
+		
+		if( (mstate_rl&mcLLookout) && (mstate_rl&mcRLookout) )
+			tgt_roll	= 0.0f;
+	}
 	if (!fsimilar(tgt_roll,r_torso_tgt_roll,EPS)){
 		angle_lerp		(r_torso_tgt_roll,tgt_roll,PI_MUL_2,dt);
 		r_torso_tgt_roll= angle_normalize_signed(r_torso_tgt_roll);

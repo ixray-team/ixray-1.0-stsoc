@@ -1,7 +1,6 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "Physics.h"
 #include "PHWorld.h"
-#include "script_space.h"
 #include "PHCommander.h"
 
 using namespace luabind;
@@ -17,4 +16,3 @@ void CPHWorld::script_register(lua_State *L)
 			.def("add_call",					&CPHWorld::AddCall)
 		];
 }
-

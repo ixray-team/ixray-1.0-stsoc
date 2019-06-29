@@ -21,6 +21,7 @@ struct vertBoned1W			// (3+3+3+3+2+1)*4 = 15*4 = 60 bytes
 	Fvector	B;
 	float	u,v;
 	u32		matrix;
+	void	get_pos( Fvector& p ) { p.set(P); }
 };
 struct vertBoned2W			// (1+3+3 + 1+3+3 + 2)*4 = 16*4 = 64 bytes
 {
@@ -32,6 +33,7 @@ struct vertBoned2W			// (1+3+3 + 1+3+3 + 2)*4 = 16*4 = 64 bytes
 	Fvector	B;
 	float	w;
 	float	u,v;
+	void	get_pos( Fvector& p ) { p.set(P); }
 };
 struct vertRender			// T&B are not skinned, because in R2 skinning occurs always in hardware
 {
@@ -41,6 +43,7 @@ struct vertRender			// T&B are not skinned, because in R2 skinning occurs always
 };
 #pragma pack(pop)
 
+struct SEnumVerticesCallback;
 class ENGINE_API	CSkeletonX
 {
 protected:
@@ -91,6 +94,7 @@ public:
 
 	virtual void			SetParent		(CKinematics* K)					{ Parent = K; }
 	virtual void			AfterLoad		(CKinematics* parent, u16 child_idx)=0;
+	virtual void			EnumBoneVertices(SEnumVerticesCallback &C, u16 bone_id)=0;
 	virtual BOOL			PickBone		(Fvector& normal, float& dist, const Fvector& start, const Fvector& dir, u16 bone_id)=0;
 	virtual void			FillVertices	(const Fmatrix& view, CSkeletonWallmark& wm, const Fvector& normal, float size, u16 bone_id)=0;
 };

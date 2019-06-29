@@ -116,7 +116,7 @@ IC	bool CSpaceRestriction::intersects			(SpaceRestrictionHolder::CBaseRestrictio
 		return						(true);
 
 	m_temp.resize					(bridge0->border().size() + bridge1->border().size());
-	xr_vector<u32>::iterator		J = set_intersection(
+	xr_vector<u32>::iterator		J = std::set_intersection(
 		bridge0->border().begin(),
 		bridge0->border().end(),
 		bridge1->border().begin(),
@@ -138,22 +138,44 @@ void CSpaceRestriction::merge_in_out_restrictions	()
 {
 	START_PROFILE("Restricted Object/Merge In-Out");
 	xr_vector<u32>					temp_border;
-	xr_vector<u32>::iterator		I;
 
 	m_border						= m_out_space_restriction->border();
-	I								= remove_if(m_border.begin(),m_border.end(),CMergeInOutPredicate<true>(m_out_space_restriction,m_in_space_restriction));
-	m_border.erase					(I,m_border.end());
+	m_border.erase					(
+		std::remove_if(
+			m_border.begin(),
+			m_border.end(),
+			CMergeInOutPredicate<true>(
+				m_out_space_restriction,
+				m_in_space_restriction
+			)
+		),
+		m_border.end()
+	);
 
 	if (m_in_space_restriction) {
 		temp_border					= m_in_space_restriction->border();
-		I							= remove_if(temp_border.begin(),temp_border.end(),CMergeInOutPredicate<false>(m_out_space_restriction,m_in_space_restriction));
-		temp_border.erase			(I,temp_border.end());
+		temp_border.erase			(
+			std::remove_if(
+				temp_border.begin(),
+				temp_border.end(),
+				CMergeInOutPredicate<false>(
+					m_out_space_restriction,
+					m_in_space_restriction
+				)
+			),
+			temp_border.end()
+		);
 		m_border.insert				(m_border.end(),temp_border.begin(),temp_border.end());
 	}
 	
 	std::sort						(m_border.begin(),m_border.end());
-	I								= unique(m_border.begin(),m_border.end());
-	m_border.erase					(I,m_border.end());
+	m_border.erase					(
+		std::unique(
+			m_border.begin(),
+			m_border.end()
+		),
+		m_border.end()
+	);
 	STOP_PROFILE;
 }
 
@@ -173,7 +195,7 @@ CSpaceRestriction::CBaseRestrictionPtr CSpaceRestriction::merge	(CBaseRestrictio
 	RESTRICTIONS::const_iterator	I = temp_restrictions.begin();
 	RESTRICTIONS::const_iterator	E = temp_restrictions.end();
 	for ( ; I != E; ++I)
-		temp						= strconcat(S,*temp,",",*(*I)->name());
+		temp						= strconcat(sizeof(S),S,*temp,",",*(*I)->name());
 
 	xr_free							(S);
 

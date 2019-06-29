@@ -59,7 +59,7 @@ BOOL IGame_Level::Load			(u32 dwNum)
 {
 	// Initialize level data
 	pApp->Level_Set				( dwNum );
-	string256					temp;
+	string_path					temp;
 	if (!FS.exist(temp, "$level$", "level.ltx"))
 		Debug.fatal	(DEBUG_INFO,"Can't find level configuration file '%s'.",temp);
 	pLevel						= xr_new<CInifile>	( temp );
@@ -101,7 +101,7 @@ BOOL IGame_Level::Load			(u32 dwNum)
 	// Done
 	FS.r_close					( LL_Stream );
 	bReady						= true;
-	if (!g_pGamePersistent->bDedicatedServer)	IR_Capture();
+	if (!g_dedicated_server)	IR_Capture();
 #ifndef DEDICATED_SERVER
 	Device.seqRender.Add		(this);
 #endif
@@ -118,7 +118,7 @@ void	IGame_Level::OnRender		( )
 //	if (_abs(Device.fTimeDelta)<EPS_S) return;
 
 	// Level render, only when no client output required
-	if (!g_pGamePersistent->bDedicatedServer)	{
+	if (!g_dedicated_server)	{
 		Render->Calculate			();
 		Render->Render				();
 	} else {
@@ -153,5 +153,30 @@ void	IGame_Level::OnFrame		( )
 			Sounds_Random[id].set_volume	(1.f);
 			Sounds_Random[id].set_range		(10,200);
 		}
+	}
+}
+
+// ==================================================================================================
+
+void CServerInfo::AddItem( LPCSTR name_, LPCSTR value_, u32 color_ )
+{
+	shared_str s_name( name_ );
+	AddItem( s_name, value_, color_ );
+}
+
+void CServerInfo::AddItem( shared_str& name_, LPCSTR value_, u32 color_ )
+{
+	SItem_ServerInfo it;
+//	shared_str s_name = CStringTable().translate( name_ );
+	
+//	strcpy_s( it.name, s_name.c_str() );
+	strcpy_s( it.name, name_.c_str() );
+	strcat_s( it.name, " = " );
+	strcat_s( it.name, value_ );
+	it.color = color_;
+
+	if ( data.size() < max_item )
+	{
+		data.push_back( it );
 	}
 }

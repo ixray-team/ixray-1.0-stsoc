@@ -12,7 +12,7 @@ dlgItem::dlgItem(CUIWindow* pWnd)
 	enabled = true;
 }
 
-bool dlgItem::operator < (const dlgItem& itm)
+bool dlgItem::operator < (const dlgItem& itm) const
 {
 	return (int)enabled > (int)itm.enabled;
 }
@@ -73,14 +73,19 @@ void CDialogHolder::StartMenu (CUIDialogWnd* pDialog, bool bDoHideIndicators)
 	if( pDialog->NeedCursor() )
 		GetUICursor()->Show();
 
-	if(g_pGameLevel){
+	if(g_pGameLevel)
+	{
 		CActor* A	= smart_cast<CActor*>( Level().CurrentViewEntity() );
 		if ( A && pDialog->StopAnyMove() )
 		{
 			A->StopAnyMove				();
 			A->PickupModeOff			();
 		};
-		if(A)	A->IR_OnKeyboardRelease		(kWPN_ZOOM);
+		if(A)
+		{	
+			A->IR_OnKeyboardRelease		(kWPN_ZOOM);
+			A->IR_OnKeyboardRelease		(kWPN_FIRE);
+		}
 	}
 }
 
@@ -212,7 +217,7 @@ void CDialogHolder::shedule_Update(u32 dt)
 	if (m_dialogsToRender.empty())
 		return;
 
-	std::sort			(m_dialogsToRender.begin(), m_dialogsToRender.end() );
+	std::sort			(m_dialogsToRender.begin(), m_dialogsToRender.end());
 
 	while ((m_dialogsToRender.size()) && (!m_dialogsToRender[m_dialogsToRender.size()-1].enabled)) 
 		m_dialogsToRender.pop_back();

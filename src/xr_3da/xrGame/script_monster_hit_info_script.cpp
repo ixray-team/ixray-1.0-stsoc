@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_monster_hit_info.h"
-#include "script_space.h"
 #include "script_game_object.h"
 #include "ai_monster_space.h"
 #include "AI/Monsters/monster_sound_defs.h"

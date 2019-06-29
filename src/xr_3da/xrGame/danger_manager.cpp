@@ -6,7 +6,7 @@
 //	Description : Danger manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "danger_manager.h"
 #include "custommonster.h"
 #include "memory_space.h"
@@ -107,11 +107,17 @@ void CDangerManager::reload			(LPCSTR section)
 void CDangerManager::update			()
 {
 	START_PROFILE("Memory Manager/dangers::update")
-
-	{
-		OBJECTS::iterator	I = remove_if(m_objects.begin(),m_objects.end(),CRemoveByTimePredicate(time_line(),this));
-		m_objects.erase		(I,m_objects.end());
-	}
+	m_objects.erase			(
+		std::remove_if(
+			m_objects.begin(),
+			m_objects.end(),
+			CRemoveByTimePredicate(
+				time_line(),
+				this
+			)
+		),
+		m_objects.end()
+	);
 
 	float					result = flt_max;
 	m_selected				= 0;

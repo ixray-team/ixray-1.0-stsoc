@@ -45,9 +45,7 @@ void xrServer::Perform_destroy	(CSE_Abstract* object, u32 mode)
 	P.w_u32					(Device.dwTimeGlobal - 2*NET_Latency);
 	P.w_u16					(GE_DESTROY);
 	P.w_u16					(object_id);
-	ClientID				clientID;
-	clientID.setBroadcast	();
-	SendBroadcast			(clientID,P,mode);
+	SendBroadcast			(BroadcastCID,P,mode);
 }
 
 void xrServer::SLS_Clear		()

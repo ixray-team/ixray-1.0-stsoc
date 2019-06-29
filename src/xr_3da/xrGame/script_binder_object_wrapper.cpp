@@ -6,7 +6,7 @@
 //	Description : Script object binder wrapper
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_binder_object_wrapper.h"
 #include "script_game_object.h"
 #include "xrServer_Objects_ALife.h"
@@ -130,4 +130,3 @@ void CScriptBinderObjectWrapper::net_Relcase_static		(CScriptBinderObject *scrip
 {
 	script_binder_object->CScriptBinderObject::net_Relcase	(object);
 }
-

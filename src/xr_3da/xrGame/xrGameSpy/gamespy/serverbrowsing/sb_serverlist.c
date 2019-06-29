@@ -439,12 +439,13 @@ static int StringHash(const char *s, int numbuckets)
 }
 
 
+#define BUFFER_SIZE 256
 
 static SBError ServerListConnect(SBServerList *slist)
 {
 	struct   sockaddr_in saddr;
 	struct hostent *hent;
-	char masterHostname[128];
+	char masterHostname[BUFFER_SIZE];
 	int masterIndex;
 	
 
@@ -452,7 +453,7 @@ static SBError ServerListConnect(SBServerList *slist)
 	if (SBOverrideMasterServer != NULL)
 		strcpy(masterHostname, SBOverrideMasterServer);
 	else //use the default format...
-		sprintf(masterHostname,"%s.ms%d." GSI_DOMAIN_NAME, slist->queryforgamename, masterIndex);
+		sprintf_s(masterHostname,BUFFER_SIZE,"%s.ms%d." GSI_DOMAIN_NAME, slist->queryforgamename, masterIndex);
 	saddr.sin_family = AF_INET;
 	saddr.sin_port = htons(MSPORT2);
 	saddr.sin_addr.s_addr = inet_addr(masterHostname);
@@ -481,6 +482,8 @@ static SBError ServerListConnect(SBServerList *slist)
 	return sbe_noerror;
 
 }
+
+#undef BUFFER_SIZE
 
 static void BufferAddNTS(char **buffer, const char *str, int *len)
 {

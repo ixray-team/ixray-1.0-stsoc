@@ -4,35 +4,35 @@
 #define NUM_RESERVED_KEYS 50
 
 
-#define HOSTNAME_KEY	1
-#define GAMENAME_KEY	2
-#define GAMEVER_KEY		3
-#define HOSTPORT_KEY	4
-#define MAPNAME_KEY		5
-#define GAMETYPE_KEY	6
-#define GAMEVARIANT_KEY	7
-#define NUMPLAYERS_KEY	8
-#define NUMTEAMS_KEY	9
-#define MAXPLAYERS_KEY	10
-#define GAMEMODE_KEY	11
-#define TEAMPLAY_KEY	12
-#define FRAGLIMIT_KEY	13
+#define HOSTNAME_KEY		1
+#define GAMENAME_KEY		2
+#define GAMEVER_KEY			3
+#define HOSTPORT_KEY		4
+#define MAPNAME_KEY			5
+#define GAMETYPE_KEY		6
+#define GAMEVARIANT_KEY		7
+#define NUMPLAYERS_KEY		8
+#define NUMTEAMS_KEY		9
+#define MAXPLAYERS_KEY		10
+#define GAMEMODE_KEY		11
+#define TEAMPLAY_KEY		12
+#define FRAGLIMIT_KEY		13
 #define TEAMFRAGLIMIT_KEY	14
-#define TIMEELAPSED_KEY	15
-#define TIMELIMIT_KEY	16
-#define ROUNDTIME_KEY	17
+#define TIMEELAPSED_KEY		15
+#define TIMELIMIT_KEY		16
+#define ROUNDTIME_KEY		17
 #define ROUNDELAPSED_KEY	18
-#define PASSWORD_KEY	19
-#define GROUPID_KEY		20
-#define PLAYER__KEY		21
-#define SCORE__KEY		22
-#define SKILL__KEY		23
-#define PING__KEY		24
-#define TEAM__KEY		25
-#define DEATHS__KEY		26
-#define PID__KEY		27
-#define TEAM_T_KEY		28
-#define SCORE_T_KEY		29
+#define PASSWORD_KEY		19
+#define GROUPID_KEY			20
+#define PLAYER__KEY			21
+#define SCORE__KEY			22
+#define SKILL__KEY			23
+#define PING__KEY			24
+#define TEAM__KEY			25
+#define DEATHS__KEY			26
+#define PID__KEY			27
+#define TEAM_T_KEY			28
+#define SCORE_T_KEY			29
 
 //----- ADDITIONAL KEYS ---------------------
 //---- Game Keys
@@ -69,14 +69,18 @@
 #define	G_BEARER_CANT_SPRINT_KEY				124
 												
 //---- Player keys								
-//#define P_NAME__KEY								125
+//#define P_NAME__KEY							125
 //#define P_FRAGS__KEY							126
 //#define P_DEATH__KEY							127
-//#define P_RANK__KEY								128
-//#define P_TEAM__KEY								129
+//#define P_RANK__KEY							128
+//#define P_TEAM__KEY							129
 #define P_SPECTATOR__KEY						130
 #define P_ARTEFACTS__KEY						131
 
 //---- Team keys
 //#define T_NAME_KEY							
 #define T_SCORE_T_KEY							132
+
+#define	G_MAX_PING_KEY							133
+#define	G_BATTLEYE_KEY							134
+#define	G_USER_PASSWORD_KEY						135

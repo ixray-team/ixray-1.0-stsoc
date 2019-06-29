@@ -6,12 +6,12 @@
 #define LocatorAPIH
 #pragma once
 
-#include "LocatorAPI_defs.h"
-
 #pragma warning(push)
 #pragma warning(disable:4995)
 #include <io.h>
 #pragma warning(pop)
+
+#include "LocatorAPI_defs.h"
 
 class XRCORE_API CStreamReader;
 
@@ -62,7 +62,7 @@ private:
 	u64							m_auth_code		;
 
 	void						Register		(LPCSTR name, u32 vfs, u32 crc, u32 ptr, u32 size_real, u32 size_compressed, u32 modif);
-	void						ProcessArchive	(LPCSTR path);
+	void						ProcessArchive	(LPCSTR path, LPCSTR base_path=NULL);
 	void						ProcessOne		(LPCSTR path, void* F);
 	bool						Recurse			(LPCSTR path);	
 //	bool						CheckExistance	(LPCSTR path);
@@ -101,11 +101,11 @@ private:
 	template <typename T>
 			void				copy_file_to_build	(T *&R, LPCSTR source_name);
 
-			bool				check_for_file		(LPCSTR path, LPCSTR _fname, LPSTR fname, const file *&desc);
+			bool				check_for_file		(LPCSTR path, LPCSTR _fname, string_path& fname, const file *&desc);
 	
 	template <typename T>
 	IC		T					*r_open_impl		(LPCSTR path, LPCSTR _fname);
-
+			void				ProcessExternalArch	();
 public:
 								CLocatorAPI		();
 								~CLocatorAPI	();
@@ -126,8 +126,8 @@ public:
 
 	const file*					exist			(LPCSTR N);
 	const file*					exist			(LPCSTR path, LPCSTR name);
-	const file*					exist			(LPSTR fn, LPCSTR path, LPCSTR name);
-	const file*					exist			(LPSTR fn, LPCSTR path, LPCSTR name, LPCSTR ext);
+	const file*					exist			(string_path& fn, LPCSTR path, LPCSTR name);
+	const file*					exist			(string_path& fn, LPCSTR path, LPCSTR name, LPCSTR ext);
 
     BOOL 						can_write_to_folder	(LPCSTR path); 
     BOOL 						can_write_to_alias	(LPCSTR path); 
@@ -152,10 +152,10 @@ public:
     bool						path_exist			(LPCSTR path);
     FS_Path*					get_path			(LPCSTR path);
     FS_Path*					append_path			(LPCSTR path_alias, LPCSTR root, LPCSTR add, BOOL recursive);
-    LPCSTR						update_path			(LPSTR dest, LPCSTR initial, LPCSTR src);
+    LPCSTR						update_path			(string_path& dest, LPCSTR initial, LPCSTR src);
 
 	int							file_list			(FS_FileSet& dest, LPCSTR path, u32 flags=FS_ListFiles, LPCSTR mask=0);
-    void						update_path			(xr_string& dest, LPCSTR initial, LPCSTR src);
+//.    void						update_path			(xr_string& dest, LPCSTR initial, LPCSTR src);
 
 	// 
 	void						register_archieve	(LPCSTR path);

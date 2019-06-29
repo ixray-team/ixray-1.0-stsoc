@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "../script_space.h"
+#include "pch_script.h"
 
 //UI-controls
 #include "UIScriptWnd.h"
@@ -43,18 +42,18 @@ export_class &script_register_ui_window1(export_class &instance)
 	instance
 		.def(					constructor<>())
 
-		.def("AddCallback",		(void(BaseType::*)(LPCSTR, s16, const luabind::functor<void>&))BaseType::AddCallback)
-		.def("AddCallback",		(void(BaseType::*)(LPCSTR, s16, const luabind::functor<void>&, const luabind::object&))BaseType::AddCallback)
+		.def("AddCallback",		(void(BaseType::*)(LPCSTR, s16, const luabind::functor<void>&))&BaseType::AddCallback)
+		.def("AddCallback",		(void(BaseType::*)(LPCSTR, s16, const luabind::functor<void>&, const luabind::object&))&BaseType::AddCallback)
 
-		.def("Register",		(void (BaseType::*)(CUIWindow*))BaseType::Register)
-		.def("Register",		(void (BaseType::*)(CUIWindow*,LPCSTR))BaseType::Register)
+		.def("Register",		(void (BaseType::*)(CUIWindow*))&BaseType::Register)
+		.def("Register",		(void (BaseType::*)(CUIWindow*,LPCSTR))&BaseType::Register)
 
-		.def("GetButton",		(CUIButton* (BaseType::*)(LPCSTR)) BaseType::GetControl<CUIButton>)
-		.def("GetMessageBox",	(CUIMessageBox* (BaseType::*)(LPCSTR)) BaseType::GetControl<CUIMessageBox>)
-		.def("GetPropertiesBox",(CUIPropertiesBox* (BaseType::*)(LPCSTR)) BaseType::GetControl<CUIPropertiesBox>)
-		.def("GetCheckButton",	(CUICheckButton* (BaseType::*)(LPCSTR)) BaseType::GetControl<CUICheckButton>)
-		.def("GetRadioButton",	(CUIRadioButton* (BaseType::*)(LPCSTR)) BaseType::GetControl<CUIRadioButton>)
-//		.def("GetRadioGroup",	(CUIRadioGroup* (BaseType::*)(LPCSTR)) BaseType::GetControl<CUIRadioGroup>)
+		.def("GetButton",		(CUIButton* (BaseType::*)(LPCSTR)) &BaseType::GetControl<CUIButton>)
+		.def("GetMessageBox",	(CUIMessageBox* (BaseType::*)(LPCSTR)) &BaseType::GetControl<CUIMessageBox>)
+		.def("GetPropertiesBox",(CUIPropertiesBox* (BaseType::*)(LPCSTR)) &BaseType::GetControl<CUIPropertiesBox>)
+		.def("GetCheckButton",	(CUICheckButton* (BaseType::*)(LPCSTR)) &BaseType::GetControl<CUICheckButton>)
+		.def("GetRadioButton",	(CUIRadioButton* (BaseType::*)(LPCSTR)) &BaseType::GetControl<CUIRadioButton>)
+//		.def("GetRadioGroup",	(CUIRadioGroup* (BaseType::*)(LPCSTR)) &BaseType::GetControl<CUIRadioGroup>)
 
 	;return	(instance);
 }

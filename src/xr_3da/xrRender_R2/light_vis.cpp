@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "light.h"
+#include "..\xrRender\light.h"
 #include "..\cl_intersect.h"
 
 const	u32	delay_small_min			= 1;

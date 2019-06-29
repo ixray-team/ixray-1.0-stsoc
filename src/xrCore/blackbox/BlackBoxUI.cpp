@@ -34,11 +34,11 @@ void BuildStackTrace	(struct _EXCEPTION_POINTERS *g_BlackBoxUIExPtrs)
 
 		incr += 2;
 		traceDump = GetNextStackTraceString( GSTSO_MODULE | GSTSO_SYMBOL | GSTSO_SRCLINE,
-			g_BlackBoxUIExPtrs );		
+			g_BlackBoxUIExPtrs );
 	}
 }
 
-#if 0
+#ifdef _EDITOR
 #	pragma auto_inline(off)
 	DWORD_PTR program_counter()
 	{
@@ -52,10 +52,10 @@ void BuildStackTrace	(struct _EXCEPTION_POINTERS *g_BlackBoxUIExPtrs)
 		return programcounter;
 	}
 #	pragma auto_inline(on)
-#else
+#else // _EDITOR
 	extern "C" void * _ReturnAddress(void);
 
-#	pragma intrinsic(_ReturnAddress)
+#   pragma intrinsic(_ReturnAddress)
 
 #	pragma auto_inline(off)
 	DWORD_PTR program_counter()
@@ -63,18 +63,29 @@ void BuildStackTrace	(struct _EXCEPTION_POINTERS *g_BlackBoxUIExPtrs)
 		return (DWORD_PTR)_ReturnAddress();
 	}
 #	pragma auto_inline(on)
-#endif
+#endif // _EDITOR
 
 void BuildStackTrace	()
 {
     CONTEXT					context;
 	context.ContextFlags	= CONTEXT_FULL;
+
+#ifdef _EDITOR
+    DWORD                   *EBP = &context.Ebp;
+    DWORD                   *ESP = &context.Esp;
+#endif // _EDITOR
+
 	if (!GetThreadContext(GetCurrentThread(),&context))
 		return;
 
 	context.Eip				= program_counter();
+#ifndef _EDITOR
 	__asm					mov context.Ebp, ebp
 	__asm					mov context.Esp, esp
+#else // _EDITOR
+	__asm					mov EBP, ebp
+	__asm					mov ESP, esp
+#endif // _EDITOR
 
 	EXCEPTION_POINTERS		ex_ptrs;
 	ex_ptrs.ContextRecord	= &context;
@@ -83,7 +94,9 @@ void BuildStackTrace	()
 	BuildStackTrace			(&ex_ptrs);
 }
 
+#ifndef _EDITOR
 __declspec(noinline)
+#endif // _EDITOR
 void OutputDebugStackTrace	(const char *header)
 {
 	BuildStackTrace			();		

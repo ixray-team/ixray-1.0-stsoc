@@ -9,8 +9,10 @@
 
 CHUDCrosshair::CHUDCrosshair	()
 {
+//.	hGeomLine.create			(FVF::F_TL0uv,RCache.Vertex.Buffer(),0);
+//.	hShader.create				("editor\\wire");
 	hGeomLine.create			(FVF::F_TL0uv,RCache.Vertex.Buffer(),0);
-	hShader.create				("editor\\wire");
+	hShader.create				("hud\\crosshair");
 
 	//вычислить и запомнить центр экрана
 //	center.set(int(Device.dwWidth)/2,int(Device.dwHeight)/2);
@@ -50,21 +52,11 @@ void CHUDCrosshair::SetDispersion	(float disp)
 	Fvector R			= { VIEWPORT_NEAR*_sin(disp), 0.f, VIEWPORT_NEAR };
 	Device.mProject.transform	(r,R);
 
-	float radius_pixels		= _abs(r.x)*Device.fWidth_2;
+	Fvector2		scr_size;
+	scr_size.set	(float(::Render->getTarget()->get_width()), float(::Render->getTarget()->get_height()));
+	float radius_pixels		= _abs(r.x)*scr_size.x/2.0f;
 	//	clamp(radius_pixels, min_radius, max_radius);
 	target_radius		= radius_pixels; 
-/*
-	Fvector E={0,0,0};
-	Fvector D={0,0,1}, R={1,0,0};
-	E.mad(D,_cos(disp));
-	E.mad(R,_sin(disp));
-	Device.mProject.transform_tiny(E);
-
-    int radius_pixels = iFloor(0.5f + _abs(E.x)*Device.fWidth_2);
-//	clamp(radius_pixels, min_radius, max_radius);
-
-	target_radius = radius_pixels; 
-*/
 }
 
 extern ENGINE_API BOOL g_bRendering; 
@@ -72,17 +64,20 @@ void CHUDCrosshair::OnRender ()
 {
 	VERIFY			(g_bRendering);
 	Fvector2		center;
-	center.set		(Device.dwWidth/2.0f, Device.dwHeight/2.0f);
+	Fvector2		scr_size;
+	scr_size.set	(float(::Render->getTarget()->get_width()), float(::Render->getTarget()->get_height()));
+	center.set		(scr_size.x/2.0f, scr_size.y/2.0f);
 
 	// draw back
-	u32			dwOffset,dwCount;
-	FVF::TL0uv* pv_start				= (FVF::TL0uv*)RCache.Vertex.Lock(10,hGeomLine->vb_stride,dwOffset);
+	u32			dwOffset, dwCount;
+	dwCount								= 10;
+	FVF::TL0uv* pv_start				= (FVF::TL0uv*)RCache.Vertex.Lock(dwCount,hGeomLine->vb_stride,dwOffset);
 	FVF::TL0uv* pv						= pv_start;
 	
 
-	float cross_length					= cross_length_perc*Device.dwWidth;
-	float min_radius					= min_radius_perc*Device.dwWidth;
-	float max_radius					= max_radius_perc*Device.dwWidth;
+	float cross_length					= cross_length_perc*scr_size.x;
+	float min_radius					= min_radius_perc*scr_size.x;
+	float max_radius					= max_radius_perc*scr_size.x;
 
 	clamp								(target_radius , min_radius, max_radius);
 
@@ -93,23 +88,22 @@ void CHUDCrosshair::OnRender ()
 	float y_max							= x_max;
 
 	// 0
-	pv->set					(center.x+1,center.y + y_min, cross_color); pv++;
-	pv->set					(center.x+1,center.y + y_max, cross_color); pv++;
+	pv->set					(center.x+1,		center.y + y_min,	cross_color); pv++;
+	pv->set					(center.x+1,		center.y + y_max,	cross_color); pv++;
 	// 1
-	pv->set					(center.x+1,center.y - y_min , cross_color); pv++;
-	pv->set					(center.x+1,center.y - y_max, cross_color); pv++;
+	pv->set					(center.x+1,		center.y - y_min,	cross_color); pv++;
+	pv->set					(center.x+1,		center.y - y_max,	cross_color); pv++;
 	// 2
-	pv->set					(center.x + x_min+1, center.y, cross_color); pv++;
-	pv->set					(center.x + x_max+1, center.y, cross_color); pv++;
+	pv->set					(center.x + x_min+1, center.y,			cross_color); pv++;
+	pv->set					(center.x + x_max+1, center.y,			cross_color); pv++;
 	// 3
-	pv->set					(center.x - x_min, center.y, cross_color); pv++;
-	pv->set					(center.x - x_max, center.y, cross_color); pv++;
+	pv->set					(center.x - x_min,	center.y,			cross_color); pv++;
+	pv->set					(center.x - x_max,	center.y,			cross_color); pv++;
 	// 4
-	pv->set					(center.x, center.y, cross_color); pv++;
-	pv->set					(center.x+1, center.y, cross_color); pv++;
+	pv->set					(center.x,			center.y,			cross_color); pv++;
+	pv->set					(center.x+1,		center.y,			cross_color); pv++;
 //*/
 	// render	
-	dwCount 				= u32(pv-pv_start);
 	RCache.Vertex.Unlock	(dwCount,hGeomLine->vb_stride);
 
 	RCache.set_Shader		(hShader);
@@ -119,7 +113,7 @@ void CHUDCrosshair::OnRender ()
 
 	if(!fsimilar(target_radius,radius))
 	{
-		float sp				= radius_speed_perc * float(Device.dwWidth) ;
+		float sp				= radius_speed_perc * scr_size.x ;
 		float radius_change		= sp*Device.fTimeDelta;
 		clamp					(radius_change, 0.0f, sp*0.033f); // clamp to 30 fps
 		clamp					(radius_change, 0.0f, _abs(target_radius-radius));
@@ -129,14 +123,4 @@ void CHUDCrosshair::OnRender ()
 		else
 			radius += radius_change;
 	};
-/*
-	if(_abs(target_radius - radius)>0){
-		if(target_radius < radius)
-			radius -= radius_speed;
-		else
-			radius += radius_speed;
-	};
-
-	clamp(radius,2.0f,radius);
-*/
 }

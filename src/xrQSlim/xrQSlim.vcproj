@@ -1,175 +1,244 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="xrQSlim"
 	ProjectGUID="{F1836CE2-59EF-4189-8B9C-D103A511CB27}"
 	RootNamespace="xrQSlim"
-	SccProjectName=""
-	SccAuxPath=""
-	SccLocalPath=""
-	SccProvider=""
-	Keyword="Win32Proj">
+	Keyword="Win32Proj"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="x:\libraries"
 			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="2"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;XR_QSLIM_EXPORTS"
-				MinimalRebuild="TRUE"
-				ExceptionHandling="TRUE"
-				BasicRuntimeChecks="3"
-				SmallerTypeCheck="TRUE"
-				RuntimeLibrary="3"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
+				EnableFiberSafeOptimizations="true"
+				PreprocessorDefinitions="WIN32;DEBUG;_WINDOWS;XR_QSLIM_EXPORTS;_SECURE_SCL=0"
+				ExceptionHandling="1"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
+				FloatingPointModel="2"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				WarningLevel="4"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
-				Name="VCLibrarianTool"/>
+				Name="VCResourceCompilerTool"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCLibrarianTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="x:\libraries"
 			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				GlobalOptimizations="TRUE"
+				Optimization="2"
 				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
+				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="3"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;XR_QSLIM_EXPORTS"
-				StringPooling="TRUE"
-				ExceptionHandling="FALSE"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
+				WholeProgramOptimization="true"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;XR_QSLIM_EXPORTS;_SECURE_SCL=0"
+				StringPooling="true"
+				ExceptionHandling="0"
 				RuntimeLibrary="2"
-				BufferSecurityCheck="FALSE"
-				ForceConformanceInForLoopScope="TRUE"
-				RuntimeTypeInfo="TRUE"
+				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="false"
+				EnableEnhancedInstructionSet="1"
+				FloatingPointModel="2"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
-				Name="VCLibrarianTool"/>
+				Name="VCResourceCompilerTool"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCLibrarianTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Mixed|Win32"
 			OutputDirectory="x:\libraries"
 			IntermediateDirectory="x:\intermediate\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
+				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="3"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;DEBUG;XR_QSLIM_EXPORTS"
-				StringPooling="TRUE"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
+				PreprocessorDefinitions="WIN32;_WINDOWS;DEBUG;XR_QSLIM_EXPORTS;_SECURE_SCL=0"
+				StringPooling="true"
 				RuntimeLibrary="2"
-				BufferSecurityCheck="TRUE"
-				ForceConformanceInForLoopScope="TRUE"
-				RuntimeTypeInfo="TRUE"
+				BufferSecurityCheck="true"
+				FloatingPointModel="2"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
-				Name="VCLibrarianTool"/>
+				Name="VCResourceCompilerTool"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCLibrarianTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -177,168 +246,230 @@
 	<Files>
 		<Filter
 			Name="Math"
-			Filter="">
+			>
 			<File
-				RelativePath=".\src\geom3d.h">
+				RelativePath=".\src\geom3d.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\mat2.cpp">
+				RelativePath=".\src\mat2.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\mat2.h">
+				RelativePath=".\src\mat2.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\mat3.cpp">
+				RelativePath=".\src\mat3.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\mat3.h">
+				RelativePath=".\src\mat3.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\mat4.cpp">
+				RelativePath=".\src\mat4.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\mat4.h">
+				RelativePath=".\src\mat4.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\mixmops.cpp">
+				RelativePath=".\src\mixmops.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\mixmops.h">
+				RelativePath=".\src\mixmops.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\mixvops.h">
+				RelativePath=".\src\mixvops.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxDefines.h">
+				RelativePath=".\src\MxDefines.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxGeom3D.cpp">
+				RelativePath=".\src\MxGeom3D.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxGeom3D.h">
+				RelativePath=".\src\MxGeom3D.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxMat2.h">
+				RelativePath=".\src\MxMat2.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxMat3-jacobi.cpp">
+				RelativePath=".\src\MxMat3-jacobi.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxMat3.h">
+				RelativePath=".\src\MxMat3.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxMat4-jacobi.cpp">
+				RelativePath=".\src\MxMat4-jacobi.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxMat4.h">
+				RelativePath=".\src\MxMat4.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxMatrix.cpp">
+				RelativePath=".\src\MxMatrix.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxMatrix.h">
+				RelativePath=".\src\MxMatrix.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxQMetric.cpp">
+				RelativePath=".\src\MxQMetric.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxQMetric.h">
+				RelativePath=".\src\MxQMetric.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxQMetric3.cpp">
+				RelativePath=".\src\MxQMetric3.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxQMetric3.h">
+				RelativePath=".\src\MxQMetric3.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxVec3.h">
+				RelativePath=".\src\MxVec3.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxVec4.h">
+				RelativePath=".\src\MxVec4.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxVector.h">
+				RelativePath=".\src\MxVector.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\vec2.h">
+				RelativePath=".\src\vec2.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\vec3.h">
+				RelativePath=".\src\vec3.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\vec4.h">
+				RelativePath=".\src\vec4.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Kernel"
-			Filter="">
+			>
 			<File
-				RelativePath=".\src\MxBlock.h">
+				RelativePath=".\src\MxBlock.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxBlock2.h">
+				RelativePath=".\src\MxBlock2.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxDynBlock.h">
+				RelativePath=".\src\MxDynBlock.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxGeoPrims.h">
+				RelativePath=".\src\MxGeoPrims.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxHeap.cpp">
-			</File>
-			<File
-				RelativePath=".\src\MxHeap.h">
-			</File>
-			<File
-				RelativePath=".\src\stdafx.cpp">
+				RelativePath=".\src\MxHeap.cpp"
+				>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Mixed|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\stdafx.h">
+				RelativePath=".\src\MxHeap.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\stdafx.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Model"
-			Filter="">
+			>
 			<File
-				RelativePath=".\src\MxBlockModel.cpp">
+				RelativePath=".\src\MxBlockModel.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxBlockModel.h">
+				RelativePath=".\src\MxBlockModel.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxStdModel.cpp">
+				RelativePath=".\src\MxStdModel.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxStdModel.h">
+				RelativePath=".\src\MxStdModel.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="QSlim"
-			Filter="">
+			>
 			<File
-				RelativePath=".\src\MxPropSlim.cpp">
+				RelativePath=".\src\MxPropSlim.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxPropSlim.h">
+				RelativePath=".\src\MxPropSlim.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxQSlim.cpp">
+				RelativePath=".\src\MxQSlim.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxQSlim.h">
+				RelativePath=".\src\MxQSlim.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxStdSlim.cpp">
+				RelativePath=".\src\MxStdSlim.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\src\MxStdSlim.h">
+				RelativePath=".\src\MxStdSlim.h"
+				>
 			</File>
 		</Filter>
 	</Files>

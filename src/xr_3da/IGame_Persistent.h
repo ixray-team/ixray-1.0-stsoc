@@ -34,7 +34,7 @@ public:
 		void			reset		()
 		{
 			for (int i=0; i<4; ++i)
-				strcpy	(m_params[i],"");
+				strcpy_s	(m_params[i],"");
 		}
 		void						parse_cmd_line		(LPCSTR cmd_line)
 		{
@@ -51,6 +51,10 @@ public:
 	xr_set<CPS_Instance*>			ps_active;
 	xr_vector<CPS_Instance*>		ps_destroy;
 	xr_vector<CPS_Instance*>		ps_needtoplay;
+
+public:
+			void					destroy_particles	(const bool &all_particles);
+
 public:
 	virtual void					PreStart			(LPCSTR op);
 	virtual void					Start				(LPCSTR op);
@@ -63,7 +67,6 @@ public:
 
 	CEnvironment*					pEnvironment;
 	CEnvironment&					Environment()	{return *pEnvironment;};
-	BOOL							bDedicatedServer	;
 
 	virtual bool					OnRenderPPUI_query	() { return FALSE; };	// should return true if we want to have second function called
 	virtual void					OnRenderPPUI_main	() {};
@@ -78,6 +81,8 @@ public:
 	// вызывается только когда изменяется тип игры
 	virtual	void					OnGameStart			(); 
 	virtual void					OnGameEnd			();
+
+	virtual void					UpdateGameType		() {};
 
 	virtual void					RegisterModel		(IRender_Visual* V)
 #ifndef _EDITOR
@@ -103,6 +108,7 @@ public:
 	{}
 #endif
 	virtual	void					LoadTitle			(LPCSTR str){}
+	virtual bool					CanBePaused			()		{ return true;}
 };
 
 class IMainMenu
@@ -114,6 +120,7 @@ public:
 	virtual void	DestroyInternal					(bool bForce)										=0;
 };
 
+extern ENGINE_API	bool g_dedicated_server;
 extern ENGINE_API	IGame_Persistent*	g_pGamePersistent;
 #endif //IGame_PersistentH
 

@@ -1,6 +1,3 @@
-// xrCompress.cpp : Defines the entry point for the console application.
-//
-
 #include "stdafx.h"
 #include "lzo\lzo1x.h"
 #include <mmsystem.h>
@@ -15,17 +12,26 @@
 
 #pragma comment			(lib,"xrCore.lib")
 
+//. #define MOD_COMPRESS
+
+typedef void DUMMY_STUFF (const void*,const u32&,void*);
+XRCORE_API DUMMY_STUFF	*g_temporary_stuff;
+XRCORE_API DUMMY_STUFF	*g_dummy_stuff;
+
+
 #define PROTECTED_BUILD
 
 #ifdef PROTECTED_BUILD
 #	define TRIVIAL_ENCRYPTOR_ENCODER
-//#	define TRIVIAL_ENCRYPTOR_DECODER
+#	define TRIVIAL_ENCRYPTOR_DECODER
 #	include "../xr_3da/trivial_encryptor.h"
 #	undef TRIVIAL_ENCRYPTOR_ENCODER
-//#	undef TRIVIAL_ENCRYPTOR_DECODER
+#	undef TRIVIAL_ENCRYPTOR_DECODER
 #endif // PROTECTED_BUILD
 
-extern int				ProcessDifference();
+#ifndef MOD_COMPRESS
+	extern int				ProcessDifference();
+#endif
 
 BOOL					bStoreFiles = FALSE;
 
@@ -42,7 +48,7 @@ CStatTimer				t_compress;
 u8*						c_heap			= NULL;
 u32						dwTimeStart		= 0;
 
-const u32				XRP_MAX_SIZE	= 1024*1024*640; // bytes
+u32						XRP_MAX_SIZE	= 1024*1024*640; // bytes
 
 DEFINE_VECTOR(_finddata_t,FFVec,FFIt);
 IC bool pred_str_ff(const _finddata_t& x, const _finddata_t& y)
@@ -197,7 +203,8 @@ void	Compress			(LPCSTR path, LPCSTR base, BOOL bFast)
 		return;
 	}
 
-	string256		fn;				strconcat(fn,base,"\\",path);
+	string_path		fn;				
+	strconcat		(sizeof(fn),fn,base,"\\",path);
 
 	if (::GetFileAttributes(fn)==u32(-1))
 	{
@@ -328,7 +335,11 @@ void	OpenPack			(LPCSTR tgt_folder, int num)
 
 	string_path		fname;
 	string128		s_num;
-	strconcat		(fname,tgt_folder,".pack_#",itoa(num,s_num,10));
+#ifdef MOD_COMPRESS
+	strconcat		(sizeof(fname),fname,tgt_folder,".xdb",itoa(num,s_num,10));
+#else
+	strconcat		(sizeof(fname),fname,tgt_folder,".pack_#",itoa(num,s_num,10));
+#endif
 	unlink			(fname);
 	fs				= FS.w_open	(fname);
 	fs_desc.clear	();
@@ -351,7 +362,16 @@ void	ClosePack			()
 	// save list
 	bytesDST		= fs->tell	();
 	Log				("...Writing pack desc");
+#ifdef MOD_COMPRESS
+	DUMMY_STUFF*		_dummy_stuff_tmp;
+	_dummy_stuff_tmp	= g_dummy_stuff;
+	g_dummy_stuff		 = NULL;
+#endif
 	fs->w_chunk		(1|CFS_CompressMark, fs_desc.pointer(),fs_desc.size());
+#ifdef MOD_COMPRESS
+	g_dummy_stuff	= _dummy_stuff_tmp;
+#endif
+
 	Msg				("Data size: %d. Desc size: %d.",bytesDST,fs_desc.size());
 	FS.w_close		(fs);
 	Log				("Pack saved.");
@@ -404,9 +424,9 @@ void CompressList(LPCSTR in_name, xr_vector<char*>* list, xr_vector<char*>* fl_l
 				Compress		((*list)[it],in_name,bFast);
 			}
 			if (copy_path && copy_path[0]){
-				string256		src_fn, dst_fn; 
-				strconcat		(src_fn,in_name,"\\",(*list)[it]);
-				strconcat		(dst_fn,copy_path,tgt_folder,"\\",(*list)[it]);
+				string_path		src_fn, dst_fn; 
+				strconcat		(sizeof(src_fn),src_fn,in_name,"\\",(*list)[it]);
+				strconcat		(sizeof(dst_fn),dst_fn,copy_path,tgt_folder,"\\",(*list)[it]);
 				printf			(" + COPY");
 				int age			= FS.get_file_age(src_fn);
 				FS.file_copy	(src_fn,dst_fn);
@@ -464,13 +484,16 @@ void ProcessFolder(xr_vector<char*>& list, LPCSTR path)
 bool IsFolderAccepted(CInifile& ltx, LPCSTR path, BOOL& recurse)
 {
 	// exclude folders
-	CInifile::Sect& ef_sect	= ltx.r_section("exclude_folders");
-	for (CInifile::SectIt ef_it=ef_sect.begin(); ef_it!=ef_sect.end(); ef_it++){
-		recurse	= CInifile::IsBOOL(ef_it->second.c_str());
-		if (recurse)	{
-			if (path==strstr(path,ef_it->first.c_str()))	return false;
-		}else{
-			if (0==xr_strcmp(path,ef_it->first.c_str()))	return false;
+	if( ltx.section_exist("exclude_folders") )
+	{
+		CInifile::Sect& ef_sect	= ltx.r_section("exclude_folders");
+		for (CInifile::SectCIt ef_it=ef_sect.Data.begin(); ef_it!=ef_sect.Data.end(); ef_it++){
+			recurse	= CInifile::IsBOOL(ef_it->second.c_str());
+			if (recurse)	{
+				if (path==strstr(path,ef_it->first.c_str()))	return false;
+			}else{
+				if (0==xr_strcmp(path,ef_it->first.c_str()))	return false;
+			}
 		}
 	}
 	return true;
@@ -490,7 +513,7 @@ void ProcessLTX(LPCSTR tgt_name, LPCSTR params, BOOL bFast)
 	// append ltx path (if exist)
 	string_path		fn,dr,di;
 	_splitpath		(ltx_fn,dr,di,0,0);
-	strconcat		(fn,dr,di);  
+	strconcat		(sizeof(fn),fn,dr,di);  
 	if (0!=fn[0])
 		FS.append_path	("ltx_path",fn,0,false);
 	
@@ -507,8 +530,11 @@ void ProcessLTX(LPCSTR tgt_name, LPCSTR params, BOOL bFast)
 
 	xr_vector<char*> list;
 	xr_vector<char*> fl_list;
+	if(ltx.section_exist("include_folders"))
+	{
 	CInifile::Sect& if_sect	= ltx.r_section("include_folders");
-	for (CInifile::SectIt if_it=if_sect.begin(); if_it!=if_sect.end(); if_it++){
+	for (CInifile::SectCIt if_it=if_sect.Data.begin(); if_it!=if_sect.Data.end(); if_it++)
+	{
 		BOOL ifRecurse		= CInifile::IsBOOL(if_it->second.c_str());
 		u32 folder_mask		= FS_ListFolders | (ifRecurse?0:FS_RootOnly);
 
@@ -522,11 +548,13 @@ void ProcessLTX(LPCSTR tgt_name, LPCSTR params, BOOL bFast)
 		OUT_LOG				("Processing folder: '%s'",path);
 		BOOL efRecurse;
 		BOOL val			= IsFolderAccepted(ltx,path,efRecurse);
-		if (val || (!val&&!efRecurse)){ 
+		if (val || (!val&&!efRecurse))
+		{ 
 			if (val)		ProcessFolder	(list,path);
 
 			xr_vector<char*>*	i_fl_list	= FS.file_list_open	("$target_folder$",path,folder_mask);
-			if (!i_fl_list){
+			if (!i_fl_list)
+			{
 				Log			("ERROR: Unable to open folder list:", path);
 				continue;
 			}
@@ -536,28 +564,35 @@ void ProcessLTX(LPCSTR tgt_name, LPCSTR params, BOOL bFast)
 			for (;it!=itE;++it){ 
 				xr_string tmp_path	= xr_string(path)+xr_string(*it);
 				bool val		= IsFolderAccepted(ltx,tmp_path.c_str(),efRecurse);
-				if (val){
+				if (val)
+				{
 					fl_list.push_back(xr_strdup(tmp_path.c_str()));
 					Msg			("+F: %s",tmp_path.c_str());
 					// collect files
 					if (ifRecurse) 
 						ProcessFolder (list,tmp_path.c_str());
-				}else{
+				}else
+				{
 					Msg			("-F: %s",tmp_path.c_str());
 				}
 			}
 			FS.file_list_close	(i_fl_list);
-		}else{
+		}else
+		{
 			Msg					("-F: %s",path);
 		}
 	}
+}//if(ltx.section_exist("include_folders"))
 	// compress
 	{
+		if(ltx.section_exist("include_files"))
+		{
 		CInifile::Sect& if_sect	= ltx.r_section("include_files");
-		for (CInifile::SectIt if_it=if_sect.begin(); if_it!=if_sect.end(); if_it++)
+		for (CInifile::SectCIt if_it=if_sect.Data.begin(); if_it!=if_sect.Data.end(); if_it++)
 			{
 				  list.push_back	(xr_strdup(if_it->first.c_str()));
 			}	
+		}
 	
 	}
 	CompressList	(tgt_name,&list,&fl_list,bFast,make_pack,copy_path);
@@ -573,13 +608,10 @@ void ProcessLTX(LPCSTR tgt_name, LPCSTR params, BOOL bFast)
 	exclude_exts.clear_and_free();
 }
 
-typedef void DUMMY_STUFF (const void*,const u32&,void*);
-XRCORE_API DUMMY_STUFF	*g_temporary_stuff;
-XRCORE_API DUMMY_STUFF	*g_dummy_stuff;
 
 int __cdecl main	(int argc, char* argv[])
 {
-//	g_temporary_stuff	= &trivial_encryptor::decode;
+	g_temporary_stuff	= &trivial_encryptor::decode;
 	g_dummy_stuff		= &trivial_encryptor::encode;
 
 	Core._initialize("xrCompress",0,FALSE);
@@ -587,15 +619,34 @@ int __cdecl main	(int argc, char* argv[])
 
 	LPCSTR params = GetCommandLine();
 
+#ifndef MOD_COMPRESS
 	if(strstr(params,"-store"))
 	{
 		bStoreFiles = TRUE;
 	};
-
-	if(strstr(params,"-diff")){
+	{
+		LPCSTR					temp = strstr(params,"-max_size");
+		if (temp) {
+			u64					test = u64(1024*1024)*u64(atoi(temp+9));
+			if (u64(test) >= u64(u32(1) << 31))
+				printf			("! too large max_size (%I64u), restoring previous (%I64u)\n",test,u64(XRP_MAX_SIZE));
+			else
+				XRP_MAX_SIZE	= u32(test);
+		};
+	}
+#else
+	bStoreFiles = TRUE;
+#endif
+#ifndef MOD_COMPRESS
+	if(strstr(params,"-diff"))
+	{
 		ProcessDifference	();
-	}else{
-		if (argc<2)	{
+	}else
+#endif
+	{
+		#ifndef MOD_COMPRESS
+		if (argc<2)	
+		{
 			printf("ERROR: u must pass folder name as parameter.\n");
 			printf("-diff /? option to get information about creating difference.\n");
 			printf("-fast	- fast compression.\n");
@@ -611,10 +662,11 @@ int __cdecl main	(int argc, char* argv[])
 			Core._destroy();
 			return 3;
 		}
-		printf			("[settings] SKIP: '*.key','build.*'\n");
-		printf			("[settings] VFS:  'level.*'\n");
+		#endif
 
-		string_path		folder;		strlwr(strconcat(folder,argv[1],"\\"));
+		string_path		folder;		
+		strconcat		(sizeof(folder),folder,argv[1],"\\");
+		_strlwr_s		(folder,sizeof(folder));
 		printf			("\nCompressing files (%s)...\n\n",folder);
 
 		FS._initialize	(CLocatorAPI::flTargetFolderOnly|CLocatorAPI::flScanAppRoot,folder);
@@ -622,11 +674,17 @@ int __cdecl main	(int argc, char* argv[])
 		BOOL bFast		= 0!=strstr(params,"-fast");
 
 		LPCSTR p		= strstr(params,"-ltx");
-		if(0!=p){
+#ifndef MOD_COMPRESS
+		if(0!=p)
+		{
 			ProcessLTX		(argv[1],p+4,bFast);
 		}else{
 			ProcessNormal	(argv[1],bFast);
 		}
+#else
+		R_ASSERT2		(p, "wrong params passed. -ltx option needed");
+		ProcessLTX		(argv[1],p+4,bFast);
+#endif
 	}
 
 	Core._destroy		();

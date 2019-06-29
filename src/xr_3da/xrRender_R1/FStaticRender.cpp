@@ -10,7 +10,7 @@
 #include "..\xr_object.h"
 #include "..\fmesh.h"
 #include "..\SkeletonCustom.h"
-#include "lighttrack.h"
+#include "..\xrRender\lighttrack.h"
  
 using	namespace		R_dsgraph;
 
@@ -46,6 +46,10 @@ ShaderElement*			CRender::rimp_select_sh_static	(IRender_Visual	*pVisual, float 
 //////////////////////////////////////////////////////////////////////////
 void					CRender::create					()
 {
+	L_DB				= 0;
+	L_Shadows			= 0;
+	L_Projector			= 0;
+
 	Device.seqFrame.Add	(this,REG_PRIORITY_HIGH+0x12345678);
 
 	// c-setup
@@ -74,7 +78,7 @@ void					CRender::create					()
 	Models						= xr_new<CModelPool>		();
 	L_Dynamic					= xr_new<CLightR_Manager>	();
 	PSLibrary.OnCreate			();
-	HWOCC.occq_create			(occq_size);
+//.	HWOCC.occq_create			(occq_size);
 
 	xrRender_apply_tf			();
 	::PortalTraverser.initialize();
@@ -83,7 +87,7 @@ void					CRender::create					()
 void					CRender::destroy				()
 {
 	::PortalTraverser.destroy	();
-	HWOCC.occq_destroy			();
+//.	HWOCC.occq_destroy			();
 	PSLibrary.OnDestroy			();
 	
 	xr_delete					(L_Dynamic);
@@ -99,13 +103,13 @@ void					CRender::destroy				()
 void					CRender::reset_begin			()
 {
 	xr_delete					(Target);
-	HWOCC.occq_destroy			();
+//.	HWOCC.occq_destroy			();
 }
 
 void					CRender::reset_end				()
 {
 	xrRender_apply_tf			();
-	HWOCC.occq_create			(occq_size);
+//.	HWOCC.occq_create			(occq_size);
 	Target						=	xr_new<CRenderTarget>	();
 	if (L_Projector)			L_Projector->invalidate		();
 }
@@ -219,11 +223,17 @@ void					CRender::set_Object				(IRenderable*		O )
 		if (O->renderable.pROS) { VERIFY(dynamic_cast<CROS_impl*>(O->renderable.pROS)); }
 	}
 	if (PHASE_NORMAL==phase)	{
-		L_Shadows->set_object	(O);
-		L_Projector->set_object	(O);
+		if (L_Shadows)
+			L_Shadows->set_object	(O);
+		
+		if (L_Projector)
+			L_Projector->set_object	(O);
 	} else {
-		L_Shadows->set_object	(0);
-		L_Projector->set_object	(0);
+		if (L_Shadows)
+			L_Shadows->set_object(0);
+
+		if (L_Projector)
+			L_Projector->set_object	(0);
 	}
 }
 void					CRender::apply_object			(IRenderable*		O )
@@ -326,7 +336,8 @@ void CRender::Calculate				()
 		}
 	}
 	//
-	L_DB->Update	();
+	if (L_DB)
+		L_DB->Update();
 
 	// Main process
 	marker	++;
@@ -613,19 +624,25 @@ HRESULT	CRender::shader_compile			(
 	defines[def_it].Name			=	0;
 	defines[def_it].Definition		=	0;
 	def_it							++;
+	R_ASSERT						(def_it<128);
 
 	LPD3DXINCLUDE                   pInclude		= (LPD3DXINCLUDE)		_pInclude;
 	LPD3DXBUFFER*                   ppShader		= (LPD3DXBUFFER*)		_ppShader;
 	LPD3DXBUFFER*                   ppErrorMsgs		= (LPD3DXBUFFER*)		_ppErrorMsgs;
 	LPD3DXCONSTANTTABLE*            ppConstantTable	= (LPD3DXCONSTANTTABLE*)_ppConstantTable;
+#ifdef	D3DXSHADER_USE_LEGACY_D3DX9_31_DLL	//	December 2006 and later
+	HRESULT		_result	= D3DXCompileShader(pSrcData,SrcDataLen,defines,pInclude,pFunctionName,pTarget,Flags|D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,ppShader,ppErrorMsgs,ppConstantTable);
+#else
 	HRESULT		_result	= D3DXCompileShader(pSrcData,SrcDataLen,defines,pInclude,pFunctionName,pTarget,Flags,ppShader,ppErrorMsgs,ppConstantTable);
+#endif
+
 	if (SUCCEEDED(_result) && o.disasm)
 	{
 		ID3DXBuffer*		code	= *((LPD3DXBUFFER*)_ppShader);
 		ID3DXBuffer*		disasm	= 0;
 		D3DXDisassembleShader		(LPDWORD(code->GetBufferPointer()), FALSE, 0, &disasm );
 		string_path			dname;
-		strconcat			(dname,"disasm\\",name,('v'==pTarget[0])?".vs":".ps" );
+		strconcat			(sizeof(dname),dname,"disasm\\",name,('v'==pTarget[0])?".vs":".ps" );
 		IWriter*			W		= FS.w_open("$logs$",dname);
 		W->w				(disasm->GetBufferPointer(),disasm->GetBufferSize());
 		FS.w_close			(W);

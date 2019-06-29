@@ -32,21 +32,24 @@ class	game_cl_GameState	: public game_GameState, public ISheduled
 //	bool								m_bCrosshair;	//был ли показан прицел-курсор HUD перед вызовом меню
 protected:
 	CUIGameCustom*						m_game_ui_custom;
-	bool								m_bVotingEnabled;	
+	u16									m_u16VotingEnabled;	
 	bool								m_bServerControlHits;	
 
 public:
-	typedef xr_map<ClientID,game_PlayerState*> PLAYERS_MAP;
-	typedef PLAYERS_MAP::iterator PLAYERS_MAP_IT;
+	typedef xr_map<ClientID,game_PlayerState*>	PLAYERS_MAP;
+	typedef PLAYERS_MAP::iterator				PLAYERS_MAP_IT;
+	typedef PLAYERS_MAP::const_iterator			PLAYERS_MAP_CIT;
 
 	PLAYERS_MAP							players;
 	ClientID							local_svdpnid;
 	game_PlayerState*					local_player;
-	xr_vector<CGameObject*>				targets; //bases ???
+//.	xr_vector<CGameObject*>				targets;
 
 
 	WeaponUsageStatistic				*m_WeaponUsageStatistic;	
 	virtual		void				reset_ui				();
+	virtual		void				CommonMessageOut		(LPCSTR msg);
+
 private:
 				void				switch_Phase			(u32 new_phase)		{inherited::switch_Phase(new_phase);};
 protected:
@@ -55,7 +58,6 @@ protected:
 
 	//for scripting enhancement
 	virtual		void				TranslateGameMessage	(u32 msg, NET_Packet& P);
-	virtual		void				CommonMessageOut		(LPCSTR msg);
 
 	virtual		shared_str			shedule_Name			() const		{ return shared_str("game_cl_GameState"); };
 	virtual		float				shedule_Scale			();
@@ -103,8 +105,12 @@ public:
 	virtual		void				ChatSayTeam				(const shared_str &phrase)	{};
 	virtual		void				ChatSayAll				(const shared_str &phrase)	{};
 	virtual		void				OnChatMessage			(NET_Packet* P)	{};
+	virtual		void				OnWarnMessage			(NET_Packet* P)	{};
+	virtual		void				OnRadminMessage			(u16 type, NET_Packet* P)	{};
+	
 
-	virtual		bool				IsVotingEnabled			()	{return m_bVotingEnabled;};
+	virtual		bool				IsVotingEnabled			()	{return m_u16VotingEnabled != 0;};
+	virtual		bool				IsVotingEnabled			(u16 flag) {return (m_u16VotingEnabled & flag) != 0;};
 	virtual		bool				IsVotingActive			()	{ return false; };
 	virtual		void				SetVotingActive			( bool Active )	{ };
 	virtual		void				SendStartVoteMessage	(LPCSTR args)	{};

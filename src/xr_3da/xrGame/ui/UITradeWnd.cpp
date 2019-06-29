@@ -449,16 +449,16 @@ void CUITradeWnd::UpdatePrices()
 
 
 	string256				buf;
-	sprintf					(buf, "%d RU", m_iOurTradePrice);
+	sprintf_s					(buf, "%d RU", m_iOurTradePrice);
 	m_uidata->UIOurPriceCaption.GetPhraseByIndex(2)->str = buf;
-	sprintf					(buf, "%d RU", m_iOthersTradePrice);
+	sprintf_s					(buf, "%d RU", m_iOthersTradePrice);
 	m_uidata->UIOthersPriceCaption.GetPhraseByIndex(2)->str = buf;
 
-	sprintf					(buf, "%d RU", m_pInvOwner->get_money());
+	sprintf_s					(buf, "%d RU", m_pInvOwner->get_money());
 	m_uidata->UIOurMoneyStatic.SetText(buf);
 
 	if(!m_pOthersInvOwner->InfinitiveMoney()){
-		sprintf					(buf, "%d RU", m_pOthersInvOwner->get_money());
+		sprintf_s					(buf, "%d RU", m_pOthersInvOwner->get_money());
 		m_uidata->UIOtherMoneyStatic.SetText(buf);
 	}else
 	{
@@ -608,7 +608,7 @@ void CUITradeWnd::SetCurrentItem(CUICellItem* itm)
 
 		string256			str;
 
-		sprintf				(str, "%d RU", m_pOthersTrade->GetItemPrice(CurrentIItem(), bBuying) );
+		sprintf_s				(str, "%d RU", m_pOthersTrade->GetItemPrice(CurrentIItem(), bBuying) );
 		m_uidata->UIItemInfo.UICost->SetText (str);
 	}
 }

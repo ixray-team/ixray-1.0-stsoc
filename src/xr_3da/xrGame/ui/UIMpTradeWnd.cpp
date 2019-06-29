@@ -14,10 +14,11 @@
 void CUIMpTradeWnd::OnBtnOkClicked(CUIWindow* w, void* d)
 {
 	CheckDragItemToDestroy				();
-	StorePreset							(_preset_idx_last, true);
+	StorePreset							(_preset_idx_last, true, false);
 	GetHolder()->StartStopMenu			(this,true);
 	game_cl_Deathmatch * dm				= smart_cast<game_cl_Deathmatch *>(&(Game()));
 	dm->OnBuyMenu_Ok					();
+//.	StorePreset							(_preset_idx_last, true, true);
 }
 
 void CUIMpTradeWnd::OnBtnCancelClicked(CUIWindow* w, void* d)
@@ -107,19 +108,19 @@ void	xr_stdcall	CUIMpTradeWnd::OnBtnPresetDefaultClicked	(CUIWindow* w, void* d)
 void CUIMpTradeWnd::OnBtnSave1PresetClicked(CUIWindow* w, void* d)
 {
 	CheckDragItemToDestroy				();
-	StorePreset					(_preset_idx_1, false);
+	StorePreset					(_preset_idx_1, false, true);
 }
 
 void CUIMpTradeWnd::OnBtnSave2PresetClicked(CUIWindow* w, void* d)
 {
 	CheckDragItemToDestroy				();
-	StorePreset					(_preset_idx_2, false);
+	StorePreset					(_preset_idx_2, false, true);
 }
 
 void CUIMpTradeWnd::OnBtnSave3PresetClicked(CUIWindow* w, void* d)
 {
 	CheckDragItemToDestroy				();
-	StorePreset					(_preset_idx_3, false);
+	StorePreset					(_preset_idx_3, false, true);
 }
 
 void CUIMpTradeWnd::OnBtnResetClicked(CUIWindow* w, void* d)
@@ -225,6 +226,7 @@ void CUIMpTradeWnd::Show()
 
 void CUIMpTradeWnd::Hide()
 {
+	CheckDragItemToDestroy	();
 	inherited::Hide			();
 
 	CActor *pActor			= smart_cast<CActor*>(Level().CurrentEntity());

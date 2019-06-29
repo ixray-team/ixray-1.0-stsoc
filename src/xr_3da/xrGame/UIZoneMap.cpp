@@ -83,7 +83,7 @@ void CUIZoneMap::UpdateRadar		(Fvector pos)
 	if(IsGameTypeSingle()){
 		if(m_activeMap->GetPointerDistance()>0.5f){
 			string64	str;
-			sprintf		(str,"%.1f m.",m_activeMap->GetPointerDistance());
+			sprintf_s		(str,"%.1f m.",m_activeMap->GetPointerDistance());
 			m_pointerDistanceText.SetText(str);
 		}else{
 			m_pointerDistanceText.SetText("");
@@ -103,8 +103,13 @@ bool CUIZoneMap::ZoomOut()
 
 void CUIZoneMap::SetupCurrentMap()
 {
-	CInifile& gameLtx				= *pGameIni;
-	m_activeMap->Init				(Level().name(),gameLtx,"hud\\default");
+	CInifile* pLtx				= pGameIni;
+
+	if(!pLtx->section_exist(Level().name()))
+		pLtx							= Level().pLevel;
+
+	m_activeMap->Init				(Level().name(),*pLtx,"hud\\default");
+
 	Frect r;
 	m_clipFrame.GetAbsoluteRect		(r);
 	m_activeMap->SetClipRect		(r);

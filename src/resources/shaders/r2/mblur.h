@@ -11,7 +11,7 @@ uniform half4x4	m_previous;
 uniform half2 	m_blur;		// scale_x / 12, scale_y / 12
 
 #define MBLUR_SAMPLES 	half(12)
-#define MBLUR_CLAMP	half(0.01)	//0.001
+#define MBLUR_CLAMP	half(0.001)
 
 half3 	mblur	(float2 UV, half3 pos, half3 c_original)	{
 	half4 	pos4		= half4	(pos,1.h);

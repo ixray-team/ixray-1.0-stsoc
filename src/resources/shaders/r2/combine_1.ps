@@ -43,15 +43,15 @@ _out         main                ( _input I )
         // static sun
 	half mtl 		= P.w;
 #ifdef        USE_R2_STATIC_SUN
-        half        sun_occ        	=       P.w;
-					mtl 			= 		xmaterial;
-                    L              +=       Ldynamic_color * sun_occ * plight_infinity        (mtl, P.xyz, N.xyz, Ldynamic_dir);
+	half	sun_occ        	=       P.w*2	;
+			mtl 			= 		xmaterial;
+            L              +=       Ldynamic_color * sun_occ * plight_infinity	(mtl, P.xyz, N.xyz, Ldynamic_dir);
 #endif
 
         // hemisphere
-        half3         hdiffuse,hspecular                ;
+        half3       hdiffuse,hspecular;
 
-        hmodel      (hdiffuse, hspecular, mtl, N.w, D.w, P.xyz, N.xyz);
+        hmodel		(hdiffuse, hspecular, mtl, N.w, D.w, P.xyz, N.xyz);
 		//			hdiffuse*=hdiffuse;			//. high contrast hemi
 
         half4         light       = half4         (L.rgb + hdiffuse, L.w)        ;

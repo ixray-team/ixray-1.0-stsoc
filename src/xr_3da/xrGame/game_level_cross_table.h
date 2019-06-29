@@ -9,10 +9,10 @@
 #pragma once
 
 #ifdef AI_COMPILER
-	#include "xrLevel.h"
-#else
-	#include "../xrLevel.h"
-#endif
+#	include "xrLevel.h"
+#else // AI_COMPILER
+#	include "../xrLevel.h"
+#endif // AI_COMPILER
 
 #include "alife_space.h"
 #include "game_graph_space.h"
@@ -23,6 +23,13 @@
 #define CROSS_TABLE_CHUNK_DATA				1
 
 class CGameLevelCrossTable {
+#ifdef AI_COMPILER		
+	friend class CLevelGameGraph;
+	friend class CCrossTableBuilder;
+	friend class CRenumbererConverter;
+	friend class CGameGraphBuilder;
+#endif // AI_COMPILER
+
 public:
 	#pragma pack(push,2)
 	class CHeader {
@@ -44,7 +51,7 @@ public:
 		friend class CCrossTableBuilder;
 		friend class CRenumbererConverter;
 		friend class CGameGraphBuilder;
-#endif
+#endif // AI_COMPILER
 	};
 	
 	class  CCell {
@@ -58,31 +65,35 @@ public:
 		friend class CCrossTableBuilder;
 		friend class CRenumbererConverter;
 		friend class CGameGraphBuilder;
-#endif
+#endif // AI_COMPILER
 	};
 	#pragma pack(pop)
 
-protected:
+private:
 	CHeader					m_tCrossTableHeader;
-	IReader					*m_tpCrossTableVFS;
-	IReader					*m_chunk;
 	CCell					*m_tpaCrossTable;
 
+#ifndef PRIQUEL
+private:
+	IReader					*m_tpCrossTableVFS;
+	IReader					*m_chunk;
+#endif // PRIQUEL
+
 public:
-#ifdef AI_COMPILER
-	IC						CGameLevelCrossTable	(LPCSTR fName);
+#ifdef PRIQUEL
+	IC						CGameLevelCrossTable	(const void *buffer, const u32 &buffer_size);
 #else
-	IC						CGameLevelCrossTable	();
-#endif
+#	ifdef AI_COMPILER
+		IC					CGameLevelCrossTable	(LPCSTR fName);
+#	else // AI_COMPILER
+		IC					CGameLevelCrossTable	();
+#	endif // AI_COMPILER
+#endif // PRIQUEL
+
+public:
 	IC virtual				~CGameLevelCrossTable	();
 	IC		const CCell		&vertex					(u32 level_vertex_id) const;
 	IC		const CHeader	&header					() const;
-#ifdef AI_COMPILER		
-	friend class CLevelGameGraph;
-	friend class CCrossTableBuilder;
-	friend class CRenumbererConverter;
-	friend class CGameGraphBuilder;
-#endif
 };
 
 #include "game_level_cross_table_inline.h"

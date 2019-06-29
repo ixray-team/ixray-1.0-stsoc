@@ -37,40 +37,40 @@ void CWeaponPistol::Load	(LPCSTR section)
 	animGet				(mhud_pistol.mhud_reload_empty,	pSettings->r_string(*hud_sect, "anim_reload_empty"));
 
 	string128			str;
-	strconcat(str,pSettings->r_string(*hud_sect, "anim_empty"),"_r");
+	strconcat(sizeof(str),str,pSettings->r_string(*hud_sect, "anim_empty"),"_r");
 	animGet				(mhud_pistol_r.mhud_empty,		str);
 
-	strconcat(str,pSettings->r_string(*hud_sect, "anim_shot_last"),"_r");
+	strconcat(sizeof(str),str,pSettings->r_string(*hud_sect, "anim_shot_last"),"_r");
 	animGet				(mhud_pistol_r.mhud_shot_l,		str);
 
-	strconcat(str,pSettings->r_string(*hud_sect, "anim_close"),"_r");
+	strconcat(sizeof(str),str,pSettings->r_string(*hud_sect, "anim_close"),"_r");
 	animGet				(mhud_pistol_r.mhud_close,		str);
 
-	strconcat(str,pSettings->r_string(*hud_sect, "anim_draw_empty"),"_r");
+	strconcat(sizeof(str),str,pSettings->r_string(*hud_sect, "anim_draw_empty"),"_r");
 	animGet				(mhud_pistol_r.mhud_show_empty,	str);
 
-	strconcat(str,pSettings->r_string(*hud_sect, "anim_reload_empty"),"_r");
+	strconcat(sizeof(str),str,pSettings->r_string(*hud_sect, "anim_reload_empty"),"_r");
 	animGet				(mhud_pistol_r.mhud_reload_empty,	str);
 
 
 
-	strconcat(str,pSettings->r_string(*hud_sect, "anim_idle"),"_r");
+	strconcat(sizeof(str),str,pSettings->r_string(*hud_sect, "anim_idle"),"_r");
 	animGet				(wm_mhud_r.mhud_idle,	str);
 
-	strconcat(str,pSettings->r_string(*hud_sect, "anim_reload"),"_r");
+	strconcat(sizeof(str),str,pSettings->r_string(*hud_sect, "anim_reload"),"_r");
 	animGet				(wm_mhud_r.mhud_reload,	str);
 
-	strconcat(str,pSettings->r_string(*hud_sect, "anim_draw"),"_r");
+	strconcat(sizeof(str),str,pSettings->r_string(*hud_sect, "anim_draw"),"_r");
 	animGet				(wm_mhud_r.mhud_show,	str);
 
-	strconcat(str,pSettings->r_string(*hud_sect, "anim_holster"),"_r");
+	strconcat(sizeof(str),str,pSettings->r_string(*hud_sect, "anim_holster"),"_r");
 	animGet				(wm_mhud_r.mhud_hide,	str);
 
-	strconcat(str,pSettings->r_string(*hud_sect, "anim_shoot"),"_r");
+	strconcat(sizeof(str),str,pSettings->r_string(*hud_sect, "anim_shoot"),"_r");
 	animGet				(wm_mhud_r.mhud_shots,	str);
 
 	if(IsZoomEnabled()){
-		strconcat(str,pSettings->r_string(*hud_sect, "anim_idle_aim"),"_r");
+		strconcat(sizeof(str),str,pSettings->r_string(*hud_sect, "anim_idle_aim"),"_r");
 		animGet				(wm_mhud_r.mhud_idle_aim,		str);
 	}
 

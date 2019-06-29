@@ -2,8 +2,7 @@
 // script_game_object_inventory_owner.сpp :	функции для inventory owner
 //////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "script_space.h"
+#include "pch_script.h"
 #include "script_game_object.h"
 #include "script_game_object_impl.h"
 #include "InventoryOwner.h"
@@ -235,7 +234,7 @@ void CScriptGameObject::MarkItemDropped		(CScriptGameObject *item)
 		return;
 	}
 
-	inventory_item->Drop	();
+	inventory_item->SetDropManual	(TRUE);
 }
 
 bool CScriptGameObject::MarkedDropped		(CScriptGameObject *item)
@@ -252,7 +251,7 @@ bool CScriptGameObject::MarkedDropped		(CScriptGameObject *item)
 		return				(false);
 	}
 
-	return					(!!inventory_item->GetDrop());
+	return					(!!inventory_item->GetDropManual());
 }
 
 void CScriptGameObject::UnloadMagazine		()

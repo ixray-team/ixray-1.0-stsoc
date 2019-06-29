@@ -391,7 +391,7 @@ void CUIBuyWnd::Highlight(int slot)
 void CUIBuyWnd::OnMoneyChange()
 {
 	string16			buff;
-	sprintf				(buff,"%d",m_bag.m_money);
+	sprintf_s				(buff,"%d",m_bag.m_money);
 	m_moneyInfo.SetText	(buff);
 }
 
@@ -413,7 +413,7 @@ void CUIBuyWnd::ProcessPropertiesBoxClicked()
 	{
 		CUICellItem* itm			= NULL;
 
-		switch(m_propertiesBox.GetClickedItem()->GetID())
+		switch(m_propertiesBox.GetClickedItem()->GetTAG())
 		{
 		case INVENTORY_TO_SLOT_ACTION:	
 			ToSlot					(CurrentItem(), true);
@@ -612,7 +612,7 @@ void CUIBuyWnd::SetCurrentItem(CUICellItem* itm)
 	{
 		string256					str;
 		m_itemInfo.InitItem			(CurrentIItem());
-		sprintf						(str, "%d RU", m_bag.GetItemPrice(itm));
+		sprintf_s						(str, "%d RU", m_bag.GetItemPrice(itm));
 		m_itemInfo.UICost->SetText	(str);
 
 		string64					tex_name;
@@ -623,7 +623,7 @@ void CUIBuyWnd::SetCurrentItem(CUICellItem* itm)
 		else 
 			strcpy					(team, "green");
 
-		sprintf						(tex_name, "ui_hud_status_%s_0%d", team, m_bag.GetItemRank(m_pCurrentCellItem)+1);
+		sprintf_s						(tex_name, "ui_hud_status_%s_0%d", team, m_bag.GetItemRank(m_pCurrentCellItem)+1);
 				
 		m_rankInfo.InitTexture		(tex_name);
 	}
@@ -934,7 +934,7 @@ void CUIBuyWnd::ActivatePropertiesBox()
 	Frect							vis_rect;
 
 	GetAbsoluteRect					(vis_rect);
-	GetUICursor()->GetPos			(cursor_pos.x, cursor_pos.y);
+	cursor_pos						= GetUICursor()->GetCursorPosition();
 	cursor_pos.sub					(vis_rect.lt);
 	m_propertiesBox.Show			(vis_rect, cursor_pos);
 

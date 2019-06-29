@@ -6,10 +6,9 @@
 //	Description : ALife monster brain class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "alife_monster_brain.h"
 #include "alife_monster_movement_manager.h"
-#include "script_space.h"
 
 using namespace luabind;
 
@@ -24,7 +23,8 @@ void CALifeMonsterBrain::script_register	(lua_State *L)
 	module(L)
 	[
 		class_<CALifeMonsterBrain>("CALifeMonsterBrain")
-			.def("movement",	&get_movement)
-			.def("update",		&CALifeMonsterBrain::update)
+			.def("movement",				&get_movement)
+			.def("update",					&CALifeMonsterBrain::update)
+			.def("can_choose_alife_tasks",	(void (CALifeMonsterBrain::*)(bool))&CALifeMonsterBrain::can_choose_alife_tasks)
 	];
 }

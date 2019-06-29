@@ -6,9 +6,8 @@
 //	Description : XRay Script hit class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_hit.h"
-#include "script_space.h"
 #include "script_game_object.h"
 
 using namespace luabind;

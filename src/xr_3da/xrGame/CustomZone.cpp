@@ -55,6 +55,7 @@ CCustomZone::CCustomZone(void)
 
 	m_effector					= NULL;
 	m_bIdleObjectParticlesDontStop = FALSE;
+	m_b_always_fastmode			= FALSE;
 }
 
 CCustomZone::~CCustomZone(void) 
@@ -325,6 +326,8 @@ BOOL CCustomZone::net_Spawn(CSE_Abstract* DC)
 	m_owner_id					= Z->m_owner_id;
 	if(m_owner_id != u32(-1))
 		m_ttl					= Device.dwTimeGlobal + 40000;// 40 sec
+	else
+		m_ttl					= u32(-1);
 
 	if (GameID() != GAME_SINGLE)
 		m_zone_flags.set(eSpawnBlowoutArtefacts,	FALSE);
@@ -368,6 +371,10 @@ BOOL CCustomZone::net_Spawn(CSE_Abstract* DC)
 	m_bBlowoutWindActive		= false;
 
 	o_fastmode					= TRUE;		// start initially with fast-mode enabled
+	if(spawn_ini() && spawn_ini()->line_exist("fast_mode","always_fast"))
+	{
+		m_b_always_fastmode		= spawn_ini()->r_bool("fast_mode","always_fast");
+	}
 	return						(TRUE);
 }
 
@@ -394,13 +401,13 @@ void CCustomZone::net_Destroy()
 void CCustomZone::net_Import(NET_Packet& P)
 {
 	inherited::net_Import(P);
-	P.r_u32				(m_owner_id);
+//	P.r_u32				(m_owner_id);
 }
 
 void CCustomZone::net_Export(NET_Packet& P)
 {
 	inherited::net_Export(P);
-	P.w_u32				(m_owner_id);
+//	P.w_u32				(m_owner_id);
 }
 
 bool CCustomZone::IdleState()
@@ -550,19 +557,22 @@ void CCustomZone::shedule_Update(u32 dt)
 
 		inherited::shedule_Update(dt);
 
-		//////////////////////////////////////////////////////////////////////////
 		// check "fast-mode" border
 		float	cam_distance	= Device.vCameraPosition.distance_to(P)-s.R;
-		if (cam_distance > FASTMODE_DISTANCE)	o_switch_2_slow	();
-		else									o_switch_2_fast	();
+		if (cam_distance > FASTMODE_DISTANCE && !m_b_always_fastmode)	
+			o_switch_2_slow	();
+		else									
+			o_switch_2_fast	();
+
 		if (!o_fastmode)		UpdateWorkload	(dt);
 
 	};
 
 	UpdateOnOffState	();
 
-	if(m_owner_id != u32(-1)){
-		if(Local() && Device.dwTimeGlobal > m_ttl)
+	if( !IsGameTypeSingle() && Local() )
+	{
+		if(Device.dwTimeGlobal > m_ttl)
 			DestroyObject ();
 	}
 }
@@ -1191,7 +1201,7 @@ void CCustomZone::SpawnArtefact()
 
 	Fvector pos;
 	Center(pos);
-	Level().spawn_item(*m_ArtefactSpawn[i].section, pos, ai_location().level_vertex_id(), ID());
+	Level().spawn_item(*m_ArtefactSpawn[i].section, pos, (g_dedicated_server)?u32(-1):ai_location().level_vertex_id(), ID());
 }
 
 
@@ -1332,8 +1342,7 @@ void CCustomZone::net_Relcase(CObject* O)
 		exit_Zone(*it);
 		m_ObjectInfoMap.erase(it);
 	}
-	if (GameID() == GAME_SINGLE)
-		if(GO->ID()==m_owner_id)	m_owner_id = u32(-1);
+	if(GO->ID()==m_owner_id)	m_owner_id = u32(-1);
 
 	if(m_effector && m_effector->m_pActor && m_effector->m_pActor->ID() == GO->ID())
 		m_effector->Stop();
@@ -1429,4 +1438,12 @@ BOOL CCustomZone::feel_touch_on_contact	(CObject *O)
 		return			(FALSE);
 
 	return				(inherited::feel_touch_on_contact(O));
+}
+
+BOOL CCustomZone::AlwaysTheCrow()
+{
+	if(m_b_always_fastmode && IsEnabled() )
+		return TRUE;
+	else
+		return inherited::AlwaysTheCrow();
 }

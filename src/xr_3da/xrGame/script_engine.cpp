@@ -6,12 +6,11 @@
 //	Description : XRay Script Engine
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "script_engine.h"
 #include "ai_space.h"
 #include "object_factory.h"
 #include "script_process.h"
-#include "script_space.h"
 
 #ifdef USE_DEBUGGER
 #	include "script_debugger.h"
@@ -43,7 +42,11 @@ CScriptEngine::~CScriptEngine			()
 {
 	while (!m_script_processes.empty())
 		remove_script_process(m_script_processes.begin()->first);
+
+#ifdef DEBUG
 	flush_log				();
+#endif // DEBUG
+
 #ifdef USE_DEBUGGER
 	xr_delete (m_scriptDebugger);
 #endif
@@ -56,13 +59,13 @@ void CScriptEngine::unload				()
 	*m_last_no_file			= 0;
 }
 
-int CScriptEngine::lua_panic			(CLuaVirtualMachine *L)
+int CScriptEngine::lua_panic			(lua_State *L)
 {
 	print_output	(L,"PANIC",LUA_ERRRUN);
 	return			(0);
 }
 
-void CScriptEngine::lua_error			(CLuaVirtualMachine *L)
+void CScriptEngine::lua_error			(lua_State *L)
 {
 	print_output			(L,"",LUA_ERRRUN);
 
@@ -73,7 +76,7 @@ void CScriptEngine::lua_error			(CLuaVirtualMachine *L)
 #endif
 }
 
-int  CScriptEngine::lua_pcall_failed	(CLuaVirtualMachine *L)
+int  CScriptEngine::lua_pcall_failed	(lua_State *L)
 {
 	print_output			(L,"",LUA_ERRRUN);
 #if !XRAY_EXCEPTIONS
@@ -84,7 +87,7 @@ int  CScriptEngine::lua_pcall_failed	(CLuaVirtualMachine *L)
 	return					(LUA_ERRRUN);
 }
 
-void lua_cast_failed					(CLuaVirtualMachine *L, LUABIND_TYPE_INFO info)
+void lua_cast_failed					(lua_State *L, LUABIND_TYPE_INFO info)
 {
 	CScriptEngine::print_output	(L,"",LUA_ERRRUN);
 
@@ -118,7 +121,7 @@ void CScriptEngine::setup_callbacks		()
 
 #ifdef DEBUG
 #	include "script_thread.h"
-void CScriptEngine::lua_hook_call		(CLuaVirtualMachine *L, lua_Debug *dbg)
+void CScriptEngine::lua_hook_call		(lua_State *L, lua_Debug *dbg)
 {
 	if (ai().script_engine().current_thread())
 		ai().script_engine().current_thread()->script_hook(L,dbg);
@@ -201,7 +204,7 @@ void CScriptEngine::load_common_scripts()
 #ifdef DBG_DISABLE_SCRIPTS
 	return;
 #endif
-	string256		S;
+	string_path		S;
 	FS.update_path	(S,"$game_config$","script.ltx");
 	CInifile		*l_tpIniFile = xr_new<CInifile>(S);
 	R_ASSERT		(l_tpIniFile);
@@ -234,9 +237,9 @@ void CScriptEngine::process_file_if_exists	(LPCSTR file_name, bool warn_if_not_e
 	if (!warn_if_not_exist && no_file_exists(file_name,string_length))
 		return;
 
-	string256				S,S1;
+	string_path				S,S1;
 	if (m_reload_modules || (*file_name && !namespace_loaded(file_name))) {
-		FS.update_path		(S,"$game_scripts$",strconcat(S1,file_name,".script"));
+		FS.update_path		(S,"$game_scripts$",strconcat(sizeof(S1),S1,file_name,".script"));
 		if (!warn_if_not_exist && !FS.exist(S)) {
 #ifdef DEBUG
 #	ifndef XRSE_FACTORY_EXPORTS
@@ -276,7 +279,7 @@ void CScriptEngine::register_script_classes		()
 #ifdef DBG_DISABLE_SCRIPTS
 	return;
 #endif
-	string256					S;
+	string_path					S;
 	FS.update_path				(S,"$game_config$","script.ltx");
 	CInifile					*l_tpIniFile = xr_new<CInifile>(S);
 	R_ASSERT					(l_tpIniFile);

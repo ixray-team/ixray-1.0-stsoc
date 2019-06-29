@@ -167,8 +167,8 @@ void CPHDestroyable::Load(CInifile* ini,LPCSTR section)
 		m_destroyed_obj_visual_names.push_back(ini->r_string(section,"destroyed_vis_name"));
 	}else{
 		CInifile::Sect& data		= ini->r_section(section);
-		if(data.size()>0) m_flags.set(fl_destroyable,TRUE);
-		for (CInifile::SectIt I=data.begin(); I!=data.end(); I++)
+		if(data.Data.size()>0) m_flags.set(fl_destroyable,TRUE);
+		for (CInifile::SectCIt I=data.Data.begin(); I!=data.Data.end(); I++)
 			if(I->first.size())		m_destroyed_obj_visual_names.push_back(I->first);
 	}
 }

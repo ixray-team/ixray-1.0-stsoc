@@ -6,11 +6,10 @@
 //	Description : Miscellanious routines for monsters
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "pch_script.h"
 #include "ai_monsters_misc.h"
 #include "../ai_space.h"
 #include "../custommonster.h"
-//#include "../actor.h"
 #include "../ef_storage.h"
 #include "../seniority_hierarchy_holder.h"
 #include "../team_hierarchy_holder.h"
@@ -179,7 +178,7 @@ void CAniVector::Load(CKinematicsAnimated *tpKinematics, LPCSTR caBaseName)
 	string256	S1, S2;
 	MotionID	tpMotionDef;
 	for (int i=0; ; ++i)
-		if (!!(tpMotionDef = tpKinematics->ID_Cycle_Safe(strconcat(S1,caBaseName,itoa(i,S2,10))))) {
+		if (!!(tpMotionDef = tpKinematics->ID_Cycle_Safe(strconcat(sizeof(S1),S1,caBaseName,itoa(i,S2,10))))) {
 			A.push_back(tpMotionDef);
 #ifdef DEBUG
 			if (psAI_Flags.test(aiAnimation))
@@ -187,7 +186,7 @@ void CAniVector::Load(CKinematicsAnimated *tpKinematics, LPCSTR caBaseName)
 #endif
 		}
 		else
-			if (!!(tpMotionDef = tpKinematics->ID_FX_Safe(strconcat(S1,caBaseName,itoa(i,S2,10))))) {
+			if (!!(tpMotionDef = tpKinematics->ID_FX_Safe(strconcat(sizeof(S1),S1,caBaseName,itoa(i,S2,10))))) {
 				A.push_back(tpMotionDef);
 #ifdef DEBUG
 			if (psAI_Flags.test(aiAnimation))
