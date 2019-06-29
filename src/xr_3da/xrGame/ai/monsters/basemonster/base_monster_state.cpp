@@ -1,0 +1,18 @@
+////////////////////////////////////////////////////////////////////////////
+//	Module 		: base_monster_state.cpp
+//	Created 	: 27.05.2003
+//  Modified 	: 27.05.2003
+//	Author		: Serge Zhem
+//	Description : FSM states
+////////////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "base_monster.h"
+#include "base_monster_state.h"
+
+
+
+
+
+
+

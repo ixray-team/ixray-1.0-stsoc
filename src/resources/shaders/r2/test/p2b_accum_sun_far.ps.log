@@ -1,0 +1,155 @@
+--------------------------------------------------------------------------------
+Running performance on file test\p2B_accum_sun_far.ps
+-------------------- NV40 --------------------
+Target: GeForce 6800 Ultra (NV40) :: Unified Compiler: v65.04
+IPU0 ------ Simplified schedule: --------
+
+Pass |  Unit  |  uOp |  PC:  Op
+-----+--------+------+-------------------------
+   1 |   SCT0 |  div |   0:  TEXr r3, f[TEX0], TEX0;
+     |    TEX |  tex |   0:  TEXr r3, f[TEX0], TEX0;
+     |   SCB0 |  mov |   1:  MOVr r4.xyz, r3;
+     |   SCB1 |  mov |   2:  MOVr r4.w, const.---x;
+     |        |      |
+   2 |   SCT1 |  mov |   4:  MOVr r2.z, r3.--w-;
+     |   SCB0 |  dp4 |   5:  DP4r r0.x, const, r4;
+     |   SCB1 |  nop |   5:  DP4r r0.x, const, r4;
+     |        |      |
+   3 |   SCT1 |  div |   7:  RCPr r1.y, r0;
+     |   SCB0 |  dp4 |   8:  DP4r r1.z, const, r4;
+     |   SCB1 |  nop |   8:  DP4r r1.z, const, r4;
+     |        |      |
+   4 |   SCB0 |  dp4 |  10:  DP4r r1.w, const, r4;
+     |   SCB1 |  nop |  10:  DP4r r1.w, const, r4;
+     |        |      |
+   5 |   SCB0 |  mad |  12:  MADr r0.xy, r1.zw--, r1.yy--, const.xx--;
+     |   SCB1 |  mad |  14:  MADr r0.zw, r1, r1.--yy, const.--yy;
+     |        |      |
+   6 |   SCT0 |  mov |  16:  TEXr r1.x, r0, TEX2;
+     |    TEX |  tex |  16:  TEXr r1.x, r0, TEX2;
+     |   SCB0 |  mad |  17:  MADr r0.xy, r1.zw--, r1.yy--, const.xy--;
+     |   SCB1 |  mad |  19:  MADr r1.zw, r1, r1.--yy, const.--yx;
+     |        |      |
+   7 |   SCT0 |  mov |  21:  TEXr r2.x, r0, TEX2;
+     |    TEX |  tex |  21:  TEXr r2.x, r0, TEX2;
+     |   SCB0 |  dp4 |  22:  DP4r r0.y, const, r4;
+     |   SCB1 |  nop |  22:  DP4r r0.y, const, r4;
+     |        |      |
+   8 |   SCT0 |  mov |  24:  TEXr r0.x, r0.zwzz, TEX2;
+     |    TEX |  tex |  24:  TEXr r0.x, r0.zwzz, TEX2;
+     |   SCB1 |  mul |  25:  MULr r0.zw, r0, const.--xx;
+     |        |      |
+   9 |   SCB1 |  frc |  27:  FRCr h5.zw, r0;
+     |        |      |
+  10 |   SCB0 |  dp4 |  28:  DP4r r0.z, const, r4;
+     |   SCB1 |  nop |  28:  DP4r r0.z, const, r4;
+     |        |      |
+  11 |   SCB0 |  dp4 |  30:  DP4r r0.w, const, r4;
+     |   SCB1 |  nop |  30:  DP4r r0.w, const, r4;
+     |        |      |
+  12 |   SCT0 |  div |  32:  TEXh h8.xyz, f[TEX0], TEX1;
+     |   SCT1 |  mov |  33:  NRMh h9.xyz, r3;
+     |    TEX |  tex |  32:  TEXh h8.xyz, f[TEX0], TEX1;
+     |    SRB |  nrm |  33:  NRMh h9.xyz, r3;
+     |   SCB0 |  dp3 |  34:  DP3h*2 h8.w, h9, h8;
+     |   SCB1 |  add |  35:  ADDr h6.w,-r1.---x, r0.---y;
+     |        |      |
+  13 | SCT0/1 |  mul |  36:  MOVh h2, const.xxxx;
+     |   SCB0 |  add |  38:  ADDr h6.y,-r2.-x--, r0;
+     |        |      |
+  14 |   SCT0 |  mov |  39:  TEXh h1.w, r0.zwzz, TEX3;
+     |    TEX |  tex |  39:  TEXh h1.w, r0.zwzz, TEX3;
+     |   SCB0 |  mad |  40:  MADh h7.xyz, h8,-h8.www-, h9;
+     |        |      |
+  15 |   SCT0 |  mov |  41:  TEXr r2.x, r1.zwzz, TEX2;
+     |    TEX |  tex |  41:  TEXr r2.x, r1.zwzz, TEX2;
+     |   SCB0 |  add |  43:  ADDr h6.x,-r0, r0.y---;
+     |   SCB1 |  add |  42:  ADDr h6.z,-r2.--x-, r0.--y-;
+     |        |      |
+  16 | SCT0/1 |  mul |  44:  MOVrc0 hc,-h6;
+     |   SCB0 |  dp3 |  45:  DP3h r2.y,-const, h8;
+     |   SCB1 |  mul |  47:  MULh h3.w, h5, h5.---z;
+     |        |      |
+  17 | SCT0/1 |  mul |  48:  MOVh h2(LT0.xyzw), const.xxxx;
+     |   SCB0 |  dp3 |  50:  DP3h r2.x,-const, h7;
+     |        |      |
+  18 |   SCT0 |  mov |  52:  TEXh h0, r2.yxzz, TEX4;
+     |    TEX |  tex |  52:  TEXh h0, r2.yxzz, TEX4;
+     |   SCB0 |  add |  53:  ADDh h4.xy,-h5.zw--, const.xx--;
+     |        |      |
+  19 |   SCT0 |  mul |  55:  MULh h3.yz, h5.-wz-, h4.-xy-;
+     |   SCB0 |  mul |  56:  MULh h3.x, h4.y---, h4;
+     |        |      |
+  20 | SCT0/1 |  mul |  57:  MULh h0, h0, const;
+     |   SCB0 |  dp4 |  59:  DP4h h1.x, h2, h3;
+     |   SCB1 |  nop |  59:  DP4h h1.x, h2, h3;
+     |        |      |
+  21 |   SCT0 |  div |  61:  TEXh h1, f[TEX0], TEX5;
+     |   SCT1 |  mul |  60:  MULh h2.w, h1, h1.---x;
+     |    TEX |  tex |  61:  TEXh h1, f[TEX0], TEX5;
+     | SCB0/1 |  mad |  62:  MADh h0, h0, h2.wwww, h1;
+
+Pass   SCT  TEX  SCB
+   1:  50% 100% 100%
+   2:  25%   0% 100%
+   3:  25%   0% 100%
+   4:   0%   0% 100%
+   5:   0%   0% 100%
+   6:   0% 100% 100%
+   7:   0% 100% 100%
+   8:   0% 100%  50%
+   9:   0%   0%  50%
+  10:   0%   0% 100%
+  11:   0%   0% 100%
+  12:  50% 100%  75%
+  13: 100%   0%  25%
+  14:   0% 100%  75%
+  15:   0% 100%  50%
+  16: 100%   0%  75%
+  17: 100%   0%  75%
+  18:   0% 100%  50%
+  19:  50%   0%  25%
+  20: 100%   0% 100%
+  21:  75% 100% 100%
+  22:   0%   0%   0%
+
+MEAN:  30%  40%  75%
+
+Pass   SCT0  SCT1   TEX  SCB0  SCB1
+   1:  100%    0%  100%  100%  100%
+   2:    0%  100%    0%  100%  100%
+   3:    0%  100%    0%  100%  100%
+   4:    0%    0%    0%  100%  100%
+   5:    0%    0%    0%  100%  100%
+   6:    0%    0%  100%  100%  100%
+   7:    0%    0%  100%  100%  100%
+   8:    0%    0%  100%    0%  100%
+   9:    0%    0%    0%    0%  100%
+  10:    0%    0%    0%  100%  100%
+  11:    0%    0%    0%  100%  100%
+  12:  100%    0%  100%  100%    0%
+  13:  100%  100%    0%  100%    0%
+  14:    0%    0%  100%  100%    0%
+  15:    0%    0%  100%  100%  100%
+  16:  100%  100%    0%  100%    0%
+  17:  100%  100%    0%  100%    0%
+  18:    0%    0%  100%  100%    0%
+  19:  100%    0%    0%  100%    0%
+  20:  100%  100%    0%  100%  100%
+  21:  100%  100%  100%  100%  100%
+  22:    0%    0%    0%    0%    0%
+
+MEAN:   36%   31%   40%   86%   63%
+Cycles: 24.25 :: R Regs Used: 5 :: R Regs Max Index (0 based): 4
+--------------------------------------------------------------------------------
+Running performance on file test\p2b_accum_sun_far.ps
+-------------------- NV40 --------------------
+Target: GeForce 6800 Ultra (NV40) :: Unified Compiler: v81.95
+Cycles: 24.25 :: R Regs Used: 5 :: R Regs Max Index (0 based): 4
+Pixel throughput (assuming 1 cycle texture lookup) 266.67 MP/s
+--------------------------------------------------------------------------------
+Running performance on file test\p2b_accum_sun_far.ps
+-------------------- G70 --------------------
+Target: GeForce 7800 GT (G70) :: Unified Compiler: v81.95
+Cycles: 20.25 :: R Regs Used: 5 :: R Regs Max Index (0 based): 4
+Pixel throughput (assuming 1 cycle texture lookup) 480.00 MP/s
