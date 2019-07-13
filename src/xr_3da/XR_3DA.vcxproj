@@ -118,6 +118,18 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release_Dedicated|Win32'">x:\binaries\dedicated\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release_Dedicated|Win32'">x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release_Dedicated|Win32'">false</LinkIncremental>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\dplay;X:\src\xrCore;X:\src\xrLua\src;X:\sdk\Xiph\Include;X:\sdk\dxsdk_mar2009\Include;X:\sdk\luabind\luabind;X:\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\Xiph\Libs;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug_Dedicated|Win32'">X:\sdk\dplay;X:\src\xrCore;X:\src\xrLua\src;X:\sdk\dxsdk_mar2009\Include;X:\sdk\Xiph\Include;X:\sdk\luabind\luabind;X:\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug_Dedicated|Win32'">X:\sdk\Xiph\Libs;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">X:\sdk\dplay;X:\src\xrCore;X:\sdk\dxsdk_mar2009\Include;X:\src\xrLua\src;X:\sdk\luabind\luabind;X:\sdk\boost_1_30_0;X:\sdk\Xiph\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">X:\sdk\Xiph\Libs;X:\sdk\OpenAL\libs;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Mixed_Dedicated|Win32'">X:\sdk\dplay;X:\src\xrCore;X:\sdk\dxsdk_mar2009\Include;X:\src\xrLua\src;X:\sdk\luabind\luabind;X:\sdk\Xiph\Include;X:\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Mixed_Dedicated|Win32'">X:\sdk\Xiph\Libs;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\dplay;X:\src\xrCore;X:\sdk\dxsdk_mar2009\Include;X:\src\xrLua\src;X:\sdk\luabind\luabind;X:\sdk\boost_1_30_0;X:\sdk\Xiph\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\Xiph\Libs;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release_Dedicated|Win32'">X:\sdk\dplay;X:\src\xrCore;X:\sdk\dxsdk_mar2009\Include;X:\sdk\Xiph\Include;X:\src\xrLua\src;X:\sdk\luabind\luabind;X:\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release_Dedicated|Win32'">X:\sdk\Xiph\Libs;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>

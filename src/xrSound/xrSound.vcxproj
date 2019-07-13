@@ -64,6 +64,12 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">x:\binaries\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">true</LinkIncremental>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\Xiph\Include;X:\src\xrCore;X:\sdk\eax\Include;X:\sdk\dxsdk_mar2009\Include;X:\sdk\OpenAL\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\Xiph\Libs;X:\sdk\OpenAL\libs;X:\sdk\eax;X:\libraries;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">X:\sdk\Xiph\Include;X:\src\xrCore;X:\sdk\eax\Include;X:\sdk\OpenAL\Include;X:\sdk\dxsdk_mar2009\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">X:\sdk\Xiph\Libs;X:\sdk\OpenAL\libs;X:\sdk\eax;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\Xiph\Include;X:\src\xrCore;X:\sdk\eax\Include;X:\sdk\OpenAL\Include;X:\sdk\dxsdk_mar2009\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\Xiph\Libs;X:\sdk\OpenAL\libs;X:\sdk\eax;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

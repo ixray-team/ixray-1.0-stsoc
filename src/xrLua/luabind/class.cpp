@@ -35,13 +35,6 @@ void boost::throw_exception	( std::exception const & )
 	abort();
 }
 
-#ifdef NDEBUG
-void std::terminate()
-{
-	abort();
-}
-#endif // #ifdef NDEBUG
-
 namespace luabind { namespace detail {
 
 #ifdef USE_NATIVE_LUA_STRINGS
