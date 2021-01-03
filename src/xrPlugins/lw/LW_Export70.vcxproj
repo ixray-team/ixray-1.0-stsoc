@@ -45,6 +45,10 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\lw\ver-7.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\lw\ver-7.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -74,6 +78,7 @@
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ForceConformanceInForLoopScope>false</ForceConformanceInForLoopScope>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -143,22 +148,22 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Export\bone.cpp" />
-    <ClCompile Include="Export\Envelope.cpp" />
-    <ClCompile Include="Export\interp.cpp" />
-    <ClCompile Include="Export\motion.cpp" />
-    <ClCompile Include="Export\EditMesh.cpp" />
-    <ClCompile Include="Export\EditMeshIO.cpp" />
-    <ClCompile Include="Export\EditMeshModify.cpp" />
-    <ClCompile Include="Export\EditObject.cpp" />
+    <ClCompile Include="..\Shared\bone.cpp" />
+    <ClCompile Include="..\Shared\Envelope.cpp" />
+    <ClCompile Include="..\Shared\interp.cpp" />
+    <ClCompile Include="..\Shared\motion.cpp" />
+    <ClCompile Include="..\Shared\EditMesh.cpp" />
+    <ClCompile Include="..\Shared\EditMeshIO.cpp" />
+    <ClCompile Include="..\Shared\EditMeshModify.cpp" />
+    <ClCompile Include="..\Shared\EditObject.cpp" />
     <ClCompile Include="Export\EditObjectImport.cpp" />
     <ClCompile Include="Export\EditObjectImportDB.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Export\EditObjectIO.cpp" />
-    <ClCompile Include="Export\EditObjectMotions.cpp" />
-    <ClCompile Include="Export\ELog.cpp" />
+    <ClCompile Include="..\Shared\EditObjectIO.cpp" />
+    <ClCompile Include="..\Shared\EditObjectMotions.cpp" />
+    <ClCompile Include="..\Shared\ELog.cpp" />
     <ClCompile Include="Server\servmain.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>

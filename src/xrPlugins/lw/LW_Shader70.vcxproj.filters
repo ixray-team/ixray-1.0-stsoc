@@ -27,16 +27,16 @@
     <ClCompile Include="shader\stdafx.cpp">
       <Filter>Kernel</Filter>
     </ClCompile>
-    <ClCompile Include="shader\GameMtlLib.cpp">
+    <ClCompile Include="..\Shared\GameMtlLib.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="shader\ELog.cpp">
+    <ClCompile Include="..\Shared\ELog.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
     <ClCompile Include="shader\LW_Shader.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="shader\BlenderListLoader.cpp">
+    <ClCompile Include="..\Shared\BlenderListLoader.cpp">
       <Filter>Shared Files\Plugins</Filter>
     </ClCompile>
     <ClCompile Include="Server\servmain.c">
