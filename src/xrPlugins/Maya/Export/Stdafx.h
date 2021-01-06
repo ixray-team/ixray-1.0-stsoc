@@ -71,7 +71,7 @@ typedef TMsgDlgBtn TMsgDlgButtons[mbHelp];
 
 #include "..\..\Shared\ELog.h"
 #include "..\..\Shared\bone.h"
-#include <d3dtypes.h>
+#include <d3d9types.h>
 #include <time.h>
 
 #include <string>

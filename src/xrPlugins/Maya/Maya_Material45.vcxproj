@@ -43,6 +43,10 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bin\release\ver-4.5\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\maya\ver-4.5\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\3d_sdk\maya\ver-4.5\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\maya\ver-4.5\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\3d_sdk\maya\ver-4.5\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -55,7 +59,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\sdk\maya\ver-4.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;NT_PLUGIN;_MAYA_MATERIAL;_MAYA_PLUGIN;XRCORE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;NT_PLUGIN;_MAYA_MATERIAL;_MAYA_PLUGIN;XRCORE_STATIC;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -134,9 +138,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Material\GameMtlLib.cpp" />
-    <ClCompile Include="Material\ELog.cpp" />
-    <ClCompile Include="Material\BlenderListLoader.cpp" />
+    <ClCompile Include="..\Shared\GameMtlLib.cpp" />
+    <ClCompile Include="..\Shared\ELog.cpp" />
+    <ClCompile Include="..\Shared\BlenderListLoader.cpp" />
     <ClCompile Include="Material\crc16.cpp" />
     <ClCompile Include="Material\lambertShader.cpp" />
   </ItemGroup>

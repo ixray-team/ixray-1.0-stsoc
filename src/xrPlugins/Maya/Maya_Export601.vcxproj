@@ -43,6 +43,10 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bin\release\ver-6.0\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\maya\ver-6.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\3d_sdk\maya\ver-6.0\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\maya\ver-6.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\3d_sdk\maya\ver-6.0\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -55,7 +59,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\sdk\maya\ver-6.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;NT_PLUGIN;_MAYA_EXPORT;_MAYA_PLUGIN;XRCORE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;NT_PLUGIN;_MAYA_EXPORT;_MAYA_PLUGIN;XRCORE_STATIC;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -135,17 +139,17 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Export\XRayExport.cpp" />
-    <ClCompile Include="Export\bone.cpp" />
-    <ClCompile Include="Export\Envelope.cpp" />
-    <ClCompile Include="Export\interp.cpp" />
-    <ClCompile Include="Export\motion.cpp" />
-    <ClCompile Include="Export\EditMesh.cpp" />
-    <ClCompile Include="Export\EditMeshIO.cpp" />
-    <ClCompile Include="Export\EditMeshModify.cpp" />
-    <ClCompile Include="Export\EditObject.cpp" />
-    <ClCompile Include="Export\EditObjectIO.cpp" />
-    <ClCompile Include="Export\EditObjectMotions.cpp" />
-    <ClCompile Include="Export\ELog.cpp" />
+    <ClCompile Include="..\Shared\bone.cpp" />
+    <ClCompile Include="..\Shared\Envelope.cpp" />
+    <ClCompile Include="..\Shared\interp.cpp" />
+    <ClCompile Include="..\Shared\motion.cpp" />
+    <ClCompile Include="..\Shared\EditMesh.cpp" />
+    <ClCompile Include="..\Shared\EditMeshIO.cpp" />
+    <ClCompile Include="..\Shared\EditMeshModify.cpp" />
+    <ClCompile Include="..\Shared\EditObject.cpp" />
+    <ClCompile Include="..\Shared\EditObjectIO.cpp" />
+    <ClCompile Include="..\Shared\EditObjectMotions.cpp" />
+    <ClCompile Include="..\Shared\ELog.cpp" />
     <ClCompile Include="Export\ExportDefines.cpp" />
     <ClCompile Include="Export\SmdBone.cpp" />
     <ClCompile Include="Export\SmdMaya.cpp" />

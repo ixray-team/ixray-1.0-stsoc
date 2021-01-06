@@ -30,37 +30,37 @@
     <ClCompile Include="Export\XRayExport.cpp">
       <Filter>Kernel</Filter>
     </ClCompile>
-    <ClCompile Include="Export\bone.cpp">
+    <ClCompile Include="..\Shared\bone.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Export\Envelope.cpp">
+    <ClCompile Include="..\Shared\Envelope.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Export\interp.cpp">
+    <ClCompile Include="..\Shared\interp.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Export\motion.cpp">
+    <ClCompile Include="..\Shared\motion.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Export\EditMesh.cpp">
+    <ClCompile Include="..\Shared\EditMesh.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="Export\EditMeshIO.cpp">
+    <ClCompile Include="..\Shared\EditMeshIO.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="Export\EditMeshModify.cpp">
+    <ClCompile Include="..\Shared\EditMeshModify.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="Export\EditObject.cpp">
+    <ClCompile Include="..\Shared\EditObject.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="Export\EditObjectIO.cpp">
+    <ClCompile Include="..\Shared\EditObjectIO.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="Export\EditObjectMotions.cpp">
+    <ClCompile Include="..\Shared\EditObjectMotions.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="Export\ELog.cpp">
+    <ClCompile Include="..\Shared\ELog.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
     <ClCompile Include="Export\ExportDefines.cpp">

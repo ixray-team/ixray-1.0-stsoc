@@ -24,13 +24,13 @@
     <ClCompile Include="Material\stdafx.cpp">
       <Filter>Kernel</Filter>
     </ClCompile>
-    <ClCompile Include="Material\GameMtlLib.cpp">
+    <ClCompile Include="..\Shared\GameMtlLib.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Material\ELog.cpp">
+    <ClCompile Include="..\Shared\ELog.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="Material\BlenderListLoader.cpp">
+    <ClCompile Include="..\Shared\BlenderListLoader.cpp">
       <Filter>Shared Files\Plugins</Filter>
     </ClCompile>
     <ClCompile Include="Material\crc16.cpp">
