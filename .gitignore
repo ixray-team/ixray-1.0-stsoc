@@ -30,3 +30,8 @@ UpgradeLog*.htm
 # Dependencies
 sdk/dxsdk_mar2009/
 sdk/dplay/
+
+# C++ Builder backups
+*.~bpr
+*.~h
+*.~cpp
