@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Kernel">
-      <UniqueIdentifier>{cc6dba6b-63c8-4c7a-8f4c-5a07348f12e7}</UniqueIdentifier>
+      <UniqueIdentifier>{b8edd3a3-3e3e-4c12-a7cd-ee708f2c3c37}</UniqueIdentifier>
     </Filter>
     <Filter Include="VIPM">
-      <UniqueIdentifier>{6e7019a7-2638-4e53-bdd1-b34e93f321db}</UniqueIdentifier>
+      <UniqueIdentifier>{1f925cb7-7483-4c39-b5e9-e26d654fd3c0}</UniqueIdentifier>
     </Filter>
     <Filter Include="OGG encoder">
-      <UniqueIdentifier>{f3c87775-8c96-4ade-9c21-9af98202d2e9}</UniqueIdentifier>
+      <UniqueIdentifier>{49b977d9-e312-4283-b749-918931f2eca9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="core">
-      <UniqueIdentifier>{d93059f9-dbd8-4d4e-b4c1-e2df448fa141}</UniqueIdentifier>
+      <UniqueIdentifier>{a1cbb59d-2c61-4811-8b05-4f8231bcd504}</UniqueIdentifier>
     </Filter>
     <Filter Include="luabind">
-      <UniqueIdentifier>{6de64276-5731-4cc4-a151-ec801e147b82}</UniqueIdentifier>
+      <UniqueIdentifier>{bdd27ff7-2502-4733-85ea-5c2f4fcf529e}</UniqueIdentifier>
     </Filter>
     <Filter Include="etc">
-      <UniqueIdentifier>{11b5effb-2670-4b34-8d57-f9e23267db27}</UniqueIdentifier>
+      <UniqueIdentifier>{e0555900-2a1b-472b-8332-1662c445548a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

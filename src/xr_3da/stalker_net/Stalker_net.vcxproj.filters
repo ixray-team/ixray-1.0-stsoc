@@ -14,20 +14,20 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
     </Filter>
     <Filter Include="GameSpy.net">
-      <UniqueIdentifier>{387b9ecd-7439-4fd6-b6ce-5da7c649171c}</UniqueIdentifier>
+      <UniqueIdentifier>{bb73dbf0-3561-4e16-a29a-3c6b795b0ba0}</UniqueIdentifier>
     </Filter>
     <Filter Include="GameSpy.net\Common Headers">
-      <UniqueIdentifier>{41b89dac-846c-4b87-b68a-c99825db9f26}</UniqueIdentifier>
+      <UniqueIdentifier>{64e60efc-5259-4713-92b6-b6b025d5475f}</UniqueIdentifier>
     </Filter>
     <Filter Include="GameSpy.net\Common Sources">
-      <UniqueIdentifier>{ceac90de-0320-4743-ba0a-506d86b82992}</UniqueIdentifier>
+      <UniqueIdentifier>{a158f237-8a3f-4e00-beb1-911b62d51309}</UniqueIdentifier>
     </Filter>
     <Filter Include="GameSpy.net\SB Sources">
-      <UniqueIdentifier>{54342aeb-0ba5-4616-ac30-c3767ba4bcdd}</UniqueIdentifier>
+      <UniqueIdentifier>{6a2d5d3b-c9f6-46eb-94bd-d2e8747ee14d}</UniqueIdentifier>
       <Extensions>*.c</Extensions>
     </Filter>
     <Filter Include="GameSpy.net\SB Headers">
-      <UniqueIdentifier>{8d04fe5f-bad5-4b1e-9593-9a8865d5eb4d}</UniqueIdentifier>
+      <UniqueIdentifier>{92d3b290-bf3b-42b4-91a1-0e1a757b0085}</UniqueIdentifier>
       <Extensions>*.h</Extensions>
     </Filter>
   </ItemGroup>
@@ -276,36 +276,33 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\icon1.ico">
+    <Image Include="res\icon1.ico">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\IconList.bmp">
+    </Image>
+    <Image Include="res\IconList.bmp">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\IconList16.bmp">
+    </Image>
+    <Image Include="res\IconList16.bmp">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\IconList24.bmp">
+    </Image>
+    <Image Include="res\IconList24.bmp">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\IconList32.bmp">
+    </Image>
+    <Image Include="res\IconList32.bmp">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\idr_main.ico">
+    </Image>
+    <Image Include="res\idr_main.ico">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\powered_by_gamespy_web_130x30.bmp">
+    </Image>
+    <Image Include="res\powered_by_gamespy_web_130x30.bmp">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\powered_by_gamespy_web_261x50.bmp">
+    </Image>
+    <Image Include="res\powered_by_gamespy_web_261x50.bmp">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\Stalker_net.ico">
+    </Image>
+    <Image Include="res\Stalker_net.ico">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\Stalker_net.rc2">
-      <Filter>Resource Files</Filter>
-    </None>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Stalker_net.rc">
@@ -313,6 +310,11 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuildStep Include="res\Stalker_net.manifest" />
+    <None Include="res\Stalker_net.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="res\Stalker_net.manifest" />
   </ItemGroup>
 </Project>

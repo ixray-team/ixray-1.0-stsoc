@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -21,15 +21,18 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -49,23 +52,23 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\binaries\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\binaries\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">x:\binaries\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">true</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\dplay;X:\src\xrCore;X:\sdk\dxsdk_mar2009\Include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">X:\sdk\dplay;X:\src\xrCore;X:\sdk\dxsdk_mar2009\Include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\dplay;X:\src\xrCore;X:\sdk\dxsdk_mar2009\Include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>x:\binaries\</OutDir>
+    <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>x:\binaries\</OutDir>
+    <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
+    <OutDir>x:\binaries\</OutDir>
+    <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -93,8 +96,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
-      <MapFileName>
-      </MapFileName>
+      <MapFileName />
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
       <ImportLibrary>x:\libraries\$(ProjectName).lib</ImportLibrary>
@@ -112,8 +114,7 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;XRRENDER_R2_EXPORTS;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <ExceptionHandling>
-      </ExceptionHandling>
+      <ExceptionHandling />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>false</FunctionLevelLinking>
@@ -123,8 +124,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerOutput>
-      </AssemblerOutput>
+      <AssemblerOutput />
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
@@ -135,8 +135,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(ProjectName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>false</GenerateMapFile>
-      <MapFileName>
-      </MapFileName>
+      <MapFileName />
       <SubSystem>NotSet</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
       <OptimizeReferences>true</OptimizeReferences>
@@ -164,8 +163,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerOutput>
-      </AssemblerOutput>
+      <AssemblerOutput />
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
@@ -183,41 +181,49 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="cl_intersect.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="..\xrRender\xrRender_console.h" />
+    <ClInclude Include="..\xrRender\Blender_BmmD.h" />
+    <ClInclude Include="..\xrRender\Blender_detail_still.h" />
+    <ClInclude Include="..\xrRender\Blender_Editor_Selection.h" />
+    <ClInclude Include="..\xrRender\Blender_Editor_Wire.h" />
+    <ClInclude Include="..\xrRender\Blender_Lm(EbB).h" />
+    <ClInclude Include="..\xrRender\Blender_Model_EbB.h" />
+    <ClInclude Include="..\xrRender\Blender_Particle.h" />
+    <ClInclude Include="..\xrRender\Blender_Screen_SET.h" />
+    <ClInclude Include="..\xrRender\Blender_tree.h" />
+    <ClInclude Include="..\xrRender\DetailManager.h" />
+    <ClInclude Include="..\xrRender\DetailModel.h" />
+    <ClInclude Include="..\xrRender\FLOD.h" />
+    <ClInclude Include="..\xrRender\FProgressive.h" />
+    <ClInclude Include="..\xrRender\FSkinned.h" />
+    <ClInclude Include="..\xrRender\FTreeVisual.h" />
+    <ClInclude Include="..\xrRender\FVisual.h" />
+    <ClInclude Include="..\xrRender\HOM.h" />
+    <ClInclude Include="..\xrRender\LightTrack.h" />
+    <ClInclude Include="..\xrRender\Light_DB.h" />
+    <ClInclude Include="..\xrRender\Light_Package.h" />
+    <ClInclude Include="..\xrRender\ModelPool.h" />
+    <ClInclude Include="..\xrRender\NvTriStrip.h" />
+    <ClInclude Include="..\xrRender\NvTriStripObjects.h" />
+    <ClInclude Include="..\xrRender\occRasterizer.h" />
+    <ClInclude Include="..\xrRender\ParticleEffect.h" />
+    <ClInclude Include="..\xrRender\ParticleEffectDef.h" />
+    <ClInclude Include="..\xrRender\ParticleGroup.h" />
     <ClInclude Include="..\xrRender\PSLibrary.h" />
-    <ClInclude Include="r2.h" />
-    <ClInclude Include="r2_types.h" />
     <ClInclude Include="..\xrRender\r__dsgraph_structure.h" />
     <ClInclude Include="..\xrRender\r__dsgraph_types.h" />
     <ClInclude Include="..\xrRender\r__occlusion.h" />
     <ClInclude Include="..\xrRender\r__pixel_calculator.h" />
-    <ClInclude Include="doug_lea_memory_allocator.h" />
-    <ClInclude Include="DetailFormat.h" />
-    <ClInclude Include="..\xrRender\DetailManager.h" />
-    <ClInclude Include="..\xrRender\DetailModel.h" />
-    <ClInclude Include="..\xrRender\NvTriStrip.h" />
-    <ClInclude Include="..\xrRender\NvTriStripObjects.h" />
+    <ClInclude Include="..\xrRender\r__sector.h" />
+    <ClInclude Include="..\xrRender\uber_deffer.h" />
     <ClInclude Include="..\xrRender\VertexCache.h" />
-    <ClInclude Include="..\xrRender\xrStripify.h" />
-    <ClInclude Include="light.h" />
-    <ClInclude Include="..\xrRender\Light_DB.h" />
-    <ClInclude Include="light_gi.h" />
-    <ClInclude Include="..\xrRender\Light_Package.h" />
-    <ClInclude Include="Light_Render_Direct.h" />
-    <ClInclude Include="light_smapvis.h" />
-    <ClInclude Include="..\xrRender\LightTrack.h" />
-    <ClInclude Include="SMAP_Allocator.h" />
     <ClInclude Include="..\xrRender\WallmarksEngine.h" />
+    <ClInclude Include="..\xrRender\xrRender_console.h" />
+    <ClInclude Include="..\xrRender\xrStripify.h" />
     <ClInclude Include="blender_bloom_build.h" />
-    <ClInclude Include="..\xrRender\Blender_BmmD.h" />
     <ClInclude Include="blender_combine.h" />
     <ClInclude Include="blender_deffer_aref.h" />
     <ClInclude Include="blender_deffer_flat.h" />
     <ClInclude Include="blender_deffer_model.h" />
-    <ClInclude Include="..\xrRender\Blender_Editor_Selection.h" />
-    <ClInclude Include="..\xrRender\Blender_Editor_Wire.h" />
     <ClInclude Include="blender_light_direct.h" />
     <ClInclude Include="blender_light_mask.h" />
     <ClInclude Include="blender_light_occq.h" />
@@ -225,55 +231,37 @@
     <ClInclude Include="blender_light_reflected.h" />
     <ClInclude Include="blender_light_spot.h" />
     <ClInclude Include="blender_luminance.h" />
-    <ClInclude Include="..\xrRender\Blender_Particle.h" />
-    <ClInclude Include="..\xrRender\uber_deffer.h" />
-    <ClInclude Include="..\xrRender\Blender_detail_still.h" />
-    <ClInclude Include="..\xrRender\Blender_Lm(EbB).h" />
-    <ClInclude Include="..\xrRender\Blender_Model_EbB.h" />
-    <ClInclude Include="..\xrRender\Blender_Screen_SET.h" />
-    <ClInclude Include="..\xrRender\Blender_tree.h" />
-    <ClInclude Include="..\xrRender\ModelPool.h" />
-    <ClInclude Include="..\xrRender\FLOD.h" />
-    <ClInclude Include="..\xrRender\FProgressive.h" />
-    <ClInclude Include="..\xrRender\FSkinned.h" />
-    <ClInclude Include="..\xrRender\FTreeVisual.h" />
-    <ClInclude Include="..\xrRender\FVisual.h" />
-    <ClInclude Include="..\xrRender\ParticleEffect.h" />
-    <ClInclude Include="..\xrRender\ParticleEffectDef.h" />
-    <ClInclude Include="..\xrRender\ParticleGroup.h" />
-    <ClInclude Include="..\xrRender\r__sector.h" />
-    <ClInclude Include="..\xrRender\HOM.h" />
-    <ClInclude Include="..\xrRender\occRasterizer.h" />
+    <ClInclude Include="cl_intersect.h" />
+    <ClInclude Include="DetailFormat.h" />
+    <ClInclude Include="doug_lea_memory_allocator.h" />
     <ClInclude Include="du_sphere_part.h" />
+    <ClInclude Include="light.h" />
+    <ClInclude Include="light_gi.h" />
+    <ClInclude Include="Light_Render_Direct.h" />
+    <ClInclude Include="light_smapvis.h" />
+    <ClInclude Include="r2.h" />
     <ClInclude Include="r2_rendertarget.h" />
     <ClInclude Include="r2_rendertarget_wallmarks.h" />
+    <ClInclude Include="r2_types.h" />
+    <ClInclude Include="SMAP_Allocator.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\xrRender\xrRender_console.cpp" />
-    <ClCompile Include="xrRender_R2.cpp" />
-    <ClCompile Include="..\xrRender\PSLibrary.cpp" />
-    <ClCompile Include="r2.cpp" />
-    <ClCompile Include="r2_blenders.cpp" />
-    <ClCompile Include="r2_loader.cpp" />
-    <ClCompile Include="r2_R_calculate.cpp" />
-    <ClCompile Include="r2_R_lights.cpp" />
-    <ClCompile Include="r2_R_render.cpp" />
-    <ClCompile Include="r2_R_sun.cpp" />
-    <ClCompile Include="r2_sector_detect.cpp" />
-    <ClCompile Include="r2_test_hw.cpp" />
-    <ClCompile Include="..\xrRender\r__dsgraph_build.cpp" />
-    <ClCompile Include="..\xrRender\r__dsgraph_render.cpp" />
-    <ClCompile Include="..\xrRender\r__dsgraph_render_lods.cpp" />
-    <ClCompile Include="..\xrRender\r__occlusion.cpp" />
-    <ClCompile Include="..\xrRender\r__pixel_calculator.cpp" />
-    <ClCompile Include="..\xrRender\r__screenshot.cpp" />
-    <ClCompile Include="..\xrRender\Texture.cpp" />
-    <ClCompile Include="..\xrRender\tga.cpp" />
+    <ClCompile Include="..\xrRender\Blender_BmmD.cpp" />
+    <ClCompile Include="..\xrRender\Blender_detail_still.cpp" />
+    <ClCompile Include="..\xrRender\Blender_Editor_Selection.cpp" />
+    <ClCompile Include="..\xrRender\Blender_Editor_Wire.cpp" />
+    <ClCompile Include="..\xrRender\Blender_Lm(EbB).cpp" />
+    <ClCompile Include="..\xrRender\Blender_Model_EbB.cpp" />
+    <ClCompile Include="..\xrRender\Blender_Particle.cpp" />
+    <ClCompile Include="..\xrRender\Blender_Screen_SET.cpp" />
+    <ClCompile Include="..\xrRender\Blender_tree.cpp" />
+    <ClCompile Include="..\xrRender\DetailManager.cpp" />
+    <ClCompile Include="..\xrRender\DetailManager_CACHE.cpp" />
+    <ClCompile Include="..\xrRender\DetailManager_Decompress.cpp" />
+    <ClCompile Include="..\xrRender\DetailManager_soft.cpp" />
+    <ClCompile Include="..\xrRender\DetailManager_VS.cpp" />
+    <ClCompile Include="..\xrRender\DetailModel.cpp" />
     <ClCompile Include="..\xrRender\doug_lea_memory_allocator.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
@@ -285,34 +273,45 @@
       </PrecompiledHeader>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level2</WarningLevel>
     </ClCompile>
-    <ClCompile Include="..\xrRender\DetailManager.cpp" />
-    <ClCompile Include="..\xrRender\DetailManager_CACHE.cpp" />
-    <ClCompile Include="..\xrRender\DetailManager_Decompress.cpp" />
-    <ClCompile Include="..\xrRender\DetailManager_soft.cpp" />
-    <ClCompile Include="..\xrRender\DetailManager_VS.cpp" />
-    <ClCompile Include="..\xrRender\DetailModel.cpp" />
+    <ClCompile Include="..\xrRender\FLOD.cpp" />
+    <ClCompile Include="..\xrRender\FProgressive.cpp" />
+    <ClCompile Include="..\xrRender\FSkinned.cpp" />
+    <ClCompile Include="..\xrRender\FTreeVisual.cpp" />
+    <ClCompile Include="..\xrRender\FVisual.cpp" />
+    <ClCompile Include="..\xrRender\HOM.cpp" />
+    <ClCompile Include="..\xrRender\light.cpp" />
+    <ClCompile Include="..\xrRender\LightTrack.cpp" />
+    <ClCompile Include="..\xrRender\Light_DB.cpp" />
+    <ClCompile Include="..\xrRender\Light_Package.cpp" />
+    <ClCompile Include="..\xrRender\ModelPool.cpp" />
     <ClCompile Include="..\xrRender\NvTriStrip.cpp" />
     <ClCompile Include="..\xrRender\NvTriStripObjects.cpp" />
+    <ClCompile Include="..\xrRender\occRasterizer.cpp" />
+    <ClCompile Include="..\xrRender\occRasterizer_core.cpp" />
+    <ClCompile Include="..\xrRender\ParticleEffect.cpp" />
+    <ClCompile Include="..\xrRender\ParticleEffectDef.cpp" />
+    <ClCompile Include="..\xrRender\ParticleGroup.cpp" />
+    <ClCompile Include="..\xrRender\PSLibrary.cpp" />
+    <ClCompile Include="..\xrRender\r__dsgraph_build.cpp" />
+    <ClCompile Include="..\xrRender\r__dsgraph_render.cpp" />
+    <ClCompile Include="..\xrRender\r__dsgraph_render_lods.cpp" />
+    <ClCompile Include="..\xrRender\r__occlusion.cpp" />
+    <ClCompile Include="..\xrRender\r__pixel_calculator.cpp" />
+    <ClCompile Include="..\xrRender\r__screenshot.cpp" />
+    <ClCompile Include="..\xrRender\r__sector.cpp" />
+    <ClCompile Include="..\xrRender\r__sector_traversal.cpp" />
+    <ClCompile Include="..\xrRender\Texture.cpp" />
+    <ClCompile Include="..\xrRender\tga.cpp" />
+    <ClCompile Include="..\xrRender\uber_deffer.cpp" />
     <ClCompile Include="..\xrRender\VertexCache.cpp" />
-    <ClCompile Include="..\xrRender\xrStripify.cpp" />
-    <ClCompile Include="..\xrRender\light.cpp" />
-    <ClCompile Include="..\xrRender\Light_DB.cpp" />
-    <ClCompile Include="light_GI.cpp" />
-    <ClCompile Include="..\xrRender\Light_Package.cpp" />
-    <ClCompile Include="Light_Render_Direct.cpp" />
-    <ClCompile Include="Light_Render_Direct_ComputeXFS.cpp" />
-    <ClCompile Include="light_smapvis.cpp" />
-    <ClCompile Include="light_vis.cpp" />
-    <ClCompile Include="..\xrRender\LightTrack.cpp" />
     <ClCompile Include="..\xrRender\WallmarksEngine.cpp" />
+    <ClCompile Include="..\xrRender\xrRender_console.cpp" />
+    <ClCompile Include="..\xrRender\xrStripify.cpp" />
     <ClCompile Include="blender_bloom_build.cpp" />
-    <ClCompile Include="..\xrRender\Blender_BmmD.cpp" />
     <ClCompile Include="blender_combine.cpp" />
     <ClCompile Include="blender_deffer_aref.cpp" />
     <ClCompile Include="blender_deffer_flat.cpp" />
     <ClCompile Include="blender_deffer_model.cpp" />
-    <ClCompile Include="..\xrRender\Blender_Editor_Selection.cpp" />
-    <ClCompile Include="..\xrRender\Blender_Editor_Wire.cpp" />
     <ClCompile Include="blender_light_direct.cpp" />
     <ClCompile Include="blender_light_mask.cpp" />
     <ClCompile Include="blender_light_occq.cpp" />
@@ -320,28 +319,15 @@
     <ClCompile Include="blender_light_reflected.cpp" />
     <ClCompile Include="blender_light_spot.cpp" />
     <ClCompile Include="blender_luminance.cpp" />
-    <ClCompile Include="..\xrRender\Blender_Particle.cpp" />
-    <ClCompile Include="..\xrRender\uber_deffer.cpp" />
-    <ClCompile Include="..\xrRender\Blender_detail_still.cpp" />
-    <ClCompile Include="..\xrRender\Blender_Lm(EbB).cpp" />
-    <ClCompile Include="..\xrRender\Blender_Model_EbB.cpp" />
-    <ClCompile Include="..\xrRender\Blender_Screen_SET.cpp" />
-    <ClCompile Include="..\xrRender\Blender_tree.cpp" />
-    <ClCompile Include="..\xrRender\ModelPool.cpp" />
-    <ClCompile Include="..\xrRender\FLOD.cpp" />
-    <ClCompile Include="..\xrRender\FProgressive.cpp" />
-    <ClCompile Include="..\xrRender\FSkinned.cpp" />
-    <ClCompile Include="..\xrRender\FTreeVisual.cpp" />
-    <ClCompile Include="..\xrRender\FVisual.cpp" />
-    <ClCompile Include="..\xrRender\ParticleEffect.cpp" />
-    <ClCompile Include="..\xrRender\ParticleEffectDef.cpp" />
-    <ClCompile Include="..\xrRender\ParticleGroup.cpp" />
-    <ClCompile Include="..\xrRender\r__sector.cpp" />
-    <ClCompile Include="..\xrRender\r__sector_traversal.cpp" />
-    <ClCompile Include="..\xrRender\HOM.cpp" />
-    <ClCompile Include="..\xrRender\occRasterizer.cpp" />
-    <ClCompile Include="..\xrRender\occRasterizer_core.cpp" />
     <ClCompile Include="du_sphere_part.cpp" />
+    <ClCompile Include="light_GI.cpp" />
+    <ClCompile Include="Light_Render_Direct.cpp" />
+    <ClCompile Include="Light_Render_Direct_ComputeXFS.cpp" />
+    <ClCompile Include="light_smapvis.cpp" />
+    <ClCompile Include="light_vis.cpp" />
+    <ClCompile Include="r2.cpp" />
+    <ClCompile Include="r2_blenders.cpp" />
+    <ClCompile Include="r2_loader.cpp" />
     <ClCompile Include="r2_rendertarget.cpp">
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AssemblyAndSourceCode</AssemblerOutput>
     </ClCompile>
@@ -363,9 +349,21 @@
     <ClCompile Include="r2_rendertarget_phase_scene.cpp" />
     <ClCompile Include="r2_rendertarget_phase_smap_D.cpp" />
     <ClCompile Include="r2_rendertarget_phase_smap_S.cpp" />
+    <ClCompile Include="r2_R_calculate.cpp" />
+    <ClCompile Include="r2_R_lights.cpp" />
+    <ClCompile Include="r2_R_render.cpp" />
+    <ClCompile Include="r2_R_sun.cpp" />
+    <ClCompile Include="r2_sector_detect.cpp" />
+    <ClCompile Include="r2_test_hw.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="xrRender_R2.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="todo.txt" />
+    <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\xrCDB\xrCDB.vcxproj">

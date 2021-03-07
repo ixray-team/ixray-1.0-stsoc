@@ -2,16 +2,16 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Kernel">
-      <UniqueIdentifier>{2af4f627-ca4f-4518-b3d0-38168b547528}</UniqueIdentifier>
+      <UniqueIdentifier>{e93ae971-7a6f-4387-b1c6-4f687f6ebf37}</UniqueIdentifier>
     </Filter>
     <Filter Include="3DNow!">
-      <UniqueIdentifier>{2b2e4a90-3777-4a16-98b2-f4b5ad1067c8}</UniqueIdentifier>
+      <UniqueIdentifier>{638f29c3-761b-461d-873b-5a5835bb0e0d}</UniqueIdentifier>
     </Filter>
     <Filter Include="SSE">
-      <UniqueIdentifier>{c8dc29c9-88b3-4c54-aa00-a6eb2b242374}</UniqueIdentifier>
+      <UniqueIdentifier>{3ebd894b-94aa-47e2-85d7-0f4f6086718f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Generic x86">
-      <UniqueIdentifier>{e2ccc7dd-f02f-4783-ac3b-aacc79816672}</UniqueIdentifier>
+      <UniqueIdentifier>{8d991254-83a3-4281-b10d-2188fd5f0cbf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Statistic">
-      <UniqueIdentifier>{4d72315b-b0a0-4507-ac7b-e9c9899370b7}</UniqueIdentifier>
+      <UniqueIdentifier>{2e06293a-3008-444d-b82f-117d6eb7bb93}</UniqueIdentifier>
     </Filter>
     <Filter Include="Base">
-      <UniqueIdentifier>{2fdbdc50-7a72-438a-acff-db65eaa4a7e5}</UniqueIdentifier>
+      <UniqueIdentifier>{95cad98c-a8c1-4533-a7f4-06de5bcd0de9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

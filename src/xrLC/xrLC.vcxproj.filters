@@ -2,49 +2,49 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Kernel">
-      <UniqueIdentifier>{fdf3424a-443c-4b25-8fcb-9fd751374c16}</UniqueIdentifier>
+      <UniqueIdentifier>{5d30b7d3-1a31-42a0-b837-27eb85cd21cd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Kernel\Res">
-      <UniqueIdentifier>{6c5465dd-f10b-4ace-a68c-67c019ff0d15}</UniqueIdentifier>
+      <UniqueIdentifier>{eedf2030-b154-41a0-b706-7d5885e542d1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Kernel\Log">
-      <UniqueIdentifier>{006562cd-af23-4c4a-b532-44bc9f8badd8}</UniqueIdentifier>
+      <UniqueIdentifier>{c899d6ad-a3cc-4127-a929-15927762e714}</UniqueIdentifier>
     </Filter>
     <Filter Include="CDB">
-      <UniqueIdentifier>{26426f4b-5192-426d-81a7-6c8b2b1f2820}</UniqueIdentifier>
+      <UniqueIdentifier>{dd6420df-7693-4b90-adc7-0c18e62c5174}</UniqueIdentifier>
     </Filter>
     <Filter Include="External">
-      <UniqueIdentifier>{d6d13bd6-9b09-4698-a0e3-6d7699bd5871}</UniqueIdentifier>
+      <UniqueIdentifier>{f6e4e9a2-0be7-4784-aee8-6529054fcc0c}</UniqueIdentifier>
     </Filter>
     <Filter Include="External\NV_Strips">
-      <UniqueIdentifier>{30624f65-c247-42e2-8b41-38bed05f5456}</UniqueIdentifier>
+      <UniqueIdentifier>{b1b9aebb-f2a2-47b7-a073-9f8b6553fec4}</UniqueIdentifier>
     </Filter>
     <Filter Include="External\NV_Basis">
-      <UniqueIdentifier>{f8b1ed9e-73d0-4ef7-8fe9-59459c0ddd6e}</UniqueIdentifier>
+      <UniqueIdentifier>{7bf0add7-57ec-403c-804d-3129a8583f67}</UniqueIdentifier>
     </Filter>
     <Filter Include="- OLD -">
-      <UniqueIdentifier>{374ef01b-e165-4373-9e25-f20db42f9731}</UniqueIdentifier>
+      <UniqueIdentifier>{aa50b45a-2f09-4216-a3d1-8a53f7125a30}</UniqueIdentifier>
     </Filter>
     <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a">
-      <UniqueIdentifier>{4f986051-ac6d-44ad-9292-12ffbfddc4b9}</UniqueIdentifier>
+      <UniqueIdentifier>{fa56bd34-63c2-472a-b232-8faee4720c51}</UniqueIdentifier>
     </Filter>
     <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a\Deflector">
-      <UniqueIdentifier>{d7ce4c2c-5310-4a3f-8582-1f6ef27d28f5}</UniqueIdentifier>
+      <UniqueIdentifier>{fb27791c-37d2-4c66-8774-f65c757b535a}</UniqueIdentifier>
     </Filter>
     <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a\XRAY">
-      <UniqueIdentifier>{c656f6b9-5c5a-4fdf-a5e8-2887699f9560}</UniqueIdentifier>
+      <UniqueIdentifier>{f53e20c1-a4cc-4227-92a2-9321c5574630}</UniqueIdentifier>
     </Filter>
     <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a\Internal">
-      <UniqueIdentifier>{88c30ec4-304f-4b12-8421-c4622829e464}</UniqueIdentifier>
+      <UniqueIdentifier>{48ca4efe-99d4-499c-8d6d-60a5d245f2af}</UniqueIdentifier>
     </Filter>
     <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a\Internal\Targa">
-      <UniqueIdentifier>{39afd6ec-08c7-4b19-96fd-1a0b15d1feca}</UniqueIdentifier>
+      <UniqueIdentifier>{f00d53d9-9327-41af-afe5-a2a3f25d1125}</UniqueIdentifier>
     </Filter>
     <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a\Internal\Targa\ILoader">
-      <UniqueIdentifier>{1e72e5e5-f638-42f5-891d-e5369d216e82}</UniqueIdentifier>
+      <UniqueIdentifier>{02dc7158-4374-4cd6-bb66-84568107da70}</UniqueIdentifier>
     </Filter>
     <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a\Model">
-      <UniqueIdentifier>{ee0571bf-c37d-4197-991a-0e1b946ebf81}</UniqueIdentifier>
+      <UniqueIdentifier>{1efbac8e-7a33-403b-abb4-ffe6795b0210}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

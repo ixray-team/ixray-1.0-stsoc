@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Convert">
-      <UniqueIdentifier>{2fe1010b-8663-4a83-8fd9-f2a1e0770da0}</UniqueIdentifier>
+      <UniqueIdentifier>{02d842b4-138b-43ee-9015-6da30a556292}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared">
-      <UniqueIdentifier>{6a5b8f6c-5284-4749-94d3-1cf3aa18478b}</UniqueIdentifier>
+      <UniqueIdentifier>{81b001e0-9ede-4db7-ab84-06223f60afbc}</UniqueIdentifier>
     </Filter>
     <Filter Include="NormalMap">
-      <UniqueIdentifier>{d647abcf-53bf-4237-a914-1a0854b9bb3c}</UniqueIdentifier>
+      <UniqueIdentifier>{3b3da4b1-5aab-4b3c-88e9-70e7c8b4baa7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +84,6 @@
     </Library>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
+    <Text Include="ReadMe.txt" />
   </ItemGroup>
 </Project>
