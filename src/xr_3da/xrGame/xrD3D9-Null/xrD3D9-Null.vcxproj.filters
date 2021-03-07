@@ -14,40 +14,40 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
     </Filter>
     <Filter Include="IDirect3D9">
-      <UniqueIdentifier>{addeb9da-233f-4069-9edc-9f2b3593f181}</UniqueIdentifier>
+      <UniqueIdentifier>{4e5c9221-0685-4054-8327-f4451534acd2}</UniqueIdentifier>
     </Filter>
     <Filter Include="IDirect3DDevice9">
-      <UniqueIdentifier>{dd78c528-0e51-431d-a345-5c0d4f25f8d5}</UniqueIdentifier>
+      <UniqueIdentifier>{471d7e45-2154-4928-b337-b70aa8dffe10}</UniqueIdentifier>
     </Filter>
     <Filter Include="IDirect3DQuery9">
-      <UniqueIdentifier>{8ee1aef6-30fe-463b-95ae-825c3c40b94f}</UniqueIdentifier>
+      <UniqueIdentifier>{2245b8f0-c3d1-428b-9296-74feb61a1a62}</UniqueIdentifier>
     </Filter>
     <Filter Include="IDirect3DSurface9">
-      <UniqueIdentifier>{4e42a53a-33fb-4e61-be95-5921208b1e37}</UniqueIdentifier>
+      <UniqueIdentifier>{a4b20d9b-3008-4c34-a833-a35fafdc95e9}</UniqueIdentifier>
     </Filter>
     <Filter Include="IDirect3DIndexBuffer9">
-      <UniqueIdentifier>{a4e6f750-093a-47c1-84b5-0038fd5a224b}</UniqueIdentifier>
+      <UniqueIdentifier>{071e5ad9-7311-4c0f-bd69-29b40461c111}</UniqueIdentifier>
     </Filter>
     <Filter Include="IDirect3DVertexBuffer9">
-      <UniqueIdentifier>{0ea01675-5b86-4c2b-ae0e-79870328982c}</UniqueIdentifier>
+      <UniqueIdentifier>{a54f87b1-a7db-4226-aeae-7c18edc0585d}</UniqueIdentifier>
     </Filter>
     <Filter Include="IDirect3DTexture9">
-      <UniqueIdentifier>{ea249393-2107-4968-9223-a520814e6189}</UniqueIdentifier>
+      <UniqueIdentifier>{4078fec6-2ef6-4ae7-9aee-60507d81da53}</UniqueIdentifier>
     </Filter>
     <Filter Include="IDirect3DVertexDeclaration9">
-      <UniqueIdentifier>{4200e526-c4e2-4479-b11b-28e7ad62f5f9}</UniqueIdentifier>
+      <UniqueIdentifier>{a12a047b-be96-410d-81b5-195ec5eb100a}</UniqueIdentifier>
     </Filter>
     <Filter Include="IDirect3DVertexShader9">
-      <UniqueIdentifier>{2942488a-6f17-4b88-8f97-044b08b43115}</UniqueIdentifier>
+      <UniqueIdentifier>{e5a07a12-763c-40b6-a497-0dd74004a63d}</UniqueIdentifier>
     </Filter>
     <Filter Include="IDirect3DPixelShader9">
-      <UniqueIdentifier>{7f0f8c84-fa0b-400b-a5dd-96634632a984}</UniqueIdentifier>
+      <UniqueIdentifier>{2c2d1439-4227-4e8a-bb68-6c0568cab5c8}</UniqueIdentifier>
     </Filter>
     <Filter Include="IDirect3DStateBlock9">
-      <UniqueIdentifier>{ce6392e7-3209-4894-9a4d-46a4b886e008}</UniqueIdentifier>
+      <UniqueIdentifier>{4c110dd4-9af4-4e9f-af50-d27b0875e45c}</UniqueIdentifier>
     </Filter>
     <Filter Include="IDirect3DCubeTexture9">
-      <UniqueIdentifier>{97189eca-6d79-4d13-b52c-8f33169e5054}</UniqueIdentifier>
+      <UniqueIdentifier>{6ad0fa03-08f3-4c1c-9560-dc6476bebf1c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -104,7 +104,6 @@
     <None Include="xrD3D9-Null.def">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -152,5 +151,8 @@
     <ClInclude Include="IDirect3DCubeTexture9.h">
       <Filter>IDirect3DCubeTexture9</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
   </ItemGroup>
 </Project>

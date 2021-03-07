@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,16 +22,19 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -51,21 +54,23 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\binaries\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">x:\binaries\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\binaries\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\loki;X:\src\xrLua\src;X:\src\xrCore;X:\sdk\luabind\luabind;X:\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\libraries;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">X:\sdk\loki;X:\src\xrLua\src;X:\src\xrCore;X:\sdk\luabind\luabind;X:\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\loki;X:\src\xrCore;X:\src\xrLua\src;X:\sdk\luabind\luabind;X:\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>x:\binaries\</OutDir>
+    <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
+    <OutDir>x:\binaries\</OutDir>
+    <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>x:\binaries\</OutDir>
+    <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -97,8 +102,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
-      <MapFileName>
-      </MapFileName>
+      <MapFileName />
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
       <ImportLibrary>x:\libraries\$(ProjectName).lib</ImportLibrary>
@@ -134,13 +138,11 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerOutput>
-      </AssemblerOutput>
+      <AssemblerOutput />
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>
-      </BrowseInformation>
+      <BrowseInformation />
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -171,8 +173,7 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;XRSE_FACTORY_EXPORTS;LUABIND_NO_ERROR_CHECKING;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <ExceptionHandling>
-      </ExceptionHandling>
+      <ExceptionHandling />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>false</FunctionLevelLinking>
@@ -193,8 +194,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(ProjectName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>false</GenerateMapFile>
-      <MapFileName>
-      </MapFileName>
+      <MapFileName />
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
       <OptimizeReferences>true</OptimizeReferences>
@@ -205,31 +205,46 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DrawUtils.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="xr_LuaAllocator.h" />
-    <ClInclude Include="xrSE_Factory.h" />
-    <ClInclude Include="xrSE_Factory_import_export.h" />
-    <ClInclude Include="defines.h" />
-    <ClInclude Include="FastDelegate.h" />
-    <ClInclude Include="xrLevel.h" />
-    <ClInclude Include="restriction_space.h" />
     <ClInclude Include="ai_sounds.h" />
     <ClInclude Include="ai_space.h" />
     <ClInclude Include="ai_space_inline.h" />
+    <ClInclude Include="alife_artefact_order.h" />
+    <ClInclude Include="alife_human_brain.h" />
+    <ClInclude Include="alife_human_brain_inline.h" />
+    <ClInclude Include="alife_monster_brain.h" />
+    <ClInclude Include="alife_monster_brain_inline.h" />
+    <ClInclude Include="alife_space.h" />
+    <ClInclude Include="associative_vector.h" />
+    <ClInclude Include="associative_vector_compare_predicate.h" />
+    <ClInclude Include="associative_vector_compare_predicate_inline.h" />
+    <ClInclude Include="associative_vector_inline.h" />
+    <ClInclude Include="bone.h" />
+    <ClInclude Include="character_info.h" />
+    <ClInclude Include="character_info_defs.h" />
+    <ClInclude Include="ChooseTypes.h" />
+    <ClInclude Include="client_id.h" />
+    <ClInclude Include="clsid_game.h" />
+    <ClInclude Include="defines.h" />
+    <ClInclude Include="doug_lea_memory_allocator.h" />
+    <ClInclude Include="DrawUtils.h" />
+    <ClInclude Include="FastDelegate.h" />
+    <ClInclude Include="game_base_space.h" />
+    <ClInclude Include="game_graph_space.h" />
+    <ClInclude Include="InfoPortionDefs.h" />
+    <ClInclude Include="inventory_space.h" />
+    <ClInclude Include="ItemListTypes.h" />
+    <ClInclude Include="mslotutils.h" />
+    <ClInclude Include="NET_Compressor.h" />
+    <ClInclude Include="NET_utils.h" />
     <ClInclude Include="object_broker.h" />
     <ClInclude Include="object_cloner.h" />
     <ClInclude Include="object_comparer.h" />
     <ClInclude Include="object_destroyer.h" />
-    <ClInclude Include="object_interfaces.h" />
-    <ClInclude Include="object_loader.h" />
-    <ClInclude Include="object_saver.h" />
-    <ClInclude Include="object_type_traits.h" />
-    <ClInclude Include="clsid_game.h" />
     <ClInclude Include="object_factory.h" />
     <ClInclude Include="object_factory_impl.h" />
     <ClInclude Include="object_factory_inline.h" />
     <ClInclude Include="object_factory_space.h" />
+    <ClInclude Include="object_interfaces.h" />
     <ClInclude Include="object_item_abstract.h" />
     <ClInclude Include="object_item_abstract_inline.h" />
     <ClInclude Include="object_item_client_server.h" />
@@ -238,153 +253,93 @@
     <ClInclude Include="object_item_script_inline.h" />
     <ClInclude Include="object_item_single.h" />
     <ClInclude Include="object_item_single_inline.h" />
-    <ClInclude Include="smart_cast.h" />
-    <ClInclude Include="smart_cast_impl0.h" />
-    <ClInclude Include="smart_cast_impl1.h" />
-    <ClInclude Include="smart_cast_impl2.h" />
-    <ClInclude Include="associative_vector.h" />
-    <ClInclude Include="associative_vector_compare_predicate.h" />
-    <ClInclude Include="associative_vector_compare_predicate_inline.h" />
-    <ClInclude Include="associative_vector_inline.h" />
-    <ClInclude Include="script_export_macroses.h" />
-    <ClInclude Include="script_export_space.h" />
-    <ClInclude Include="script_space.h" />
-    <ClInclude Include="script_space_forward.h" />
-    <ClInclude Include="script_fmatrix.h" />
-    <ClInclude Include="script_fcolor.h" />
-    <ClInclude Include="script_fvector.h" />
-    <ClInclude Include="script_ini_file.h" />
-    <ClInclude Include="script_ini_file_inline.h" />
-    <ClInclude Include="script_token_list.h" />
-    <ClInclude Include="script_token_list_inline.h" />
-    <ClInclude Include="script_rtoken_list.h" />
-    <ClInclude Include="script_rtoken_list_inline.h" />
-    <ClInclude Include="script_net_packet.h" />
-    <ClInclude Include="script_sound_type.h" />
-    <ClInclude Include="script_flags.h" />
-    <ClInclude Include="script_reader.h" />
-    <ClInclude Include="script_engine.h" />
-    <ClInclude Include="script_engine_export.h" />
-    <ClInclude Include="script_engine_inline.h" />
-    <ClInclude Include="script_engine_space.h" />
-    <ClInclude Include="script_storage.h" />
-    <ClInclude Include="script_storage_inline.h" />
-    <ClInclude Include="script_storage_space.h" />
-    <ClInclude Include="script_process.h" />
-    <ClInclude Include="script_process_inline.h" />
-    <ClInclude Include="script_thread.h" />
-    <ClInclude Include="script_thread_inline.h" />
-    <ClInclude Include="script_stack_tracker.h" />
-    <ClInclude Include="script_stack_tracker_inline.h" />
-    <ClInclude Include="mslotutils.h" />
+    <ClInclude Include="object_loader.h" />
+    <ClInclude Include="object_saver.h" />
+    <ClInclude Include="object_type_traits.h" />
+    <ClInclude Include="PHNetState.h" />
+    <ClInclude Include="PHSynchronize.h" />
+    <ClInclude Include="PropertiesListTypes.h" />
+    <ClInclude Include="restriction_space.h" />
     <ClInclude Include="script_callStack.h" />
     <ClInclude Include="script_debugger.h" />
     <ClInclude Include="script_debugger_messages.h" />
     <ClInclude Include="script_debugger_threads.h" />
     <ClInclude Include="script_debugger_utils.h" />
+    <ClInclude Include="script_engine.h" />
+    <ClInclude Include="script_engine_export.h" />
+    <ClInclude Include="script_engine_inline.h" />
+    <ClInclude Include="script_engine_space.h" />
+    <ClInclude Include="script_export_macroses.h" />
+    <ClInclude Include="script_export_space.h" />
+    <ClInclude Include="script_fcolor.h" />
     <ClInclude Include="script_file.h" />
+    <ClInclude Include="script_flags.h" />
+    <ClInclude Include="script_fmatrix.h" />
+    <ClInclude Include="script_fvector.h" />
+    <ClInclude Include="script_ini_file.h" />
+    <ClInclude Include="script_ini_file_inline.h" />
     <ClInclude Include="script_lua_helper.h" />
-    <ClInclude Include="doug_lea_memory_allocator.h" />
-    <ClInclude Include="alife_space.h" />
-    <ClInclude Include="game_graph_space.h" />
-    <ClInclude Include="alife_artefact_order.h" />
-    <ClInclude Include="alife_human_brain.h" />
-    <ClInclude Include="alife_human_brain_inline.h" />
-    <ClInclude Include="alife_monster_brain.h" />
-    <ClInclude Include="alife_monster_brain_inline.h" />
-    <ClInclude Include="bone.h" />
-    <ClInclude Include="game_base_space.h" />
-    <ClInclude Include="inventory_space.h" />
-    <ClInclude Include="client_id.h" />
-    <ClInclude Include="NET_Compressor.h" />
-    <ClInclude Include="NET_utils.h" />
-    <ClInclude Include="PHNetState.h" />
-    <ClInclude Include="PHSynchronize.h" />
-    <ClInclude Include="character_info.h" />
-    <ClInclude Include="character_info_defs.h" />
-    <ClInclude Include="shared_data.h" />
-    <ClInclude Include="specific_character.h" />
-    <ClInclude Include="xml_str_id_loader.h" />
-    <ClInclude Include="xrMessages.h" />
-    <ClInclude Include="xrServer_Space.h" />
-    <ClInclude Include="xrUIXmlParser.h" />
-    <ClInclude Include="InfoPortionDefs.h" />
-    <ClInclude Include="ShapeData.h" />
-    <ClInclude Include="xrServer_Objects_Abstract.h" />
-    <ClInclude Include="xrServer_Objects_ALife_All.h" />
-    <ClInclude Include="xrServer_script_macroses.h" />
-    <ClInclude Include="xrServer_Object_Base.h" />
-    <ClInclude Include="xrServer_Objects.h" />
-    <ClInclude Include="xrServer_Objects_ALife.h" />
-    <ClInclude Include="xrServer_Objects_ALife_Items.h" />
-    <ClInclude Include="xrServer_Objects_ALife_Monsters.h" />
-    <ClInclude Include="ChooseTypes.h" />
-    <ClInclude Include="ItemListTypes.h" />
-    <ClInclude Include="PropertiesListTypes.h" />
-    <ClInclude Include="Sound.h" />
-    <ClInclude Include="WaveForm.h" />
-    <ClInclude Include="xrCDB.h" />
-    <ClInclude Include="xrEProps.h" />
+    <ClInclude Include="script_net_packet.h" />
+    <ClInclude Include="script_process.h" />
+    <ClInclude Include="script_process_inline.h" />
+    <ClInclude Include="script_properties_list_helper.h" />
+    <ClInclude Include="script_reader.h" />
+    <ClInclude Include="script_rtoken_list.h" />
+    <ClInclude Include="script_rtoken_list_inline.h" />
+    <ClInclude Include="script_sound_type.h" />
+    <ClInclude Include="script_space.h" />
+    <ClInclude Include="script_space_forward.h" />
+    <ClInclude Include="script_stack_tracker.h" />
+    <ClInclude Include="script_stack_tracker_inline.h" />
+    <ClInclude Include="script_storage.h" />
+    <ClInclude Include="script_storage_inline.h" />
+    <ClInclude Include="script_storage_space.h" />
+    <ClInclude Include="script_thread.h" />
+    <ClInclude Include="script_thread_inline.h" />
+    <ClInclude Include="script_token_list.h" />
+    <ClInclude Include="script_token_list_inline.h" />
     <ClInclude Include="script_value.h" />
+    <ClInclude Include="script_value_container.h" />
+    <ClInclude Include="script_value_container_impl.h" />
     <ClInclude Include="script_value_inline.h" />
     <ClInclude Include="script_value_wrapper.h" />
     <ClInclude Include="script_value_wrapper_inline.h" />
-    <ClInclude Include="script_value_container.h" />
-    <ClInclude Include="script_value_container_impl.h" />
-    <ClInclude Include="script_properties_list_helper.h" />
+    <ClInclude Include="ShapeData.h" />
+    <ClInclude Include="shared_data.h" />
+    <ClInclude Include="smart_cast.h" />
+    <ClInclude Include="smart_cast_impl0.h" />
+    <ClInclude Include="smart_cast_impl1.h" />
+    <ClInclude Include="smart_cast_impl2.h" />
+    <ClInclude Include="Sound.h" />
+    <ClInclude Include="specific_character.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="WaveForm.h" />
+    <ClInclude Include="xml_str_id_loader.h" />
+    <ClInclude Include="xrCDB.h" />
+    <ClInclude Include="xrEProps.h" />
+    <ClInclude Include="xrLevel.h" />
+    <ClInclude Include="xrMessages.h" />
+    <ClInclude Include="xrServer_Objects.h" />
+    <ClInclude Include="xrServer_Objects_Abstract.h" />
+    <ClInclude Include="xrServer_Objects_ALife.h" />
+    <ClInclude Include="xrServer_Objects_ALife_All.h" />
+    <ClInclude Include="xrServer_Objects_ALife_Items.h" />
+    <ClInclude Include="xrServer_Objects_ALife_Monsters.h" />
+    <ClInclude Include="xrServer_Object_Base.h" />
+    <ClInclude Include="xrServer_script_macroses.h" />
+    <ClInclude Include="xrServer_Space.h" />
+    <ClInclude Include="xrSE_Factory.h" />
+    <ClInclude Include="xrSE_Factory_import_export.h" />
+    <ClInclude Include="xrUIXmlParser.h" />
+    <ClInclude Include="xr_LuaAllocator.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="xr_LuaAllocator.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="xrSE_Factory.cpp" />
     <ClCompile Include="ai_space.cpp" />
-    <ClCompile Include="object_factory.cpp" />
-    <ClCompile Include="object_factory_register.cpp" />
-    <ClCompile Include="object_factory_script.cpp" />
-    <ClCompile Include="object_item_script.cpp" />
-    <ClCompile Include="smart_cast.cpp" />
-    <ClCompile Include="smart_cast_stats.cpp" />
-    <ClCompile Include="script_fmatrix_script.cpp" />
-    <ClCompile Include="script_fcolor_script.cpp" />
-    <ClCompile Include="script_fvector_script.cpp" />
-    <ClCompile Include="script_ini_file.cpp" />
-    <ClCompile Include="script_ini_file_script.cpp" />
-    <ClCompile Include="script_token_list.cpp" />
-    <ClCompile Include="script_token_list_script.cpp" />
-    <ClCompile Include="script_rtoken_list_script.cpp" />
-    <ClCompile Include="script_net_packet_script.cpp" />
-    <ClCompile Include="script_sound_type_script.cpp" />
-    <ClCompile Include="script_flags_script.cpp" />
-    <ClCompile Include="script_reader_script.cpp" />
-    <ClCompile Include="script_engine.cpp" />
-    <ClCompile Include="script_engine_export.cpp" />
-    <ClCompile Include="script_engine_script.cpp" />
-    <ClCompile Include="script_storage.cpp" />
-    <ClCompile Include="script_process.cpp" />
-    <ClCompile Include="script_thread.cpp" />
-    <ClCompile Include="script_stack_tracker.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="script_callStack.cpp" />
-    <ClCompile Include="script_debugger.cpp" />
-    <ClCompile Include="script_debugger_threads.cpp" />
-    <ClCompile Include="script_debugger_utils.cpp" />
-    <ClCompile Include="script_file.cpp" />
-    <ClCompile Include="script_lua_helper.cpp" />
+    <ClCompile Include="alife_artefact_order.cpp" />
+    <ClCompile Include="alife_human_brain.cpp" />
+    <ClCompile Include="alife_monster_brain.cpp" />
+    <ClCompile Include="alife_space.cpp" />
+    <ClCompile Include="character_info.cpp" />
     <ClCompile Include="doug_lea_memory_allocator.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
@@ -396,25 +351,53 @@
       </PrecompiledHeader>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level2</WarningLevel>
     </ClCompile>
-    <ClCompile Include="alife_space.cpp" />
-    <ClCompile Include="alife_artefact_order.cpp" />
-    <ClCompile Include="alife_human_brain.cpp" />
-    <ClCompile Include="alife_monster_brain.cpp" />
+    <ClCompile Include="object_factory.cpp" />
+    <ClCompile Include="object_factory_register.cpp" />
+    <ClCompile Include="object_factory_script.cpp" />
+    <ClCompile Include="object_item_script.cpp" />
     <ClCompile Include="PHNetState.cpp" />
     <ClCompile Include="PHSynchronize.cpp" />
-    <ClCompile Include="character_info.cpp" />
+    <ClCompile Include="properties_list_helper_script.cpp" />
+    <ClCompile Include="script_callStack.cpp" />
+    <ClCompile Include="script_debugger.cpp" />
+    <ClCompile Include="script_debugger_threads.cpp" />
+    <ClCompile Include="script_debugger_utils.cpp" />
+    <ClCompile Include="script_engine.cpp" />
+    <ClCompile Include="script_engine_export.cpp" />
+    <ClCompile Include="script_engine_script.cpp" />
+    <ClCompile Include="script_fcolor_script.cpp" />
+    <ClCompile Include="script_file.cpp" />
+    <ClCompile Include="script_flags_script.cpp" />
+    <ClCompile Include="script_fmatrix_script.cpp" />
+    <ClCompile Include="script_fvector_script.cpp" />
+    <ClCompile Include="script_ini_file.cpp" />
+    <ClCompile Include="script_ini_file_script.cpp" />
+    <ClCompile Include="script_lua_helper.cpp" />
+    <ClCompile Include="script_net_packet_script.cpp" />
+    <ClCompile Include="script_process.cpp" />
+    <ClCompile Include="script_properties_list_helper.cpp" />
+    <ClCompile Include="script_reader_script.cpp" />
+    <ClCompile Include="script_rtoken_list_script.cpp" />
+    <ClCompile Include="script_sound_type_script.cpp" />
+    <ClCompile Include="script_stack_tracker.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="script_storage.cpp" />
+    <ClCompile Include="script_thread.cpp" />
+    <ClCompile Include="script_token_list.cpp" />
+    <ClCompile Include="script_token_list_script.cpp" />
+    <ClCompile Include="smart_cast.cpp" />
+    <ClCompile Include="smart_cast_stats.cpp" />
     <ClCompile Include="specific_character.cpp" />
-    <ClCompile Include="xrUIXmlParser.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="xrServer_Factory.cpp" />
-    <ClCompile Include="xrServer_Objects_Abstract.cpp" />
-    <ClCompile Include="xrServer_Object_Base.cpp" />
     <ClCompile Include="xrServer_Objects.cpp" />
-    <ClCompile Include="xrServer_Objects_script.cpp" />
-    <ClCompile Include="xrServer_Objects_script2.cpp" />
+    <ClCompile Include="xrServer_Objects_Abstract.cpp" />
     <ClCompile Include="xrServer_Objects_ALife.cpp" />
-    <ClCompile Include="xrServer_Objects_ALife_script.cpp" />
-    <ClCompile Include="xrServer_Objects_ALife_script2.cpp" />
-    <ClCompile Include="xrServer_Objects_ALife_script3.cpp" />
     <ClCompile Include="xrServer_Objects_ALife_Items.cpp" />
     <ClCompile Include="xrServer_Objects_ALife_Items_script.cpp" />
     <ClCompile Include="xrServer_Objects_ALife_Items_script2.cpp" />
@@ -424,8 +407,25 @@
     <ClCompile Include="xrServer_Objects_ALife_Monsters_script2.cpp" />
     <ClCompile Include="xrserver_objects_alife_monsters_script3.cpp" />
     <ClCompile Include="xrServer_Objects_ALife_Monsters_script4.cpp" />
-    <ClCompile Include="properties_list_helper_script.cpp" />
-    <ClCompile Include="script_properties_list_helper.cpp" />
+    <ClCompile Include="xrServer_Objects_ALife_script.cpp" />
+    <ClCompile Include="xrServer_Objects_ALife_script2.cpp" />
+    <ClCompile Include="xrServer_Objects_ALife_script3.cpp" />
+    <ClCompile Include="xrServer_Objects_script.cpp" />
+    <ClCompile Include="xrServer_Objects_script2.cpp" />
+    <ClCompile Include="xrServer_Object_Base.cpp" />
+    <ClCompile Include="xrSE_Factory.cpp" />
+    <ClCompile Include="xrUIXmlParser.cpp" />
+    <ClCompile Include="xr_LuaAllocator.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">true</ExcludedFromBuild>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
+      </PrecompiledHeader>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\xrCore\xrCore.vcxproj">

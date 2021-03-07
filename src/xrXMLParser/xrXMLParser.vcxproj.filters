@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Kernel">
-      <UniqueIdentifier>{462cc15b-7e71-41dd-b329-1e4eea03d2c5}</UniqueIdentifier>
+      <UniqueIdentifier>{75c3d2a1-475c-471e-8908-acdd83f6f2f3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Parser">
-      <UniqueIdentifier>{a0c74a85-ef48-4490-a2bd-4f2c1fea02a0}</UniqueIdentifier>
+      <UniqueIdentifier>{a92ac789-2ba5-4679-b430-0cbaaab0a1c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Parser\TinyXML">
-      <UniqueIdentifier>{50b3467b-acba-4704-9d9d-c46a4361d71a}</UniqueIdentifier>
+      <UniqueIdentifier>{ad6efa61-4260-4b52-84d6-f5b0bae39f29}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
