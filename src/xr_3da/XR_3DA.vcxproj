@@ -105,16 +105,22 @@
     <ExtensionsToDeleteOnClean>*.idb%3b*.obj%3b*.ilk%3b*.pdb%3b*.tlb%3b*.tli%3b*.tlh%3b*.tmp%3b*.rsp%3b*.bat%3b$(TargetPath)</ExtensionsToDeleteOnClean>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\DPlay;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\Xiph\Include;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrLua\src;$(SolutionDir)..\..\sdk\luabind\luabind;$(SolutionDir)..\..\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\sdk\Xiph\Libs;$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
     <OutDir>x:\binaries\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\DPlay;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\Xiph\Include;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrLua\src;$(SolutionDir)..\..\sdk\luabind\luabind;$(SolutionDir)..\..\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\sdk\Xiph\Libs;$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>x:\binaries\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\DPlay;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\Xiph\Include;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrLua\src;$(SolutionDir)..\..\sdk\luabind\luabind;$(SolutionDir)..\..\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\sdk\Xiph\Libs;$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Dedicated|Win32'">
     <OutDir>x:\binaries\dedicated\</OutDir>
@@ -122,16 +128,22 @@
     <ExtensionsToDeleteOnClean>*.idb%3b*.obj%3b*.ilk%3b*.pdb%3b*.tlb%3b*.tli%3b*.tlh%3b*.tmp%3b*.rsp%3b*.bat%3b$(TargetPath)</ExtensionsToDeleteOnClean>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\DPlay;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\Xiph\Include;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrLua\src;$(SolutionDir)..\..\sdk\luabind\luabind;$(SolutionDir)..\..\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\sdk\Xiph\Libs;$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed_Dedicated|Win32'">
     <OutDir>x:\binaries\dedicated\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\DPlay;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\Xiph\Include;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrLua\src;$(SolutionDir)..\..\sdk\luabind\luabind;$(SolutionDir)..\..\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\sdk\Xiph\Libs;$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Dedicated|Win32'">
     <OutDir>x:\binaries\dedicated\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\DPlay;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\Xiph\Include;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrLua\src;$(SolutionDir)..\..\sdk\luabind\luabind;$(SolutionDir)..\..\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\sdk\Xiph\Libs;$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -188,6 +200,7 @@
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
       <ImportLibrary>x:\libraries\$(ProjectName).lib</ImportLibrary>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
@@ -241,6 +254,7 @@
       <ImportLibrary>x:\libraries\$(ProjectName).lib</ImportLibrary>
       <TargetMachine>NotSet</TargetMachine>
       <FixedBaseAddress>false</FixedBaseAddress>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -302,6 +316,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>x:\libraries\$(ProjectName).lib</ImportLibrary>
       <FixedBaseAddress>false</FixedBaseAddress>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Dedicated|Win32'">
@@ -356,6 +371,7 @@
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
       <FixedBaseAddress>false</FixedBaseAddress>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Mixed_Dedicated|Win32'">
@@ -407,6 +423,7 @@
       <LargeAddressAware>true</LargeAddressAware>
       <TargetMachine>NotSet</TargetMachine>
       <FixedBaseAddress>false</FixedBaseAddress>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_Dedicated|Win32'">
@@ -460,6 +477,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <FixedBaseAddress>false</FixedBaseAddress>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
