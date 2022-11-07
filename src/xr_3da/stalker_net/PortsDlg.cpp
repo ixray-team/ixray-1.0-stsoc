@@ -89,7 +89,7 @@ void	CPortsDlg::FillPortsList()
 		closesocket(tmpsocket);
 //-----------------------------------------------------------------------
 		char PortStr[1024];
-		int ItemID = m_pPortsList.AddString(ltoa(i, PortStr, 10));
+		int ItemID = m_pPortsList.AddString((LPCTSTR) ltoa(i, PortStr, 10));
 		m_pPortsList.SetItemData(ItemID, DWORD(i));
 	}
 	m_pPortsList.SetCurSel(0);

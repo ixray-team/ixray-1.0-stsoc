@@ -37,7 +37,7 @@ BOOL SVWeatherOptions::OnInitDialog()
 	CSubDlg::OnInitDialog();
 
 	//-----------------------------------
-	m_pWeatherSpeedCoeff.SetWindowText("1.0");
+	m_pWeatherSpeedCoeff.SetWindowText(L"1.0");
 	//-----------------------------------
 	return TRUE;
 };
@@ -48,7 +48,7 @@ void	SVWeatherOptions::AddWeather(const char* WeatherType, const char* WeatherTi
 	if (!WeatherType[0] || !WeatherTime[0]) return;
 
 	int ID = m_pStartWeather.GetCount();
-	m_pStartWeather.AddString(WeatherType);
+	m_pStartWeather.AddString((LPCTSTR) WeatherType);
 	int hour = 0, min = 0;
 	sscanf(WeatherTime, "%d:%d", &hour, &min);
 	DWORD Time = hour*60+min;

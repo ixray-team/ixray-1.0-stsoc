@@ -64,7 +64,7 @@ BOOL CStalker_netDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	SetWindowText(WND_NAME);
+	SetWindowText((LPCTSTR) WND_NAME);
 
 	// TODO: Add extra initialization here
 	//Load Map List
@@ -75,27 +75,27 @@ BOOL CStalker_netDlg::OnInitDialog()
 	{
 		BOOL ret = m_pServerDlg->Create(IDD_SERVERDLG,this);
 		if(!ret)   //Create failed.
-			AfxMessageBox("Error creating Server Dialog");
+			AfxMessageBox(L"Error creating Server Dialog");
 		m_pServerDlg->ShowWindow(SW_SHOW);
 		m_pServerDlg->SetParent(&m_pTabCtrl);
 		m_pServerDlg->SetWindowPos(NULL, 3, 23, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 
 	}
 	else
-		AfxMessageBox("Error Creating Server Dialog Object");
+		AfxMessageBox(L"Error Creating Server Dialog Object");
 	//-------------------------------------------------------
 	m_pClientDlg = new CClientDlg();
 	if (m_pClientDlg)
 	{
 		BOOL ret = m_pClientDlg->Create(IDD_CLIENTDLG,this);
 		if(!ret)   //Create failed.
-			AfxMessageBox("Error creating Client Dialog");
+			AfxMessageBox(L"Error creating Client Dialog");
 		m_pClientDlg->ShowWindow(SW_HIDE);
 		m_pClientDlg->SetParent(&m_pTabCtrl);
 		m_pClientDlg->SetWindowPos(NULL, 3, 23, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 	}
 	else
-		AfxMessageBox("Error Creating Client Object");
+		AfxMessageBox(L"Error Creating Client Object");
 	//-------------------------------------------------------
 	/*
 	m_pCDKeyDlg = new CCDKeyDlg();
@@ -113,11 +113,11 @@ BOOL CStalker_netDlg::OnInitDialog()
 	TCITEM tcItem;
 	tcItem.mask = TCIF_TEXT;
 
-	tcItem.pszText = _T("Server");
+	tcItem.pszText = L"Server";
 	m_pTabCtrl.InsertItem(0, &tcItem);
 
 #ifndef NDEBUG
-	tcItem.pszText = _T("Client");
+	tcItem.pszText = L"Client";
 	m_pTabCtrl.InsertItem(1, &tcItem);
 #endif
 
@@ -125,14 +125,14 @@ BOOL CStalker_netDlg::OnInitDialog()
 	//---------------------------------------
 	m_pCatchInput.SetCheck(0);
 
-	m_pPlayerName.SetWindowText("");	
+	m_pPlayerName.SetWindowText(L"");	
 	//---------------------------------------
 	char CompName[1024];
 	DWORD CompNameSize = 1024;
-	GetComputerName(CompName, &CompNameSize);
+	GetComputerName((LPWSTR) CompName, &CompNameSize);
 	
 	CompName[MAX_PLAYERNAME_LEN] = 0;
-	m_pPlayerName.SetWindowText(CompName);
+	m_pPlayerName.SetWindowText((LPCTSTR) CompName);
 	m_pPlayerName.LimitText(MAX_PLAYERNAME_LEN);
 
 	m_pBuild.SetCheck(0);
@@ -167,9 +167,9 @@ BOOL CStalker_netDlg::OnInitDialog()
 
 	char CDKeyStr[1024];
 	GetCDKey(CDKeyStr);
-	m_pCDKeyBtn.SetWindowText(CDKeyStr);
+	m_pCDKeyBtn.SetWindowText((LPCTSTR) CDKeyStr);
 
-	m_pLogsPath.SetWindowText("");
+	m_pLogsPath.SetWindowText(L"");
 	//-----------------------------------------------
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -272,9 +272,9 @@ void CStalker_netDlg::OnClose()
 	CDialog::OnClose();
 }
 #define REGISTRY_BASE	HKEY_LOCAL_MACHINE
-#define REGISTRY_PATH	"Software\\GSC Game World\\STALKER-SHOC\\"
-#define REGISTRY_VALUE_GSCDKEY	"InstallCDKEY"
-#define REGISTRY_VALUE_VERSION	"InstallVers"
+#define REGISTRY_PATH	L"Software\\GSC Game World\\STALKER-SHOC\\"
+#define REGISTRY_VALUE_GSCDKEY	L"InstallCDKEY"
+#define REGISTRY_VALUE_VERSION	L"InstallVers"
 
 void	CStalker_netDlg::GetCDKey(char* CDKeyStr)
 {
@@ -363,7 +363,7 @@ void	CStalker_netDlg::CallToEnterCDKey()
 
 		char CDKeyStr[1024];
 		GetCDKey(CDKeyStr);
-		m_pCDKeyBtn.SetWindowText(CDKeyStr);
+		m_pCDKeyBtn.SetWindowText((LPCTSTR) CDKeyStr);
 	}
 	else if (nResponse == IDCANCEL)
 	{
@@ -378,7 +378,7 @@ void	CStalker_netDlg::CallToEnterCDKey()
 void CStalker_netDlg::OnBnClickedLogsPath()
 {
 	char NewPath[MAX_PATH] = "";
-	m_pLogsPath.GetWindowText(NewPath, MAX_PATH);
+	m_pLogsPath.GetWindowText((LPTSTR) NewPath, MAX_PATH);
 	/*
 	ITEMIDLIST InitialDir;
 	ULONG tmp;
@@ -387,13 +387,13 @@ void CStalker_netDlg::OnBnClickedLogsPath()
 	CoInitialize( NULL);//, COINIT_APARTMENTTHREADED );
 	BROWSEINFO BIS; ZeroMemory(&BIS, sizeof(BIS));
 	BIS.hwndOwner = NULL;
-	BIS.pszDisplayName = NewPath;
-	BIS.lpszTitle = "Select root folder to store logs";
+	BIS.pszDisplayName = (LPWSTR) NewPath;
+	BIS.lpszTitle = L"Select root folder to store logs";
 	BIS.ulFlags = 0;
 
 	LPITEMIDLIST res = SHBrowseForFolder(&BIS);
 	if (res == NULL) return;	
-	if (!SHGetPathFromIDList(res, NewPath)) return;
+	if (!SHGetPathFromIDList(res, (LPWSTR) NewPath)) return;
 	strcat(NewPath, "\\");
-	m_pLogsPath.SetWindowText(NewPath);
+	m_pLogsPath.SetWindowText((LPCTSTR) NewPath);
 }

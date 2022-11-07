@@ -103,31 +103,43 @@
     <OutDir>x:\binaries\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\FreeImage;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>x:\binaries\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\FreeImage;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
     <OutDir>x:\binaries\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\FreeImage;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Priquel|Win32'">
     <OutDir>x:\binaries\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\FreeImage;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed_Priquel|Win32'">
     <OutDir>x:\binaries\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\FreeImage;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Priquel|Win32'">
     <OutDir>x:\binaries\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\sdk\dxsdk_mar2009\Include;$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\FreeImage;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\libraries;$(SolutionDir)..\..\sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>

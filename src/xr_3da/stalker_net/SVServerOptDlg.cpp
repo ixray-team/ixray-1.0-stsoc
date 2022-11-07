@@ -46,26 +46,26 @@ BOOL SVServerOptDlg::OnInitDialog()
 	//-------------------------------------------------
 	char CompName[1024];
 	DWORD CompNameSize = 1024;
-	GetComputerName(CompName, &CompNameSize);
+	GetComputerName((LPWSTR) CompName, &CompNameSize);
 	//-------------------------------------------------	
 	CompName[MAX_SERVERNAME_LEN] = 0;
-	m_pHostName.SetWindowText(CompName);
+	m_pHostName.SetWindowText((LPCTSTR) CompName);
 	m_pHostName.LimitText(MAX_SERVERNAME_LEN);
 	
-	m_pPassword.SetWindowText("");
+	m_pPassword.SetWindowText(L"");
 	m_pPassword.LimitText(MAX_SERVERPASSW_LEN);
 
 
-	m_pSVPort.SetWindowText("5445");
+	m_pSVPort.SetWindowText(L"5445");
 	m_pSVPort.LimitText(MAX_PORTNUMBER_LEN);
-	m_pCLPort.SetWindowText("5446");
+	m_pCLPort.SetWindowText(L"5446");
 	m_pCLPort.LimitText(MAX_PORTNUMBER_LEN);
-	m_pGSPort.SetWindowText("5447");
+	m_pGSPort.SetWindowText(L"5447");
 	m_pGSPort.LimitText(MAX_PORTNUMBER_LEN);
 
-	m_pMaxPlayers.SetWindowText("32");
+	m_pMaxPlayers.SetWindowText(L"32");
 	m_pSpectrMode.SetCheck(0);
-	m_pSpectrSwitchTime.SetWindowText("20"); 
+	m_pSpectrSwitchTime.SetWindowText(L"20"); 
 	m_pSpectrSwitchTime.EnableWindow(FALSE);
 
 	m_pDedicated.SetCheck(0);
@@ -147,7 +147,7 @@ void	SVServerOptDlg::SetPort(CEdit* pPortItem, int NumPorts, int* UsedPorts)
 	if (nResponse == IDOK)
 	{
 		char tmp[1024];
-		pPortItem->SetWindowText(ltoa(ResPort, tmp, 10));
+		pPortItem->SetWindowText((LPCTSTR) ltoa(ResPort, tmp, 10));
 	};
 };
 
@@ -155,9 +155,9 @@ void SVServerOptDlg::OnBnClickedSvPortButton()
 {
 	int UsedPorts[2];
 	char tmp[1024];
-	m_pCLPort.GetWindowText(tmp, 1024);
+	m_pCLPort.GetWindowText((LPTSTR) tmp, 1024);
 	UsedPorts[0] = atol(tmp);
-	m_pGSPort.GetWindowText(tmp, 1024);
+	m_pGSPort.GetWindowText((LPTSTR) tmp, 1024);
 	UsedPorts[1] = atol(tmp);
 
 	SetPort(&m_pSVPort, 2, UsedPorts);
@@ -167,9 +167,9 @@ void SVServerOptDlg::OnBnClickedClPortbutton()
 {
 	int UsedPorts[2];
 	char tmp[1024];
-	m_pSVPort.GetWindowText(tmp, 1024);
+	m_pSVPort.GetWindowText((LPTSTR) tmp, 1024);
 	UsedPorts[0] = atol(tmp);
-	m_pGSPort.GetWindowText(tmp, 1024);
+	m_pGSPort.GetWindowText((LPTSTR) tmp, 1024);
 	UsedPorts[1] = atol(tmp);
 
 	SetPort(&m_pCLPort, 2, UsedPorts);
@@ -179,9 +179,9 @@ void SVServerOptDlg::OnBnClickedGsPortbutton()
 {
 	int UsedPorts[2];
 	char tmp[1024];
-	m_pSVPort.GetWindowText(tmp, 1024);
+	m_pSVPort.GetWindowText((LPTSTR) tmp, 1024);
 	UsedPorts[0] = atol(tmp);
-	m_pCLPort.GetWindowText(tmp, 1024);
+	m_pCLPort.GetWindowText((LPTSTR) tmp, 1024);
 	UsedPorts[1] = atol(tmp);
 
 	SetPort(&m_pGSPort, 2, UsedPorts);

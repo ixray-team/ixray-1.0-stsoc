@@ -30,7 +30,7 @@ BOOL CPasswordDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	m_pPswCtrl.SetWindowText(PswStr);
+	m_pPswCtrl.SetWindowText((LPCTSTR) PswStr);
 
 	return TRUE;
 };
@@ -49,7 +49,7 @@ INT_PTR CPasswordDlg::DoModal( char* Psw )
 void CPasswordDlg::OnOK()
 {
 	// TODO: Add your specialized code here and/or call the base class
-	m_pPswCtrl.GetWindowText(PswStr, 64);
+	m_pPswCtrl.GetWindowText((LPTSTR) PswStr, 64);
 	strcpy(pPsw, PswStr);
 	CDialog::OnOK();
 }

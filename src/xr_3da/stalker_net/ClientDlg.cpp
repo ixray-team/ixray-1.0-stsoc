@@ -111,12 +111,12 @@ BOOL CClientDlg::OnInitDialog()
 	RECT wRect;
 	m_pServerList.GetWindowRect(&wRect);
 	int NumColumns = 5;
-	m_pServerList.InsertColumn(0, "Server Name", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
-	m_pServerList.InsertColumn(1, "Map Name", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
-	m_pServerList.InsertColumn(2, "Game Mode", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
-	m_pServerList.InsertColumn(3, "Players", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
-	m_pServerList.InsertColumn(4, "Ping", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
-//	m_pServerList.InsertColumn(5, "Protected", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
+	m_pServerList.InsertColumn(0, L"Server Name", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
+	m_pServerList.InsertColumn(1, L"Map Name", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
+	m_pServerList.InsertColumn(2, L"Game Mode", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
+	m_pServerList.InsertColumn(3, L"Players", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
+	m_pServerList.InsertColumn(4, L"Ping", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
+//	m_pServerList.InsertColumn(5, L"Protected", LVCFMT_CENTER, (wRect.right - wRect.left)/NumColumns-1);
 
 	m_pServerList.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT );
 	//=============================================================================
@@ -160,14 +160,14 @@ BOOL CClientDlg::OnInitDialog()
 		msleep(5);
 	if(result != GSIACAvailable)
 	{
-		MessageBox("The backend is not available\n");
+		MessageBox(L"The backend is not available\n");
 		return TRUE;
 	}
 
 	m_serverBrowser = ServerBrowserNew(GAMESPY_GAMENAME, GAMESPY_GAMENAME, SECRET_KEY, 0, MAX_UPDATES, QVERSION_QR2, SBFalse, SBCallback, this);
 	if(!m_serverBrowser)
 	{
-		MessageBox("Unable to create the server browser object");
+		MessageBox(L"Unable to create the server browser object");
 		return FALSE;
 	}
 
@@ -361,18 +361,18 @@ void CClientDlg::UpdateServersList()
 		iItem.mask = LVIF_TEXT | LVIF_IMAGE;
 		iItem.iItem = NumItems;
 		iItem.iSubItem = 0;
-		iItem.pszText = N.dpServerName;
+		iItem.pszText = (LPWSTR) N.dpServerName;
 		iItem.iImage = (N.dpPassword == 0) ? 0 : 1;
 
 		CString tmp;
-		tmp.Format("%d/%d", N.dpServerNumPlayers, (N.dpServerMaxPlayers == 0) ? 32 : N.dpServerMaxPlayers);
+		tmp.Format(L"%d/%d", N.dpServerNumPlayers, (N.dpServerMaxPlayers == 0) ? 32 : N.dpServerMaxPlayers);
 
 		m_pServerList.InsertItem(&iItem);
-		m_pServerList.SetItemText(NumItems, 0, N.dpServerName);
-		m_pServerList.SetItemText(NumItems, 1, N.dpSessionName);
-		m_pServerList.SetItemText(NumItems, 2, g_GameTypeName[N.dpServerGameType]);
+		m_pServerList.SetItemText(NumItems, 0, (LPCTSTR) N.dpServerName);
+		m_pServerList.SetItemText(NumItems, 1, (LPCTSTR) N.dpSessionName);
+		m_pServerList.SetItemText(NumItems, 2, (LPCTSTR) g_GameTypeName[N.dpServerGameType]);
 		m_pServerList.SetItemText(NumItems, 3, tmp);
-		tmp.Format("%d", N.dpPing);
+		tmp.Format(L"%d", N.dpPing);
 		m_pServerList.SetItemText(NumItems, 4, tmp);
 //		tmp.Format("%s", N.dpPassword ? "Yes" : "No");
 //		m_pServerList.SetItemText(NumItems, 5, tmp);
@@ -435,7 +435,7 @@ void CClientDlg::AddServerToList		(SBServer server)
 	//  [5/20/2005]
 	char dbgStr[1024];
 	sprintf(dbgStr, "%s - %s\n", NODE->dpHostName, NODE->dpServerName);
-	OutputDebugString(dbgStr);
+	OutputDebugString((LPCWSTR) dbgStr);
 	//  [5/20/2005]
 
 	sprintf(NODE->dpSessionName, "%s", SBServerGetStringValue(server, qr2_registered_key_list[MAPNAME_KEY], "Unknown"));
@@ -478,7 +478,7 @@ void CClientDlg::AddServerToList		(SBServer server)
 
 void		CClientDlg::RefillServersList			()
 {
-	OutputDebugString("CClientDlg::RefillServersList \n");
+	OutputDebugString(L"CClientDlg::RefillServersList \n");
 	ClearHostList();
 	// clear the server count
 	//	m_serverCount = 0;
@@ -599,7 +599,7 @@ void CClientDlg::OnBnClickedJoin()
 		NameLen = pMainDlg->m_pPlayerName.GetWindowTextLength();
 		if (NameLen) 
 		{
-			pMainDlg->m_pPlayerName.GetWindowText(Name, 1023);
+			pMainDlg->m_pPlayerName.GetWindowText((LPTSTR) Name, 1023);
 			Name[32]=0;
 			sprintf(NameAdd, "/name=%s", Name);
 		};
@@ -609,13 +609,13 @@ void CClientDlg::OnBnClickedJoin()
 		if (pMainDlg->m_pLogsPath.GetWindowTextLength() != 0)
 		{
 			char tmp[1024];
-			pMainDlg->m_pLogsPath.GetWindowText(tmp, 1024);
+			pMainDlg->m_pLogsPath.GetWindowText((LPTSTR) tmp, 1024);
 			sprintf(sLogsPath, "-overlaypath %s ", tmp);
 		}
 		if (pMainDlg->m_pCDKeyBtn.GetWindowTextLength() != 0)
 		{
 			char tmp[1024];
-			pMainDlg->m_pCDKeyBtn.GetWindowText(tmp, 1024);
+			pMainDlg->m_pCDKeyBtn.GetWindowText((LPTSTR) tmp, 1024);
 			if (0 != xr_strcmp(tmp, "- No CD Key -"))
 				sprintf(sCDKeyStr, "/cdkey=%s", tmp);
 		}
@@ -660,7 +660,7 @@ void CClientDlg::OnBnClickedJoin()
 							(sCDKeyStr[0]) ? sCDKeyStr : ""
 							);
 
-	OutputDebugString( cmdline );
+	OutputDebugString((LPCWSTR) cmdline );
 	int res = WinExec(cmdline, SW_SHOW);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -910,7 +910,7 @@ BOOL	CClientDlg::Client_EnumHosts()
 	};
 	if (hr != S_OK)
 	{
-		const char* text = DXGetErrorString(hr);
+		const WCHAR* text = DXGetErrorString(hr);
 		int x=0;
 		x=x;
 	}
@@ -1128,7 +1128,7 @@ void CClientDlg::OnBnClickedGSUpdateList()
 
 	if (error != sbe_noerror)
 	{
-		MessageBox("GameSpy Error!", "Error", MB_OK);
+		MessageBox(L"GameSpy Error!", L"Error", MB_OK);
 		m_pGameSpyUpdateList.EnableWindow(TRUE);
 		m_pGameSpyRefreshList.EnableWindow(TRUE);
 		if (m_timerID)

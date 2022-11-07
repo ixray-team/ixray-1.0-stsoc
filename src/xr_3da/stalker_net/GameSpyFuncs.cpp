@@ -10,39 +10,39 @@ void SBCallback(ServerBrowser sb, SBCallbackReason reason, SBServer server, void
 
 	CString address;
 	if(server)
-		address.Format("%s:%d", SBServerGetPublicAddress(server), SBServerGetPublicQueryPort(server));
+		address.Format(L"%s:%d", SBServerGetPublicAddress(server), SBServerGetPublicQueryPort(server));
 
 
 	switch (reason)
 	{
 	case sbc_serveradded : //a server was added to the list, may just have an IP & port at this point
 		{
-			OutputDebugString("sbc_serveradded \n");
+			OutputDebugString(L"sbc_serveradded \n");
 			pClDialog->AddServerToList(server);
 		}break;
 	case sbc_serverupdated : //server information has been updated - either basic or full information is now available about this server
 		{
-			OutputDebugString("sbc_serverupdated \n");
+			OutputDebugString(L"sbc_serverupdated \n");
 			pClDialog->AddServerToList(server);
 		}break;
 	case sbc_serverupdatefailed : //an attempt to retrieve information about this server, either directly or from the master, failed
 		{
-			OutputDebugString("sbc_serverupdatefailed \n");
+			OutputDebugString(L"sbc_serverupdatefailed \n");
 //			pClDialog->RemoveServerFromList(server);
 		}break;
 	case sbc_serverdeleted : //a server was removed from the list
 		{
-			OutputDebugString("sbc_serverdeleted \n");
+			OutputDebugString(L"sbc_serverdeleted \n");
 //			pClDialog->RemoveServerFromList(server);
 		}break;
 	case sbc_updatecomplete : //the server query engine is now idle 
 		{
-			OutputDebugString("sbc_updatecomplete \n");			
+			OutputDebugString(L"sbc_updatecomplete \n");			
 			pClDialog->OnGameSpyUpdateComplete();
 		}break;
 	case sbc_queryerror		://the master returned an error string for the provided query
 		{
-			OutputDebugString("sbc_queryerror \n");
+			OutputDebugString(L"sbc_queryerror \n");
 		}break;
 	};
 };

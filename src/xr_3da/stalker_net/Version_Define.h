@@ -55,8 +55,8 @@
 
 #endif
 
-#define			MAPROT_LIST_NAME		"maprot_list.ltx"
+#define			MAPROT_LIST_NAME		L"maprot_list.ltx"
 
 //--------------- CD key -------------------------------
 #define CHECK_CDKEY			1
-#define	REGISTRY_CDKEY_STR	"Software\\S.T.A.L.K.E.R\\CDKey"
+#define	REGISTRY_CDKEY_STR	L"Software\\S.T.A.L.K.E.R\\CDKey"
