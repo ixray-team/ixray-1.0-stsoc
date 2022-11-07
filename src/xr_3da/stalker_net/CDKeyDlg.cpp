@@ -101,7 +101,8 @@ void CCDKeyDlg::OnOK()
 	{
 		CString tmp;
 		m_pCDKA[i]->GetWindowText(tmp);
-		strncpy(m_pNewCDKey+offset, tmp, 4);
+		CT2A tmp_(tmp);
+		strncpy(m_pNewCDKey+offset, tmp_, 4);
 		offset += 4;
 		m_pNewCDKey[offset] = 0;
 		strcat(m_pNewCDKey, "-");

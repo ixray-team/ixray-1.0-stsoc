@@ -93,7 +93,7 @@ BOOL CServerDlg::OnInitDialog()
 	{
 		BOOL ret = m_pSVO2->Create(IDD_SERVEROPTS2,this);
 		if(!ret)   //Create failed.
-			AfxMessageBox("Error creating Respawn Dialog");
+			AfxMessageBox(L"Error creating Respawn Dialog");
 		m_pSVO2->ShowWindow(SW_SHOW);
 //		m_pSVO2->SetParent(GetParent()->GetParent());
 		m_pSVO2->SetParent(this);
@@ -101,7 +101,7 @@ BOOL CServerDlg::OnInitDialog()
 		m_pSVO2->SetWindowPos(NULL, CX, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 	}
 	else
-		AfxMessageBox("Error Creating Respawn Dialog Object");
+		AfxMessageBox(L"Error Creating Respawn Dialog Object");
 	//-------------------------------------------------------
 	CX = 5;
 	int CY = 3;
@@ -112,33 +112,33 @@ BOOL CServerDlg::OnInitDialog()
 		{
 			BOOL ret = m_pSVServerOptDlg->Create(IDD_SERVEROPT,m_pSVO2);
 			if(!ret)   //Create failed.
-				AfxMessageBox("Error Creating Server Options Dialog");
+				AfxMessageBox(L"Error Creating Server Options Dialog");
 			AddDlg(m_pSVServerOptDlg, m_pSVO2, CX, CY);			
 		}
 		else
-			AfxMessageBox("Error Creating Dialog Object");
+			AfxMessageBox(L"Error Creating Dialog Object");
 		//-------------------------------------------------------
 		m_pSVGameTypeDlg = new SVGameTypeDlg();
 		if (m_pSVGameTypeDlg)
 		{
 			BOOL ret = m_pSVGameTypeDlg->Create(IDD_GAMETYPE,m_pSVO2);
 			if(!ret)   //Create failed.
-				AfxMessageBox("Error Creating Game Type Dialog");
+				AfxMessageBox(L"Error Creating Game Type Dialog");
 			AddDlg(m_pSVGameTypeDlg, m_pSVO2, CX, CY);			
 		}
 		else
-			AfxMessageBox("Error Creating Dialog Object");
+			AfxMessageBox(L"Error Creating Dialog Object");
 		//-------------------------------------------------------
 		m_pSVGameOptDlg = new SVGameOptDlg();
 		if (m_pSVGameOptDlg)
 		{
 			BOOL ret = m_pSVGameOptDlg->Create(IDD_GAMEOPTIONS,m_pSVO2);
 			if(!ret)   //Create failed.
-				AfxMessageBox("Error Creating Game Options Dialog");
+				AfxMessageBox(L"Error Creating Game Options Dialog");
 			AddDlg(m_pSVGameOptDlg, m_pSVO2, CX, CY);			
 		}
 		else
-			AfxMessageBox("Error Creating Dialog Object");
+			AfxMessageBox(L"Error Creating Dialog Object");
 		//-------------------------------------------------------
 		
 //		int LastCY = CY;
@@ -147,33 +147,33 @@ BOOL CServerDlg::OnInitDialog()
 		{
 			BOOL ret = m_pSVRepawnDlg->Create(IDD_RESPAWN,m_pSVO2);
 			if(!ret)   //Create failed.
-				AfxMessageBox("Error Creating Respawn Options Dialog");
+				AfxMessageBox(L"Error Creating Respawn Options Dialog");
 			AddDlg(m_pSVRepawnDlg, m_pSVO2, CX, CY);
 		}
 		else
-			AfxMessageBox("Error Creating Dialog Object");
+			AfxMessageBox(L"Error Creating Dialog Object");
 		//-------------------------------------------------------
 		m_pSVSpectatorOptsDlg = new SVSpectatorDlg();
 		if (m_pSVSpectatorOptsDlg)
 		{
 			BOOL ret = m_pSVSpectatorOptsDlg->Create(IDD_SPECTATOROPTS,m_pSVO2);
 			if(!ret)   //Create failed.
-				AfxMessageBox("Error Creating Spectator Options Dialog");
+				AfxMessageBox(L"Error Creating Spectator Options Dialog");
 			AddDlg(m_pSVSpectatorOptsDlg, m_pSVO2, CX, CY);
 		}
 		else
-			AfxMessageBox("Error Creating Dialog Object");		
+			AfxMessageBox(L"Error Creating Dialog Object");		
 		//-------------------------------------------------------
 		m_pSVWeatherOptDlg = new SVWeatherOptions();
 		if (m_pSVWeatherOptDlg)
 		{
 			BOOL ret = m_pSVWeatherOptDlg->Create(IDD_WEATHEROPTIONS,m_pSVO2);
 			if(!ret)   //Create failed.
-				AfxMessageBox("Error Creating Weather Options Dialog");
+				AfxMessageBox(L"Error Creating Weather Options Dialog");
 			AddDlg(m_pSVWeatherOptDlg, m_pSVO2, CX, CY);
 		}
 		else
-			AfxMessageBox("Error Creating Dialog Object");		
+			AfxMessageBox(L"Error Creating Dialog Object");		
 		
 		//-------------------------------------------------------
 		m_pSVO2->GetClientRect(&R);
@@ -360,7 +360,7 @@ void	CServerDlg::UpdateMapList(GAME_TYPE GameType)
 //	};
 	for (u32 i=0; i<(u32)m_maps[xGameType].size(); i++)
 	{
-		m_pMapList.AddString(*(m_maps[xGameType][i]));
+		m_pMapList.AddString((LPCTSTR) *(m_maps[xGameType][i]));
 	};
 };
 
@@ -374,7 +374,7 @@ bool CServerDlg::GetMapName	(char* pMapName)
 	return true;
 	*/
 	if (!m_pMapList2.GetCount()) return false;
-	m_pMapList2.GetText(0, pMapName);
+	m_pMapList2.GetText(0, (LPTSTR) pMapName);
 	return true;
 };
 
@@ -429,15 +429,17 @@ void CServerDlg::OnBnClickedStartServer()
 	if (m_pSVGameOptDlg->m_pFragLimit.GetWindowTextLength())
 	{
 		CString tmpText;
+		CT2A tmpText_(tmpText);
 		m_pSVGameOptDlg->m_pFragLimit.GetWindowText(tmpText);
-		FragLimit = atoi(tmpText);
+		FragLimit = atoi(tmpText_);
 		sprintf(FragLimStr, "/fraglimit=%d", FragLimit);
 	};
 	if (m_pSVGameOptDlg->m_pTimeLimit.GetWindowTextLength())
 	{
 		CString tmpText;
+		CT2A tmpText_(tmpText);
 		m_pSVGameOptDlg->m_pTimeLimit.GetWindowText(tmpText);
-		TimeLimit = atoi(tmpText);
+		TimeLimit = atoi(tmpText_);
 		sprintf(TimeLimStr, "/timelimit=%d", TimeLimit);
 	};
 	char FriendlyFireStr[1024];
@@ -458,12 +460,13 @@ void CServerDlg::OnBnClickedStartServer()
 		sprintf(ArtefactNumStr, "/anum=%d", ItemData);
 	
 		CString tmpText;
+		CT2A tmpText_(tmpText);
 		m_pSVGameOptDlg->m_pArtefactDelay.GetWindowText(tmpText);
-		ArtefactDelay = atoi(tmpText);
+		ArtefactDelay = atoi(tmpText_);
 		sprintf(ArtefactDelayStr, "/ardelta=%d", ArtefactDelay);
 		
 		m_pSVGameOptDlg->m_pArtefactStay.GetWindowText(tmpText);
-		ArtefactStay = atoi(tmpText);
+		ArtefactStay = atoi(tmpText_);
 		sprintf(ArtefactStayStr, "/astime=%d", ArtefactStay);
 
 		if (m_pSVRepawnDlg->m_pACaptured.GetCheck())
@@ -474,7 +477,7 @@ void CServerDlg::OnBnClickedStartServer()
 		{
 
 			m_pSVRepawnDlg->m_pReinforcementTime.GetWindowText(tmpText);
-			int ReinfTime = atoi(tmpText);
+			int ReinfTime = atoi(tmpText_);
 			if (ReinfTime > 0)
 				sprintf(ReinforcementStr, "/reinf=%s", tmpText);
 			else
@@ -489,7 +492,7 @@ void CServerDlg::OnBnClickedStartServer()
 		NameLen = pMainDlg->m_pPlayerName.GetWindowTextLength();
 		if (NameLen) 
 		{
-			pMainDlg->m_pPlayerName.GetWindowText(Name, 1023);
+			pMainDlg->m_pPlayerName.GetWindowText((LPTSTR) Name, 1023);
 			Name[32] = 0;
 			sprintf(NameAdd, "/name=%s", Name);
 		};
@@ -501,13 +504,13 @@ void CServerDlg::OnBnClickedStartServer()
 		if (pMainDlg->m_pLogsPath.GetWindowTextLength() != 0)
 		{
 			char tmp[1024];
-			pMainDlg->m_pLogsPath.GetWindowText(tmp, 1024);
+			pMainDlg->m_pLogsPath.GetWindowText((LPTSTR) tmp, 1024);
 			sprintf(sLogsPath, "-overlaypath %s ", tmp);
 		}
 		if (pMainDlg->m_pCDKeyBtn.GetWindowTextLength() != 0)
 		{
 			char tmp[1024];
-			pMainDlg->m_pCDKeyBtn.GetWindowText(tmp, 1024);
+			pMainDlg->m_pCDKeyBtn.GetWindowText((LPTSTR) tmp, 1024);
 			if (xr_strcmp(tmp, "- No CD Key -") != 0)
 				sprintf(sCDKeyStr, "/cdkey=%s", tmp);
 		}
@@ -517,21 +520,21 @@ void CServerDlg::OnBnClickedStartServer()
 	if (m_pSVServerOptDlg->m_pHostName.GetWindowTextLength() > 0)
 	{
 		char tmp[1024];
-		m_pSVServerOptDlg->m_pHostName.GetWindowText(tmp, 1024);
+		m_pSVServerOptDlg->m_pHostName.GetWindowText((LPTSTR) tmp, 1024);
 		sprintf(HostNameStr, "/hname=%s", tmp);
 	};
 	char PasswordStr[1024] = "";
 	if (m_pSVServerOptDlg->m_pPassword.GetWindowTextLength() > 0)
 	{
 		char tmp[1024];
-		m_pSVServerOptDlg->m_pPassword.GetWindowText(tmp, 1024);
+		m_pSVServerOptDlg->m_pPassword.GetWindowText((LPTSTR) tmp, 1024);
 		sprintf(PasswordStr, "/psw=%s", tmp);
 	}
 	char MaxPlayersStr[1024] = "";
 	if (m_pSVServerOptDlg->m_pMaxPlayers.GetWindowTextLength() > 0)
 	{
 		char tmp[1024];
-		m_pSVServerOptDlg->m_pMaxPlayers.GetWindowText(tmp, 1024);
+		m_pSVServerOptDlg->m_pMaxPlayers.GetWindowText((LPTSTR) tmp, 1024);
 		sprintf(MaxPlayersStr, "/maxplayers=%s", tmp);
 	};
 	iDedicated = m_pSVServerOptDlg->m_pDedicated.GetCheck();
@@ -539,8 +542,9 @@ void CServerDlg::OnBnClickedStartServer()
 	if (iSpectatorOnly)
 	{
 		CString tmpText;
+		CT2A tmpText_(tmpText);
 		m_pSVServerOptDlg->m_pSpectrSwitchTime.GetWindowText(tmpText);
-		int SpectrTime = atoi(tmpText);
+		int SpectrTime = atoi(tmpText_);
 		sprintf(SpectrStr, "/spectr=%d", SpectrTime);
 	};
 	int iPublic = m_pSVServerOptDlg->m_pPublic.GetCheck();
@@ -553,8 +557,9 @@ void CServerDlg::OnBnClickedStartServer()
 	if (m_pSVRepawnDlg->m_pRPFreezeTime.GetWindowTextLength())
 	{
 		CString tmpText;
+		CT2A tmpText_(tmpText);
 		m_pSVRepawnDlg->m_pRPFreezeTime.GetWindowText(tmpText);
-		iRPFreezeTime = atoi(tmpText);
+		iRPFreezeTime = atoi(tmpText_);
 		sprintf(RPFreezeTimeStr, "/rpfrz=%i", iRPFreezeTime);
 	}
 	char MapRotStr[1024] = "";
@@ -586,8 +591,9 @@ void CServerDlg::OnBnClickedStartServer()
 	if (m_pSVRepawnDlg->m_pDmBlockLimit.GetWindowTextLength())
 	{
 		CString DmgBlkLimit;
+		CT2A DmgBlkLimit_(DmgBlkLimit);
 		m_pSVRepawnDlg->m_pDmBlockLimit.GetWindowText(DmgBlkLimit);
-		sprintf(DmgBlkStr, "/dmgblock=%d", atol(DmgBlkLimit));
+		sprintf(DmgBlkStr, "/dmgblock=%d", atol(DmgBlkLimit_));
 	}
 	char DmgBlkStrInd[1024] = "";
 	if (m_pSVRepawnDlg->m_pDmgBlkInd.IsWindowEnabled() && m_pSVRepawnDlg->m_pDmgBlkInd.GetCheck())
@@ -598,10 +604,11 @@ void CServerDlg::OnBnClickedStartServer()
 	if (m_pSVRepawnDlg->m_pForceRespawn.IsWindowEnabled() && m_pSVRepawnDlg->m_pForceRespawn.GetCheck())
 	{
 		CString ForceRespawnTime;
+		CT2A ForceRespawnTime_(ForceRespawnTime);
 		m_pSVRepawnDlg->m_pForceRespawnTime.GetWindowText(ForceRespawnTime);
-		if (atol(ForceRespawnTime))
+		if (atol(ForceRespawnTime_))
 		{
-			sprintf(DmgBlkStr, "/frcrspwn=%d", atol(ForceRespawnTime));
+			sprintf(DmgBlkStr, "/frcrspwn=%d", atol(ForceRespawnTime_));
 		}
 	};
 	//-------------------------------------------
@@ -609,17 +616,19 @@ void CServerDlg::OnBnClickedStartServer()
 	if (m_pSVGameOptDlg->m_pNoAnomalies.GetCheck()==0)
 	{
 		CString AnomalySetTime;
+		CT2A AnomalySetTime_(AnomalySetTime);
 		m_pSVGameOptDlg->m_pAnomalySetTime.GetWindowText(AnomalySetTime);
-		sprintf(DmgBlkStr, "/anslen=%d", atol(AnomalySetTime));
+		sprintf(DmgBlkStr, "/anslen=%d", atol(AnomalySetTime_));
 	}
 //-----------------------------------------------------------------------------
 	char WarmUpStr[1024] = "";
 	if (m_pSVGameOptDlg->m_pWarmUpTime.GetWindowTextLength()>0)
 	{
 		CString WarmUpTime;
+		CT2A WarmUpTime_(WarmUpTime);
 		m_pSVGameOptDlg->m_pWarmUpTime.GetWindowText(WarmUpTime);
-		if (atol(WarmUpTime)>0)
-			sprintf(WarmUpStr, "/warmup=%d", atol(WarmUpTime));
+		if (atol(WarmUpTime_)>0)
+			sprintf(WarmUpStr, "/warmup=%d", atol(WarmUpTime_));
 	}
 //-----------------------------------------------------------------------------
 	//------------- Weather ---------------------------
@@ -628,8 +637,9 @@ void CServerDlg::OnBnClickedStartServer()
 	if (m_pSVWeatherOptDlg->m_pWeatherSpeedCoeff.GetWindowTextLength())
 	{
 		CString WeatherSpeedCoeff;
+		CT2A WeatherSpeedCoeff_(WeatherSpeedCoeff);
 		m_pSVWeatherOptDlg->m_pWeatherSpeedCoeff.GetWindowText(WeatherSpeedCoeff);
-		sprintf(WeatherCoeff, "/etimef=%d", atol(WeatherSpeedCoeff));
+		sprintf(WeatherCoeff, "/etimef=%d", atol(WeatherSpeedCoeff_));
 	};
 	if (m_pSVWeatherOptDlg->m_pStartWeather.GetCount())
 	{
@@ -643,7 +653,7 @@ void CServerDlg::OnBnClickedStartServer()
 	if (m_pSVServerOptDlg->m_pSVPort.GetWindowTextLength() > 0)
 	{
 		char tmp[1024];
-		m_pSVServerOptDlg->m_pSVPort.GetWindowText(tmp, 1024);
+		m_pSVServerOptDlg->m_pSVPort.GetWindowText((LPTSTR) tmp, 1024);
 		int Port = atol(tmp);		
 		clamp(Port, START_PORT, END_PORT);
 		sprintf(SVPortStr, "/portsv=%d", Port);
@@ -652,7 +662,7 @@ void CServerDlg::OnBnClickedStartServer()
 	if (m_pSVServerOptDlg->m_pCLPort.GetWindowTextLength() > 0)
 	{
 		char tmp[1024];
-		m_pSVServerOptDlg->m_pCLPort.GetWindowText(tmp, 1024);
+		m_pSVServerOptDlg->m_pCLPort.GetWindowText((LPTSTR) tmp, 1024);
 		int Port = atol(tmp);		
 		clamp(Port, START_PORT, END_PORT);
 		sprintf(CLPortStr, "/portcl=%d", Port);
@@ -661,7 +671,7 @@ void CServerDlg::OnBnClickedStartServer()
 	if (m_pSVServerOptDlg->m_pGSPort.GetWindowTextLength() > 0)
 	{
 		char tmp[1024];
-		m_pSVServerOptDlg->m_pGSPort.GetWindowText(tmp, 1024);
+		m_pSVServerOptDlg->m_pGSPort.GetWindowText((LPTSTR) tmp, 1024);
 		int Port = atol(tmp);		
 		clamp(Port, START_PORT, END_PORT);
 		sprintf(GSPortStr, "/portgs=%d", Port);
@@ -723,7 +733,7 @@ void CServerDlg::OnBnClickedStartServer()
 			);
 	
 //	if (xr_strlen(cmdline) > 4096) _ASSERT(0);
-	OutputDebugString( cmdline );
+	OutputDebugString((LPCWSTR) cmdline );
 	int res = WinExec(cmdline, SW_SHOW);	
 	//-------------------------------------------------------
 	/*
@@ -816,10 +826,10 @@ void CServerDlg::OnBnClicked2List2()
 	char pMapName[1024];
 	for (int i=0; i < NumSelected; i++)
 	{
-		m_pMapList.GetText(SelIndx[i], pMapName);
+		m_pMapList.GetText(SelIndx[i], (LPTSTR) pMapName);
 		m_pMapList.SetSel(SelIndx[i], FALSE);
 		if (!pMapName[0]) continue;
-		m_pMapList2.AddString(pMapName);
+		m_pMapList2.AddString((LPCTSTR) pMapName);
 	};
 
 	m_pMapList2.RedrawWindow();
@@ -863,18 +873,19 @@ void	CServerDlg::SaveMapList()
 //	MapRotFileName += ".ltx";
 
 	string_path			MapRotFileFullPath;
+	CT2A MapRotFileName_(MapRotFileName);
 
-	u32 size = xr_strlen(MapRotFileName);
+	u32 size = xr_strlen(MapRotFileName_);
 //	memmove(MapRotFileFullPath, MapRotFileName, xr_strlen(MapRotFileName));
-	strcpy(MapRotFileFullPath, MapRotFileName);
+	strcpy(MapRotFileFullPath, MapRotFileName_);
 	
-	FS.update_path		(MapRotFileFullPath, "$app_data_root$", MapRotFileName);
+	FS.update_path		(MapRotFileFullPath, "$app_data_root$", MapRotFileName_);
 	CStalker_netDlg* pMainDlg = (CStalker_netDlg*) (GetParent()->GetParent());
 	if (pMainDlg && pMainDlg->m_pLogsPath.GetWindowTextLength() != 0)
 	{
 		char tmp[1024];
 		string_path NewPath;
-		pMainDlg->m_pLogsPath.GetWindowText(tmp, 1024);
+		pMainDlg->m_pLogsPath.GetWindowText((LPTSTR) tmp, 1024);
 		sprintf(NewPath, "%s%s", tmp, MapRotFileFullPath);
 		strcpy(MapRotFileFullPath, NewPath);
 	}
@@ -893,7 +904,7 @@ void	CServerDlg::SaveMapList()
 	char pMapName[1024];
 	for (int i=0; i < m_pMapList2.GetCount(); i++)
 	{
-		m_pMapList2.GetText(i, pMapName);
+		m_pMapList2.GetText(i, (LPTSTR) pMapName);
 		if (!pMapName[0]) continue;
 
 		fs->w_printf("sv_addmap %s\n", pMapName);

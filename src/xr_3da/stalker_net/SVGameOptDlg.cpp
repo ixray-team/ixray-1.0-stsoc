@@ -61,7 +61,7 @@ BOOL SVGameOptDlg::OnInitDialog()
 	//-----------------------------------------
 	m_pFriedlyFire.EnableWindow(FALSE);	m_pStaticFF.EnableWindow(FALSE);
 	m_pFFAmount.EnableWindow(FALSE);
-	m_pFFAmount.SetWindowText("100%");
+	m_pFFAmount.SetWindowText(L"100%");
 
 	int NumTicks = m_pFriedlyFire.GetNumTics();
 	m_pFriedlyFire.SetRangeMax(200);
@@ -85,23 +85,23 @@ BOOL SVGameOptDlg::OnInitDialog()
 		char Text[1024];
 		sprintf(Text, "%2d", ItemData);
 
-		m_pArtefactsNum.AddString(Text);
+		m_pArtefactsNum.AddString((LPCTSTR) Text);
 		m_pArtefactsNum.SetItemData(i-1, (DWORD_PTR)ItemData);
 	};
 	m_pArtefactsNum.SetCurSel(1);
 	//-----------------------------------------
-	m_pFragLimit.SetWindowText("0");		m_pStaticFL.EnableWindow(TRUE);
-	m_pTimeLimit.SetWindowText("0");		m_pStaticTL.EnableWindow(TRUE);
-	m_pArtefactDelay.SetWindowText("30");	m_pStaticAD.EnableWindow(FALSE);
+	m_pFragLimit.SetWindowText(L"0");		m_pStaticFL.EnableWindow(TRUE);
+	m_pTimeLimit.SetWindowText(L"0");		m_pStaticTL.EnableWindow(TRUE);
+	m_pArtefactDelay.SetWindowText(L"30");	m_pStaticAD.EnableWindow(FALSE);
 	m_pArtefactDelay.EnableWindow(FALSE);
 	//-----------------------------------------
-	m_pArtefactStay.SetWindowText("3");
+	m_pArtefactStay.SetWindowText(L"3");
 	//-----------------------------------------
 	m_pNoAnomalies.SetCheck(0);
-	m_pAnomalySetTime.SetWindowText("5");
+	m_pAnomalySetTime.SetWindowText(L"5");
 	OnBnClickedNoAnomalies();
 	//-----------------------------------------
-	m_pWarmUpTime.SetWindowText("60");		m_pStaticWU.EnableWindow(TRUE);
+	m_pWarmUpTime.SetWindowText(L"60");		m_pStaticWU.EnableWindow(TRUE);
 	/*
 	RECT R, PR;
 	GetWindowRect(&R);
@@ -126,7 +126,7 @@ void SVGameOptDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	{
 		char Text[1024];
 		sprintf(Text, "%d%c", m_pFriedlyFire.GetPos(), '%');//);
-		m_pFFAmount.SetWindowText(Text);
+		m_pFFAmount.SetWindowText((LPCTSTR) Text);
 	};
 }
 

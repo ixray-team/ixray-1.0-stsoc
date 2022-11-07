@@ -51,18 +51,18 @@ BOOL SVRespawnDlg::OnInitDialog()
 	m_pACaptured.SetCheck(0);
 	//-----------------------------------------
 	m_pReinforcementTime.EnableWindow(FALSE);
-	m_pReinforcementTime.SetWindowText("10");
+	m_pReinforcementTime.SetWindowText(L"10");
 	//-----------------------------------------
 	m_pRPFreezeTime.EnableWindow(TRUE);
-	m_pRPFreezeTime.SetWindowText("5");
+	m_pRPFreezeTime.SetWindowText(L"5");
 	//-----------------------------------------
 	m_pDmgBlkInd.SetCheck(1);
-	m_pDmBlockLimit.SetWindowText("0");
+	m_pDmBlockLimit.SetWindowText(L"0");
 	//-----------------------------------------
 	m_pForceRespawn.EnableWindow(TRUE);
 	m_pForceRespawn.SetCheck(0);
 	m_pForceRespawnTime.EnableWindow(TRUE);
-	m_pForceRespawnTime.SetWindowText("0");
+	m_pForceRespawnTime.SetWindowText(L"0");
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 };
@@ -119,7 +119,7 @@ void SVRespawnDlg::OnGameTypeSwitch(byte NewGameType)
 			m_pACaptured.EnableWindow(FALSE);
 			//-----------------------------------------
 			m_pReinforcementTime.EnableWindow(FALSE);
-			m_pReinforcementTime.SetWindowText("0");
+			m_pReinforcementTime.SetWindowText(L"0");
 			m_pForceRespawnTime.EnableWindow(TRUE);			
 		}break;
 	case GAME_TEAMDEATHMATCH :
@@ -133,7 +133,7 @@ void SVRespawnDlg::OnGameTypeSwitch(byte NewGameType)
 			m_pACaptured.EnableWindow(FALSE);
 			//-----------------------------------------
 			m_pReinforcementTime.EnableWindow(FALSE);
-			m_pReinforcementTime.SetWindowText("0");
+			m_pReinforcementTime.SetWindowText(L"0");
 			m_pForceRespawnTime.EnableWindow(TRUE);			
 		}break;
 	case GAME_ARTEFACTHUNT:

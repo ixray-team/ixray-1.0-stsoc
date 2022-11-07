@@ -61,16 +61,22 @@
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\loki;$(SolutionDir)..\..\src\xrLua\src;$(SolutionDir)..\..\sdk\luabind\luabind;$(SolutionDir)..\..\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
     <OutDir>x:\binaries\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\loki;$(SolutionDir)..\..\src\xrLua\src;$(SolutionDir)..\..\sdk\luabind\luabind;$(SolutionDir)..\..\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>x:\binaries\</OutDir>
     <IntDir>x:\intermediate\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\src\xrCore;$(SolutionDir)..\..\sdk\loki;$(SolutionDir)..\..\src\xrLua\src;$(SolutionDir)..\..\sdk\luabind\luabind;$(SolutionDir)..\..\sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
