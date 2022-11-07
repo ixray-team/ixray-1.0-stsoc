@@ -2,35 +2,35 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Kernel">
-      <UniqueIdentifier>{821458fa-e7f1-4276-8bac-8b17f712db30}</UniqueIdentifier>
+      <UniqueIdentifier>{c9b41585-8961-464a-b3d1-b329b6eb54ff}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files">
-      <UniqueIdentifier>{c7503738-6ef8-43d0-a985-cfd941cddad5}</UniqueIdentifier>
+      <UniqueIdentifier>{3483184b-47df-481e-84c3-45d98fd7a4fd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files\Engine">
-      <UniqueIdentifier>{348ccacf-cac4-4579-9e3f-c0d8e0cade9a}</UniqueIdentifier>
+      <UniqueIdentifier>{1ab81e8b-5014-42d3-876c-668d9534bf08}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files\Editor">
-      <UniqueIdentifier>{736d685c-9931-4ba0-8e41-5c39a29e63b0}</UniqueIdentifier>
+      <UniqueIdentifier>{18d6bbff-3b11-4f2f-8d33-cae1ed749b5e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files\Plugins">
-      <UniqueIdentifier>{d83553d6-5e14-4c16-803a-9b19996f0f02}</UniqueIdentifier>
+      <UniqueIdentifier>{d81afce5-1afd-4209-80b7-2e7540b75c7d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shader">
-      <UniqueIdentifier>{28b514aa-7926-4477-8be6-c4890c9e1f7c}</UniqueIdentifier>
+      <UniqueIdentifier>{dae4dfa9-522f-4301-b64a-d8e4cb3c0b13}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Material\stdafx.cpp">
       <Filter>Kernel</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\GameMtlLib.cpp">
+    <ClCompile Include="Material\GameMtlLib.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\ELog.cpp">
+    <ClCompile Include="Material\ELog.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\BlenderListLoader.cpp">
+    <ClCompile Include="Material\BlenderListLoader.cpp">
       <Filter>Shared Files\Plugins</Filter>
     </ClCompile>
     <ClCompile Include="Material\crc16.cpp">
@@ -49,20 +49,20 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuildStep Include="Material\Stdafx.h">
+    <CustomBuild Include="Material\Stdafx.h">
       <Filter>Kernel</Filter>
-    </CustomBuildStep>
-    <CustomBuildStep Include="Material\GameMtlLib.h">
+    </CustomBuild>
+    <CustomBuild Include="Material\GameMtlLib.h">
       <Filter>Shared Files\Engine</Filter>
-    </CustomBuildStep>
-    <CustomBuildStep Include="Material\Shader_xrLC.h">
+    </CustomBuild>
+    <CustomBuild Include="Material\Shader_xrLC.h">
       <Filter>Shared Files\Engine</Filter>
-    </CustomBuildStep>
-    <CustomBuildStep Include="Material\ELog.h">
+    </CustomBuild>
+    <CustomBuild Include="Material\ELog.h">
       <Filter>Shared Files\Editor</Filter>
-    </CustomBuildStep>
-    <CustomBuildStep Include="Material\BlenderListLoader.h">
+    </CustomBuild>
+    <CustomBuild Include="Material\BlenderListLoader.h">
       <Filter>Shared Files\Plugins</Filter>
-    </CustomBuildStep>
+    </CustomBuild>
   </ItemGroup>
 </Project>

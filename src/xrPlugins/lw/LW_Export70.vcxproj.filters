@@ -2,56 +2,56 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Kernel">
-      <UniqueIdentifier>{3bb69c08-6973-4184-be4e-a621580ec43e}</UniqueIdentifier>
+      <UniqueIdentifier>{8027724a-fdec-4d59-a597-078288082d83}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files">
-      <UniqueIdentifier>{cec8a83f-65d1-4cb1-9c3b-5e3026f62aae}</UniqueIdentifier>
+      <UniqueIdentifier>{b30cf884-7bf2-4d16-9439-e57305e24460}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files\Engine">
-      <UniqueIdentifier>{367c6c42-b1e7-4ac0-85c9-0a64d71b1a31}</UniqueIdentifier>
+      <UniqueIdentifier>{1163267f-c7a0-4587-923f-e969f8038c2f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files\Editor">
-      <UniqueIdentifier>{3e49054d-8ae9-47cc-9cc5-f831524df09b}</UniqueIdentifier>
+      <UniqueIdentifier>{45e4e2cb-98e7-4442-aa71-cbd04c6c2511}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files\Server">
-      <UniqueIdentifier>{f7fa2fc6-a19c-470e-b22b-0dcaa949df3f}</UniqueIdentifier>
+      <UniqueIdentifier>{238374c2-2897-47d6-81a8-dde9e32f078d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Export">
-      <UniqueIdentifier>{6603d6a2-43a2-4e8d-ba87-a7515e002256}</UniqueIdentifier>
+      <UniqueIdentifier>{f87d0a8b-e849-4d9b-b768-fed8fdb4e53c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Export\SceneScan">
-      <UniqueIdentifier>{40ff2e07-bbc4-4d35-8edf-5233de46af0b}</UniqueIdentifier>
+      <UniqueIdentifier>{74cba151-2a5f-4c4a-a0f1-f6626bdeb7ae}</UniqueIdentifier>
     </Filter>
     <Filter Include="Export\LWO">
-      <UniqueIdentifier>{02a54ad0-e06c-41d5-a1e4-f86e4f25c96e}</UniqueIdentifier>
+      <UniqueIdentifier>{edb9bfd0-6796-4f6d-9dea-ca3459aae434}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Export\stdafx.cpp">
       <Filter>Kernel</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\bone.cpp">
+    <ClCompile Include="Export\bone.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\Envelope.cpp">
+    <ClCompile Include="Export\Envelope.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\interp.cpp">
+    <ClCompile Include="Export\interp.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\motion.cpp">
+    <ClCompile Include="Export\motion.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\EditMesh.cpp">
+    <ClCompile Include="Export\EditMesh.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\EditMeshIO.cpp">
+    <ClCompile Include="Export\EditMeshIO.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\EditMeshModify.cpp">
+    <ClCompile Include="Export\EditMeshModify.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\EditObject.cpp">
+    <ClCompile Include="Export\EditObject.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
     <ClCompile Include="Export\EditObjectImport.cpp">
@@ -60,13 +60,13 @@
     <ClCompile Include="Export\EditObjectImportDB.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\EditObjectIO.cpp">
+    <ClCompile Include="Export\EditObjectIO.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\EditObjectMotions.cpp">
+    <ClCompile Include="Export\EditObjectMotions.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\ELog.cpp">
+    <ClCompile Include="Export\ELog.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
     <ClCompile Include="Server\servmain.c">

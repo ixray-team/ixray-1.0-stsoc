@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -17,11 +17,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -38,17 +40,17 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\lw\ver-7.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\lw\ver-7.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -63,8 +65,7 @@
       <AdditionalIncludeDirectories>$(3D_EDITORS_SDK)\lw\ver-7.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_X86_;_WIN32;WIN32;_WINDOWS;_USRDLL;_LW_PLUGIN;_LW_EXPORT;XRCORE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <ExceptionHandling>
-      </ExceptionHandling>
+      <ExceptionHandling />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -78,7 +79,6 @@
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ForceConformanceInForLoopScope>false</ForceConformanceInForLoopScope>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -89,10 +89,8 @@
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;lw_server.lib;xrcorestatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)xray_export.p</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>Server\serv.def</ModuleDefinitionFile>
-      <ProgramDatabaseFile>
-      </ProgramDatabaseFile>
+      <ProgramDatabaseFile />
       <ImportLibrary>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\project.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
@@ -136,7 +134,6 @@
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;lw_serverd.lib;xrcorestaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)xray_export.p</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>Server\serv.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)xray_export.pdb</ProgramDatabaseFile>
@@ -144,48 +141,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Export\stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Shared\bone.cpp" />
-    <ClCompile Include="..\Shared\Envelope.cpp" />
-    <ClCompile Include="..\Shared\interp.cpp" />
-    <ClCompile Include="..\Shared\motion.cpp" />
-    <ClCompile Include="..\Shared\EditMesh.cpp" />
-    <ClCompile Include="..\Shared\EditMeshIO.cpp" />
-    <ClCompile Include="..\Shared\EditMeshModify.cpp" />
-    <ClCompile Include="..\Shared\EditObject.cpp" />
+    <ClCompile Include="Export\bone.cpp" />
+    <ClCompile Include="Export\bone_lw.cpp" />
+    <ClCompile Include="Export\EditMesh.cpp" />
+    <ClCompile Include="Export\EditMeshIO.cpp" />
+    <ClCompile Include="Export\EditMeshModify.cpp" />
+    <ClCompile Include="Export\EditObject.cpp" />
     <ClCompile Include="Export\EditObjectImport.cpp" />
     <ClCompile Include="Export\EditObjectImportDB.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\Shared\EditObjectIO.cpp" />
-    <ClCompile Include="..\Shared\EditObjectMotions.cpp" />
-    <ClCompile Include="..\Shared\ELog.cpp" />
-    <ClCompile Include="Server\servmain.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="Export\bone_lw.cpp" />
+    <ClCompile Include="Export\EditObjectIO.cpp" />
+    <ClCompile Include="Export\EditObjectMotions.cpp" />
+    <ClCompile Include="Export\ELog.cpp" />
+    <ClCompile Include="Export\Envelope.cpp" />
     <ClCompile Include="Export\envtest.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Export\LW_export_keys.cpp" />
-    <ClCompile Include="Export\LW_export_motion.cpp" />
-    <ClCompile Include="Export\LW_export_object.cpp" />
-    <ClCompile Include="Export\motion_lw.cpp" />
-    <ClCompile Include="Export\scenscan\objectdb.cpp" />
-    <ClCompile Include="Export\scenscan\ptsearch.cpp" />
-    <ClCompile Include="Export\scenscan\surface.cpp" />
-    <ClCompile Include="Export\scenscan\vecmat.cpp" />
-    <ClCompile Include="Export\scenscan\vmap.cpp" />
+    <ClCompile Include="Export\interp.cpp" />
     <ClCompile Include="Export\LWO\clip.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
@@ -252,25 +229,45 @@
       </PrecompiledHeader>
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="Export\LW_export_keys.cpp" />
+    <ClCompile Include="Export\LW_export_motion.cpp" />
+    <ClCompile Include="Export\LW_export_object.cpp" />
+    <ClCompile Include="Export\motion.cpp" />
+    <ClCompile Include="Export\motion_lw.cpp" />
+    <ClCompile Include="Export\scenscan\objectdb.cpp" />
+    <ClCompile Include="Export\scenscan\ptsearch.cpp" />
+    <ClCompile Include="Export\scenscan\surface.cpp" />
+    <ClCompile Include="Export\scenscan\vecmat.cpp" />
+    <ClCompile Include="Export\scenscan\vmap.cpp" />
+    <ClCompile Include="Export\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Server\servmain.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Export\stdafx.h" />
     <ClInclude Include="Export\bone.h" />
-    <ClInclude Include="Export\envelope.h" />
-    <ClInclude Include="Export\Fmesh.h" />
-    <ClInclude Include="Export\motion.h" />
     <ClInclude Include="Export\EditMesh.h" />
     <ClInclude Include="Export\EditObject.h" />
     <ClInclude Include="Export\ELog.h" />
-    <ClInclude Include="Export\LW_ShaderDef.h" />
-    <ClInclude Include="Export\SceneObject.h" />
+    <ClInclude Include="Export\envelope.h" />
+    <ClInclude Include="Export\Fmesh.h" />
     <ClInclude Include="Export\lwo2.h" />
+    <ClInclude Include="Export\LWO\envelope.h" />
+    <ClInclude Include="Export\LWO\lwo2.h" />
+    <ClInclude Include="Export\LW_ShaderDef.h" />
+    <ClInclude Include="Export\motion.h" />
     <ClInclude Include="Export\resource.h" />
+    <ClInclude Include="Export\SceneObject.h" />
     <ClInclude Include="Export\scenscan\objectdb.h" />
     <ClInclude Include="Export\scenscan\scenscan.h" />
     <ClInclude Include="Export\scenscan\vecmat.h" />
-    <ClInclude Include="Export\LWO\envelope.h" />
-    <ClInclude Include="Export\LWO\lwo2.h" />
+    <ClInclude Include="Export\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="LW_Server.vcxproj">
