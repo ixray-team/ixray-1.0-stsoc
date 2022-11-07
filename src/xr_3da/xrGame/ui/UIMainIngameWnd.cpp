@@ -49,6 +49,8 @@
 #include "UIColorAnimatorWrapper.h"
 #include "../game_news.h"
 
+#include <functional>
+
 #ifdef DEBUG
 #	include "../debug_renderer.h"
 
