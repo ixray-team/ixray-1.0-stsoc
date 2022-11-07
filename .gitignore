@@ -15,12 +15,9 @@ ipch/
 *.aps
 
 # Build results
-intermediate/
-intermediate_ed/
-intermediate_plugs/
-libraries/
-binaries/
-binaries_plugs/
+obj/
+lib/
+bin/
 
 # Migrating report files
 _UpgradeReport_Files/
@@ -29,10 +26,13 @@ UpgradeLog*.htm
 
 # Dependencies
 sdk/dxsdk_mar2009/
-sdk/dplay/
 sdk/3d_sdk/
 
 # C++ Builder backups
 *.~bpr
 *.~h
 *.~cpp
+
+# X-Ray resources
+gamedata/
+rawdata/
