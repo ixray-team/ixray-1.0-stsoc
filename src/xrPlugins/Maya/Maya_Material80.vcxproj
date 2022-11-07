@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -18,10 +18,12 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -37,17 +39,17 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\maya\ver-8.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\3d_sdk\maya\ver-8.0\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\maya\ver-8.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\3d_sdk\maya\ver-8.0\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -60,7 +62,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(3D_EDITORS_SDK)\maya\ver-8.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;NT_PLUGIN;_MAYA_MATERIAL;_MAYA_PLUGIN;XRCORE_STATIC;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;NT_PLUGIN;_MAYA_MATERIAL;_MAYA_PLUGIN;XRCORE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -104,8 +106,7 @@
       <AdditionalIncludeDirectories>$(3D_EDITORS_SDK)\maya\ver-8.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;NT_PLUGIN;_MAYA_MATERIAL;_MAYA_PLUGIN;XRCORE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <ExceptionHandling>
-      </ExceptionHandling>
+      <ExceptionHandling />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -128,29 +129,28 @@
       <OutputFile>$(OutDir)xrayMaya_material.mll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(3D_EDITORS_SDK)\maya\ver-8.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ProgramDatabaseFile>
-      </ProgramDatabaseFile>
+      <ProgramDatabaseFile />
       <SubSystem>Windows</SubSystem>
       <ImportLibrary>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\project.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Material\BlenderListLoader.cpp" />
+    <ClCompile Include="Material\crc16.cpp" />
+    <ClCompile Include="Material\ELog.cpp" />
+    <ClCompile Include="Material\GameMtlLib.cpp" />
+    <ClCompile Include="Material\lambertShader.cpp" />
     <ClCompile Include="Material\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\Shared\GameMtlLib.cpp" />
-    <ClCompile Include="..\Shared\ELog.cpp" />
-    <ClCompile Include="..\Shared\BlenderListLoader.cpp" />
-    <ClCompile Include="Material\crc16.cpp" />
-    <ClCompile Include="Material\lambertShader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuildStep Include="Material\Stdafx.h" />
-    <CustomBuildStep Include="Material\GameMtlLib.h" />
-    <CustomBuildStep Include="Material\Shader_xrLC.h" />
-    <CustomBuildStep Include="Material\ELog.h" />
-    <CustomBuildStep Include="Material\BlenderListLoader.h" />
+    <CustomBuild Include="Material\BlenderListLoader.h" />
+    <CustomBuild Include="Material\ELog.h" />
+    <CustomBuild Include="Material\GameMtlLib.h" />
+    <CustomBuild Include="Material\Shader_xrLC.h" />
+    <CustomBuild Include="Material\Stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Material\AElambertShaderTemplate.mel" />

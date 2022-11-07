@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug6|Win32">
       <Configuration>Debug6</Configuration>
@@ -29,26 +29,31 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release6|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -77,31 +82,37 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">true</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release6|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release6|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release6|Win32'">true</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release6|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">true</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">true</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\3d_sdk\3dsmax\ver-6.0\include;X:\src\xrCore;X:\sdk\3d_sdk\3dsmax\ver-6.0\cssdk\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\3d_sdk\3dsmax\ver-6.0\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\3d_sdk\3dsmax\ver-6.0\include;X:\src\xrCore;X:\sdk\3d_sdk\3dsmax\ver-6.0\cssdk\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\3d_sdk\3dsmax\ver-6.0\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release6|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -165,8 +176,7 @@
       <PreprocessorDefinitions>UTILITY_EXPORTS;WIN32;_WINDOWS;_USRDLL;_MAX_EXPORT;_MAX_PLUGIN;XRCORE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
-      <ExceptionHandling>
-      </ExceptionHandling>
+      <ExceptionHandling />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -178,8 +188,7 @@
       <AssemblerListingLocation>x:\intermediate_plugs\$(Configuration)\$(ProjectName)/</AssemblerListingLocation>
       <ObjectFileName>x:\intermediate_plugs\$(Configuration)\$(ProjectName)/</ObjectFileName>
       <ProgramDataBaseFileName>x:\intermediate_plugs\$(Configuration)\$(ProjectName)/</ProgramDataBaseFileName>
-      <BrowseInformation>
-      </BrowseInformation>
+      <BrowseInformation />
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ShowIncludes>false</ShowIncludes>
@@ -339,6 +348,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Shared\bone.cpp" />
+    <ClCompile Include="..\Shared\EditMesh.cpp" />
+    <ClCompile Include="..\Shared\EditMeshIO.cpp" />
+    <ClCompile Include="..\Shared\EditMeshModify.cpp" />
+    <ClCompile Include="..\Shared\EditObject.cpp" />
+    <ClCompile Include="..\Shared\EditObjectIO.cpp" />
+    <ClCompile Include="..\Shared\EditObjectMotions.cpp" />
+    <ClCompile Include="..\Shared\ELog.cpp" />
+    <ClCompile Include="..\Shared\Envelope.cpp" />
+    <ClCompile Include="..\Shared\Helper.cpp" />
+    <ClCompile Include="..\Shared\interp.cpp" />
+    <ClCompile Include="..\Shared\motion.cpp" />
+    <ClCompile Include="Export\BoneDef.cpp" />
+    <ClCompile Include="Export\EditMeshExportMAX.cpp" />
+    <ClCompile Include="Export\EditObjectExportLWO.cpp" />
+    <ClCompile Include="Export\EditObjectExportMAX.cpp" />
+    <ClCompile Include="Export\Exporter.cpp" />
+    <ClCompile Include="Export\ExporterMotion.cpp" />
+    <ClCompile Include="Export\ExporterSkin.cpp" />
+    <ClCompile Include="Export\ExportKeys.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release6|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Export\FS2.CPP" />
     <ClCompile Include="Export\MeshExpPlugin.cpp" />
     <ClCompile Include="Export\MeshExpUtility.cpp" />
     <ClCompile Include="Export\NetDeviceLog.cpp" />
@@ -349,55 +385,28 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release6|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\Shared\bone.cpp" />
-    <ClCompile Include="..\Shared\Envelope.cpp" />
-    <ClCompile Include="..\Shared\interp.cpp" />
-    <ClCompile Include="..\Shared\motion.cpp" />
-    <ClCompile Include="..\Shared\EditMesh.cpp" />
-    <ClCompile Include="..\Shared\EditMeshIO.cpp" />
-    <ClCompile Include="..\Shared\EditMeshModify.cpp" />
-    <ClCompile Include="..\Shared\EditObject.cpp" />
-    <ClCompile Include="..\Shared\EditObjectIO.cpp" />
-    <ClCompile Include="..\Shared\EditObjectMotions.cpp" />
-    <ClCompile Include="..\Shared\ELog.cpp" />
-    <ClCompile Include="Export\FS2.CPP" />
-    <ClCompile Include="Export\EditMeshExportMAX.cpp" />
-    <ClCompile Include="Export\EditObjectExportLWO.cpp" />
-    <ClCompile Include="Export\EditObjectExportMAX.cpp" />
-    <ClCompile Include="Export\BoneDef.cpp" />
-    <ClCompile Include="Export\Exporter.cpp" />
-    <ClCompile Include="Export\ExporterMotion.cpp" />
-    <ClCompile Include="Export\ExporterSkin.cpp" />
-    <ClCompile Include="..\Shared\Helper.cpp" />
-    <ClCompile Include="Export\ExportKeys.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release6|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Export\MeshExpUtility.h" />
-    <ClInclude Include="Export\NetDeviceLog.h" />
-    <ClInclude Include="Export\Stdafx.h" />
     <ClInclude Include="..\Shared\bone.h" />
-    <ClInclude Include="..\Shared\envelope.h" />
-    <ClInclude Include="Export\Fmesh.h" />
-    <ClInclude Include="..\Shared\motion.h" />
     <ClInclude Include="..\Shared\EditMesh.h" />
     <ClInclude Include="..\Shared\EditObject.h" />
     <ClInclude Include="..\Shared\ELog.h" />
-    <ClInclude Include="Export\FS2.H" />
-    <ClInclude Include="Export\lwchunks.h" />
-    <ClInclude Include="Export\Shader_xrLC.h" />
-    <ClInclude Include="Export\GameMaterial.h" />
-    <ClInclude Include="Export\TexMaps.h" />
-    <ClInclude Include="Export\XRayMtlRes.h" />
-    <ClInclude Include="Export\Exporter.h" />
+    <ClInclude Include="..\Shared\envelope.h" />
     <ClInclude Include="..\Shared\Face.h" />
     <ClInclude Include="..\Shared\Helper.h" />
+    <ClInclude Include="..\Shared\motion.h" />
     <ClInclude Include="..\Shared\Vert.h" />
+    <ClInclude Include="Export\Exporter.h" />
+    <ClInclude Include="Export\Fmesh.h" />
+    <ClInclude Include="Export\FS2.H" />
+    <ClInclude Include="Export\GameMaterial.h" />
+    <ClInclude Include="Export\lwchunks.h" />
+    <ClInclude Include="Export\MeshExpUtility.h" />
+    <ClInclude Include="Export\NetDeviceLog.h" />
+    <ClInclude Include="Export\Shader_xrLC.h" />
+    <ClInclude Include="Export\Stdafx.h" />
+    <ClInclude Include="Export\TexMaps.h" />
+    <ClInclude Include="Export\XRayMtlRes.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Export\MeshExpUtility.rc" />

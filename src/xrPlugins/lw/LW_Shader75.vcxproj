@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -17,11 +17,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -38,17 +40,17 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\lw\ver-7.5\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\lw\ver-7.5\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -63,8 +65,7 @@
       <AdditionalIncludeDirectories>$(3D_EDITORS_SDK)\lw\ver-7.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_X86_;_WIN32;WIN32;_WINDOWS;_USRDLL;_LW_PLUGIN;_LW_SHADER;XRCORE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <ExceptionHandling>
-      </ExceptionHandling>
+      <ExceptionHandling />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -89,10 +90,8 @@
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;lw_server.lib;xrcorestatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)xray_shader.p</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>Server\serv.def</ModuleDefinitionFile>
-      <ProgramDatabaseFile>
-      </ProgramDatabaseFile>
+      <ProgramDatabaseFile />
       <ImportLibrary>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\project.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
@@ -136,7 +135,6 @@
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;lw_serverd.lib;xrcorestaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)xray_shader.p</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>Server\serv.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)xray_shader.pdb</ProgramDatabaseFile>
@@ -144,36 +142,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="shader\stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Shared\GameMtlLib.cpp" />
-    <ClCompile Include="..\Shared\ELog.cpp" />
-    <ClCompile Include="shader\LW_Shader.cpp" />
-    <ClCompile Include="..\Shared\BlenderListLoader.cpp" />
     <ClCompile Include="Server\servmain.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="shader\BlenderListLoader.cpp" />
     <ClCompile Include="shader\blotch.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="shader\ELog.cpp" />
+    <ClCompile Include="shader\GameMtlLib.cpp" />
+    <ClCompile Include="shader\LW_Shader.cpp" />
+    <ClCompile Include="shader\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shader\stdafx.h" />
-    <ClInclude Include="shader\GameMtlLib.h" />
-    <ClInclude Include="shader\Shader_xrLC.h" />
+    <ClInclude Include="shader\BlenderListLoader.h" />
     <ClInclude Include="shader\ELog.h" />
+    <ClInclude Include="shader\GameMtlLib.h" />
     <ClInclude Include="shader\LW_Shader.h" />
     <ClInclude Include="shader\LW_ShaderDef.h" />
-    <ClInclude Include="shader\BlenderListLoader.h" />
     <ClInclude Include="shader\resource.h" />
+    <ClInclude Include="shader\Shader_xrLC.h" />
+    <ClInclude Include="shader\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="LW_Server.vcxproj">

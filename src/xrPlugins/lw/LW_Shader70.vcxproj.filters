@@ -2,41 +2,41 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Kernel">
-      <UniqueIdentifier>{0dcbbf95-fa37-42ee-b72c-f5bcd2845625}</UniqueIdentifier>
+      <UniqueIdentifier>{e0c13888-ac22-4cca-bf82-ddb79ac6a418}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files">
-      <UniqueIdentifier>{79334910-42a8-4641-8f46-29ee1a7e8ada}</UniqueIdentifier>
+      <UniqueIdentifier>{054cd4bf-1b65-46a3-8e3c-cc3378af36fe}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files\Engine">
-      <UniqueIdentifier>{8f784a4d-cfcf-463b-9941-eba87339a1e3}</UniqueIdentifier>
+      <UniqueIdentifier>{ced6727a-51c4-40c2-9342-349374e33a0e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files\Editor">
-      <UniqueIdentifier>{09d21dd9-14cd-4337-8c05-18bdef498b0a}</UniqueIdentifier>
+      <UniqueIdentifier>{c5cdafab-3e2e-4098-8f95-4da9d0ccebf6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files\Plugins">
-      <UniqueIdentifier>{01c721a9-1051-4f6a-8f28-d1ef15ae6607}</UniqueIdentifier>
+      <UniqueIdentifier>{c6857a7e-6699-4890-8091-a7e9f67d217e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shared Files\Server">
-      <UniqueIdentifier>{87802c07-dec0-4adc-bc35-79a3ea539124}</UniqueIdentifier>
+      <UniqueIdentifier>{54f0ca59-4859-4009-b04f-7e32c34b6180}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shader">
-      <UniqueIdentifier>{9f5edd58-7df0-4997-b59e-781e9d483db4}</UniqueIdentifier>
+      <UniqueIdentifier>{8cbd4226-94ff-4f10-919b-00309c7c0ca3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="shader\stdafx.cpp">
       <Filter>Kernel</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\GameMtlLib.cpp">
+    <ClCompile Include="shader\GameMtlLib.cpp">
       <Filter>Shared Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\ELog.cpp">
+    <ClCompile Include="shader\ELog.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
     <ClCompile Include="shader\LW_Shader.cpp">
       <Filter>Shared Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\BlenderListLoader.cpp">
+    <ClCompile Include="shader\BlenderListLoader.cpp">
       <Filter>Shared Files\Plugins</Filter>
     </ClCompile>
     <ClCompile Include="Server\servmain.c">

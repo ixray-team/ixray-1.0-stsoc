@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -17,10 +17,12 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -36,17 +38,17 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bin\release\ver-6.0\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\maya\ver-6.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\3d_sdk\maya\ver-6.0\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\src\xrCore;X:\sdk\3d_sdk\maya\ver-6.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\3d_sdk\maya\ver-6.0\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>bin\release\ver-6.0\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -59,7 +61,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\sdk\maya\ver-6.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;NT_PLUGIN;_MAYA_EXPORT;_MAYA_PLUGIN;XRCORE_STATIC;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;NT_PLUGIN;_MAYA_EXPORT;_MAYA_PLUGIN;XRCORE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -103,8 +105,7 @@
       <AdditionalIncludeDirectories>..\xrCore\source; ..\sdk\maya\ver-6.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;NT_PLUGIN;_MAYA_EXPORT;_MAYA_PLUGIN;XRCORE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <ExceptionHandling>
-      </ExceptionHandling>
+      <ExceptionHandling />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -127,57 +128,56 @@
       <OutputFile>$(OutDir)xrayMaya_export.mll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\sdk\maya\ver-6.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ProgramDatabaseFile>
-      </ProgramDatabaseFile>
+      <ProgramDatabaseFile />
       <SubSystem>Windows</SubSystem>
       <ImportLibrary>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\project.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Export\bone.cpp" />
+    <ClCompile Include="Export\EditMesh.cpp" />
+    <ClCompile Include="Export\EditMeshIO.cpp" />
+    <ClCompile Include="Export\EditMeshModify.cpp" />
+    <ClCompile Include="Export\EditObject.cpp" />
+    <ClCompile Include="Export\EditObjectIO.cpp" />
+    <ClCompile Include="Export\EditObjectMotions.cpp" />
+    <ClCompile Include="Export\ELog.cpp" />
+    <ClCompile Include="Export\Envelope.cpp" />
+    <ClCompile Include="Export\ExportDefines.cpp" />
+    <ClCompile Include="Export\interp.cpp" />
+    <ClCompile Include="Export\maTranslator.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Export\MayaExport.cpp" />
+    <ClCompile Include="Export\motion.cpp" />
+    <ClCompile Include="Export\SmdBone.cpp" />
+    <ClCompile Include="Export\SmdMaya.cpp" />
+    <ClCompile Include="Export\SmdTriangle.cpp" />
     <ClCompile Include="Export\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Export\XRayExport.cpp" />
-    <ClCompile Include="..\Shared\bone.cpp" />
-    <ClCompile Include="..\Shared\Envelope.cpp" />
-    <ClCompile Include="..\Shared\interp.cpp" />
-    <ClCompile Include="..\Shared\motion.cpp" />
-    <ClCompile Include="..\Shared\EditMesh.cpp" />
-    <ClCompile Include="..\Shared\EditMeshIO.cpp" />
-    <ClCompile Include="..\Shared\EditMeshModify.cpp" />
-    <ClCompile Include="..\Shared\EditObject.cpp" />
-    <ClCompile Include="..\Shared\EditObjectIO.cpp" />
-    <ClCompile Include="..\Shared\EditObjectMotions.cpp" />
-    <ClCompile Include="..\Shared\ELog.cpp" />
-    <ClCompile Include="Export\ExportDefines.cpp" />
-    <ClCompile Include="Export\SmdBone.cpp" />
-    <ClCompile Include="Export\SmdMaya.cpp" />
-    <ClCompile Include="Export\SmdTriangle.cpp" />
-    <ClCompile Include="Export\maTranslator.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="Export\MayaExport.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Export\Stdafx.h" />
     <ClInclude Include="Export\bone.h" />
-    <ClInclude Include="Export\envelope.h" />
-    <ClInclude Include="Export\Fmesh.h" />
     <ClInclude Include="Export\EditMesh.h" />
     <ClInclude Include="Export\EditObject.h" />
     <ClInclude Include="Export\ELog.h" />
-    <ClInclude Include="Export\motion.h" />
+    <ClInclude Include="Export\envelope.h" />
     <ClInclude Include="Export\ExportDefines.h" />
-    <CustomBuildStep Include="Export\SmdBone.h" />
-    <CustomBuildStep Include="Export\SmdMaya.h" />
-    <CustomBuildStep Include="Export\SmdTriangle.h" />
-    <CustomBuildStep Include="Export\maTranslator.h" />
+    <ClInclude Include="Export\Fmesh.h" />
+    <CustomBuild Include="Export\maTranslator.h" />
+    <ClInclude Include="Export\motion.h" />
+    <CustomBuild Include="Export\SmdBone.h" />
+    <CustomBuild Include="Export\SmdMaya.h" />
+    <CustomBuild Include="Export\SmdTriangle.h" />
+    <ClInclude Include="Export\Stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Export\xrayObjectExportOptions.mel" />
     <None Include="Export\xraySkinExportOptions.mel" />
     <None Include="Export\xraySkinMotionExportOptions.mel" />
-    <None Include="Export\xrayObjectExportOptions.mel" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

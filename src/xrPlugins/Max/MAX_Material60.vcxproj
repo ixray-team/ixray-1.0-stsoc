@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug6|Win32">
       <Configuration>Debug6</Configuration>
@@ -22,14 +22,17 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -49,20 +52,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">true</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\3d_sdk\3dsmax\ver-6.0\include;X:\src\xrCore;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">X:\sdk\3d_sdk\3dsmax\ver-6.0\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\3d_sdk\3dsmax\ver-6.0\include;X:\src\xrCore;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">X:\sdk\3d_sdk\3dsmax\ver-6.0\lib;X:\libraries;X:\sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">
+    <OutDir>x:\binaries_plugs\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>x:\intermediate_plugs\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -127,8 +132,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;_MAX_MATERIAL;_MAX_PLUGIN;XRCORE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
-      <ExceptionHandling>
-      </ExceptionHandling>
+      <ExceptionHandling />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -208,35 +212,37 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Material\DllEntry.cpp" />
+    <ClCompile Include="..\Shared\BlenderListLoader.cpp" />
+    <ClCompile Include="..\Shared\ELog.cpp" />
     <ClCompile Include="..\Shared\GameMaterial.cpp" />
+    <ClCompile Include="..\Shared\GameMtlLib.cpp" />
+    <ClCompile Include="..\Shared\TexMaps.cpp" />
+    <ClCompile Include="Material\DllEntry.cpp" />
     <ClCompile Include="Material\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug6|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\Shared\TexMaps.cpp" />
-    <ClCompile Include="..\Shared\GameMtlLib.cpp" />
-    <ClCompile Include="..\Shared\BlenderListLoader.cpp" />
-    <ClCompile Include="..\Shared\ELog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Shared\GameMaterial.def" />
-    <None Include="Material\dmtlbut.bmp" />
-    <None Include="Material\dmtlmsk.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Shared\GameMaterial.h" />
-    <ClInclude Include="Material\Stdafx.h" />
-    <ClInclude Include="..\Shared\TexMaps.h" />
-    <ClInclude Include="..\Shared\XRayMtlRes.h" />
-    <ClInclude Include="..\Shared\GameMtlLib.h" />
-    <ClInclude Include="..\Shared\Shader_xrLC.h" />
     <ClInclude Include="..\Shared\BlenderListLoader.h" />
     <ClInclude Include="..\Shared\ELog.h" />
+    <ClInclude Include="..\Shared\GameMaterial.h" />
+    <ClInclude Include="..\Shared\GameMtlLib.h" />
+    <ClInclude Include="..\Shared\Shader_xrLC.h" />
+    <ClInclude Include="..\Shared\TexMaps.h" />
+    <ClInclude Include="..\Shared\XRayMtlRes.h" />
+    <ClInclude Include="Material\Stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Material\GameMaterial.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Material\dmtlbut.bmp" />
+    <Image Include="Material\dmtlmsk.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\xrCore\xrCoreStatic.vcxproj">
