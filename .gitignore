@@ -1,6 +1,7 @@
 # Global ignoring of different binaries and another temporary files
 
 # Visual Studio user settings
+.vs/
 *.suo
 *.user
 

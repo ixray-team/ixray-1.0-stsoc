@@ -107,42 +107,42 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed_Priquel|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Priquel|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Priquel|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -162,7 +162,6 @@
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\xrQSlim\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES;WIN32;_WINDOWS;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling />
@@ -207,7 +206,6 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\xrQSlim\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES;WIN32;DEBUG;_WINDOWS;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -250,7 +248,6 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>false</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>..\xrQSlim\src; .\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES;WIN32;DEBUG;_WINDOWS;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -291,7 +288,6 @@
     <ClCompile>
       <AdditionalOptions>/Gs  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\xrQSlim\src; .\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES;WIN32;DEBUG;_WINDOWS;_SECURE_SCL=0;PRIQUEL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -331,7 +327,6 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\xrQSlim\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES;WIN32;DEBUG;_WINDOWS;_SECURE_SCL=0;PRIQUEL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -375,7 +370,6 @@
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\xrQSlim\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES;WIN32;_WINDOWS;_SECURE_SCL=0;PRIQUEL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling />

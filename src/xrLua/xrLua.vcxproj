@@ -60,27 +60,26 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\luabind\luabind;$(SolutionDir)src\xrCore;$(SolutionDir)src\xrLua\src;$(SolutionDir)sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\xrLua\dynasm;$(SolutionDir)sdk\luabind\luabind;$(SolutionDir)src\xrCore;$(SolutionDir)src\xrLua\src;$(SolutionDir)sdk\boost_1_30_0;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\luabind\luabind;$(SolutionDir)src\xrCore;$(SolutionDir)src\xrLua\src;$(SolutionDir)sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\xrLua\dynasm;$(SolutionDir)sdk\luabind\luabind;$(SolutionDir)src\xrCore;$(SolutionDir)src\xrLua\src;$(SolutionDir)sdk\boost_1_30_0;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\luabind\luabind;$(SolutionDir)src\xrCore;$(SolutionDir)src\xrLua\src;$(SolutionDir)sdk\boost_1_30_0;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\xrLua\dynasm;$(SolutionDir)sdk\luabind\luabind;$(SolutionDir)src\xrCore;$(SolutionDir)src\xrLua\src;$(SolutionDir)sdk\boost_1_30_0;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>dynasm\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;DEBUG;_WINDOWS;_USRDLL;LUA_BUILD_AS_DLL;LUABIND_BUILDING;DEBUG;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -110,7 +109,6 @@
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>dynasm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LUA_BUILD_AS_DLL;LUABIND_BUILDING;LUABIND_NO_ERROR_CHECKING;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <StringPooling>true</StringPooling>
@@ -144,7 +142,6 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>dynasm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;LUA_BUILD_AS_DLL;LUABIND_BUILDING;DEBUG;MIXED;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Sync</ExceptionHandling>
