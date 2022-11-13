@@ -18,6 +18,7 @@
 #pragma warning(push)
 #pragma warning(disable:4995)
 #include <malloc.h>
+#include <functional>
 #pragma warning(pop)
 
 xrClientData::xrClientData	():IClient(Device.GetTimerGlobal())
