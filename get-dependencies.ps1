@@ -14,6 +14,9 @@ If (!(Test-Path "sdk\dxsdk_mar2009")) {
     Remove-Item "directxsdk-mar2009.7z"
 }
 
+# Getting another dependencies from Git
+git clone --branch aug2021 --depth 1 https://github.com/microsoft/DirectXTex.git dep/DirectXTex
+
 # Pause
 Write-Host "Press any key to continue..."
 $Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown") | Out-Null

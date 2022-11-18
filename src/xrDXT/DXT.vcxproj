@@ -62,19 +62,22 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)lib\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)dep\DirectXTex\DirectXTex;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)lib\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)dep\DirectXTex\DirectXTex;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)lib\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)dep\DirectXTex\DirectXTex;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -113,7 +116,6 @@
     </ResourceCompile>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <IgnoreSpecificDefaultLibraries>libcmt.lib;msvcp71.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <MapFileName />
       <LargeAddressAware>true</LargeAddressAware>
@@ -121,7 +123,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>$(SolutionDir)lib\$(ProjectName).lib</ImportLibrary>
-      <AdditionalDependencies>msvcprt_vc8.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -152,12 +153,10 @@
     </ResourceCompile>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <IgnoreSpecificDefaultLibraries>libcmt.lib;msvcp80.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <MapFileName />
       <LargeAddressAware>true</LargeAddressAware>
       <ImportLibrary>$(SolutionDir)lib\$(ProjectName).lib</ImportLibrary>
-      <AdditionalDependencies>msvcprt_vc8.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
@@ -193,19 +192,16 @@
     </ResourceCompile>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <MapFileName />
       <LargeAddressAware>true</LargeAddressAware>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <ImportLibrary>$(SolutionDir)lib\$(ProjectName).lib</ImportLibrary>
-      <AdditionalDependencies>msvcprt_vc8.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="colorconvert.h" />
-    <ClInclude Include="dds.h" />
     <ClInclude Include="ddsTypes.h" />
     <ClInclude Include="dxtlib.h" />
     <ClInclude Include="ETextureParams.h" />
@@ -240,9 +236,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="tga.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="nvDXTlibMTDLL.lib" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
