@@ -345,7 +345,7 @@ void CEnvironment::OnFrame()
 			// tonemapping in VS
 			CurrentEnv.sky_r_textures.push_back		(std::make_pair(u32(D3DVERTEXTEXTURESAMPLER0),tonemap));	//. hack
 			CurrentEnv.sky_r_textures_env.push_back	(std::make_pair(u32(D3DVERTEXTEXTURESAMPLER0),tonemap));	//. hack
-			CurrentEnv.clouds_r_textures.push_back	(std::make_pairke_pair(u32(D3DVERTEXTEXTURESAMPLER0),tonemap));	//. hack
+			CurrentEnv.clouds_r_textures.push_back	(std::make_pair(u32(D3DVERTEXTEXTURESAMPLER0),tonemap));	//. hack
 		} else {
 			// tonemapping in PS
 			CurrentEnv.sky_r_textures.push_back		(std::make_pair(2,tonemap));								//. hack
