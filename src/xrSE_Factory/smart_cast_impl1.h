@@ -221,7 +221,7 @@ namespace SmartDynamicCast {
 			};
 
 			typedef typename selector<
-					std::is_base_of<typename Head::Head,Source>::value || object_type_traits::is_same<typename Head::Head,Source>::value
+					std::is_base_of<typename Head::Head,Source>::value || std::is_same<typename Head::Head,Source>::value
 				>::result result;
 		};
 
