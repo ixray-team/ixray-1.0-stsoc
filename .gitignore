@@ -36,5 +36,8 @@ dep/
 *.~cpp
 
 # X-Ray resources
-gamedata/
-rawdata/
+mods/
+gamedata.db[0-9a-z]
+
+# X-Ray user files
+_appdata_/
