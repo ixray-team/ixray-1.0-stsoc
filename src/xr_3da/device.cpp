@@ -124,7 +124,7 @@ void 			mt_Thread	(void *ptr)	{
  
 		for (u32 pit=0; pit<Device.seqParallel.size(); pit++)
 			Device.seqParallel[pit]	();
-		Device.seqParallel.clear_not_free	();
+		Device.seqParallel.clear();
 		Device.seqFrameMT.Process	(rp_Frame);
 
 		// now we give control to device - signals that we are ended our work
@@ -273,7 +273,7 @@ void CRenderDevice::Run			()
 				if (dwFrame!=mt_Thread_marker)			{
 					for (u32 pit=0; pit<Device.seqParallel.size(); pit++)
 						Device.seqParallel[pit]			();
-					Device.seqParallel.clear_not_free	();
+					Device.seqParallel.clear();
 					seqFrameMT.Process					(rp_Frame);
 				}
 #ifdef DEDICATED_SERVER
