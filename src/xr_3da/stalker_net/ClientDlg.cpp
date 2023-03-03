@@ -245,7 +245,6 @@ END_MESSAGE_MAP()
 // CClientDlg message handlers
 /////////////////////////////////////////////////////////
 #include <dplay8.h>
-#include <dxerr.h>
 #include <vector>
 IDirectPlay8Client 		*g_pClient;
 IDirectPlay8Address		*g_pClientDeviceAddress	;
@@ -910,7 +909,6 @@ BOOL	CClientDlg::Client_EnumHosts()
 	};
 	if (hr != S_OK)
 	{
-		const WCHAR* text = DXGetErrorString(hr);
 		int x=0;
 		x=x;
 	}
