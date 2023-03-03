@@ -265,7 +265,7 @@ void CGameFont::OnRender()
 			RCache.Render			(D3DPT_TRIANGLELIST,vOffset,0,vCount,0,vCount/2);
 		}
 	}
-	strings.clear_not_free			();
+	strings.clear();
 }
 
 u16 CGameFont::GetCutLengthPos( float fTargetWidth , const char * pszText )
