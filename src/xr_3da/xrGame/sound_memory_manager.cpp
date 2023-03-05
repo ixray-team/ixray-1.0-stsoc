@@ -30,6 +30,8 @@
 #	include "ai_debug.h"
 #endif // MASTER_GOLD
 
+#include <cmath>
+
 #define SILENCE
 //#define SAVE_OWN_SOUNDS
 //#define SAVE_OWN_ITEM_SOUNDS
@@ -94,7 +96,7 @@ IC	void CSoundMemoryManager::update_sound_threshold			()
 		exp(
 			float(Device.dwTimeGlobal - m_last_sound_time)/
 			float(m_sound_decrease_quant)*
-			log(m_decrease_factor)
+			std::log(m_decrease_factor)
 		),
 		m_min_sound_threshold
 	);
