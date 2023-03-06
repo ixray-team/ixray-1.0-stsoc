@@ -1,0 +1,94 @@
+name: 'Build engine'
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - '.github/workflows/**'
+      - 'gamedata/**'
+      - 'proj/**'
+      - 'sdk/**'
+      - 'src/**'
+      - '*.sln'
+      - '*.props'
+      - '*.targets'
+      - '*.ltx'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - '.github/workflows/**'
+      - 'gamedata/**'
+      - 'proj/**'
+      - 'sdk/**'
+      - 'src/**'
+      - '*.sln'
+      - '*.props'
+      - '*.targets'
+      - '*.ltx'
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  build-engine:
+    name: 'Building'
+
+    strategy:
+      matrix:
+        system:
+          - windows-2022
+        config:
+          - Debug
+          - Mixed
+          - Release
+          - Debug_Dedicated
+          - Mixed_Dedicated
+          - Release_Dedicated
+        platform:
+          - x86
+
+    runs-on: ${{ matrix.system }}
+
+    env:
+      solution_name: XRay.sln
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get dependencies
+        run: |
+          ${{ github.workspace }}/get-dependencies.bat
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Build solution
+        run: |
+          msbuild $env:solution_name `
+            -p:Configuration=${{ matrix.config }} `
+            -p:Platform=${{ matrix.platform }} `
+            -restore `
+            -maxCpuCount `
+            -nologo
+
+      - name: Cleanup
+        run: |
+          ${{ github.workspace }}/delete-symbols.bat
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: bin (${{ matrix.config }}) ${{ github.sha }}
+          path: bin/
+
+      - name: Upload libraries
+        uses: actions/upload-artifact@v3
+        with:
+          name: lib (${{ matrix.config }}) ${{ github.sha }}
+          path: lib/
