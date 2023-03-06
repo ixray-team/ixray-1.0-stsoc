@@ -14,7 +14,8 @@ extern	void	ReadName(char* Name, FILE* pFile);
 
 
 typedef	char	string1024	[1024];
-typedef float	Fvector		[3];
+
+#include "../../xrCore/xrCore.h"
 
 IC float	Magnitude (Fvector v0, Fvector v1)
 {
