@@ -1,5 +1,6 @@
 protected:
 	using MESSAGEMENUS = xr_vector<cl_MessageMenu>;
+	using MESSAGEMENUS_it = MESSAGEMENUS::iterator;
 
 	MESSAGEMENUS					m_aMessageMenus;
 
