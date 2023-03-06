@@ -1,8 +1,11 @@
-# Set title of the window
-$Host.UI.RawUI.WindowTitle = "IX-Ray"
-
-# Set path to 7-Zip
-$path = Join-Path -Path ${env:ProgramFiles} -ChildPath "7-Zip\7z.exe"
+# Test and set path to 7-Zip
+$globalPaths = $env:Path -split ';'
+ForEach ($line in $globalPaths) {
+    If (!(Test-Path ($line + "\7z.exe"))) {
+        $path = Join-Path -Path ${env:ProgramFiles} `
+                          -ChildPath "7-Zip\7z.exe"
+    }
+}
 
 # Getting DirectX SDK March 2009 from archive
 If (!(Test-Path "sdk\dxsdk_mar2009")) {
@@ -16,7 +19,3 @@ If (!(Test-Path "sdk\dxsdk_mar2009")) {
 
 # Getting another dependencies from Git
 git clone --branch aug2021 --depth 1 https://github.com/microsoft/DirectXTex.git dep/DirectXTex
-
-# Pause
-Write-Host "Press any key to continue..."
-$Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown") | Out-Null
