@@ -8,8 +8,11 @@
   </p>
 
   <p>
-    <a href="https://github.com/ixray-team/ixray-1.0-stsoc/releases/tag/r0.2">
+    <a href="https://github.com/ixray-team/ixray-1.0-stsoc/releases/tag/r0.3">
       <img src="https://img.shields.io/github/v/release/ixray-team/ixray-1.0-stsoc?include_prereleases" alt="Latest release" />
+    </a>
+    <a href="https://github.com/ixray-team/ixray-1.0-stsoc/actions/workflows/build-engine.yml">
+      <img src="https://github.com/ixray-team/ixray-1.0-stsoc/actions/workflows/build-engine.yml/badge.svg" alt="Build engine" />
     </a>
   </p>
 </div>
@@ -18,7 +21,9 @@ Stable repository of the modernized _X-Ray_ 1.0 game engine
 
 ## Requirements
 
-* Visual Studio 2015 Community Edition
+- Visual Studio 2022 Community Edition
+  - MFC
+  - Windows SDK 10.0.19041.0
 
 ## Building
 
@@ -28,16 +33,9 @@ Download the repository:
 git clone https://github.com/ixray-team/ixray-1.0-stsoc.git
 ```
 
-Download needed components:
-
-* DirectX SDK March 2009
-
-Unpack a contents to the root agreeing to merge
-
 ### Engine
 
-#### Debug
-
+- Run `download-dependencies.ps1`
 - Build `XRay.sln` on `Win32` without projects from `utils`
 
 ## Changelog
