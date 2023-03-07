@@ -2,6 +2,37 @@
 
 Full changelog of _IX-Ray_ 1.0 project
 
+## Release 0.3 (March 2023)
+
+### Common
+
+- Migration to __Visual Studio 2022__
+- Fixed compilation errors
+- Fixed a lot of issues with linking
+- Enabled multicore building for all projects
+- Enabled __x86-64__ toolchain for all projects
+- Enabled __GitHub Actions__
+
+### Core
+
+- Replaced custom `xr_deque<T>` and `xr_vector<T>` with aliases of `std::deque<T>` and `std::vector<T>`
+- Placed `clear_and_reserve()` method of `xr_vector<T>` class in a separate function
+- Partially replaced STL extension aliases with `using` analogs
+- Deleted `DEF_*` and `DEFINE_*` macroses from STL extensions
+
+### Engine
+
+- Fixed __VSync__
+
+### Dependencies
+
+- Deleted unused __Intel VTune__ functionality
+
+### Resources
+
+- Added resources
+- Normalized encoding of scripts
+
 ## Release 0.2 (November 2022)
 
 ### Common
