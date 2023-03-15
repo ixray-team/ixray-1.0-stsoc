@@ -161,7 +161,7 @@ void CUIPdaContactItem::SetSelected	(bool b)
 		CSE_ALifeTraderAbstract*	T = ch_info_get_from_id(UIInfo->OwnerID());
 		chInfo.Init					(T);
 
-//.		ADD_TEXT_TO_VIEW2( *(chInfo.Bio()), m_cw->UIDetailsWnd);
+		ADD_TEXT_TO_VIEW2( *(chInfo.Bio()), m_cw->UIDetailsWnd);
 	}
 }
 
