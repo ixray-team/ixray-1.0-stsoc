@@ -60,7 +60,7 @@
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\DPlay;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(IncludePath)</IncludePath>
+    <IncludePath>.\;$(SolutionDir)sdk\DPlay;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
