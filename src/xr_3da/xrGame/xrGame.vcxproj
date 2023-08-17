@@ -4150,7 +4150,6 @@
       <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <ClCompile Include="purchase_list.cpp" />
-    <ClCompile Include="r2_test_hw.cpp" />
     <ClCompile Include="RadioactiveZone.cpp" />
     <ClCompile Include="random32.cpp" />
     <ClCompile Include="RegistryFuncs.cpp" />
