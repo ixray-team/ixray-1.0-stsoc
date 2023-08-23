@@ -51,6 +51,8 @@ CALifeMonsterBrain::CALifeMonsterBrain		(object_type *object)
 	sscanf							(pSettings->r_string(this->object().name(),"smart_terrain_choose_interval"),"%d:%d:%d",&hours,&minutes,&seconds);
 	m_time_interval					= (u32)generate_time(1,1,1,hours,minutes,seconds);
 #endif
+
+	m_can_choose_alife_tasks		= true;
 }
 
 CALifeMonsterBrain::~CALifeMonsterBrain			()
@@ -114,6 +116,9 @@ void CALifeMonsterBrain::process_task			()
 void CALifeMonsterBrain::select_task			()
 {
 	if (object().m_smart_terrain_id != 0xffff)
+		return;
+
+	if (!can_choose_alife_tasks())
 		return;
 
 	ALife::_TIME_ID					current_time = ai().alife().time_manager().game_time();

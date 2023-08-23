@@ -73,22 +73,22 @@ private:
 	CHeader					m_tCrossTableHeader;
 	CCell					*m_tpaCrossTable;
 
-#ifndef PRIQUEL
+#if defined(AI_COMPILER) || !defined(PRIQUEL)
 private:
 	IReader					*m_tpCrossTableVFS;
 	IReader					*m_chunk;
-#endif // PRIQUEL
+#endif
 
 public:
-#ifdef PRIQUEL
-	IC						CGameLevelCrossTable	(const void *buffer, const u32 &buffer_size);
+#ifdef AI_COMPILER
+	IC						CGameLevelCrossTable	(LPCSTR fName);
 #else
-#	ifdef AI_COMPILER
-		IC					CGameLevelCrossTable	(LPCSTR fName);
-#	else // AI_COMPILER
+#	ifndef PRIQUEL
 		IC					CGameLevelCrossTable	();
-#	endif // AI_COMPILER
-#endif // PRIQUEL
+#	else
+		IC					CGameLevelCrossTable	(const void *buffer, const u32 &buffer_size);
+#	endif
+#endif
 
 public:
 	IC virtual				~CGameLevelCrossTable	();

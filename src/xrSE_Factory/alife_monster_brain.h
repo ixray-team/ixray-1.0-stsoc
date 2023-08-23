@@ -26,6 +26,7 @@ public:
 private:
 	object_type							*m_object;
 	movement_manager_type				*m_movement_manager;
+	bool								m_can_choose_alife_tasks;
 
 public:
 	CSE_ALifeSmartZone					*m_smart_terrain;
@@ -39,6 +40,7 @@ public:
 private:
 			void						process_task		();
 			void						default_behaviour	();
+	IC		bool						can_choose_alife_tasks	() const;
 
 public:
 										CALifeMonsterBrain	(object_type *object);
@@ -62,6 +64,7 @@ public:
 	IC		object_type					&object				() const;
 	IC		movement_manager_type		&movement			() const;
 	IC		CSE_ALifeSmartZone			&smart_terrain		();
+	IC		void						can_choose_alife_tasks	(bool value);
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

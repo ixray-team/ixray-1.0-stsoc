@@ -80,18 +80,15 @@ private:
 #endif // defined(AI_COMPILER) || !defined(PRIQUEL)
 
 public:
-#ifdef PRIQUEL
-	IC						CGameLevelCrossTable	(const void *buffer, const u32 &buffer_size);
-#	ifdef AI_COMPILER
-		IC					CGameLevelCrossTable	(LPCSTR fName);
-#	endif // AI_COMPILER
-#else // PRIQUEL
-#	ifdef AI_COMPILER
-		IC					CGameLevelCrossTable	(LPCSTR fName);
-#	else // AI_COMPILER
+#ifdef AI_COMPILER
+	IC						CGameLevelCrossTable	(LPCSTR fName);
+#else
+#	ifndef PRIQUEL
 		IC					CGameLevelCrossTable	();
-#	endif // AI_COMPILER
-#endif // PRIQUEL
+#	else
+		IC					CGameLevelCrossTable	(const void *buffer, const u32 &buffer_size);
+#	endif
+#endif
 
 public:
 	IC virtual				~CGameLevelCrossTable	();
