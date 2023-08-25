@@ -101,10 +101,10 @@ using xr_map = std::map<K, V, P, allocator>;
 template <typename K, class V, class P = std::less<K>, typename allocator = xalloc<std::pair<const K, V>>>
 using xr_multimap = std::multimap<K, V, P, allocator>;
 
-struct pred_str		: public std::binary_function<char*, char*, bool>	{	
+struct pred_str	{	
 	IC bool operator()(const char* x, const char* y) const				{	return xr_strcmp(x,y)<0;	}
 };
-struct pred_stri	: public std::binary_function<char*, char*, bool>	{	
+struct pred_stri	{	
 	IC bool operator()(const char* x, const char* y) const				{	return _stricmp(x,y)<0;	}
 };
 
