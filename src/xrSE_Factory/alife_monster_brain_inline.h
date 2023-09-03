@@ -11,7 +11,7 @@
 IC	CALifeMonsterBrain::object_type &CALifeMonsterBrain::object				() const
 {
 	VERIFY		(m_object);
-	return		(m_object);
+	return		(*m_object);
 }
 
 IC	CALifeMonsterBrain::movement_manager_type &CALifeMonsterBrain::movement	() const
