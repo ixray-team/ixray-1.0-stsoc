@@ -16,6 +16,3 @@ If (!(Test-Path "sdk\dxsdk_mar2009")) {
                   -NoNewWindow -Wait
     Remove-Item "directxsdk-mar2009.zip"
 }
-
-# Getting another dependencies from Git
-git clone --branch aug2021 --depth 1 https://github.com/microsoft/DirectXTex.git dep/DirectXTex
