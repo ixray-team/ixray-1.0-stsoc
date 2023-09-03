@@ -7,26 +7,26 @@ on:
     paths:
       - '.github/workflows/**'
       - 'gamedata/**'
-      - 'proj/**'
       - 'sdk/**'
       - 'src/**'
       - '*.sln'
       - '*.props'
       - '*.targets'
       - '*.ltx'
+      - '*.bat'
   pull_request:
     branches:
       - '**'
     paths:
       - '.github/workflows/**'
       - 'gamedata/**'
-      - 'proj/**'
       - 'sdk/**'
       - 'src/**'
       - '*.sln'
       - '*.props'
       - '*.targets'
       - '*.ltx'
+      - '*.bat'
 
 defaults:
   run:
@@ -34,7 +34,7 @@ defaults:
 
 jobs:
   build-engine:
-    name: 'Building'
+    name: 'Build'
 
     strategy:
       matrix:
@@ -61,6 +61,27 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v1
+        with:
+          nuget-version: '>=5'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            ${{ github.workspace }}/packages
+          key: |
+            ${{ runner.os }}-nuget-${{ hashFiles('**/*.nupkg') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          nuget restore $env:solution_name
+
       - name: Get dependencies
         run: |
           ${{ github.workspace }}/get-dependencies.bat
@@ -73,7 +94,6 @@ jobs:
           msbuild $env:solution_name `
             -p:Configuration=${{ matrix.config }} `
             -p:Platform=${{ matrix.platform }} `
-            -restore `
             -maxCpuCount `
             -nologo
 
