@@ -9,12 +9,12 @@ ForEach ($line in $globalPaths) {
 
 # Getting DirectX SDK March 2009 from archive
 If (!(Test-Path "sdk\dxsdk_mar2009")) {
-    Invoke-WebRequest -Uri "https://github.com/ixray-team/ixray-1.0-stsoc/releases/download/r0.1/sdk-directxsdk-mar2009.7z" `
-                      -OutFile "directxsdk-mar2009.7z"
+    Invoke-WebRequest -Uri "https://github.com/ixray-team/ixray-1.0-stsoc/releases/download/r0.1/sdk-directxsdk-mar2009.zip" `
+                      -OutFile "directxsdk-mar2009.zip"
     Start-Process -FilePath $path `
-                  -ArgumentList "x directxsdk-mar2009.7z" `
+                  -ArgumentList "x directxsdk-mar2009.zip" `
                   -NoNewWindow -Wait
-    Remove-Item "directxsdk-mar2009.7z"
+    Remove-Item "directxsdk-mar2009.zip"
 }
 
 # Getting another dependencies from Git
