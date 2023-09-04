@@ -64,10 +64,6 @@ void*	xrMemory::mem_alloc		(size_t size
 	}
 #endif // PURE_ALLOC
 
-#ifdef DEBUG_MEMORY_MANAGER
-	if (mem_initialized)		debug_cs.Enter		();
-#endif // DEBUG_MEMORY_MANAGER
-
 	u32		_footer				=	debug_mode?4:0;
 	void*	_ptr				=	0;
 
@@ -108,7 +104,6 @@ void*	xrMemory::mem_alloc		(size_t size
 
 #ifdef DEBUG_MEMORY_MANAGER
 	if		(debug_mode)		dbg_register		(_ptr,size,_name);
-	if (mem_initialized)		debug_cs.Leave		();
 	//if(g_globalCheckAddr==_ptr){
 	//	__asm int 3;
 	//}
@@ -142,9 +137,6 @@ void	xrMemory::mem_free		(void* P)
 		__asm int 3;
 #endif // DEBUG_MEMORY_MANAGER
 
-#ifdef DEBUG_MEMORY_MANAGER
-	if (mem_initialized)		debug_cs.Enter		();
-#endif // DEBUG_MEMORY_MANAGER
 	if		(debug_mode)		dbg_unregister	(P);
 	u32	pool					= get_header	(P);
 	void* _real					= (void*)(((u8*)P)-1);
@@ -157,9 +149,6 @@ void	xrMemory::mem_free		(void* P)
 		VERIFY2					(pool<mem_pools_count,"Memory corruption");
 		mem_pools[pool].destroy	(_real);
 	}
-#ifdef DEBUG_MEMORY_MANAGER
-	if (mem_initialized)		debug_cs.Leave	();
-#endif // DEBUG_MEMORY_MANAGER
 }
 
 extern BOOL	g_bDbgFillMemory	;
@@ -194,9 +183,6 @@ void*	xrMemory::mem_realloc	(void* P, size_t size
 		__asm int 3;
 #endif // DEBUG_MEMORY_MANAGER
 
-#ifdef DEBUG_MEMORY_MANAGER
-	if (mem_initialized)		debug_cs.Enter		();
-#endif // DEBUG_MEMORY_MANAGER
 	u32		p_current			= get_header(P);
 	//	Igor: Reserve 1 byte for xrMemory header
 	u32		p_new				= get_pool	(1+size+(debug_mode?4:0));
@@ -264,8 +250,6 @@ void*	xrMemory::mem_realloc	(void* P, size_t size
 	}
 
 #ifdef DEBUG_MEMORY_MANAGER
-	if (mem_initialized)		debug_cs.Leave	();
-
 	if(g_globalCheckAddr==_ptr)
 		__asm int 3;
 #endif // DEBUG_MEMORY_MANAGER
