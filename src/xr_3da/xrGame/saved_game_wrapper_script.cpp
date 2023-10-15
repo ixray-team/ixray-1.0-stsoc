@@ -14,14 +14,14 @@
 
 using namespace luabind;
 
-xrTime CSavedGameWrapper__game_time		(const CSavedGameWrapper *self)
+xrTime CSavedGameWrapper__game_time		(const CSavedGameWrapper *self_)
 {
-	return			(xrTime(self->game_time()));
+	return			(xrTime(self_->game_time()));
 }
 
-LPCSTR CSavedGameWrapper__level_name	(const CSavedGameWrapper *self)
+LPCSTR CSavedGameWrapper__level_name	(const CSavedGameWrapper *self_)
 {
-	return			(*ai().game_graph().header().level(self->level_id()).name());
+	return			(*ai().game_graph().header().level(self_->level_id()).name());
 }
 
 #pragma optimize("s",on)
