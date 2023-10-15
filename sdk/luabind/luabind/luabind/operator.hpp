@@ -116,10 +116,10 @@ namespace luabind { namespace detail {
             typedef typename unwrap_parameter_type<T, A>::type arg0;
             typedef typename unwrap_parameter_type<T, B>::type arg1;
 
-            static void execute(lua_State* L, arg0 _0, arg1 _1)
+            static void execute(lua_State* L, arg0 object0, arg1 object1)
             {
                 Derived::template apply<arg0, arg1, Policies>::execute(
-                    L, _0, _1);
+                    L, object0, object1);
             }
         };
 
@@ -185,9 +185,9 @@ namespace luabind {
             template<class T0, class T1, class Policies> \
             struct apply \
             { \
-                static void execute(lua_State* L, T0 _0, T1 _1) \
+                static void execute(lua_State* L, T0 object0, T1 object1) \
                 { \
-                    detail::operator_result(L, _0 op _1, (Policies*)0); \
+                    detail::operator_result(L, object0 op object1, (Policies*)0); \
                 } \
             }; \
 \
