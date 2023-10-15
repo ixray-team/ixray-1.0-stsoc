@@ -18,12 +18,14 @@ public:
 template <typename _storage_type>
 class IPureLîadableObject {
 public:
+	virtual ~IPureLîadableObject() = default;
 	virtual void					load(_storage_type	&storage)						= 0;
 };
 
 template <typename _storage_type>
 class IPureSavableObject {
 public:
+	virtual ~IPureSavableObject() = default;
 	virtual void					save(_storage_type	&storage)						= 0;
 };
 
@@ -42,5 +44,6 @@ public:
 
 class IPureSchedulableObject {
 public:
+	virtual ~IPureSchedulableObject() = default;
 	virtual void					update		()										= 0;
 };

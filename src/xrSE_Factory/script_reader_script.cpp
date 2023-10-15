@@ -13,21 +13,21 @@
 
 using namespace luabind;
 
-bool r_eof(IReader *self)
+bool r_eof(IReader *self_)
 {
-	return			(!!self->eof());
+	return			(!!self_->eof());
 }
 
-LPCSTR r_stringZ(IReader *self)
+LPCSTR r_stringZ(IReader *self_)
 {
 	shared_str		temp;
-	self->r_stringZ	(temp);
+	self_->r_stringZ	(temp);
 	return			(*temp);
 }
 
-bool r_bool(IReader *self)
+bool r_bool(IReader *self_)
 {
-	return			(!!self->r_u8());
+	return			(!!self_->r_u8());
 }
 
 #pragma optimize("s",on)

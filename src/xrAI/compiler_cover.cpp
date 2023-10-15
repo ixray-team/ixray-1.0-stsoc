@@ -287,8 +287,8 @@ public:
 				u32		ID	= *it;
 				R_ASSERT	(ID<g_nodes.size());
 				if			(N==ID)		continue;
-				vertex&		N			= g_nodes[ID];
-				Fvector&	Pos			= N.Pos;
+				vertex&		N_			= g_nodes[ID];
+				Fvector&	Pos			= N_.Pos;
 				Fvector		Dir;
 				Dir.sub		(Pos,BasePos);
 				float		range		= Dir.magnitude();

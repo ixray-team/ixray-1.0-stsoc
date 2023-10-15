@@ -35,8 +35,8 @@ bool r_line(CScriptIniFile *self, LPCSTR S, int L,	xr_string &N, xr_string &V)
 	V				= "";
 	
 	LPCSTR			n,v;
-	bool			result = !!self->r_line(S,L,&n,&v);
-	if (!result)
+	bool			result_ = !!self->r_line(S,L,&n,&v);
+	if (!result_)
 		return		(false);
 
 	N				= n;

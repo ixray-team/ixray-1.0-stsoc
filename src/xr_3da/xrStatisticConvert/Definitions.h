@@ -3,7 +3,7 @@ typedef	unsigned	int		u32;
 typedef	signed		short	s16;
 typedef	unsigned	short	u16;
 
-#define IC __forceinline
+#define IC_ __forceinline
 
 extern void DbgOut( const char *format, ... );
 extern void ConvOut(FILE* pFile, const char *format, ... );
@@ -17,7 +17,7 @@ typedef	char	string1024	[1024];
 
 #include "../../xrCore/xrCore.h"
 
-IC float	Magnitude (Fvector v0, Fvector v1)
+IC_ float	Magnitude (Fvector v0, Fvector v1)
 {
 	Fvector vr;
 	
