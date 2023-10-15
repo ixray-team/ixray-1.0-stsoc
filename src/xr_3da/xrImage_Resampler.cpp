@@ -262,8 +262,8 @@ void	imf_Process	(u32* dstI, u32 dstW, u32 dstH, u32* srcI, u32 srcW, u32 srcH, 
 				contrib[i].p	= (CONTRIB *)xr_malloc((int) (width * 2 + 1)*sizeof(CONTRIB));
 				ZeroMemory(contrib[i].p,(int) (width * 2 + 1)*sizeof(CONTRIB));
 				center			= float(i) / xscale;
-				left			= ceil	(center - width);
-				right			= floor	(center + width);
+				left			= (float) ceil	(center - width);
+				right			= (float) floor	(center + width);
 				for(j = int(left); j <= int(right); ++j)
 				{
 					weight	= center - float(j);
@@ -291,8 +291,8 @@ void	imf_Process	(u32* dstI, u32 dstW, u32 dstH, u32* srcI, u32 srcW, u32 srcH, 
 				contrib[i].p	= (CONTRIB *)xr_malloc((int) (fwidth * 2 + 1)*sizeof(CONTRIB));
 				ZeroMemory(contrib[i].p,(int) (fwidth * 2 + 1)*sizeof(CONTRIB));
 				center			= float(i) / xscale;
-				left			= ceil	(center - fwidth);
-				right			= floor	(center + fwidth);
+				left			= (float) ceil	(center - fwidth);
+				right			= (float) floor	(center + fwidth);
 				for(j = int(left); j <= int(right); ++j)
 				{
 					weight	= center - (float) j;
@@ -363,8 +363,8 @@ void	imf_Process	(u32* dstI, u32 dstW, u32 dstH, u32* srcI, u32 srcW, u32 srcH, 
 				contrib[i].p	= (CONTRIB *)xr_malloc((int) (width * 2 + 1)*sizeof(CONTRIB));
 				ZeroMemory(contrib[i].p,(int) (width * 2 + 1)*sizeof(CONTRIB));
 				center			= (float) i / yscale;
-				left			= ceil	(center - width);
-				right			= floor	(center + width);
+				left			= (float) ceil	(center - width);
+				right			= (float) floor	(center + width);
 				for(j = int(left); j <= int(right); ++j)
 				{
 					weight	= center - (float) j;
@@ -390,8 +390,8 @@ void	imf_Process	(u32* dstI, u32 dstW, u32 dstH, u32* srcI, u32 srcW, u32 srcH, 
 				contrib[i].p	= (CONTRIB *)xr_malloc((int) (fwidth * 2 + 1)*sizeof(CONTRIB));
 				ZeroMemory(contrib[i].p,(int) (fwidth * 2 + 1)*sizeof(CONTRIB));
 				center			= (float) i / yscale;
-				left			= ceil	(center - fwidth);
-				right			= floor	(center + fwidth);
+				left			= (float) ceil	(center - fwidth);
+				right			= (float) floor	(center + fwidth);
 				for(j = int(left); j <= int(right); ++j) {
 					weight = center - (float) j;
 					weight = (*filterf)(weight);

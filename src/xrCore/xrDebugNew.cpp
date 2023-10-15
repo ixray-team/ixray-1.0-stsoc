@@ -503,7 +503,7 @@ void format_message	(LPSTR buffer, const u32 &buffer_size)
 		NULL
 	);
 
-	sprintf		(buffer,"[error][%8d]    : %s",error_code,message);
+	sprintf		(buffer,"[error][%8d]    : %s",error_code, (char*) message);
     LocalFree	(message);
 }
 

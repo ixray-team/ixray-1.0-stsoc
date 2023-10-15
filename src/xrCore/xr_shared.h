@@ -22,16 +22,16 @@ public:
 	template <typename _on_new>
 	T*						dock				(shared_str key, const _on_new& p)
 	{
-		T*	result				= 0	;
+		T*	result_				= 0	;
 		SharedMapIt	I			= container.find	(key);
-		if (I!=container.end())	result = I->second;
-		if (0==result)			{
-			result				= xr_new<T>();
-			result->m_ref_cnt	= 0;
-			if (p(key,result))	container.insert(std::make_pair(key,result));
-			else				xr_delete		(result);
+		if (I!=container.end())	result_ = I->second;
+		if (0==result_)			{
+			result_				= xr_new<T>();
+			result_->m_ref_cnt	= 0;
+			if (p(key,result_))	container.insert(std::make_pair(key,result_));
+			else				xr_delete		(result_);
 		}
-		return				result;
+		return				result_;
 	}
 	virtual void			clean				(bool force_destroy)
 	{

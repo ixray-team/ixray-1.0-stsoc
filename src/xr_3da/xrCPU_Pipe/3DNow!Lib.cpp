@@ -29,16 +29,16 @@ static const __m64f  ones		=	{ 1.0f		,	1.0f			};
 static const __m64f  twos		=	{ 2.0f		,	2.0f			};
 static const __m64i izeros      =   { 0,            0               };
 static const __m64i pinfs       =   { 0x7f800000,   0x7f800000      }; // dword PINH, PINH
-static const __m64i smh_masks   =   { 0x807fffff,   0x807fffff      }; // dword MASKSMH, MASKSMH
+static const __m64i smh_masks   =   { (int) 0x807fffff, (int) 0x807fffff      }; // dword MASKSMH, MASKSMH
 static const __m64i sign_mask   =   { 0x7fffffff,   0x7fffffff      };
-static const __m64i sh_masks    =   { 0x80000000,   0x80000000      }; // dword MASKSH, MASKSH
+static const __m64i sh_masks    =   { (int) 0x80000000, (int) 0x80000000      }; // dword MASKSH, MASKSH
 static const __m64i two_126s    =   { 126,          126             };
 // ; SINCOS specific values
 static const __m64f mo2s		=	{ -0.5f			,-0.5f			};
 static const __m64f mo12_6		=	{ -0.0833333333f,-0.166666667f	};	
 static const __m64f mo30_20		=	{ -0.0333333333f,-0.05f			};
 static const __m64f mo56_42		=	{ -0.0178571f	,-0.0238095f	};
-static const __m64i pio4ht      =   { 0xbf490000,   0xb97daa22      };  // approximately -0.000241913 | -0.785156
+static const __m64i pio4ht      =   { (int) 0xbf490000, (int) 0xb97daa22      };  // approximately -0.000241913 | -0.785156
 static const __m64i pio4s       =   { 0x3f490fdb,   0x3f490fdb      };  // approximately 0.785398 | 0.785398
 //;******************************************************************************
 //; Scalar (single float) data
@@ -64,7 +64,7 @@ static const __int32 qq2        =       0x41355DC0;
 static const __int32 pp0        =       0xC0D21907;
 static const __int32 pp1        =       0xC0B59883;
 static const __int32 pp2        =       0xBF52C7EA;
-static const __int32 bnd        =       0x3F133333;
+static const __int32 bnd_        =       0x3F133333;
 static const __int32 asp0       =       0x3F6A4AA5;
 static const __int32 asp1       =       0xBF004C2C;
 static const __int32 asq0       =       0x40AFB829;
@@ -261,7 +261,7 @@ __declspec (naked) void a_acos ()
         pcmpgtd     mm3, mm5    //; z > 1.0 ? 0xFFFFFFFF : 0
         movq        mm5, mm0    //; save z
         pfmul       mm0, mm4    //; z*0.5
-        movd        mm2, [bnd]  //; 0.575
+        movd        mm2, [bnd_]  //; 0.575
         pfsubr      mm0, mm4    //; 0.5 - z * 0.5
         pfrsqrt     mm7, mm0    //; 1/sqrt((1-z)/2) approx low
         movq        mm1, mm7    //; complete
@@ -349,7 +349,7 @@ __declspec (naked) void a_asin ()
         pcmpgtd     mm3, mm5    //; z > 1.0 ? 0xFFFFFFFF : 0
         movq        mm5, mm0    //; save z
         pfmul       mm0, mm4    //; z*0.5
-        movd        mm2, [bnd]  //; 0.575
+        movd        mm2, [bnd_]  //; 0.575
         pfsubr      mm0, mm4    //; 0.5 - z * 0.5
         pfrsqrt     mm7, mm0    //; 1/sqrt((1-z)/2) approx
         movq        mm1, mm7    //; complete

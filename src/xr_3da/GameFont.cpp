@@ -78,7 +78,7 @@ void CGameFont::Initialize		(LPCSTR cShader, LPCSTR cTextureName)
 		uFlags |= fsMultibyte;
 		fHeight = ini->r_float( "mb_symbol_coords" , "height" );
 		
-		fXStep = ceil( fHeight / 2.0f );
+		fXStep = (float) ceil( fHeight / 2.0f );
 
 		for ( u32 i=0 ; i < nNumChars ; i++ ) {
 			sprintf_s( buf ,sizeof(buf), "%05d" , i );
