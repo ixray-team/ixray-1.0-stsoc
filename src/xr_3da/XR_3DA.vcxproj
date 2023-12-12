@@ -555,7 +555,6 @@
     <ClInclude Include="xrTheora_Stream.h" />
     <ClInclude Include="xrTheora_Surface.h" />
     <ClInclude Include="xrTheora_Surface_mmx.h" />
-    <ClInclude Include="xrXRC.h" />
     <ClInclude Include="xr_area.h" />
     <ClInclude Include="xr_collide_defs.h" />
     <ClInclude Include="xr_collide_form.h" />
@@ -730,7 +729,6 @@
     <ClCompile Include="xrTheora_Stream.cpp" />
     <ClCompile Include="xrTheora_Surface.cpp" />
     <ClCompile Include="xrTheora_Surface_mmx.cpp" />
-    <ClCompile Include="xrXRC.cpp" />
     <ClCompile Include="xr_area.cpp" />
     <ClCompile Include="xr_area_query.cpp" />
     <ClCompile Include="xr_area_raypick.cpp" />
