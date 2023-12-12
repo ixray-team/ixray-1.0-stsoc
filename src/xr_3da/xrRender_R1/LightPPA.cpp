@@ -71,7 +71,6 @@ void CLightR_Manager::render_point	()
 		if (!RImplementation.ViewBase.testSphere_dirty (PPL.position,PPL.range))	continue;
 
 		// Calculations and rendering
-		Device.Statistic->RenderDUMP_Lights.Begin();
 		Fcolor				factor;
 		factor.mul_rgba		(PPL.color,(1-alpha));
 		RCache.set_c		(hPPAcolor,factor.r,factor.g,factor.b,1);
@@ -132,7 +131,6 @@ void CLightR_Manager::render_point	()
 			RCache.Vertex.Unlock		(actual*3,hGeom->vb_stride);
 			if (actual) RCache.Render	(D3DPT_TRIANGLELIST,vOffset,actual);
 		}
-		Device.Statistic->RenderDUMP_Lights.End	();
 	}
 
 	// Projection

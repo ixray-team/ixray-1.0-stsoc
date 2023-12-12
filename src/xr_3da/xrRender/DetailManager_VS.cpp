@@ -166,7 +166,6 @@ void CDetailManager::hw_Render()
 }
 void	CDetailManager::hw_Render_dump		(ref_constant x_array, u32 var_id, u32 lod_id, u32 c_offset)
 {
-	Device.Statistic->RenderDUMP_DT_Count	= 0;
 
 	// Matrices and offsets
 	u32		vOffset	=	0;
@@ -227,7 +226,6 @@ void	CDetailManager::hw_Render_dump		(ref_constant x_array, u32 var_id, u32 lod_
 					dwBatch	++;
 					if (dwBatch == hw_BatchSize)	{
 						// flush
-						Device.Statistic->RenderDUMP_DT_Count					+=	dwBatch;
 						u32 dwCNT_verts			= dwBatch * Object.number_vertices;
 						u32 dwCNT_prims			= (dwBatch * Object.number_indices)/3;
 						RCache.get_ConstantCache_Vertex().b_dirty				=	TRUE;
@@ -243,7 +241,6 @@ void	CDetailManager::hw_Render_dump		(ref_constant x_array, u32 var_id, u32 lod_
 			// flush if nessecary
 			if (dwBatch)
 			{
-				Device.Statistic->RenderDUMP_DT_Count	+= dwBatch;
 				u32 dwCNT_verts			= dwBatch * Object.number_vertices;
 				u32 dwCNT_prims			= (dwBatch * Object.number_indices)/3;
 				RCache.get_ConstantCache_Vertex().b_dirty				=	TRUE;

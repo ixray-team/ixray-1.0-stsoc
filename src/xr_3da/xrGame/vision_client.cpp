@@ -39,7 +39,6 @@ vision_client::~vision_client					()
 
 void vision_client::eye_pp_s01					()
 {
-	Device.Statistic->AI_Vis_Query.Begin		();
 	
 	Fvector						c, k, j;
 	float						field_of_view, aspect_ratio, near_plane, far_plane;
@@ -53,19 +52,16 @@ void vision_client::eye_pp_s01					()
 	
 	feel_vision_query			(mFull,c);
 
-	Device.Statistic->AI_Vis_Query.End		();
 }
 
 void vision_client::eye_pp_s2					()
 {
-	Device.Statistic->AI_Vis_RayTests.Begin	();
 
 	u32							dwTime = Device.dwTimeGlobal;
 	u32							dwDT = dwTime - m_time_stamp;
 	m_time_stamp				= dwTime;
 	feel_vision_update			(m_object,m_position,float(dwDT)/1000.f,visual().transparency_threshold());
 
-	Device.Statistic->AI_Vis_RayTests.End	();
 }
 
 float vision_client::shedule_Scale				()

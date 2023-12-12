@@ -104,7 +104,7 @@ void CAI_Stalker::reinit			()
 	animation().reinit				();
 	movement().reinit				();
 
-	//загрузка спецевической звуковой схемы для сталкера согласно m_SpecificCharacter
+	//Р·Р°РіСЂСѓР·РєР° СЃРїРµС†РµРІРёС‡РµСЃРєРѕР№ Р·РІСѓРєРѕРІРѕР№ СЃС…РµРјС‹ РґР»СЏ СЃС‚Р°Р»РєРµСЂР° СЃРѕРіР»Р°СЃРЅРѕ m_SpecificCharacter
 	sound().sound_prefix			(SpecificCharacter().sound_voice_prefix());
 
 #ifdef DEBUG_MEMORY_MANAGER
@@ -286,7 +286,7 @@ void CAI_Stalker::Die				(CObject* who)
 
 	inherited::Die					(who);
 	
-	//запретить использование слотов в инвенторе
+	//Р·Р°РїСЂРµС‚РёС‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ СЃР»РѕС‚РѕРІ РІ РёРЅРІРµРЅС‚РѕСЂРµ
 	inventory().SetSlotsUseful		(false);
 
 	if (inventory().GetActiveSlot() >= inventory().m_slots.size())
@@ -384,7 +384,7 @@ BOOL CAI_Stalker::net_Spawn			(CSE_Abstract* DC)
 	if (!g_Alive())
 		sound().set_sound_mask(u32(eStalkerSoundMaskDie));
 
-	//загрузить иммунитеты из модельки сталкера
+	//Р·Р°РіСЂСѓР·РёС‚СЊ РёРјРјСѓРЅРёС‚РµС‚С‹ РёР· РјРѕРґРµР»СЊРєРё СЃС‚Р°Р»РєРµСЂР°
 	CKinematics* pKinematics = smart_cast<CKinematics*>(Visual()); VERIFY(pKinematics);
 	CInifile* ini = pKinematics->LL_UserData();
 	if(ini)
@@ -401,7 +401,7 @@ BOOL CAI_Stalker::net_Spawn			(CSE_Abstract* DC)
 		}
 	}
 
-	//вычислить иммунета в зависимости от ранга
+	//РІС‹С‡РёСЃР»РёС‚СЊ РёРјРјСѓРЅРµС‚Р° РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЂР°РЅРіР°
 	static float novice_rank_immunity			= pSettings->r_float("ranks_properties", "immunities_novice_k");
 	static float expirienced_rank_immunity		= pSettings->r_float("ranks_properties", "immunities_experienced_k");
 
@@ -787,7 +787,6 @@ void CAI_Stalker::shedule_Update		( u32 DT )
 		// here is monster AI call
 		VERIFY							(_valid(Position()));
 		m_fTimeUpdateDelta				= dt;
-		Device.Statistic->AI_Think.Begin	();
 		if (GetScriptControl())
 			ProcessScripts				();
 		else
@@ -796,7 +795,6 @@ void CAI_Stalker::shedule_Update		( u32 DT )
 #endif
 				Think					();
 		m_dwLastUpdateTime				= Device.dwTimeGlobal;
-		Device.Statistic->AI_Think.End	();
 		VERIFY							(_valid(Position()));
 
 		// Look and action streams

@@ -67,7 +67,6 @@ void CRenderDevice::_Create	(LPCSTR shName)
 	Gamma.Update				();
 	Resources->OnDeviceCreate	(shName);
 	::Render->create			();
-	Statistic->OnDeviceCreate	();
 
 #ifndef DEDICATED_SERVER
 	m_WireShader.create			("editor\\wire");
@@ -83,7 +82,6 @@ void CRenderDevice::_Create	(LPCSTR shName)
 void CRenderDevice::Create	() 
 {
 	if (b_is_Ready)		return;		// prevent double call
-	Statistic			= xr_new<CStats>();
 	Log					("Starting RENDER device...");
 
 #ifdef _EDITOR

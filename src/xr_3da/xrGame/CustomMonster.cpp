@@ -325,8 +325,6 @@ void CCustomMonster::shedule_Update	( u32 DT )
 	} else {
 		// here is monster AI call
 		m_fTimeUpdateDelta				= dt;
-		Device.Statistic->AI_Think.Begin	();
-		Device.Statistic->TEST1.Begin();
 		if (GetScriptControl())
 			ProcessScripts();
 		else {
@@ -334,8 +332,6 @@ void CCustomMonster::shedule_Update	( u32 DT )
 				Think					();
 		}
 		m_dwLastUpdateTime				= Device.dwTimeGlobal;
-		Device.Statistic->TEST1.End();
-		Device.Statistic->AI_Think.End	();
 
 		// Look and action streams
 		float							temp = conditions().health();
@@ -347,7 +343,7 @@ void CCustomMonster::shedule_Update	( u32 DT )
 			//////////////////////////////////////
 			//Fvector C; float R;
 			//////////////////////////////////////
-			// С Олеся - ПИВО!!!! (Диме :-))))
+			// РЎ РћР»РµСЃСЏ - РџРР’Рћ!!!! (Р”РёРјРµ :-))))
 			// m_PhysicMovementControl->GetBoundingSphere	(C,R);
 			//////////////////////////////////////
 			//Center(C);
@@ -576,25 +572,21 @@ void CCustomMonster::eye_pp_s1			()
 #endif
 	}
 	// Standart visibility
-	Device.Statistic->AI_Vis_Query.Begin		();
 	Fmatrix									mProject,mFull,mView;
 	mView.build_camera_dir					(eye_matrix.c,eye_matrix.k,eye_matrix.j);
 	VERIFY									(_valid(eye_matrix));
 	mProject.build_projection				(deg2rad(new_fov),1,0.1f,new_range);
 	mFull.mul								(mProject,mView);
 	feel_vision_query						(mFull,eye_matrix.c);
-	Device.Statistic->AI_Vis_Query.End		();
 }
 
 void CCustomMonster::eye_pp_s2				( )
 {
 	// Tracing
-	Device.Statistic->AI_Vis_RayTests.Begin	();
 	u32 dwTime			= Level().timeServer();
 	u32 dwDT			= dwTime-eye_pp_timestamp;
 	eye_pp_timestamp	= dwTime;
 	feel_vision_update						(this,eye_matrix.c,float(dwDT)/1000.f,memory().visual().transparency_threshold());
-	Device.Statistic->AI_Vis_RayTests.End	();
 }
 
 void CCustomMonster::Exec_Visibility	( )
@@ -602,7 +594,6 @@ void CCustomMonster::Exec_Visibility	( )
 	//if (0==Sector())				return;
 	if (!g_Alive())					return;
 
-	Device.Statistic->AI_Vis.Begin	();
 	switch (eye_pp_stage%2)	
 	{
 	case 0:	
@@ -611,7 +602,6 @@ void CCustomMonster::Exec_Visibility	( )
 	case 1:	eye_pp_s2();			break;
 	}
 	++eye_pp_stage					;
-	Device.Statistic->AI_Vis.End		();
 }
 
 void CCustomMonster::UpdateCamera()
@@ -779,12 +769,12 @@ void CCustomMonster::PitchCorrection()
 	Fvector position_on_plane;
 	P.project(position_on_plane,Position());
 
-	// находим проекцию точки, лежащей на векторе текущего направления
+	// РЅР°С…РѕРґРёРј РїСЂРѕРµРєС†РёСЋ С‚РѕС‡РєРё, Р»РµР¶Р°С‰РµР№ РЅР° РІРµРєС‚РѕСЂРµ С‚РµРєСѓС‰РµРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ
 	Fvector dir_point, proj_point;
 	dir_point.mad(position_on_plane, Direction(), 1.f);
 	P.project(proj_point,dir_point);
 	
-	// получаем искомый вектор направления
+	// РїРѕР»СѓС‡Р°РµРј РёСЃРєРѕРјС‹Р№ РІРµРєС‚РѕСЂ РЅР°РїСЂР°РІР»РµРЅРёСЏ
 	Fvector target_dir;
 	target_dir.sub(proj_point,position_on_plane);
 
@@ -1072,7 +1062,7 @@ void CCustomMonster::OnRender()
 				const DetailPathManager::STravelPathPoint&	N2 = path[I];	Fvector	P2; P2.set(N2.position); P2.y+=0.1f;
 				if (!fis_zero(P1.distance_to_sqr(P2),EPS_L))
 					Level().debug_renderer().draw_line			(Fidentity,P1,P2,color0);
-				if ((path.size() - 1) == I) // песледний box?
+				if ((path.size() - 1) == I) // РїРµСЃР»РµРґРЅРёР№ box?
 					Level().debug_renderer().draw_aabb			(P1,radius0,radius0,radius0,color1);
 				else 
 					Level().debug_renderer().draw_aabb			(P1,radius0,radius0,radius0,color2);

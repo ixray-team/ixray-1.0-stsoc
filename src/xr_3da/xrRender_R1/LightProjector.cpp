@@ -152,7 +152,6 @@ void CLightProjector::calculate	()
 	if (taskid.empty())			return;
 
 	// Begin
-	Device.Statistic->RenderDUMP_Pcalc.Begin	();
 	RCache.set_RT				(RT->pRT);
 	RCache.set_ZB				(RImplementation.Target->pTempZB);
 	CHK_DX(HW.pDevice->Clear	(0,0, D3DCLEAR_ZBUFFER | (HW.Caps.bStencil?D3DCLEAR_STENCIL:0), 0,1,0 ));
@@ -310,7 +309,6 @@ void CLightProjector::calculate	()
 	*/
 
 	// Finita la comedia
-	Device.Statistic->RenderDUMP_Pcalc.End	();
 	
 	RCache.set_xform_project	(Device.mProject);
 	RCache.set_xform_view		(Device.mView);

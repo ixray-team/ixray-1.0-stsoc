@@ -80,8 +80,7 @@ public:
 	xr_vector		<fastdelegate::FastDelegate0<> >	seqParallel;
 
 	// Dependent classes
-	CResourceManager*						Resources;	  
-	CStats*									Statistic;
+	CResourceManager*						Resources;
 	CGammaControl							Gamma;
 
 	// Engine flow-control

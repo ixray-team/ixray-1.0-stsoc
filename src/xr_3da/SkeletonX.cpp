@@ -271,7 +271,6 @@ void CSkeletonX::_Render_soft	(ref_geom& hGeom, u32 vCount, u32 iOffset, u32 pCo
 		cache_vCount		= vCount;
 		cache_vOffset		= vOffset;
 		
-		Device.Statistic->RenderDUMP_SKIN.Begin	();
 		if (*Vertices1W)
 		{
 			PSGP.skin1W(
@@ -288,7 +287,6 @@ void CSkeletonX::_Render_soft	(ref_geom& hGeom, u32 vCount, u32 iOffset, u32 pCo
 				Parent->bone_instances						// bones
 				);
 		}
-		Device.Statistic->RenderDUMP_SKIN.End	();
 		_VS.Unlock			(vCount,hGeom->vb_stride);
 	}
 
