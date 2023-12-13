@@ -247,6 +247,15 @@
       <Filter>Compression\lzo</Filter>
     </ClCompile>
     <ClCompile Include="xrSyncronize.cpp" />
+    <ClCompile Include="ptmalloc3\malloc.c">
+      <Filter>Memory manager</Filter>
+    </ClCompile>
+    <ClCompile Include="ptmalloc3\sysdeps\win32\win32.c">
+      <Filter>Memory manager</Filter>
+    </ClCompile>
+    <ClCompile Include="doug_lea_allocator.cpp">
+      <Filter>Memory manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FTimer.h">
@@ -514,6 +523,12 @@
       <Filter>Compression\lzo</Filter>
     </ClInclude>
     <ClInclude Include="xrSyncronize.h" />
+    <ClInclude Include="ptmalloc3\malloc-2.8.3.h">
+      <Filter>Memory manager</Filter>
+    </ClInclude>
+    <ClInclude Include="doug_lea_allocator.h">
+      <Filter>Memory manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="xrCore.rc">
