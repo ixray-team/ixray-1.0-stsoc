@@ -1,7 +1,7 @@
 #ifndef XRCDB_H
 #define XRCDB_H
 
-#pragma once
+//#pragma once
 // The following ifdef block is the standard way of creating macros which make exporting
 // from a DLL simpler. All files within this DLL are compiled with the XRCDB_EXPORTS
 // symbol defined on the command line. this symbol should not be defined on any project
@@ -76,7 +76,9 @@ namespace CDB
 		~MODEL();
 
 		IC Fvector*				get_verts		()			{ return verts;		}
+		IC const Fvector*		get_verts		()	const	{ return verts;		}
 		IC int					get_verts_count	()	const	{ return verts_count;}
+		IC const TRI*			get_tris		()	const 	{ return tris;		}
 		IC TRI*					get_tris		()			{ return tris;		}
 		IC int					get_tris_count	()	const	{ return tris_count;}
 		IC void					syncronize		()	const
@@ -149,7 +151,7 @@ namespace CDB
 		ICF RESULT*		r_end			()	{	return &*rd.end();			};
 		RESULT&			r_add			()	;
 		void			r_free			()	;
-		ICF int			r_count			()	{	return rd.size();			};
+		ICF int			r_count			()	{	return (u32)rd.size();			};
 		ICF void		r_clear			()	{	rd.clear();		};
 		ICF void		r_clear_compact	()	{	rd.clear();		};
 	};

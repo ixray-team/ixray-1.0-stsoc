@@ -10,6 +10,9 @@
     <Filter Include="Collision Core">
       <UniqueIdentifier>{ab54ed91-c1a0-4cea-9fc8-819e881f66da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Collision">
+      <UniqueIdentifier>{ced895c0-4544-49b0-b094-20224e3b061d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cl_raypick.cpp">
@@ -238,6 +241,9 @@
     </ClInclude>
     <ClInclude Include="xrXRC.h">
       <Filter>Collision Core</Filter>
+    </ClInclude>
+    <ClInclude Include="xr_collide_defs.h">
+      <Filter>Collision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

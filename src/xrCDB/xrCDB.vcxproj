@@ -364,6 +364,7 @@
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="xrCDB.h" />
     <ClInclude Include="xrXRC.h" />
+    <ClInclude Include="xr_collide_defs.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

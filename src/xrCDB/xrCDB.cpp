@@ -6,6 +6,10 @@
 
 #include "xrCDB.h"
 
+namespace Opcode {
+#	include "OPC_TreeBuilders.h"
+} // namespace Opcode
+
 using namespace CDB;
 using namespace Opcode;
 
@@ -51,8 +55,8 @@ struct	BTHREAD_params
 {
 	MODEL*				M;
 	Fvector*			V;
-	int					Vcnt;
 	TRI*				T;
+	int					Vcnt;
 	int					Tcnt;
 	build_callback*		BC;
 	void*				BCP;
@@ -82,9 +86,10 @@ void	MODEL::build			(Fvector* V, int Vcnt, TRI* T, int Tcnt, build_callback* bc,
 	if(!strstr(Core.Params, "-mt_cdb"))
 	{
 		build_internal				(V,Vcnt,T,Tcnt,bc,bcp);
+		status						= S_READY;
 	}else
 	{
-		BTHREAD_params				P = { this, V, Vcnt, T, Tcnt, bc, bcp };
+		BTHREAD_params				P = { this, V, T, Vcnt, Tcnt, bc, bcp };
 		thread_spawn				(build_thread,"CDB-construction",0,&P);
 		while						(S_INIT	== status)	Sleep	(5);
 	}

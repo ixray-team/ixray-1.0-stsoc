@@ -130,6 +130,10 @@
 #include "stdafx.h"
 #pragma hdrstop
 
+namespace Opcode {
+#	include "OPC_TreeBuilders.h"
+} // namespace Opcode
+
 using namespace Opcode;
 
 OPCODECREATE::OPCODECREATE()

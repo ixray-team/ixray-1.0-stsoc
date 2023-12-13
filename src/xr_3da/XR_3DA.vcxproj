@@ -488,7 +488,6 @@
     <ClInclude Include="Feel_Vision.h" />
     <ClInclude Include="FHierrarhyVisual.h" />
     <ClInclude Include="Fmesh.h" />
-    <ClInclude Include="Frustum.h" />
     <ClInclude Include="FVF.h" />
     <ClInclude Include="GameFont.h" />
     <ClInclude Include="HW.h" />
@@ -556,7 +555,6 @@
     <ClInclude Include="xrTheora_Surface.h" />
     <ClInclude Include="xrTheora_Surface_mmx.h" />
     <ClInclude Include="xr_area.h" />
-    <ClInclude Include="xr_collide_defs.h" />
     <ClInclude Include="xr_collide_form.h" />
     <ClInclude Include="xr_effgamma.h" />
     <ClInclude Include="xr_efflensflare.h" />
@@ -630,10 +628,6 @@
     <ClCompile Include="Feel_Vision.cpp" />
     <ClCompile Include="FHierrarhyVisual.cpp" />
     <ClCompile Include="fmesh.cpp" />
-    <ClCompile Include="Frustum.cpp">
-      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Mixed_Dedicated|Win32'">AssemblyAndSourceCode</AssemblerOutput>
-      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">AssemblyAndSourceCode</AssemblerOutput>
-    </ClCompile>
     <ClCompile Include="GameFont.cpp" />
     <ClCompile Include="HW.cpp" />
     <ClCompile Include="HWCaps.cpp" />
