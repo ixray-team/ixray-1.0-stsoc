@@ -340,10 +340,10 @@ void CUIInventoryWnd::Hide()
 
 	if (!IsGameTypeSingle())
 	{
-		CActor *pActor_		= smart_cast<CActor*>(Level().CurrentEntity());
-		if(!pActor_)			return;
+		CActor *pActor		= smart_cast<CActor*>(Level().CurrentEntity());
+		if(!pActor)			return;
 
-		pActor_->SetWeaponHideState(INV_STATE_INV_WND, false);
+		pActor->SetWeaponHideState(INV_STATE_INV_WND, false);
 	}
 }
 

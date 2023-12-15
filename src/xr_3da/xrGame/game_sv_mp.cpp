@@ -1030,11 +1030,11 @@ void	game_sv_mp::OnPlayerChangeName		(NET_Packet& P, ClientID sender)
 	{
 		Msg( "Player \"%s\" try to change name on \"%s\" at protected server.", ps->getName(), NewName );
 
-		NET_Packet			P_;
-		GenerateGameMessage (P_);
-		P_.w_u32				(GAME_EVENT_SERVER_STRING_MESSAGE);
-		P_.w_stringZ			("Server is protected. Can\'t change player name!");
-		m_server->SendTo( sender, P_ );
+		NET_Packet			P;
+		GenerateGameMessage (P);
+		P.w_u32				(GAME_EVENT_SERVER_STRING_MESSAGE);
+		P.w_stringZ			("Server is protected. Can\'t change player name!");
+		m_server->SendTo( sender, P );
 		return;
 	}
 
@@ -1045,21 +1045,21 @@ void	game_sv_mp::OnPlayerChangeName		(NET_Packet& P, ClientID sender)
 
 	if (pClient->owner)
 	{
-		NET_Packet			P_;
-		GenerateGameMessage(P_);
-		P_.w_u32(GAME_EVENT_PLAYER_NAME);
-		P_.w_u16(pClient->owner->ID);
-		P_.w_s16(ps->team);
-		P_.w_stringZ(ps->getName());
-		P_.w_stringZ(NewName);
+		NET_Packet			P;
+		GenerateGameMessage(P);
+		P.w_u32(GAME_EVENT_PLAYER_NAME);
+		P.w_u16(pClient->owner->ID);
+		P.w_s16(ps->team);
+		P.w_stringZ(ps->getName());
+		P.w_stringZ(NewName);
 		//---------------------------------------------------		
 		u32	cnt = get_players_count();	
 		for(u32 it=0; it<cnt; it++)	
 		{
 			xrClientData *l_pC = (xrClientData*)	m_server->client_Get	(it);
-			game_PlayerState* ps_	= l_pC->ps;
-			if (!l_pC || !l_pC->net_Ready || !ps_) continue;
-			m_server->SendTo(l_pC->ID, P_);
+			game_PlayerState* ps	= l_pC->ps;
+			if (!l_pC || !l_pC->net_Ready || !ps) continue;
+			m_server->SendTo(l_pC->ID, P);
 		};
 		//---------------------------------------------------
 		pClient->owner->set_name_replace(NewName);
@@ -1094,8 +1094,8 @@ void		game_sv_mp::OnPlayerSpeechMessage	(NET_Packet& P, ClientID sender)
 		for(u32 it=0; it<cnt; it++)	
 		{
 			xrClientData *l_pC = (xrClientData*)	m_server->client_Get	(it);
-			game_PlayerState* ps_	= l_pC->ps;
-			if (!l_pC || !l_pC->net_Ready || !ps_) continue;
+			game_PlayerState* ps	= l_pC->ps;
+			if (!l_pC || !l_pC->net_Ready || !ps) continue;
 			m_server->SendTo(l_pC->ID, NP, net_flags(TRUE, TRUE, TRUE));
 		};
 	};

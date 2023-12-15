@@ -18,7 +18,7 @@ bool blend_in( const CBlend &b, const motion_marks& marks )
 	VERIFY					(!fis_zero(b.timeTotal));
 
 	float blend_time		= ( b.timeCurrent/b.timeTotal ) ;
-	blend_time				-= (float) floor( blend_time );
+	blend_time				-= floor( blend_time );
 	return marks.pick_mark	( blend_time * b.timeTotal );
 
 //.	return	is_in( interval , blend_time );

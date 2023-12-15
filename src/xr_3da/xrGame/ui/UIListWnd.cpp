@@ -150,9 +150,9 @@ void CUIListWnd::RemoveItem(int index)
 
 	//перенумеровать индексы заново
 	int i=0;
-	for(LIST_ITEM_LIST_it it_=m_ItemList.begin();  m_ItemList.end() != it_; ++it_,i++)
+	for(LIST_ITEM_LIST_it it=m_ItemList.begin();  m_ItemList.end() != it; ++it,i++)
 	{
-		(*it_)->SetIndex(i);
+		(*it)->SetIndex(i);
 	}
 
 }

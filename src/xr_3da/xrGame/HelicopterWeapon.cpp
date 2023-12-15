@@ -162,7 +162,7 @@ void CHelicopter::MGunFireStart()
 		//calc min firetrail length
 		float h = fp.y-ep.y;
 		if(h>0.0f){
-			float dl =h* (float) tan(m_lim_x_rot.y);
+			float dl =h*tan(m_lim_x_rot.y);
 			float ds = fp.distance_to_xz(ep);
 			if(ds>dl){
 				float half_trail = ds-dl;

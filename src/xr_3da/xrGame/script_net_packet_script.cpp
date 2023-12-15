@@ -12,32 +12,32 @@
 
 using namespace luabind;
 
-bool r_eof(NET_Packet *self_)
+bool r_eof(NET_Packet *self)
 {
-	return			(!!self_->r_eof());
+	return			(!!self->r_eof());
 }
 
-LPCSTR r_stringZ(NET_Packet *self_)
+LPCSTR r_stringZ(NET_Packet *self)
 {
 	shared_str			temp;
-	self_->r_stringZ	(temp);
+	self->r_stringZ	(temp);
 	return			(*temp);
 }
 
-void w_bool(NET_Packet *self_, bool value)
+void w_bool(NET_Packet *self, bool value)
 {
-	self_->w_u8		(value ? 1 : 0);
+	self->w_u8		(value ? 1 : 0);
 }
 
-bool r_bool(NET_Packet *self_)
+bool r_bool(NET_Packet *self)
 {
-	return			(!!self_->r_u8());
+	return			(!!self->r_u8());
 }
 
-ClientID r_clientID(NET_Packet *self_)
+ClientID r_clientID(NET_Packet *self)
 {
 	ClientID		clientID;
-	self_->r_clientID(clientID);
+	self->r_clientID(clientID);
 	return clientID;
 }
 

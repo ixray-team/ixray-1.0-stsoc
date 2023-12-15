@@ -37,7 +37,7 @@ void random_dir(Fvector& tgt_dir, const Fvector& src_dir, float dispersion)
 	float sigma			= dispersion/3.f;
 	float alpha			= clampr		(_nrand(sigma),-dispersion,dispersion);
 	float theta			= Random.randF	(0,PI);
-	float r 			= (float) tan(alpha);
+	float r 			= tan			(alpha);
 	Fvector 			U,V,T;
 	Fvector::generate_orthonormal_basis	(src_dir,U,V);
 	U.mul				(r*_sin(theta));

@@ -470,7 +470,7 @@ float angle_between_vectors(float u[3], float v[3], float n[3])
     project_plane(up, u, n);
     project_plane(vp, v, n);
     crossproduct(uv, up, vp); 
-    return (float) atan2(DOT(n, uv), DOT(up, vp));
+    return atan2(DOT(n, uv), DOT(up, vp)); 
 
 #endif
 } 
@@ -737,7 +737,7 @@ void rotation_matrix_to_axis(const Matrix R, float axis[], float &angle)
 {
     const float eps = 1e-7f;
 
-    angle = (float) acos((R[0][0] + R[1][1] + R[2][2] - 1) / 2.0f);
+    angle = acos((R[0][0] + R[1][1] + R[2][2] - 1) / 2.0f);
     
 
     // Close to identity. Arbitrarily set solution to z axis rotation of 0 

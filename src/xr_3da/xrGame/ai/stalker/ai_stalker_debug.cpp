@@ -479,13 +479,13 @@ void CAI_Stalker::OnHUDDraw				(CCustomHUD *hud)
 	if (inventory().ActiveItem()) {
 		HUD().Font().pFontStat->OutNext	("%s%sactive item",indent,indent);
 		HUD().Font().pFontStat->OutNext	("%s%s%sobject         : %s",indent,indent,indent,inventory().ActiveItem() ? *inventory().ActiveItem()->object().cName() : "");
-		CWeapon	*weapon_ = smart_cast<CWeapon*>(inventory().ActiveItem());
-		if (weapon_) {
-			HUD().Font().pFontStat->OutNext("%s%s%sstrapped       : %s",indent,indent,indent,weapon_strapped(weapon_) ? "+" : "-");
-			HUD().Font().pFontStat->OutNext("%s%s%sunstrapped     : %s",indent,indent,indent,weapon_unstrapped(weapon_) ? "+" : "-");
-			HUD().Font().pFontStat->OutNext("%s%s%sammo           : %d",indent,indent,indent,weapon_->GetAmmoElapsed());
-			HUD().Font().pFontStat->OutNext("%s%s%smagazine       : %d",indent,indent,indent,weapon_->GetAmmoMagSize());
-			HUD().Font().pFontStat->OutNext("%s%s%stotal ammo     : %d",indent,indent,indent,weapon_->GetAmmoCurrent());
+		CWeapon	*weapon = smart_cast<CWeapon*>(inventory().ActiveItem());
+		if (weapon) {
+			HUD().Font().pFontStat->OutNext("%s%s%sstrapped       : %s",indent,indent,indent,weapon_strapped(weapon) ? "+" : "-");
+			HUD().Font().pFontStat->OutNext("%s%s%sunstrapped     : %s",indent,indent,indent,weapon_unstrapped(weapon) ? "+" : "-");
+			HUD().Font().pFontStat->OutNext("%s%s%sammo           : %d",indent,indent,indent,weapon->GetAmmoElapsed());
+			HUD().Font().pFontStat->OutNext("%s%s%smagazine       : %d",indent,indent,indent,weapon->GetAmmoMagSize());
+			HUD().Font().pFontStat->OutNext("%s%s%stotal ammo     : %d",indent,indent,indent,weapon->GetAmmoCurrent());
 		}
 	}
 
@@ -1058,8 +1058,8 @@ void CAI_Stalker::dbg_draw_visibility_rays	()
 	const CEntityAlive		*enemy = memory().enemy().selected();
 	if (enemy) {
 		if (memory().visual().visible_now(enemy)) {
-			collide::rq_results	rq_storage_;
-			draw_visiblity_rays	(this,enemy,rq_storage_);
+			collide::rq_results	rq_storage;
+			draw_visiblity_rays	(this,enemy,rq_storage);
 		}
 	}
 }

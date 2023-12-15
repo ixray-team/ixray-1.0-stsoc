@@ -196,7 +196,7 @@ float CCarWeapon::FireDirDiff()
 	Fvector d1,d2;
 	d1.set(m_cur_x_rot,m_cur_y_rot,0).normalize_safe();
 	d2.set(m_tgt_x_rot,m_tgt_y_rot,0).normalize_safe();
-	return (float) rad2deg( acos(d1.dotproduct(d2)) );
+	return rad2deg( acos(d1.dotproduct(d2)) );
 }
 
 const Fvector&	CCarWeapon::get_CurrentFirePoint()

@@ -463,16 +463,16 @@ void	CActor::Hit							(SHit* pHDS)
 
 				CParticlesPlayer::MakeXFORM(this,HDS.bone(),HDS.dir,HDS.p_in_bone_space,pos);
 
-				// СѓСЃС‚Р°РЅРѕРІРёС‚СЊ particles
-				CParticlesObject* ps_ = NULL;
+				// установить particles
+				CParticlesObject* ps = NULL;
 
 				if (eacFirstEye == cam_active && this == Level().CurrentEntity())
-					ps_ = CParticlesObject::Create(invincibility_fire_shield_1st,TRUE);
+					ps = CParticlesObject::Create(invincibility_fire_shield_1st,TRUE);
 				else
-					ps_ = CParticlesObject::Create(invincibility_fire_shield_3rd,TRUE);
+					ps = CParticlesObject::Create(invincibility_fire_shield_3rd,TRUE);
 
-				ps_->UpdateParent(pos,Fvector().set(0.f,0.f,0.f));
-				GamePersistent().ps_needtoplay.push_back(ps_);
+				ps->UpdateParent(pos,Fvector().set(0.f,0.f,0.f));
+				GamePersistent().ps_needtoplay.push_back(ps);
 			};
 		};
 		 

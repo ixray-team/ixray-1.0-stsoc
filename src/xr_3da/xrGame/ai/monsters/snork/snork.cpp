@@ -184,7 +184,7 @@ bool CSnork::trace_geometry(const Fvector &d, float &range)
 	range				= trace (d);
 	if (range > TRACE_RANGE) return false;
 	
-	float angle			= (float) asin(1.f / range);
+	float angle			= asin(1.f / range);
 
 	// trace center ray
 	dir					= d;

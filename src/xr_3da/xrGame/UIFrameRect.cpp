@@ -98,8 +98,8 @@ void CUIFrameRect::UpdateSize()
 
 	//Фон
 	ts.set			(_bk.x,_bk.y);
-	rem_x  			= (float) fmod(size_top,ts.x);
-	rem_y  			= (float) fmod(size_left,ts.y);
+	rem_x  			= fmod(size_top,ts.x);
+	rem_y  			= fmod(size_left,ts.y);
 	tile_x 			= iFloor(size_top/ts.x);	tile_x=_max(tile_x, 0);
 	tile_y 			= iFloor(size_left/ts.y);	tile_y=_max(tile_y, 0);
 
@@ -108,26 +108,26 @@ void CUIFrameRect::UpdateSize()
 
 	//Обрамление
 	ts.set				(_t.x,_t.y);
-	rem_x				= (float) fmod(size_top,ts.x);
+	rem_x				= fmod(size_top,ts.x);
 	tile_x				= iFloor(size_top/ts.x); tile_x=_max(tile_x, 0);
 	frame[fmT].SetPos	(wnd_pos.x+_lt.x,wnd_pos.y);	
 	frame[fmT].SetTile	(tile_x,1,rem_x,0);
 
 	ts.set				(_b.x,_b.y);
-	rem_x				= (float) fmod(size_bottom,ts.x);
+	rem_x				= fmod(size_bottom,ts.x);
 	tile_x				= iFloor(size_bottom/ts.x); tile_x=_max(tile_x, 0);
 	frame[fmB].SetPos	(wnd_pos.x+_lb.x,wnd_pos.y+m_wndSize.y-ts.y);	
 	frame[fmB].SetTile	(tile_x,1,rem_x,0);
 
 
 	ts.set				(_l.x,_l.y);
-	rem_y				= (float) fmod(size_left,ts.y);
+	rem_y				= fmod(size_left,ts.y);
 	tile_y				= iFloor(size_left/ts.y); tile_y=_max(tile_y, 0);
 	frame[fmL].SetPos	(wnd_pos.x, wnd_pos.y+_lt.y);	
 	frame[fmL].SetTile	(1,tile_y,0,rem_y);
 
 	ts.set				(_r.x,_r.y);
-	rem_y				= (float) fmod(size_right,ts.y);
+	rem_y				= fmod(size_right,ts.y);
 	tile_y				= iFloor(size_right/ts.y); tile_y=_max(tile_y, 0);
 	frame[fmR].SetPos	(wnd_pos.x+m_wndSize.x-ts.x,wnd_pos.y+_rt.y);	
 	frame[fmR].SetTile	(1,tile_y,0,rem_y);

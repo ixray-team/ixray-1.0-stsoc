@@ -12,19 +12,19 @@
 
 using namespace luabind;
 
-void SPPInfo_assign(SPPInfo *self_, SPPInfo *obj)
+void SPPInfo_assign(SPPInfo *self, SPPInfo *obj)
 {
-	*self_	= *obj;
+	*self	= *obj;
 }
 
-void add_effector(CScriptEffector *self_)
+void add_effector(CScriptEffector *self)
 {
-	self_->Add		();
+	self->Add		();
 }
 
-void remove_effector(CScriptEffector *self_)
+void remove_effector(CScriptEffector *self)
 {
-	self_->Remove	();
+	self->Remove	();
 }
 
 #pragma optimize("s",on)

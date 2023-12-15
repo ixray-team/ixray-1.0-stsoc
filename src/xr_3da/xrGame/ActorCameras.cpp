@@ -74,9 +74,9 @@ void CActor::camUpdateLadder(float dt)
 	{
 		float &cam_pitch					= cameras[eacFirstEye]->pitch;
 		const float ldown_pitch				= cameras[eacFirstEye]->lim_pitch.y;
-		float delta_							= angle_difference_signed(ldown_pitch,cam_pitch);
-		if(delta_>0.f)
-			cam_pitch						+= delta_* _min(dt*10.f,1.f) ;
+		float delta							= angle_difference_signed(ldown_pitch,cam_pitch);
+		if(delta>0.f)
+			cam_pitch						+= delta* _min(dt*10.f,1.f) ;
 	}
 }
 
@@ -96,7 +96,7 @@ float CActor::CameraHeight()
 
 IC float viewport_near(float& w, float& h)
 {
-	w = 2.f*VIEWPORT_NEAR* (float) tan(deg2rad(Device.fFOV)/2.f);
+	w = 2.f*VIEWPORT_NEAR*tan(deg2rad(Device.fFOV)/2.f);
 	h = w*Device.fASPECT;
 	float	c	= _sqrt					(w*w + h*h);
 	return	_max(_max(VIEWPORT_NEAR,_max(w,h)),c);
@@ -245,11 +245,11 @@ void CActor::cam_Update(float dt, float fFOV)
 		}
 		else
 		{
-			xr_vector<ISpatial*> ISpatialResult_;
-			g_SpatialSpacePhysic->q_box(ISpatialResult_, 0, STYPE_PHYSIC, point, Fvector().set(VIEWPORT_NEAR,VIEWPORT_NEAR,VIEWPORT_NEAR));
-			for (u32 o_it=0; o_it<ISpatialResult_.size(); o_it++)
+			xr_vector<ISpatial*> ISpatialResult;
+			g_SpatialSpacePhysic->q_box(ISpatialResult, 0, STYPE_PHYSIC, point, Fvector().set(VIEWPORT_NEAR,VIEWPORT_NEAR,VIEWPORT_NEAR));
+			for (u32 o_it=0; o_it<ISpatialResult.size(); o_it++)
 			{
-				CPHShell*		pCPHS= smart_cast<CPHShell*>(ISpatialResult_[o_it]);
+				CPHShell*		pCPHS= smart_cast<CPHShell*>(ISpatialResult[o_it]);
 				if (pCPHS)
 				{
 					_viewport_near			= 0.01f;

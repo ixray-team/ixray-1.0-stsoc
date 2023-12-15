@@ -930,13 +930,13 @@ void CUIBuyWnd::ActivatePropertiesBox()
 	m_propertiesBox.AutoUpdateSize	();
 	m_propertiesBox.BringAllToTop	();
 
-	Fvector2						cursor_pos_;
+	Fvector2						cursor_pos;
 	Frect							vis_rect;
 
 	GetAbsoluteRect					(vis_rect);
-	cursor_pos_						= GetUICursor()->GetCursorPosition();
-	cursor_pos_.sub					(vis_rect.lt);
-	m_propertiesBox.Show			(vis_rect, cursor_pos_);
+	cursor_pos						= GetUICursor()->GetCursorPosition();
+	cursor_pos.sub					(vis_rect.lt);
+	m_propertiesBox.Show			(vis_rect, cursor_pos);
 
 }
 

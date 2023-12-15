@@ -99,9 +99,9 @@ void CUIVote::Update()
 	}
 }
 
-void CUIVote::SendMessage(CUIWindow* pWnd, s16 msg_, void* pData)
+void CUIVote::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 {
-    if (BUTTON_CLICKED == msg_)
+    if (BUTTON_CLICKED == msg)
 	{
 		if (btn_yes == pWnd)
 			OnBtnYes();

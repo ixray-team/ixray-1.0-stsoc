@@ -690,10 +690,10 @@ void CLevel::OnRender()
 	if (psAI_Flags.is(aiVision)) {
 		for (u32 I=0; I < Level().Objects.o_count(); I++) {
 			CObject						*object = Objects.o_get_by_iterator(I);
-			CAI_Stalker					*stalker_ = smart_cast<CAI_Stalker*>(object);
-			if (!stalker_)
+			CAI_Stalker					*stalker = smart_cast<CAI_Stalker*>(object);
+			if (!stalker)
 				continue;
-			stalker_->dbg_draw_vision	();
+			stalker->dbg_draw_vision	();
 		}
 	}
 
@@ -701,11 +701,11 @@ void CLevel::OnRender()
 	if (psAI_Flags.test(aiDrawVisibilityRays)) {
 		for (u32 I=0; I < Level().Objects.o_count(); I++) {
 			CObject						*object = Objects.o_get_by_iterator(I);
-			CAI_Stalker					*stalker_ = smart_cast<CAI_Stalker*>(object);
-			if (!stalker_)
+			CAI_Stalker					*stalker = smart_cast<CAI_Stalker*>(object);
+			if (!stalker)
 				continue;
 
-			stalker_->dbg_draw_visibility_rays	();
+			stalker->dbg_draw_visibility_rays	();
 		}
 	}
 #endif

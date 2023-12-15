@@ -21,7 +21,7 @@ IC	CSQuadTree::CQuadTree		(const Fbox &box, float min_cell_size, u32 max_node_co
 
 	VERIFY				(!fis_zero(min_cell_size));
 	VERIFY				(m_radius > min_cell_size);
-	m_max_depth			= iFloor((float) log(2.f*m_radius/min_cell_size)/ (float) log(2.f) + .5f);
+	m_max_depth			= iFloor(log(2.f*m_radius/min_cell_size)/log(2.f) + .5f);
 
 	m_nodes				= xr_new<CQuadNodeStorage>(max_node_count);
 	m_list_items		= xr_new<CListItemStorage>(max_list_item_count);
@@ -282,7 +282,7 @@ IC	void CSQuadTree::all		(xr_vector<_object_type*> &objects, CQuadNode *node, in
 }
 
 TEMPLATE_SPECIALIZATION
-IC	void CSQuadTree::all		(xr_vector<_object_type*> &objects, bool clear) const
+IC	void CSQuadTree::all		(xr_vector<_object_type*> &objects, bool clear = true) const
 {
 	if (clear)
 		objects.clear			();

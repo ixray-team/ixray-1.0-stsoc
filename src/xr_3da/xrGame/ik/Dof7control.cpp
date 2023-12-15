@@ -720,7 +720,7 @@ static void get_aim_circle_equation(const float g[3],
     unitize(t2);
 
     vecmult(t1, (float *) a, Ry);
-    float alpha = (float) acos(DOT(t1,t2));
+    float alpha = acos(DOT(t1,t2));
 
 
     //
@@ -729,7 +729,7 @@ static void get_aim_circle_equation(const float g[3],
     float L4 = _sqrt(DOT(g,g));
     float beta = M_PI - alpha;
 
-    float delta = (float) asin(_sin(beta)*L3/L4);
+    float delta = asin(_sin(beta)*L3/L4);
     if (delta < 0)
 	delta = - delta;
     float gamma = M_PI - delta - beta;

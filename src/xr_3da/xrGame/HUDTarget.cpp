@@ -153,14 +153,14 @@ void CHUDTarget::Render()
 
 	if (psHUD_Flags.test(HUD_INFO)){ 
 		if (RQ.O){
-			CEntityAlive*	E_		= smart_cast<CEntityAlive*>	(RQ.O);
+			CEntityAlive*	E		= smart_cast<CEntityAlive*>	(RQ.O);
 			CEntityAlive*	pCurEnt = smart_cast<CEntityAlive*>	(Level().CurrentEntity());
 			PIItem			l_pI	= smart_cast<PIItem>		(RQ.O);
 
 			if (IsGameTypeSingle())
 			{
 				CInventoryOwner* our_inv_owner		= smart_cast<CInventoryOwner*>(pCurEnt);
-				if (E_ && E_->g_Alive() && !E_->cast_base_monster())
+				if (E && E->g_Alive() && !E->cast_base_monster())
 				{
 //.					CInventoryOwner* our_inv_owner		= smart_cast<CInventoryOwner*>(pCurEnt);
 					CInventoryOwner* others_inv_owner	= smart_cast<CInventoryOwner*>(E);
@@ -199,12 +199,12 @@ void CHUDTarget::Render()
 			}
 			else
 			{
-				if (E_ && (E_->GetfHealth()>0))
+				if (E && (E->GetfHealth()>0))
 				{
 					if (pCurEnt && GameID() == GAME_SINGLE){	
 						if (GameID() == GAME_DEATHMATCH)			C = C_ON_ENEMY;
 						else{	
-							if (E_->g_Team() != pCurEnt->g_Team())	C = C_ON_ENEMY;
+							if (E->g_Team() != pCurEnt->g_Team())	C = C_ON_ENEMY;
 							else									C = C_ON_FRIEND;
 						};
 						if (RQ.range >= recon_mindist() && RQ.range <= recon_maxdist()){

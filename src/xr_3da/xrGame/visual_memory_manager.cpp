@@ -222,8 +222,8 @@ float CVisualMemoryManager::object_visible_distance(const CGameObject *game_obje
 	} 
 	else {
 		Fvector							dummy;
-		float							float0,float1;
-		m_client->camera				(eye_position,eye_direction,dummy,object_fov,float0,float1,object_range);
+		float							_0,_1;
+		m_client->camera				(eye_position,eye_direction,dummy,object_fov,_0,_1,object_range);
 	}
 
 	Fvector								object_direction;
@@ -255,8 +255,8 @@ float CVisualMemoryManager::object_luminocity	(const CGameObject *game_object) c
 	if (game_object->CLS_ID != CLSID_OBJECT_ACTOR)
 		return	(1.f);
 	float		luminocity = const_cast<CGameObject*>(game_object)->ROS()->get_luminocity();
-	float		power = (float) log(luminocity > .001f ? luminocity : .001f)*current_state().m_luminocity_factor;
-	return		((float) exp(power));
+	float		power = log(luminocity > .001f ? luminocity : .001f)*current_state().m_luminocity_factor;
+	return		(exp(power));
 }
 
 float CVisualMemoryManager::get_object_velocity	(const CGameObject *game_object, const CNotYetVisibleObject &not_yet_visible_object) const

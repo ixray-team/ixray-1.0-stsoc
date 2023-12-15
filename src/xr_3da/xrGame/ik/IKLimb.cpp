@@ -675,7 +675,7 @@ void CIKLimb::Collide( SIKCollideData &cld, CGameObject *O, const Fmatrix &foot,
 		DBG_DrawLine(pos,p,D3DCOLOR_XRGB( 255, 0, 0 ) );
 		if( tri )
 		{
-			Fvector p_ = pos;p_.add( Fvector( ).mul( pick_v, l_pick_dist ) );
+			Fvector p = pos;p.add( Fvector( ).mul( pick_v, l_pick_dist ) );
 			DBG_DrawTri( tri,Level( ).ObjectSpace.GetStaticVerts( ), D3DCOLOR_XRGB( 255, 0, 0 ) );
 		}
 	}

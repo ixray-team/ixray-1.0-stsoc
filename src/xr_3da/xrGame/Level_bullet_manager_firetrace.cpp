@@ -77,9 +77,9 @@ BOOL CBulletManager::test_callback(const collide::ray_defs& rd, CObject* object,
 							}
 #	else
 							float					game_difficulty_hit_probability = actor->HitProbability();
-							CAI_Stalker				*stalker_ = smart_cast<CAI_Stalker*>(initiator);
-							if (stalker_)
-								hpf					= stalker_->SpecificCharacter().hit_probability_factor();
+							CAI_Stalker				*stalker = smart_cast<CAI_Stalker*>(initiator);
+							if (stalker)
+								hpf					= stalker->SpecificCharacter().hit_probability_factor();
 
 							float					dist_factor = 1.f;
 							CObject					*weapon_object = Level().Objects.net_Find	(bullet->weapon_id);
@@ -475,10 +475,10 @@ std::pair<float, float>  CBulletManager::ObjectHit	(SBullet* bullet, const Fvect
 
 		//ÑƒÐ¼ÐµÐ½ÑŒÑˆÐ¸Ñ‚ÑŒ ÑÐºÐ¾Ñ€Ð¾ÑÑ‚ÑŒ Ð² Ð·Ð°Ð²Ð¸ÑÐ¸Ð¼Ð¾ÑÑ‚Ð¸ Ð¾Ñ‚ Ð¿Ñ€Ð¾ÑÑ‚Ñ€ÐµÐ»Ð¸Ð²Ð°ÐµÐ¼Ð¾ÑÑ‚Ð¸
 		bullet->speed *= (1-mtl->fShootFactor)*scale;
-		//ÑÐºÐ¾Ð»ÑŒÐºÐ¾ ÑÐ½ÐµÑ€Ð³Ð¸Ð¸ Ð² Ð¿Ñ€Ð¾Ñ†ÐµÐ½Ñ‚Ð°Ñ… Ð¿Ð¾Ñ‚ÐµÑ€ÑÐ»Ð° Ð¿ÑƒÐ»Ñ Ð¿Ñ€Ð¸ ÑÑ‚Ð¾Ð»ÐºÐ½Ð¾Ð²ÐµÐ½Ð¸Ð¸
-		float energy_lost_ = 1.f - bullet->speed/old_speed;
-		//Ð¸Ð¼Ð¿ÑƒÐ»ÑŒÑ Ð¿ÐµÑ€ÐµÐ´Ð°Ð½Ð½Ñ‹Ð¹ Ð¾Ð±ÑŠÐµÐºÑ‚Ñƒ Ñ€Ð°Ð²ÐµÐ½ Ð¿Ñ€ÑÐ¼Ð¾Ð¿Ñ€Ð¾Ð¿Ð¾Ñ€Ñ†Ð¸Ð¾Ð½Ð°Ð»ÐµÐ½ Ð¿Ð¾Ñ‚ÐµÑ€ÑÐ½Ð½Ð¾Ð¹ ÑÐ½ÐµÑ€Ð³Ð¸Ð¸
-		impulse = bullet->hit_impulse*speed_factor*energy_lost_;
+		//ñêîëüêî ýíåðãèè â ïðîöåíòàõ ïîòåðÿëà ïóëÿ ïðè ñòîëêíîâåíèè
+		float energy_lost = 1.f - bullet->speed/old_speed;
+		//èìïóëüñ ïåðåäàííûé îáúåêòó ðàâåí ïðÿìîïðîïîðöèîíàëåí ïîòåðÿííîé ýíåðãèè
+		impulse = bullet->hit_impulse*speed_factor*energy_lost;
 
 		#ifdef DEBUG
 		bullet_state = 0;

@@ -197,16 +197,16 @@ void CGameTaskManager::UpdateTasks						()
 	for (I = tasks; I != E; ++I)
 	{
 		CGameTask		*t = (*I).game_task;
-		for(u16 i_=0; i_<t->m_Objectives.size() ;++i_)
+		for(u16 i=0; i<t->m_Objectives.size() ;++i)
 		{
-			SGameTaskObjective& obj = t->Objective(i_);
-			if(obj.TaskState()!=eTaskStateInProgress && i_==0) break;
+			SGameTaskObjective& obj = t->Objective(i);
+			if(obj.TaskState()!=eTaskStateInProgress && i==0) break;
 			if(obj.TaskState()!=eTaskStateInProgress) continue;
 
 			ETaskState state = obj.UpdateState();
 
 			if( (state==eTaskStateFail || state==eTaskStateCompleted))
-				SetTaskState(t, i_, state);
+				SetTaskState(t, i, state);
 		}
 	}
 	
@@ -264,12 +264,12 @@ void CGameTaskManager::UpdateActiveTask				()
 	if( !bHasSpotPointer )
 	{
 		bool bDone								=false;
-		GameTasks::iterator it_			= GameTasks().begin();
-		GameTasks::iterator it_e_		= GameTasks().end();
+		GameTasks::iterator it			= GameTasks().begin();
+		GameTasks::iterator it_e		= GameTasks().end();
 
-		for( ;(it_!=it_e_)&&(!bDone); ++it_ )
+		for( ;(it!=it_e)&&(!bDone); ++it )
 		{
-			CGameTask* t						= (*it_).game_task;
+			CGameTask* t						= (*it).game_task;
 			if(t->Objective(0).TaskState()!=eTaskStateInProgress) continue;
 			
 			for(u16 i=0; (i<t->m_Objectives.size())&&(!bDone) ;++i)

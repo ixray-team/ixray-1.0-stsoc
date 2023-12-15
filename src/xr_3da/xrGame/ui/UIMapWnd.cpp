@@ -394,9 +394,9 @@ bool CUIMapWnd::OnKeyboard				(int dik, EUIMessages keyboard_action)
 bool CUIMapWnd::OnMouse(float x, float y, EUIMessages mouse_action)
 {
 	if(inherited::OnMouse(x,y,mouse_action)) return true;
-	Fvector2 cursor_pos_ = GetUICursor()->GetCursorPosition();
+	Fvector2 cursor_pos = GetUICursor()->GetCursorPosition();
 
-	if(GlobalMap() && !GlobalMap()->Locked() && ActiveMapRect().in( cursor_pos_ ) ){
+	if(GlobalMap() && !GlobalMap()->Locked() && ActiveMapRect().in( cursor_pos ) ){
 		switch (mouse_action)
 		{
 		case WINDOW_MOUSE_MOVE:
@@ -465,7 +465,7 @@ bool CUIMapWnd::OnMouse(float x, float y, EUIMessages mouse_action)
 
 			if(!fsimilar(_prev_zoom, GetZoom()))
 			{
-				m_tgtCenter						= cursor_pos_;
+				m_tgtCenter						= cursor_pos;
 				Fvector2 _p;					gm->GetAbsolutePos(_p);
 				m_tgtCenter.sub					(_p);
 				m_tgtCenter.div					(gm->GetCurrentZoom());

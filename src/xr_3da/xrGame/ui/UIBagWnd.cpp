@@ -312,7 +312,7 @@ void CUIBagWnd::FillUpGroup(const u32 group)
 			CUICellItem* itm			= CreateItem(sect);			
 
             // Set custom draw
-			_itoa						(j+1, tmp_str ,10);
+			itoa						(j+1, tmp_str ,10);
 			CBuyItemCustomDrawCell* p	= xr_new<CBuyItemCustomDrawCell>(tmp_str,UI()->Font()->pFontLetterica16Russian);
 			itm->SetCustomDraw			(p);
             
@@ -358,9 +358,9 @@ void	CUIBagWnd::ReloadItemsPrices	()
 			m_info[itm->m_index].price	= pSettings->r_u32(m_sectionPrice, ItemCostStr);
 
 
-		for (u32 i_=1; i_<=g_mp_restrictions.GetRank(); ++i_)
+		for (u32 i=1; i<=g_mp_restrictions.GetRank(); ++i)
 		{
-			sprintf_s						(RankStr, "rank_%d", i_);
+			sprintf_s						(RankStr, "rank_%d", i);
 			if (!pSettings->line_exist	(RankStr, ItemCostStr))	continue;
 			m_info[itm->m_index].price	= pSettings->r_u32(RankStr, ItemCostStr);
 		}

@@ -21,7 +21,7 @@ class CScriptSound {
 public:
 
 								CScriptSound		(LPCSTR caSoundName, ESoundTypes sound_type = SOUND_TYPE_NO_SOUND);
-	virtual						~CScriptSound		() noexcept(false);
+	virtual						~CScriptSound		();
 	IC		u32					Length				();
 	IC		void				Play				(CScriptGameObject *object);
 	IC		void				Play				(CScriptGameObject *object, float delay);

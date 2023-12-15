@@ -222,7 +222,7 @@ void CBulletManager::UpdateWorkload()
 	m_Lock.Leave		();
 }
 
-bool CBulletManager::CalcBullet (collide::rq_results & rq_storage_, xr_vector<ISpatial*>& rq_spatial_, SBullet* bullet, u32 delta_time)
+bool CBulletManager::CalcBullet (collide::rq_results & rq_storage, xr_vector<ISpatial*>& rq_spatial, SBullet* bullet, u32 delta_time)
 {
 	VERIFY					(bullet);
 
@@ -246,11 +246,11 @@ bool CBulletManager::CalcBullet (collide::rq_results & rq_storage_, xr_vector<IS
 	collide::ray_defs RD			(bullet->pos, bullet->dir, range, CDB::OPT_CULL, collide::rqtBoth);
 	BOOL result						= FALSE;
 	VERIFY							(!fis_zero(RD.dir.square_magnitude()));
-	result							= Level().ObjectSpace.RayQuery(rq_storage_, RD, firetrace_callback, &bullet_data, test_callback, NULL);
+	result							= Level().ObjectSpace.RayQuery(rq_storage, RD, firetrace_callback, &bullet_data, test_callback, NULL);
 	
 	if (result && bullet_data.bStopTracing) 
 	{
-		range						= (rq_storage_.r_begin()+rq_storage_.r_count()-1)->range;
+		range						= (rq_storage.r_begin()+rq_storage.r_count()-1)->range;
 	}
 	range							= _max				(EPS_L,range);
 

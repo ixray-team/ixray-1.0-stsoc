@@ -150,12 +150,12 @@ void CLevel::ClientReceive()
 				u8 Count = P->r_u8();
 				for (u8 i=0; i<Count; i++)
 				{
-					u16 ID_ = P->r_u16();					
+					u16 ID = P->r_u16();					
 					Fvector NewPos, NewDir;
 					P->r_vec3(NewPos);
 					P->r_vec3(NewDir);
 
-					CActor*	OActor	= smart_cast<CActor*>(Objects.net_Find		(ID_));
+					CActor*	OActor	= smart_cast<CActor*>(Objects.net_Find		(ID));
 					if (0 == OActor)		break;
 					OActor->MoveActor(NewPos, NewDir);
 				};
