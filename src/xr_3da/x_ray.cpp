@@ -157,11 +157,13 @@ void destroyInput	()
 {
 	xr_delete					( pInput		);
 }
-void InitSound		()
+void InitSound1		()
 {
-	CSound_manager_interface::_create					(u64(Device.m_hWnd));
-//	Msg				("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-//	ref_sound*	x	= 
+	CSound_manager_interface::_create					(0);
+}
+
+void InitSound2() {
+	CSound_manager_interface::_create(1);
 }
 void destroySound	()
 {
@@ -216,9 +218,9 @@ void CheckPrivilegySlowdown		( )
 
 void Startup					( )
 {
-	execUserScript	();
-//.	InitInput		();
-	InitSound		();
+	InitSound1();
+	execUserScript();
+	InitSound2();
 
 	// ...command line for auto start
 	{

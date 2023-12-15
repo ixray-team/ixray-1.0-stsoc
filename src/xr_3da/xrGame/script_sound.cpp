@@ -18,10 +18,13 @@ CScriptSound::CScriptSound				(LPCSTR caSoundName, ESoundTypes sound_type)
 	m_caSoundToPlay			= caSoundName;
 	string_path				l_caFileName;
 	VERIFY(::Sound)	;
-	if (FS.exist(l_caFileName,"$game_sounds$",caSoundName,".ogg"))
+	if (FS.exist(l_caFileName, "$game_sounds$", caSoundName, ".ogg")) {
 		m_sound.create		(caSoundName,st_Effect,sound_type);
-	else
-		ai().script_engine().script_log	(ScriptStorage::eLuaMessageTypeError,"File not found \"%s\"!",l_caFileName);
+	} else {
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeMessage, "File not found \"%s\"!", l_caFileName);
+		FS.update_path(l_caFileName, "$game_sounds$", "$no_sound.ogg");
+		m_sound.create("$no_sound.ogg", st_Effect, sound_type);
+	}
 }
 
 CScriptSound::~CScriptSound		() noexcept(false)
@@ -46,18 +49,18 @@ void CScriptSound::Play			(CScriptGameObject *object, float delay, int flags)
 {
 	THROW3						(m_sound._handle(),"There is no sound",*m_caSoundToPlay);
 //	Msg							("%6d : CScriptSound::Play (%s), delay %f, flags %d",Device.dwTimeGlobal,m_sound._handle()->file_name(),delay,flags);
-	m_sound.play				(&object->object(),flags,delay);
+	m_sound.play				((object) ? &object->object() : NULL, flags, delay);
 }
 
 void CScriptSound::PlayAtPos		(CScriptGameObject *object, const Fvector &position, float delay, int flags)
 {
 	THROW3						(m_sound._handle(),"There is no sound",*m_caSoundToPlay);
 //	Msg							("%6d : CScriptSound::Play (%s), delay %f, flags %d",m_sound._handle()->file_name(),delay,flags);
-	m_sound.play_at_pos			(&object->object(), position,flags,delay);
+	m_sound.play_at_pos			((object) ? &object->object() : NULL, position,flags,delay);
 }
 
 void CScriptSound::PlayNoFeedback	(CScriptGameObject *object,	u32 flags/*!< Looping */, float delay/*!< Delay */, Fvector pos, float vol)
 {
 	THROW3						(m_sound._handle(),"There is no sound",*m_caSoundToPlay);
-	m_sound.play_no_feedback	(&object->object(), flags,delay,&pos,&vol);
+	m_sound.play_no_feedback	((object) ? &object->object() : NULL, flags,delay,&pos,&vol);
 }

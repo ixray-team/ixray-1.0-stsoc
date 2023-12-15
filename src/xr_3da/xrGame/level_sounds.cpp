@@ -43,7 +43,7 @@ void SStaticSound::Update(u32 game_time, u32 global_time)
 					m_Source.set_frequency	(m_Freq);
 					if (bFullPlay){
 						m_StopTime		= 0xFFFFFFFF;
-						m_NextTime		= global_time+m_Source._handle()->length_ms()+Random.randI(m_PauseTime.x,m_PauseTime.y);
+						m_NextTime		= global_time+iFloor(m_Source.get_length_sec()*1000.0f)+Random.randI(m_PauseTime.x,m_PauseTime.y);
 					}else{
 						m_StopTime		= bFullPlay?0:global_time+Random.randI(m_PlayTime.x,m_PlayTime.y);
 						m_NextTime		= m_StopTime+Random.randI(m_PauseTime.x,m_PauseTime.y);
@@ -86,8 +86,8 @@ void SMusicTrack::Load(LPCSTR fn, LPCSTR params)
 
 void	SMusicTrack::Play()
 {
-	m_SourceLeft.play_at_pos	(0,Fvector().set(-0.5f,0.f,0.3f),sm_2D);
-	m_SourceRight.play_at_pos	(0,Fvector().set(+0.5f,0.f,0.3f),sm_2D);
+	m_SourceLeft.play_at_pos	(0,Fvector().set(-0.5f,0.f,0.3f), sm_Intro);
+	m_SourceRight.play_at_pos	(0,Fvector().set(+0.5f,0.f,0.3f), sm_Intro);
 	SetVolume					(1.0f);
 }
 

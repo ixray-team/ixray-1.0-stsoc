@@ -1,14 +1,24 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "soundrender_emitter.h"
-#include "soundrender_core.h"
+#include "SoundRender_Emitter.h"
+#include "SoundRender_Core.h"
+#include "SoundRender_Source.h"
+#include "SoundRender_TargetA.h"
 
 extern	u32				psSoundModel;
-extern	u32				psSoundFreq;
 extern	float			psSoundVEffects;
 
-//////////////////////////////////////////////////////////////////////
+void CSoundRender_Emitter::set_position(const Fvector &pos)	
+{ 
+	if(source()->channels_num()==1 && _valid(pos))
+		p_source.position	= pos; 
+	else
+		p_source.position.set(0,0,0); 
+
+	bMoved				= TRUE;					
+}
+
 CSoundRender_Emitter::CSoundRender_Emitter(void)
 {
 
@@ -16,28 +26,29 @@ CSoundRender_Emitter::CSoundRender_Emitter(void)
 	static	u32			incrementalID = 0;
 	dbg_ID				= ++incrementalID;
 #endif
-	target				= NULL;
-	source				= NULL;
-	owner_data			= NULL;
-	smooth_volume		= 1.f;
-	occluder_volume		= 1.f;
-	fade_volume			= 1.f;
-	occluder[0].set		(0,0,0);
-	occluder[1].set		(0,0,0);
-	occluder[2].set		(0,0,0);
-	state				= stStopped;
-	position			= 0;
-	bMoved				= TRUE;
-	b2D					= FALSE;
-	bStopping			= FALSE;
-	bRewind				= FALSE;
-	iPaused				= 0;
-	dwTimeStarted		= 0;
-	dwTimeToStop		= 0;
-	dwTimeToPropagade	= 0;
-	marker				= 0xabababab;
-	starting_delay		= 0.f;
-	priority_scale		= 1.f;
+	target						= NULL;
+//.	source						= NULL;
+	owner_data					= NULL;
+	smooth_volume				= 1.f;
+	occluder_volume				= 1.f;
+	fade_volume					= 1.f;
+	occluder[0].set				(0,0,0);
+	occluder[1].set				(0,0,0);
+	occluder[2].set				(0,0,0);
+	m_current_state				= stStopped;
+	set_cursor					(0);
+	bMoved						= TRUE;
+	b2D							= FALSE;
+	bStopping					= FALSE;
+	bRewind						= FALSE;
+	iPaused						= 0;
+	fTimeStarted				= 0.0f;
+	fTimeToStop				= 0.0f;
+	fTimeToPropagade			= 0.0f;
+	marker						= 0xabababab;
+	starting_delay				= 0.f;
+	priority_scale				= 1.f;
+	m_cur_handle_cursor			= 0;
 }
 
 CSoundRender_Emitter::~CSoundRender_Emitter(void)
@@ -61,7 +72,7 @@ void CSoundRender_Emitter::Event_ReleaseOwner()
 
 void CSoundRender_Emitter::Event_Propagade	()
 {
-	dwTimeToPropagade			+= ::Random.randI	(sdef_event_pulse-30,sdef_event_pulse+30);
+	fTimeToPropagade			+= ::Random.randF	(s_f_def_event_pulse-0.030f, s_f_def_event_pulse+0.030f);
 	if (!(owner_data))			return;
 	if (0==owner_data->g_type)	return;
 	if (0==owner_data->g_object)return;
@@ -83,6 +94,13 @@ void CSoundRender_Emitter::switch_to_2D()
 	set_priority				(100.f);
 }
 
+void CSoundRender_Emitter::switch_to_Intro()
+{
+	bIntro = true;
+	b2D = TRUE;
+	set_priority(100.f);
+}
+
 void CSoundRender_Emitter::switch_to_3D()						
 { 	
 	b2D 						= FALSE;											
@@ -90,8 +108,49 @@ void CSoundRender_Emitter::switch_to_3D()
 
 u32	CSoundRender_Emitter::play_time	( )
 { 
-	return (state==stPlaying		|| 
-			state==stPlayingLooped	|| 
-			state==stSimulating		|| 
-			state==stSimulatingLooped)?SoundRender->Timer_Value-dwTimeStarted:0; 
+	if(m_current_state==stPlaying				|| 
+			m_current_state==stPlayingLooped	|| 
+			m_current_state==stSimulating		|| 
+			m_current_state==stSimulatingLooped		
+	)
+		return iFloor((SoundRender->fTimer_Value-fTimeStarted)*1000.0f);
+	else
+		return 0; 
+}
+
+void CSoundRender_Emitter::set_cursor(u32 p)
+{
+	m_stream_cursor		= p;
+	
+	if(owner_data._get() && owner_data->fn_attached[0].size())
+	{
+		u32 bt = ((CSoundRender_Source*)owner_data->handle)->dwBytesTotal;
+		if(m_stream_cursor >= m_cur_handle_cursor+bt )
+		{
+			SoundRender->i_destroy_source	((CSoundRender_Source*)owner_data->handle);
+			owner_data->handle				= SoundRender->i_create_source(owner_data->fn_attached[0].c_str());
+			owner_data->fn_attached[0]		= owner_data->fn_attached[1];
+			owner_data->fn_attached[1]		= "";
+			m_cur_handle_cursor				= get_cursor(true);
+			
+			if(target)
+				((CSoundRender_TargetA*)target)->source_changed();
+		}
+	}
+}
+
+u32 CSoundRender_Emitter::get_cursor(bool b_absolute) const
+{
+	if(b_absolute)
+		return 	m_stream_cursor;
+	else
+	{
+		VERIFY(m_stream_cursor-m_cur_handle_cursor >=0);
+		return m_stream_cursor - m_cur_handle_cursor;
+	}
+}
+
+void CSoundRender_Emitter::move_cursor(int offset) 
+{
+	set_cursor(get_cursor(true)+offset);
 }

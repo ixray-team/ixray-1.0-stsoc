@@ -3,8 +3,9 @@
 
 #include "cl_intersect.h"
 #include "SoundRender_Core.h"
+#include "SoundRender_CoreA.h"
 #include "SoundRender_Emitter.h"
-#include "SoundRender_Target.h"
+#include "SoundRender_TargetA.h"
 #include "SoundRender_Source.h"
 
 CSoundRender_Emitter*	CSoundRender_Core::i_play(ref_sound* S, BOOL _loop, float delay)
@@ -23,10 +24,12 @@ void CSoundRender_Core::update	( const Fvector& P, const Fvector& D, const Fvect
 
 	if (0==bReady)				return;
     bLocked						= TRUE;
-	u32 new_tm					= Timer.GetElapsed_ms();
-	Timer_Delta					= new_tm-Timer_Value;
-	float dt					= float(Timer_Delta)/1000.f;
-	Timer_Value					= new_tm;
+	//TimerF.time_factor(psSoundTimeFactor); //--#SM+#--
+	float new_tm				= Timer.GetElapsed_sec();
+	fTimer_Delta				= new_tm-fTimer_Value;
+//.	float dt					= float(Timer_Delta)/1000.f;
+	float dt_sec				= fTimer_Delta;
+	fTimer_Value				= new_tm;
 
 	s_emitters_u	++	;
 
@@ -37,7 +40,7 @@ void CSoundRender_Core::update	( const Fvector& P, const Fvector& D, const Fvect
 		CSoundRender_Target*	T	= s_targets	[it];
 		CSoundRender_Emitter*	E	= T->get_emitter();
 		if (E) {
-			E->update	(dt);
+			E->update	(dt_sec);
 			E->marker	= s_emitters_u;
 			E			= T->get_emitter();	// update can stop itself
 			if (E)		T->priority	= E->priority();
@@ -54,7 +57,7 @@ void CSoundRender_Core::update	( const Fvector& P, const Fvector& D, const Fvect
 		CSoundRender_Emitter*	pEmitter = s_emitters[it];
 		if (pEmitter->marker!=s_emitters_u)
 		{
-			pEmitter->update		(dt);
+			pEmitter->update		(dt_sec);
 			pEmitter->marker		= s_emitters_u;
 		}
 		if (!pEmitter->isPlaying())		
@@ -96,27 +99,38 @@ void CSoundRender_Core::update	( const Fvector& P, const Fvector& D, const Fvect
 			s_targets_defer[it]->fill_parameters();
 	}
 
-	// update EAX
-    if (psSoundFlags.test(ss_EAX) && bEAX){
-        if (bListenerMoved){
+	// update EFX
+    if (m_is_supported)
+	{
+        if (bListenerMoved)
+		{
             bListenerMoved			= FALSE;
             e_target				= *get_environment	(P);
         }
-        e_current.lerp				(e_current,e_target,dt);
 
-        i_eax_listener_set			(&e_current);
-		i_eax_commit_setting		();
+        e_current.lerp				(e_current,e_target,dt_sec);
+
+        set_listener			(e_current);
+		commit		();
 	}
 
     // update listener
-    update_listener					(P,D,N,dt);
+    update_listener					(P,D,N,dt_sec);
     
 	// Start rendering of pending targets
 	if (!s_targets_defer.empty())
 	{
+		CSoundRender_CoreA* Core = (CSoundRender_CoreA*)this;
 		//Msg	("! update: start render");
-		for (it=0; it<s_targets_defer.size(); it++)
-			s_targets_defer[it]->render	();
+		for (it = 0; it < s_targets_defer.size(); it++)
+		{
+			CSoundRender_TargetA* Ptr = (CSoundRender_TargetA*)s_targets_defer[it];
+
+			if (m_is_supported)
+				Ptr->SetSlot(Core->slot);
+
+			Ptr->render();
+		}
 	}
 
 	// Events
@@ -128,7 +142,7 @@ void CSoundRender_Core::update	( const Fvector& P, const Fvector& D, const Fvect
 static	u32	g_saved_event_count		= 0;
 void	CSoundRender_Core::update_events		()
 {
-	g_saved_event_count				= s_events.size();
+	g_saved_event_count				= (u32)s_events.size();
 	for (u32 it=0; it<s_events.size(); it++)
 	{
 		event&	E	= s_events[it];
@@ -145,22 +159,23 @@ void	CSoundRender_Core::statistic			(CSound_stats*  dest, CSound_stats_ext*  ext
 			CSoundRender_Target*	T	= s_targets	[it];
 			if (T->get_emitter() && T->get_Rendering())	dest->_rendered++;
 		}
-		dest->_simulated	= s_emitters.size();
+		dest->_simulated	= (u32)s_emitters.size();
 		dest->_cache_hits	= cache._stat_hit;
 		dest->_cache_misses	= cache._stat_miss;
 		dest->_events		= g_saved_event_count;
 		cache.stats_clear	();
 	}
 	if (ext){
-		for (u32 it=0; it<s_emitters.size(); it++){
+		for (u32 it=0; it<s_emitters.size(); it++)
+		{
 			CSoundRender_Emitter*	_E = s_emitters[it];	
 			CSound_stats_ext::SItem _I;
 			_I._3D					= !_E->b2D;
 			_I._rendered			= !!_E->target;
-			_I.name					= _E->source->fname;
 			_I.params				= _E->p_source;
 			_I.volume				= _E->smooth_volume;
 			if (_E->owner_data){
+				_I.name				= _E->source()->fname;
 				_I.game_object		= _E->owner_data->g_object;
 				_I.game_type		= _E->owner_data->g_type;
 				_I.type				= _E->owner_data->s_type;
@@ -239,7 +254,7 @@ float CSoundRender_Core::get_occlusion(Fvector& P, float R, Fvector* occ)
 			ETOOLS::ray_query		(geom_MODEL,base,dir,range);
 			if (0!=ETOOLS::r_count()){ 
 				// cache polygon
-				const CDB::RESULT*	R = ETOOLS::r_begin			();
+				const CDB::RESULT*	R_ = ETOOLS::r_begin			();
 #else
 			geom_DB.ray_options		(CDB::OPT_ONLYNEAREST);
 			geom_DB.ray_query		(geom_MODEL,base,dir,range);

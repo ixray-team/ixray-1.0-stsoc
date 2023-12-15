@@ -541,9 +541,6 @@
     <ClInclude Include="restriction_space.h">
       <Filter>ALife\Shared</Filter>
     </ClInclude>
-    <ClInclude Include="Sound.h">
-      <Filter>ALife\Shared</Filter>
-    </ClInclude>
     <ClInclude Include="alife_artefact_order.h">
       <Filter>ALife\Shared\ALife\alife_artefact_order</Filter>
     </ClInclude>

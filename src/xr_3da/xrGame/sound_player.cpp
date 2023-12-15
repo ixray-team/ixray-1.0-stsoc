@@ -75,13 +75,14 @@ u32 CSoundPlayer::add				(LPCSTR prefix, u32 max_count, ESoundTypes type, u32 pr
 	sound_params.m_sound_player_prefix	= m_sound_prefix;
 	sound_params.m_max_count			= max_count;
 	sound_params.m_type					= type;
+	sound_params.m_data					= data;
 
 	typedef CSoundCollectionStorage::SOUND_COLLECTION_PAIR	SOUND_COLLECTION_PAIR;
 	const SOUND_COLLECTION_PAIR			&pair = sound_collection_storage().object(sound_params);
 	VERIFY								(pair.first == (CSoundCollectionParams&)sound_params);
 	VERIFY								(pair.second);
 	m_sounds.insert						(std::make_pair(internal_type,std::make_pair(sound_params,pair.second)));
-	return								(pair.second->m_sounds.size());
+	return								(u32)(pair.second->m_sounds.size());
 }
 
 void CSoundPlayer::remove			(u32 internal_type)
@@ -222,7 +223,7 @@ void CSoundPlayer::play				(u32 internal_type, u32 max_start_time, u32 min_start
 	if (max_stop_time)
 		random_time				= (max_stop_time > min_stop_time) ? random(max_stop_time - min_stop_time) + min_stop_time : max_stop_time;
 
-	sound_single.m_stop_time	= sound_single.m_start_time + sound_single.m_sound->_handle()->length_ms() + random_time;
+	sound_single.m_stop_time	= sound_single.m_start_time + iFloor(sound_single.m_sound->get_length_sec()*1000.0f) + random_time;
 	m_playing_sounds.push_back	(sound_single);
 	
 	if (Device.dwTimeGlobal >= m_playing_sounds.back().m_start_time)
@@ -292,13 +293,13 @@ const ref_sound &CSoundPlayer::CSoundCollection::random	(const u32 &id)
 	}
 
 	if (m_sounds.size() <= 2) {
-		m_last_sound_id		= CRandom32::random(m_sounds.size());
+		m_last_sound_id		= CRandom32::random((u32)m_sounds.size());
 		return				(*m_sounds[m_last_sound_id]);
 	}
 	
 	u32						result;
 	do {
-		result				= CRandom32::random(m_sounds.size());
+		result				= CRandom32::random((u32)m_sounds.size());
 	}
 	while (result == m_last_sound_id);
 

@@ -16,8 +16,8 @@
 #include "xr_object.h"
 
 xr_token							snd_freq_token							[ ]={
-	{ "22khz",						sf_22K										},
-	{ "44khz",						sf_44K										},
+	//{ "22khz",						sf_22K										},
+	//{ "44khz",						sf_44K										},
 	{ 0,							0											}
 };
 xr_token							snd_model_token							[ ]={
@@ -592,7 +592,7 @@ void CCC_Register()
 //.	CMD3(CCC_Token,		"snd_model",			&psSoundModel,		snd_model_token			);
 	CMD1(CCC_SND_Restart,"snd_restart"			);
 	CMD3(CCC_Mask,		"snd_acceleration",		&psSoundFlags,		ss_Hardware	);
-	CMD3(CCC_Mask,		"snd_efx",				&psSoundFlags,		ss_EAX		);
+	CMD3(CCC_Mask,		"snd_efx",				&psSoundFlags,		ss_EFX		);
 	CMD4(CCC_Integer,	"snd_targets",			&psSoundTargets,	4,32		);
 	CMD4(CCC_Integer,	"snd_cache_size",		&psSoundCacheSizeMB,4,32		);
 

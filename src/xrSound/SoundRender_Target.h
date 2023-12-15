@@ -2,35 +2,32 @@
 #define SoundRender_TargetH
 #pragma once
 
-#include "soundrender.h"
+#include "SoundRender.h"
 
 class CSoundRender_Target
 {
 protected:
-	WAVEFORMATEX				wfx;
-	CSoundRender_Emitter*		pEmitter;
+	CSoundRender_Emitter*		m_pEmitter;
 	BOOL						rendering;
 public:
 	float						priority;
 protected:
-	OggVorbis_File				ovf;
-	IReader*					wave;					
+	OggVorbis_File				m_ovf;
+	IReader*					m_wave;
 	void						attach				();
 	void						dettach				();
-public:
-	OggVorbis_File*				get_data			()	{
-		if (!wave)	attach		();
-		return &ovf;
-	}
-public:
-								CSoundRender_Target	(void);
-	virtual 					~CSoundRender_Target(void);
 
-	CSoundRender_Emitter*		get_emitter			()	{ return pEmitter;	}
-	BOOL						get_Rendering		()	{ return rendering;	}
+public:
+								CSoundRender_Target	();
+	virtual 					~CSoundRender_Target();
+
+	OggVorbis_File*				get_data			() { return &m_ovf; }
+	CSoundRender_Emitter*		get_emitter			() const { return m_pEmitter;	}
+	BOOL						get_Rendering		() const { return rendering;	}
 
 	virtual BOOL				_initialize			()=0;
 	virtual void				_destroy			()=0;
+	virtual void				_restart			()=0;
 
 	virtual void				start				(CSoundRender_Emitter* E)=0;
 	virtual void				render				()=0;

@@ -1,72 +1,173 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "soundrender_coreA.h"
-#include "soundrender_targetA.h"
+#include "SoundRender_CoreA.h"
+#include "SoundRender_TargetA.h"
+#include "SoundRender_Environment.h"
 
-CSoundRender_CoreA*	SoundRenderA= 0; 
+CSoundRender_CoreA*	SoundRenderA = nullptr; 
 
 CSoundRender_CoreA::CSoundRender_CoreA	():CSoundRender_Core()
 {
-	pDevice						= 0;
-	pDeviceList					= 0;
-	pContext					= 0;
-    eaxSet						= 0;
-    eaxGet						= 0;
+	pDevice = nullptr;
+	pDeviceList = nullptr;
+	pContext = nullptr;
 }
 
 CSoundRender_CoreA::~CSoundRender_CoreA	()
 {
+    if (m_is_supported)
+    {
+        alDeleteEffects(1, &effect);
+        if (alIsAuxiliaryEffectSlot(slot))
+            alDeleteAuxiliaryEffectSlots(1, &slot);
+    }
 }
 
-BOOL CSoundRender_CoreA::EAXQuerySupport(BOOL bDeferred, const GUID* guid, u32 prop, void* val, u32 sz)
+// load_reverb loads the given initial reverb properties into the given OpenAL
+//  effect object, and returns non-zero on success.
+int CSoundRender_CoreA::load_reverb(ALuint effect_, const EFXEAXREVERBPROPERTIES* reverb)
 {
-	if (AL_NO_ERROR!=eaxGet(guid, prop, 0, val, sz)) return FALSE;
-	if (AL_NO_ERROR!=eaxSet(guid, (bDeferred?DSPROPERTY_EAXLISTENER_DEFERRED:0) | prop, 0, val, sz)) return FALSE;
-    return TRUE;
+    ALenum err;
+
+    // Prepare the effect for EAX Reverb.
+    alEffecti(effect_, AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
+    if ((err = alGetError()) != AL_NO_ERROR)
+    {
+        Msg("Failed to load the EAX reverb effect: %s (0x%04x)\n", alGetString(err), err);
+        return 0;
+    }
+
+    // Load the reverb properties.
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_DENSITY, reverb->flDensity));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_DIFFUSION, reverb->flDiffusion));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_GAIN, reverb->flGain));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_GAINHF, reverb->flGainHF));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_GAINLF, reverb->flGainLF));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_DECAY_TIME, reverb->flDecayTime));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_DECAY_HFRATIO, reverb->flDecayHFRatio));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_DECAY_LFRATIO, reverb->flDecayLFRatio));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_REFLECTIONS_GAIN, reverb->flReflectionsGain));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_REFLECTIONS_DELAY, reverb->flReflectionsDelay));
+    A_CHK(alEffectfv(effect_, AL_EAXREVERB_REFLECTIONS_PAN, reverb->flReflectionsPan));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_LATE_REVERB_GAIN, reverb->flLateReverbGain));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_LATE_REVERB_DELAY, reverb->flLateReverbDelay));
+    A_CHK(alEffectfv(effect_, AL_EAXREVERB_LATE_REVERB_PAN, reverb->flLateReverbPan));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_ECHO_TIME, reverb->flEchoTime));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_ECHO_DEPTH, reverb->flEchoDepth));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_MODULATION_TIME, reverb->flModulationTime));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_MODULATION_DEPTH, reverb->flModulationDepth));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_AIR_ABSORPTION_GAINHF, reverb->flAirAbsorptionGainHF));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_HFREFERENCE, reverb->flHFReference));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_LFREFERENCE, reverb->flLFReference));
+    A_CHK(alEffectf(effect_, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, reverb->flRoomRolloffFactor));
+    A_CHK(alEffecti(effect_, AL_EAXREVERB_DECAY_HFLIMIT, reverb->iDecayHFLimit));
+
+    // Check if an error occured, and return failure if so.
+    if ((err = alGetError()) != AL_NO_ERROR)
+    {
+        Msg("Error setting up reverb effect: %s\n", alGetString(err));
+        return 0;
+    }
+   
+    return 1;
 }
 
-BOOL CSoundRender_CoreA::EAXTestSupport	(BOOL bDeferred)
+void CSoundRender_CoreA::commit()
 {
-    EAXLISTENERPROPERTIES 		ep;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_ROOM, 				&ep.lRoom,					sizeof(LONG))) 	return FALSE;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_ROOMHF, 		  	&ep.lRoomHF,				sizeof(LONG))) 	return FALSE;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_ROOMROLLOFFFACTOR, 	&ep.flRoomRolloffFactor,	sizeof(float))) return FALSE;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_DECAYTIME, 		  	&ep.flDecayTime,			sizeof(float))) return FALSE;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_DECAYHFRATIO,		&ep.flDecayHFRatio,			sizeof(float))) return FALSE;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_REFLECTIONS, 		&ep.lReflections,			sizeof(LONG))) 	return FALSE;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_REFLECTIONSDELAY,   &ep.flReflectionsDelay,		sizeof(float))) return FALSE;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_REVERB, 		  	&ep.lReverb,				sizeof(LONG))) 	return FALSE;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_REVERBDELAY, 		&ep.flReverbDelay,			sizeof(float))) return FALSE;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_ENVIRONMENTDIFFUSION,&ep.flEnvironmentDiffusion,sizeof(float))) return FALSE;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_AIRABSORPTIONHF, 	&ep.flAirAbsorptionHF,		sizeof(float))) return FALSE;
-    if (!EAXQuerySupport(bDeferred, &DSPROPSETID_EAX_ListenerProperties, DSPROPERTY_EAXLISTENER_FLAGS, 				&ep.dwFlags,				sizeof(DWORD))) return FALSE;
-	return TRUE;
+    // Tell the effect slot to use the loaded effect object. Note that this
+    // effectively copies the effect properties. You can modify or delete the
+    // effect object afterward without affecting the effect slot.
+    A_CHK(alAuxiliaryEffectSlotf(slot, AL_EFFECTSLOT_GAIN, 1.f));
+    A_CHK(alAuxiliaryEffectSloti(slot, AL_EFFECTSLOT_AUXILIARY_SEND_AUTO, false));
+    A_CHK(alAuxiliaryEffectSloti(slot, AL_EFFECTSLOT_EFFECT, effect));
 }
 
-void CSoundRender_CoreA::_initialize	(u64 window)
+void CSoundRender_CoreA::set_listener(const CSoundRender_Environment& env)
 {
-	bPresent			        = FALSE;
+    A_CHK(alEffectf(effect, AL_EAXREVERB_DIFFUSION, env.EnvironmentDiffusion));
+    A_CHK(alEffectf(effect, AL_EAXREVERB_GAIN, env.Room));
+    A_CHK(alEffectf(effect, AL_EAXREVERB_GAINHF, env.RoomHF));
+    A_CHK(alEffectf(effect, AL_EAXREVERB_DECAY_TIME, env.DecayTime));
+    A_CHK(alEffectf(effect, AL_EAXREVERB_DECAY_HFRATIO, env.DecayHFRatio));
+    A_CHK(alEffectf(effect, AL_EAXREVERB_REFLECTIONS_GAIN, env.Reflections));
+    A_CHK(alEffectf(effect, AL_EAXREVERB_REFLECTIONS_DELAY, env.ReflectionsDelay));
+    A_CHK(alEffectf(effect, AL_EAXREVERB_LATE_REVERB_GAIN, env.Reverb));
+    A_CHK(alEffectf(effect, AL_EAXREVERB_AIR_ABSORPTION_GAINHF, env.AirAbsorptionHF));
+    A_CHK(alEffectf(effect, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, env.RoomRolloffFactor));
 
-	pDeviceList					= xr_new<ALDeviceList>();
+    if (env.version == SNDENV_VER_IXR)
+    {
+        A_CHK(alEffectf(effect, AL_EAXREVERB_GAINHF, env.RoomLF));
+        //A_CHK(alEffectf(effect, AL_EAXREVERB_REFLECTIONS_PAN, *env.ReflectionsPan));
+        //A_CHK(alEffectf(effect, AL_EAXREVERB_LATE_REVERB_PAN, *env.ReverbPan));
+        A_CHK(alEffecti(effect, AL_EAXREVERB_DECAY_HFLIMIT, env.DecayHFLimit));
+        A_CHK(alEffectf(effect, AL_EAXREVERB_ECHO_TIME, env.EchoTime));
+        A_CHK(alEffectf(effect, AL_EAXREVERB_ECHO_DEPTH, env.EchoDepth));
+        A_CHK(alEffectf(effect, AL_EAXREVERB_LATE_REVERB_DELAY, env.ReverbDelay));
+        A_CHK(alEffectf(effect, AL_EAXREVERB_DECAY_LFRATIO, env.DecayLFRatio));
+        A_CHK(alEffectf(effect, AL_EAXREVERB_MODULATION_TIME, env.ModulationTime));
+        A_CHK(alEffectf(effect, AL_EAXREVERB_MODULATION_DEPTH, env.ModulationDepth));
+        A_CHK(alEffectf(effect, AL_EAXREVERB_HFREFERENCE, env.HFReference));
+        A_CHK(alEffectf(effect, AL_EAXREVERB_LFREFERENCE, env.LFReference));
+        A_CHK(alEffectf(effect, AL_EAXREVERB_DENSITY, env.Density));
+    }
+}
 
-	if (0==pDeviceList->GetNumDevices()){ 
-		Log						("OpenAL: Can't create sound device.");
-		xr_delete				(pDeviceList);
+void CSoundRender_CoreA::get_listener(CSoundRender_Environment& env)
+{
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_DENSITY, &env.Density));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_DIFFUSION, &env.EnvironmentDiffusion));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_GAIN, &env.Room));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_GAINHF, &env.RoomHF));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_GAINHF, &env.RoomLF));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_DECAY_TIME, &env.DecayTime));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_DECAY_HFRATIO, &env.DecayHFRatio));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_DECAY_LFRATIO, &env.DecayLFRatio));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_REFLECTIONS_GAIN, &env.Reflections));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_REFLECTIONS_DELAY, &env.ReflectionsDelay));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_LATE_REVERB_GAIN, &env.Reverb));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_REFLECTIONS_PAN, env.ReflectionsPan));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_LATE_REVERB_DELAY, &env.ReverbDelay));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_ECHO_TIME, &env.EchoTime));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_ECHO_DEPTH, &env.EchoDepth));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_LATE_REVERB_PAN, env.ReverbPan));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_MODULATION_TIME, &env.ModulationTime));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_MODULATION_DEPTH, &env.ModulationDepth));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_AIR_ABSORPTION_GAINHF, &env.AirAbsorptionHF));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_HFREFERENCE, &env.HFReference));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_LFREFERENCE, &env.LFReference));
+    A_CHK(alGetEffectf(effect, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, &env.RoomRolloffFactor));
+    A_CHK(alEffecti(effect, AL_EAXREVERB_DECAY_HFLIMIT, (ALint)env.DecayHFLimit));
+}
+
+void  CSoundRender_CoreA::_restart()
+{
+	inherited::_restart();
+}
+
+void CSoundRender_CoreA::_initialize(int stage)
+{
+	if(stage==0)
+	{
+		pDeviceList					= xr_new<ALDeviceList>();
+
+		if (0==pDeviceList->GetNumDevices())
+		{ 
+			CHECK_OR_EXIT			(0,"OpenAL: Can't create sound device.");
+			xr_delete				(pDeviceList);
+		}
 		return;
 	}
 	
-	pDeviceList->SelectBestDevice();
-
-	int defaultIdx					= pDeviceList->GetDefaultDevice();
-	R_ASSERT						(defaultIdx>=0 && defaultIdx<pDeviceList->GetNumDevices());
-	const ALDeviceDesc& deviceDesc	= pDeviceList->GetDeviceDesc(defaultIdx);
-
-
+	pDeviceList->SelectBestDevice	();
+	R_ASSERT						(snd_device_id>=0 && snd_device_id<pDeviceList->GetNumDevices());
+	const ALDeviceDesc& deviceDesc	= pDeviceList->GetDeviceDesc(snd_device_id);
     // OpenAL device
-    pDevice						= alcOpenDevice		(deviceDesc.name.c_str());
-	if (pDevice == NULL){
-		Log						("SOUND: OpenAL: Failed to create device.");
+    pDevice						= alcOpenDevice		(deviceDesc.name_al);
+	if (pDevice == nullptr)
+	{
+		CHECK_OR_EXIT			(0,"SOUND: OpenAL: Failed to create device.");
 		bPresent				= FALSE;
 		return;
 	}
@@ -74,14 +175,14 @@ void CSoundRender_CoreA::_initialize	(u64 window)
     // Get the device specifier.
     const ALCchar*		        deviceSpecifier;
     deviceSpecifier         	= alcGetString		(pDevice, ALC_DEVICE_SPECIFIER);
-	Msg				        	("SOUND: OpenAL: Required device: %s. Created device: %s.", deviceDesc.name.c_str(), deviceSpecifier);
 
     // Create context
     pContext					= alcCreateContext	(pDevice,NULL);
-	if (0==pContext){
-		Log						("SOUND: OpenAL: Failed to create context.");
+	if (pContext == nullptr) {
+		CHECK_OR_EXIT			(0,"SOUND: OpenAL: Failed to create context.");
 		bPresent				= FALSE;
-		alcCloseDevice			(pDevice); pDevice = 0;
+		alcCloseDevice(pDevice);
+		pDevice = nullptr;
 		return;
 	}
     
@@ -99,46 +200,95 @@ void CSoundRender_CoreA::_initialize	(u64 window)
     A_CHK				        (alListenerfv		(AL_ORIENTATION,&orient[0].x));
     A_CHK				        (alListenerf		(AL_GAIN,1.f));
 
-    // Check for EAX extension
-    bEAX 				        = deviceDesc.eax /*&& !deviceDesc.eax_unwanted*/;
-    eaxSet 				        = (EAXSet)alGetProcAddress	((const ALchar*)"EAXSet");
-    if (eaxSet==NULL) bEAX 		= false;
-    eaxGet 				        = (EAXGet)alGetProcAddress	((const ALchar*)"EAXGet");
-    if (eaxGet==NULL) bEAX 		= false;
+    // Check for EFX extension
 
-    if (bEAX){
-		bDeferredEAX			= EAXTestSupport(TRUE);
-        bEAX 					= EAXTestSupport(FALSE);
+    // Define a macro to help load the function pointers.
+#define LOAD_PROC(T, x)  ((x) = FUNCTION_CAST(T, alGetProcAddress(#x)))
+    // Filter object functions
+    LOAD_PROC(LPALGENFILTERS, alGenFilters);
+    LOAD_PROC(LPALDELETEFILTERS, alDeleteFilters);
+    LOAD_PROC(LPALISFILTER, alIsFilter);
+    LOAD_PROC(LPALFILTERI, alFilteri);
+    LOAD_PROC(LPALFILTERIV, alFilteriv);
+    LOAD_PROC(LPALFILTERF, alFilterf);
+    LOAD_PROC(LPALFILTERFV, alFilterfv);
+    LOAD_PROC(LPALGETFILTERI, alGetFilteri);
+    LOAD_PROC(LPALGETFILTERIV, alGetFilteriv);
+    LOAD_PROC(LPALGETFILTERF, alGetFilterf);
+    LOAD_PROC(LPALGETFILTERFV, alGetFilterfv);
+
+    // Effect object functions
+    LOAD_PROC(LPALGENEFFECTS, alGenEffects);
+    LOAD_PROC(LPALDELETEEFFECTS, alDeleteEffects);
+    LOAD_PROC(LPALISEFFECT, alIsEffect);
+    LOAD_PROC(LPALEFFECTI, alEffecti);
+    LOAD_PROC(LPALEFFECTIV, alEffectiv);
+    LOAD_PROC(LPALEFFECTF, alEffectf);
+    LOAD_PROC(LPALEFFECTFV, alEffectfv);
+    LOAD_PROC(LPALGETEFFECTI, alGetEffecti);
+    LOAD_PROC(LPALGETEFFECTIV, alGetEffectiv);
+    LOAD_PROC(LPALGETEFFECTF, alGetEffectf);
+
+    // Auxiliary effect slot object functions
+    LOAD_PROC(LPALGENAUXILIARYEFFECTSLOTS, alGenAuxiliaryEffectSlots);
+    LOAD_PROC(LPALDELETEAUXILIARYEFFECTSLOTS, alDeleteAuxiliaryEffectSlots);
+    LOAD_PROC(LPALISAUXILIARYEFFECTSLOT, alIsAuxiliaryEffectSlot);
+    LOAD_PROC(LPALAUXILIARYEFFECTSLOTI, alAuxiliaryEffectSloti);
+    LOAD_PROC(LPALAUXILIARYEFFECTSLOTIV, alAuxiliaryEffectSlotiv);
+    LOAD_PROC(LPALAUXILIARYEFFECTSLOTF, alAuxiliaryEffectSlotf);
+    LOAD_PROC(LPALAUXILIARYEFFECTSLOTFV, alAuxiliaryEffectSlotfv);
+    LOAD_PROC(LPALGETAUXILIARYEFFECTSLOTI, alGetAuxiliaryEffectSloti);
+    LOAD_PROC(LPALGETAUXILIARYEFFECTSLOTIV, alGetAuxiliaryEffectSlotiv);
+    LOAD_PROC(LPALGETAUXILIARYEFFECTSLOTF, alGetAuxiliaryEffectSlotf);
+    LOAD_PROC(LPALGETAUXILIARYEFFECTSLOTFV, alGetAuxiliaryEffectSlotfv);
+#undef LOAD_PROC
+
+    alGenEffects(1, &effect);
+
+    load_reverb(effect, &reverbs[0]);
+
+    // Check if an error occured, and clean up if so.
+    ALenum err = alGetError();
+
+    if (psSoundFlags.test(ss_EFX))
+    {
+        if (err == AL_NO_ERROR)
+        {
+            m_is_supported = true;
+            alGenAuxiliaryEffectSlots(1, &slot);
+        }
+        else
+        {
+            Log("SOUND: OpenAL: Failed to init EFX:", alGetString(err));
+            if (alIsEffect(effect))
+                alDeleteEffects(1, &effect);
+        }
+    }
+    else
+    {
+        m_is_supported = false;
     }
 
-	ZeroMemory					( &wfm, sizeof( WAVEFORMATEX ) );
-	switch	( psSoundFreq ){            
-	default:
-	case sf_22K:	wfm.nSamplesPerSec = 22050; break;
-	case sf_44K:	wfm.nSamplesPerSec = 44100; break;
-	}
-	wfm.wFormatTag				= WAVE_FORMAT_PCM;
-	wfm.nChannels				= 2;	//(dsCaps.dwFlags&DSCAPS_PRIMARYSTEREO)?2:1;
-	wfm.wBitsPerSample			= 16;	//(dsCaps.dwFlags&DSCAPS_PRIMARY16BIT)?16:8;
-	wfm.nBlockAlign				= wfm.wBitsPerSample / 8 * wfm.nChannels;
-	wfm.nAvgBytesPerSec			= wfm.nSamplesPerSec * wfm.nBlockAlign;
+    inherited::_initialize		(stage);
 
-    // inherited initialize           
-    inherited::_initialize		(window);
-
-	// Pre-create targets
-	CSoundRender_Target*	T	= 0;
-	for (u32 tit=0; tit<u32(psSoundTargets); tit++)
+	if(stage==1)//first initialize
 	{
-		T						=	xr_new<CSoundRender_TargetA>();
-		if (T->_initialize()){	
-			s_targets.push_back	(T);
-        }else{
-        	Log					("! SOUND: OpenAL: Max targets - ",tit);
-            T->_destroy			();
-        	xr_delete			(T);
-        	break;
-        }
+		// Pre-create targets
+		CSoundRender_Target* T = nullptr;
+		for (u32 tit=0; tit<u32(psSoundTargets); tit++)
+		{
+			T						=	xr_new<CSoundRender_TargetA>();
+			if (T->_initialize())
+			{
+				s_targets.push_back	(T);
+			}else
+			{
+        		Log					("! SOUND: OpenAL: Max targets - ",tit);
+				T->_destroy			();
+        		xr_delete			(T);
+        		break;
+			}
+		}
 	}
 }
 
@@ -153,28 +303,25 @@ void CSoundRender_CoreA::_clear	()
 {
 	inherited::_clear			();
     // remove targets
-	CSoundRender_Target*	T	= 0;
+	CSoundRender_Target* T = nullptr;
 	for (u32 tit=0; tit<s_targets.size(); tit++)
 	{
 		T						= s_targets[tit];
 		T->_destroy				();
         xr_delete				(T);
 	}
+
     // Reset the current context to NULL.
     alcMakeContextCurrent		(NULL);         
-    // Release the context and the device.
-    alcDestroyContext			(pContext);		pContext	= 0;
-    alcCloseDevice				(pDevice);		pDevice		= 0;
-	xr_delete					(pDeviceList);
-}
 
-void	CSoundRender_CoreA::i_eax_set			(const GUID* guid, u32 prop, void* val, u32 sz)
-{
-	eaxSet	     			 	(guid, prop, 0, val, sz);
-}
-void	CSoundRender_CoreA::i_eax_get			(const GUID* guid, u32 prop, void* val, u32 sz)
-{
-	eaxGet	    		  	    (guid, prop, 0, val, sz);
+    // Release the context and the device.
+	alcDestroyContext(pContext);
+	pContext = nullptr;
+
+	alcCloseDevice(pDevice);
+	pDevice = nullptr;
+
+	xr_delete					(pDeviceList);
 }
 
 void CSoundRender_CoreA::update_listener		( const Fvector& P, const Fvector& D, const Fvector& N, float dt )

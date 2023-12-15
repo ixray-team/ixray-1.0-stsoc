@@ -568,7 +568,6 @@
     <ClInclude Include="smart_cast_impl0.h" />
     <ClInclude Include="smart_cast_impl1.h" />
     <ClInclude Include="smart_cast_impl2.h" />
-    <ClInclude Include="Sound.h" />
     <ClInclude Include="space_restrictor_wrapper.h" />
     <ClInclude Include="space_restrictor_wrapper_inline.h" />
     <ClInclude Include="spawn_constructor_space.h" />

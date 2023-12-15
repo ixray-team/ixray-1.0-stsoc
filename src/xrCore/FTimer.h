@@ -130,6 +130,8 @@ public:
 	}
 };
 
+
+
 class XRCORE_API CTimer_paused_ex : public CTimer		{
 	u64							save_clock;
 public:

@@ -30,6 +30,7 @@ public:
 	IC		void				PlayAtPos			(CScriptGameObject *object, const Fvector &position, float delay);
 			void				PlayAtPos			(CScriptGameObject *object, const Fvector &position, float delay, int flags);
 			void				PlayNoFeedback		(CScriptGameObject *object,	u32 flags/*!< Looping */, float delay/*!< Delay */, Fvector pos, float vol);
+	IC		void				AttachTail			(LPCSTR caSoundName);
 	IC		void				Stop				();
 	IC		void				StopDeffered		();
 	IC		void				SetPosition			(const Fvector &position);

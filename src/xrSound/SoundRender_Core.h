@@ -5,7 +5,6 @@
 #include "SoundRender.h"
 #include "SoundRender_Environment.h"
 #include "SoundRender_Cache.h"
-#include "soundrender_environment.h"
 
 class CSoundRender_Core					: public CSound_manager_interface
 {
@@ -24,14 +23,14 @@ public:
 public:
 	BOOL								bPresent;
 	BOOL								bUserEnvironment;
-    BOOL	 							bEAX;					// Boolean variable to indicate presence of EAX Extension 
-    BOOL								bDeferredEAX;
     BOOL								bReady;
 
-    WAVEFORMATEX						wfm;
+	bool m_is_supported; // Boolean variable to indicate presence of EFX Extension
+
 	CTimer								Timer;
-	u32									Timer_Value;
-	u32									Timer_Delta;
+	//CTimerFactored						TimerF;
+	float								fTimer_Value;
+	float								fTimer_Delta;
 	sound_event*						Handler;
 protected:
 	// Collider
@@ -57,21 +56,21 @@ public:
 	// Cache
 	CSoundRender_Cache					cache;
 	u32									cache_bytes_per_line;
-protected:
-	virtual void						i_eax_set				(const GUID* guid, u32 prop, void* val, u32 sz)=0;
-	virtual void						i_eax_get				(const GUID* guid, u32 prop, void* val, u32 sz)=0;
+
 public:
 										CSoundRender_Core		();
 	virtual								~CSoundRender_Core		();
 
 	// General
-	virtual void  						_initialize				( u64 window )=0;
+	virtual void  						_initialize				(int stage)=0;
 	virtual void						_clear					( )=0;
 	virtual void						_restart				( );
 
 	// Sound interface
 			void						verify_refsound			( ref_sound& S);
 	virtual void						create					( ref_sound& S, LPCSTR fName,			esound_type sound_type, int	game_type);
+	virtual void						attach_tail				( ref_sound& S, LPCSTR fName);
+
 	virtual void						clone					( ref_sound& S, const ref_sound& from,	esound_type sound_type, int	game_type);
 	virtual void						destroy					( ref_sound& S);
 	virtual void						stop_emitters			( );
@@ -91,12 +90,12 @@ public:
 	virtual void						statistic				( CSound_stats*  dest, CSound_stats_ext*  ext );
 
 	// listener
-//	virtual const Fvector&				listener_position		( )=0;
 	virtual void						update_listener			(const Fvector& P, const Fvector& D, const Fvector& N, float dt)=0;
-	// eax listener
-	void								i_eax_commit_setting	();
-	void								i_eax_listener_set		(CSound_environment* E);
-	void								i_eax_listener_get		(CSound_environment* E);
+
+	// EFX listener
+	virtual void set_listener(const CSoundRender_Environment& env)=0;
+	virtual void get_listener(CSoundRender_Environment& env)=0;
+	virtual void commit()=0;
 
 #ifdef _EDITOR
 	virtual SoundEnvironment_LIB*		get_env_library			()																{ return s_environment; }

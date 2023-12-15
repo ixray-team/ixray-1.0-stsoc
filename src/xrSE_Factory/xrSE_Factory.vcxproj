@@ -293,7 +293,6 @@
     <ClInclude Include="smart_cast_impl0.h" />
     <ClInclude Include="smart_cast_impl1.h" />
     <ClInclude Include="smart_cast_impl2.h" />
-    <ClInclude Include="Sound.h" />
     <ClInclude Include="specific_character.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="WaveForm.h" />

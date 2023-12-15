@@ -22,7 +22,7 @@ class NET_Packet;
 class CDUInterface;
 
 #ifndef XRGAME_EXPORTS
-#	include "Sound.h"
+#	include "../xrSound/Sound.h"
 #endif
 
 #include "xrEProps.h"

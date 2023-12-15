@@ -513,9 +513,6 @@
     <ClInclude Include="PropertiesListTypes.h">
       <Filter>ServerStuff\ServerEntities\editor_properties</Filter>
     </ClInclude>
-    <ClInclude Include="Sound.h">
-      <Filter>ServerStuff\ServerEntities\editor_properties</Filter>
-    </ClInclude>
     <ClInclude Include="WaveForm.h">
       <Filter>ServerStuff\ServerEntities\editor_properties</Filter>
     </ClInclude>

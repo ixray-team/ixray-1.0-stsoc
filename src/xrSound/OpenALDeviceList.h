@@ -1,45 +1,60 @@
 #ifndef ALDEVICELIST_H
 #define ALDEVICELIST_H
 
+#include "AL/al.h"
+#include "AL/alc.h"
+#include "AL/efx.h"
+
 #define AL_GENERIC_HARDWARE "Generic Hardware"
 #define AL_GENERIC_SOFTWARE "Generic Software"
 
 struct ALDeviceDesc{
-	xr_string			name;
-	int					minor_ver;
-	int					major_ver;
-	struct{
-		u8				selected	:1;
-		u8				xram		:1;
-		u8				eax			:1;
-		u8				eax_unwanted:1;
+	string256			name;
+	string256			name_al;
+	int	ALminor_ver;
+	int	ALmajor_ver;
+	int	EFXminor_ver;
+	int	EFXmajor_ver;
+
+	union ESndProps
+	{
+		struct{
+			u16				selected	:1;
+			u16				efx			:1;
+			u16 xra : 1;
+
+			u16				unused		:9;
+		};
+		u16 storage;
 	};
-						ALDeviceDesc			(LPCSTR nm, int mn, int mj){name=nm;minor_ver=mn;major_ver=mj;selected=false;xram=false;eax=false;eax_unwanted=true;}
+	ESndProps				props;
+	ALDeviceDesc(LPCSTR nm,LPCSTR nml, int almn, int almj, int efxmn, int efxmj)
+	{
+		strcpy_s(name, nm);
+		strcpy_s(name_al, nml);
+		ALminor_ver = almn;
+		ALmajor_ver = almj;
+		EFXminor_ver = efxmn;
+		EFXmajor_ver = efxmj;
+		props.storage = 0;
+		//props.eax_unwanted=true;
+	}
 };
 
 class ALDeviceList
 {
 private:
 	xr_vector<ALDeviceDesc>	m_devices;
-	xr_string			m_defaultDeviceName;
-	int					m_defaultDeviceIndex;
-	int					m_filterIndex;
+	string256			m_defaultDeviceName;
 	void				Enumerate				();
 public:
 						ALDeviceList			();
 						~ALDeviceList			();
 
-	int					GetNumDevices			()				{return m_devices.size();}
-	const ALDeviceDesc&	GetDeviceDesc			(int index)		{return m_devices[index];}
-	const xr_string&	GetDeviceName			(int index)		{return m_devices[index].name;}
-	void				GetDeviceVersion		(int index, int *major, int *minor);
-	int					GetDefaultDevice		()				{return m_defaultDeviceIndex;};
-	void				FilterDevicesMinVer		(int major, int minor);
-	void				FilterDevicesMaxVer		(int major, int minor);
-	void				FilterDevicesXRAMOnly	();
-	void				ResetFilters			();
-	int					GetFirstFilteredDevice	();
-	int					GetNextFilteredDevice	();
+	u32					GetNumDevices			()				{return (u32)m_devices.size();}
+	const ALDeviceDesc&	GetDeviceDesc			(u32 index)		{return m_devices[index];}
+	LPCSTR				GetDeviceName			(u32 index);
+	void GetDeviceVersion(u32 index, int* ALmajor, int* ALminor, int* EFXmajor, int* EFXminor);
 	void				SelectBestDevice		();
 };
 
