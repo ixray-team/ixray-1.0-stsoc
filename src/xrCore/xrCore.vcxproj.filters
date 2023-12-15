@@ -70,6 +70,9 @@
     <Filter Include="Compression\lzo">
       <UniqueIdentifier>{8dabd87b-4ab3-4f13-bb0d-651f6cab0452}</UniqueIdentifier>
     </Filter>
+    <Filter Include="XmlParser">
+      <UniqueIdentifier>{1ad2b447-f393-45f4-8e01-70abbf0345da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FTimer.cpp">
@@ -255,6 +258,18 @@
     </ClCompile>
     <ClCompile Include="doug_lea_allocator.cpp">
       <Filter>Memory manager</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlParser\tinyxml.cpp">
+      <Filter>XmlParser</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlParser\tinyxmlerror.cpp">
+      <Filter>XmlParser</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlParser\tinyxmlparser.cpp">
+      <Filter>XmlParser</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlParser\xrXMLParser.cpp">
+      <Filter>XmlParser</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -528,6 +543,12 @@
     </ClInclude>
     <ClInclude Include="doug_lea_allocator.h">
       <Filter>Memory manager</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlParser\tinyxml.h">
+      <Filter>XmlParser</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlParser\xrXMLParser.h">
+      <Filter>XmlParser</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
