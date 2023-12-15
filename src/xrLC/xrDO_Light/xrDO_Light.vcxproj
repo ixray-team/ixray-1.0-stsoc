@@ -103,43 +103,43 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Priquel|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed_Priquel|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Priquel|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -450,7 +450,17 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\..\..\packages\ImeSense.Packages.FreeImage.WinMerge.3.18.0.20230819\build\native\ImeSense.Packages.FreeImage.WinMerge.targets" Condition="Exists('..\..\..\packages\ImeSense.Packages.FreeImage.WinMerge.3.18.0.20230819\build\native\ImeSense.Packages.FreeImage.WinMerge.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Данный проект ссылается на пакеты NuGet, отсутствующие на этом компьютере. Используйте восстановление пакетов NuGet, чтобы скачать их.  Дополнительную информацию см. по адресу: http://go.microsoft.com/fwlink/?LinkID=322105. Отсутствует следующий файл: {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\..\packages\ImeSense.Packages.FreeImage.WinMerge.3.18.0.20230819\build\native\ImeSense.Packages.FreeImage.WinMerge.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\ImeSense.Packages.FreeImage.WinMerge.3.18.0.20230819\build\native\ImeSense.Packages.FreeImage.WinMerge.targets'))" />
+  </Target>
 </Project>

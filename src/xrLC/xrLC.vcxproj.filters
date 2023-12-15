@@ -84,9 +84,6 @@
     <ClInclude Include="ETextureParams.h">
       <Filter>External</Filter>
     </ClInclude>
-    <ClInclude Include="FreeImage.h">
-      <Filter>External</Filter>
-    </ClInclude>
     <ClInclude Include="progmesh.h">
       <Filter>External</Filter>
     </ClInclude>
@@ -431,5 +428,8 @@
     <ResourceCompile Include="resource.rc">
       <Filter>Kernel\Res</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

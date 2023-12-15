@@ -107,43 +107,43 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed_Priquel|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Priquel|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Priquel|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\FreeImage;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(SolutionDir)sdk\FreeImage;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)src\xrQSlim\src;$(SolutionDir)src\xrLC;$(SolutionDir)sdk\dxsdk_mar2009\Include;$(SolutionDir)src\xrCore;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)sdk\MagicSoftware\FreeMagic\Library\ReleaseDLL;$(SolutionDir)sdk\dxsdk_mar2009\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -417,7 +417,6 @@
     <ClInclude Include="ELight_def.h" />
     <ClInclude Include="ETextureParams.h" />
     <ClInclude Include="fitter.h" />
-    <ClInclude Include="FreeImage.h" />
     <ClInclude Include="hash2D.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Lightmap.h" />
@@ -662,7 +661,17 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\..\packages\ImeSense.Packages.FreeImage.WinMerge.3.18.0.20230819\build\native\ImeSense.Packages.FreeImage.WinMerge.targets" Condition="Exists('..\..\packages\ImeSense.Packages.FreeImage.WinMerge.3.18.0.20230819\build\native\ImeSense.Packages.FreeImage.WinMerge.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Данный проект ссылается на пакеты NuGet, отсутствующие на этом компьютере. Используйте восстановление пакетов NuGet, чтобы скачать их.  Дополнительную информацию см. по адресу: http://go.microsoft.com/fwlink/?LinkID=322105. Отсутствует следующий файл: {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\ImeSense.Packages.FreeImage.WinMerge.3.18.0.20230819\build\native\ImeSense.Packages.FreeImage.WinMerge.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\ImeSense.Packages.FreeImage.WinMerge.3.18.0.20230819\build\native\ImeSense.Packages.FreeImage.WinMerge.targets'))" />
+  </Target>
 </Project>
