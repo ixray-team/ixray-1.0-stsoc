@@ -40,9 +40,6 @@
     <Filter Include="intrusive_ptr">
       <UniqueIdentifier>{6e2f0c90-d58b-49a8-886c-634d1a3f5b98}</UniqueIdentifier>
     </Filter>
-    <Filter Include="memory_monitor">
-      <UniqueIdentifier>{86a0fff9-4d22-4e94-8658-b9c2025ade5e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Compression">
       <UniqueIdentifier>{fa1c152e-0fa8-4a16-b83f-0fe882192bb1}</UniqueIdentifier>
     </Filter>
@@ -138,9 +135,6 @@
     <ClCompile Include="file_stream_reader.cpp">
       <Filter>FS\file_stream_reader</Filter>
     </ClCompile>
-    <ClCompile Include="memory_allocation_stats.cpp">
-      <Filter>Memory manager</Filter>
-    </ClCompile>
     <ClCompile Include="memory_usage.cpp">
       <Filter>Memory manager</Filter>
     </ClCompile>
@@ -148,9 +142,6 @@
       <Filter>Memory manager</Filter>
     </ClCompile>
     <ClCompile Include="xrMemory_align.cpp">
-      <Filter>Memory manager</Filter>
-    </ClCompile>
-    <ClCompile Include="xrMemory_debug.cpp">
       <Filter>Memory manager</Filter>
     </ClCompile>
     <ClCompile Include="xrMemory_POOL.cpp">
@@ -213,9 +204,6 @@
     <ClCompile Include="xrstring.cpp">
       <Filter>shared memory/string library</Filter>
     </ClCompile>
-    <ClCompile Include="memory_monitor.cpp">
-      <Filter>memory_monitor</Filter>
-    </ClCompile>
     <ClCompile Include="ppmd_compressor.cpp">
       <Filter>Compression\ppmd</Filter>
     </ClCompile>
@@ -270,6 +258,12 @@
     </ClCompile>
     <ClCompile Include="XmlParser\xrXMLParser.cpp">
       <Filter>XmlParser</Filter>
+    </ClCompile>
+    <ClCompile Include="memory_alloc_pure.cpp">
+      <Filter>Memory manager</Filter>
+    </ClCompile>
+    <ClCompile Include="memory_alloc_xr.cpp">
+      <Filter>Memory manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -480,9 +474,6 @@
     <ClInclude Include="intrusive_ptr_inline.h">
       <Filter>intrusive_ptr</Filter>
     </ClInclude>
-    <ClInclude Include="memory_monitor.h">
-      <Filter>memory_monitor</Filter>
-    </ClInclude>
     <ClInclude Include="ppmd_compressor.h">
       <Filter>Compression\ppmd</Filter>
     </ClInclude>
@@ -549,6 +540,12 @@
     </ClInclude>
     <ClInclude Include="XmlParser\xrXMLParser.h">
       <Filter>XmlParser</Filter>
+    </ClInclude>
+    <ClInclude Include="memory_alloc_pure.h">
+      <Filter>Memory manager</Filter>
+    </ClInclude>
+    <ClInclude Include="memory_alloc_xr.h">
+      <Filter>Memory manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

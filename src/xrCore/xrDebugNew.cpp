@@ -3,7 +3,7 @@
 
 #include "xrdebug.h"
 
-#include "dxerr9.h"
+#include "dxerr.h"
 
 #pragma warning(push)
 #pragma warning(disable:4995)
@@ -29,7 +29,7 @@ extern bool shared_str_initialized;
 
 #ifndef _M_AMD64
 #	ifndef __BORLANDC__
-#		pragma comment(lib,"dxerr9.lib")
+#		pragma comment(lib,"dxerr.lib")
 #	endif
 #endif
 
@@ -165,11 +165,6 @@ void gather_info		(const char *expression, const char *description, const char *
 		}
 	}
 
-#ifdef USE_MEMORY_MONITOR
-	memory_monitor::flush_each_time	(true);
-	memory_monitor::flush_each_time	(false);
-#endif // USE_MEMORY_MONITOR
-
 	if (!IsDebuggerPresent() && !strstr(GetCommandLine(),"-no_call_stack_assert")) {
 		if (shared_str_initialized)
 			Msg			("stack trace:\n");
@@ -283,7 +278,7 @@ LPCSTR xrDebug::error2string	(long code)
 
 #ifdef _M_AMD64
 #else
-	result				= DXGetErrorDescription9	(code);
+	result				= DXGetErrorDescription(code);
 #endif
 	if (nullptr==result) 
 	{

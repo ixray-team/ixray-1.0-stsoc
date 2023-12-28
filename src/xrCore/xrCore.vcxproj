@@ -310,8 +310,8 @@
     </ClCompile>
     <ClCompile Include="log.cpp" />
     <ClCompile Include="LzHuf.cpp" />
-    <ClCompile Include="memory_allocation_stats.cpp" />
-    <ClCompile Include="memory_monitor.cpp" />
+    <ClCompile Include="memory_alloc_pure.cpp" />
+    <ClCompile Include="memory_alloc_xr.cpp" />
     <ClCompile Include="memory_usage.cpp" />
     <ClCompile Include="Model.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -350,7 +350,6 @@
     <ClCompile Include="xrDebugNew.cpp" />
     <ClCompile Include="xrMemory.cpp" />
     <ClCompile Include="xrMemory_align.cpp" />
-    <ClCompile Include="xrMemory_debug.cpp" />
     <ClCompile Include="xrMemory_POOL.cpp" />
     <ClCompile Include="xrMemory_pso_Copy.cpp">
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">AssemblyAndSourceCode</AssemblerOutput>
@@ -412,7 +411,8 @@
     </CustomBuild>
     <ClInclude Include="log.h" />
     <ClInclude Include="lzhuf.h" />
-    <ClInclude Include="memory_monitor.h" />
+    <ClInclude Include="memory_alloc_pure.h" />
+    <ClInclude Include="memory_alloc_xr.h" />
     <ClInclude Include="PPMd.h" />
     <ClInclude Include="PPMdType.h" />
     <ClInclude Include="ppmd_compressor.h" />
