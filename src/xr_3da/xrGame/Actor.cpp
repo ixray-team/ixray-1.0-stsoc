@@ -948,11 +948,14 @@ void CActor::UpdateCL	()
 }
 
 float	NET_Jump = 0;
+
+BOOL g_actor_shadow = 0;
+
 void CActor::shedule_Update	(u32 DT)
 {
 	setSVU(OnServer());
 
-	//СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂРµР¶РёРј РїРѕРєР°Р·Р° HUD РґР»СЏ С‚РµРєСѓС‰РµРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ СЃР»РѕС‚Р°
+	//установить режим показа HUD для текущего активного слота
 	CHudItem* pHudItem = smart_cast<CHudItem*>(inventory().ActiveItem());	
 	if(pHudItem) 
 		pHudItem->SetHUDmode(HUDview());
@@ -1078,7 +1081,7 @@ void CActor::shedule_Update	(u32 DT)
 
 	inherited::shedule_Update	(DT);
 
-	//СЌС„С„РµРєС‚РѕСЂ РІРєР»СЋС‡Р°РµРјС‹Р№ РїСЂРё С…РѕРґСЊР±Рµ
+	//эффектор включаемый при ходьбе
 	if (!pCamBobbing)
 	{
 		pCamBobbing = xr_new<CEffectorBobbing>	();
@@ -1086,7 +1089,7 @@ void CActor::shedule_Update	(u32 DT)
 	}
 	pCamBobbing->SetState						(mstate_real, conditions().IsLimping(), IsZoomAimingMode());
 
-	//Р·РІСѓРє С‚СЏР¶РµР»РѕРіРѕ РґС‹С…Р°РЅРёСЏ РїСЂРё СѓС‚Р°Р»РѕСЃС‚Рё Рё С…СЂРѕРјР°РЅРёРё
+	//звук тяжелого дыхания при уталости и хромании
 	if(this==Level().CurrentControlEntity() && !g_dedicated_server )
 	{
 		if(conditions().IsLimping() && g_Alive())
@@ -1123,10 +1126,19 @@ void CActor::shedule_Update	(u32 DT)
 				m_BloodSnd.stop();
 	}
 	
-	//РµСЃР»Рё РІ СЂРµР¶РёРјРµ HUD, С‚Рѕ СЃР°РјР° РјРѕРґРµР»СЊ Р°РєС‚РµСЂР° РЅРµ СЂРёСЃСѓРµС‚СЃСЏ
-	if(!character_physics_support()->IsRemoved())
-										setVisible				(!HUDview	());
-	//С‡С‚Рѕ Р°РєС‚РµСЂ РІРёРґРёС‚ РїРµСЂРµРґ СЃРѕР±РѕР№
+	//если в режиме HUD, то сама модель актера не рисуется
+	BOOL has_visible = 1;
+	BOOL has_shadow_only = 0;
+	if (character_physics_support()->IsRemoved())
+		has_visible = 0;
+	if (HUDview())
+	{
+		has_visible = 0;
+		has_shadow_only = g_actor_shadow;
+	}
+	setVisible(has_visible, has_shadow_only);
+
+	//что актер видит перед собой
 	collide::rq_result& RQ = HUD().GetCurrentRayQuery();
 	
 
@@ -1187,7 +1199,7 @@ void CActor::shedule_Update	(u32 DT)
 
 //	UpdateSleep									();
 
-	//РґР»СЏ СЃРІРѕР№СЃС‚ Р°СЂС‚РµС„Р°РєС‚РѕРІ, РЅР°С…РѕРґСЏС‰РёС…СЃСЏ РЅР° РїРѕСЏСЃРµ
+	//для свойст артефактов, находящихся на поясе
 	UpdateArtefactsOnBelt						();
 	m_pPhysics_support->in_shedule_Update		(DT);
 	Check_for_AutoPickUp						();
